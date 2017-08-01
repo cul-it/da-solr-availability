@@ -144,7 +144,6 @@ public final class Locations {
       "FROM LOCATION ";
 
   private static void populateLocationMaps(final Connection voyager) throws SQLException {
-    System.out.println("Retrieving location data from Voyager");
     libraryPatterns = loadPatternMap("library_names.txt");
 
     try ( Statement stmt = voyager.createStatement(); ResultSet rs = stmt.executeQuery(getLocationsQuery) ) {
