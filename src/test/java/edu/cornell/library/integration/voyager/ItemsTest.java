@@ -38,16 +38,16 @@ public class ItemsTest {
     String expected =
         "{\"item_id\":2282772,"
         + "\"mfhd_id\":1234567,"
-        + "\"item_barcode\":\"31924067383830\","
+        + "\"barcode\":\"31924067383830\","
         + "\"copy_number\":1,"
-        + "\"item_sequence_number\":1,"
+        + "\"sequence_number\":1,"
         + "\"year\":null,"
         + "\"chron\":null,"
-        + "\"item_enum\":null,"
+        + "\"enum\":null,"
         + "\"caption\":null,"
-        + "\"holds_placed\":0,"
-        + "\"recalls_placed\":0,"
-        + "\"on_reserve\":\"N\","
+        + "\"holds\":0,"
+        + "\"recalls\":0,"
+        + "\"on_reserve\":false,"
         + "\"location\":{\"code\":\"rmc,anx\",\"number\":203,\"name\":\"Kroch Library Rare & Manuscripts"
         +         " (Request in advance)\",\"library\":\"Kroch Library Rare & Manuscripts\"},"
         + "\"type\":{\"id\":9,\"name\":\"nocirc\"},"
@@ -62,16 +62,16 @@ public class ItemsTest {
     String expected =
         "{\"item_id\":2236014,"
         + "\"mfhd_id\":1184953,"
-        + "\"item_barcode\":\"31924002209538\","
+        + "\"barcode\":\"31924002209538\","
         + "\"copy_number\":1,"
-        + "\"item_sequence_number\":1,"
+        + "\"sequence_number\":1,"
         + "\"year\":null,"
         + "\"chron\":null,"
-        + "\"item_enum\":null,"
+        + "\"enum\":null,"
         + "\"caption\":null,"
-        + "\"holds_placed\":0,"
-        + "\"recalls_placed\":0,"
-        + "\"on_reserve\":\"N\","
+        + "\"holds\":0,"
+        + "\"recalls\":0,"
+        + "\"on_reserve\":false,"
         + "\"location\":{\"code\":\"ilr,anx\",\"number\":52,\"name\":\"Library Annex\",\"library\":\"Library Annex\"},"
         + "\"type\":{\"id\":3,\"name\":\"book\"},"
         + "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"current_due_date\":null}}";
@@ -85,5 +85,14 @@ public class ItemsTest {
     Item item = Items.retrieveItemByItemId(voyager, 2236014);
     List<Item> items = Items.retrieveItemsByHoldingId(voyager, 1184953);
     assertEquals( items.get(0).toJson(), item.toJson());
+  }
+
+  @Test
+  public void roundTripItemsThroughJsonTest() throws SQLException, IOException {
+    Item item1 = Items.retrieveItemByItemId(voyager, 2236014);
+    String json1 = item1.toJson();
+    Item item2 = Items.extractItemFromJson(json1);
+    String json2 = item2.toJson();
+    assertEquals(json1,json2);
   }
 }

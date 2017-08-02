@@ -9,11 +9,23 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ItemStatus {
   public final boolean available;
   public final Map<Integer,String> codes;
   public final Timestamp current_due_date;
 
+  @JsonCreator
+  public ItemStatus(
+      @JsonProperty("available")        boolean available,
+      @JsonProperty("codes")            Map<Integer,String> codes,
+      @JsonProperty("current_due_date") Timestamp current_due_date ) {
+    this.available = available;
+    this.codes = codes;
+    this.current_due_date = current_due_date;
+  }
   public ItemStatus( Connection voyager, int item_id ) throws SQLException {
     
     String statusQ = "SELECT * FROM item_status WHERE item_id = ?";
@@ -27,7 +39,7 @@ public class ItemStatus {
           int status_id = rs.getInt("item_status");
           String status_desc = ItemStatuses.getStatusNameById(voyager, status_id);
           statuses.put(status_id, status_desc);
-          if (ItemStatuses.getIsUnvailable(status_id))
+          if (ItemStatuses.getIsUnavailable(status_id))
             foundUnavailable = true;
         }
       }

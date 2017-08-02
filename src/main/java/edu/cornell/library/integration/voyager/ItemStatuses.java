@@ -15,7 +15,7 @@ public class ItemStatuses {
   private static Set<Integer> unavailableStatuses = 
       new HashSet<>( Arrays.asList(2,3,4,5,6,7,8,9,10,12,13,14,18,21,22,23,24,25));
 
-  public static boolean getIsUnvailable( int id ) {
+  public static boolean getIsUnavailable( int id ) {
     return unavailableStatuses.contains(id);
   }
 

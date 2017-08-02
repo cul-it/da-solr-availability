@@ -7,6 +7,9 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ItemTypes {
 
   public ItemTypes( final Connection voyager) throws SQLException {
@@ -20,10 +23,11 @@ public class ItemTypes {
     return null;
   }
 
-  public class ItemType{
+ public static class ItemType{
     public final int id;
     public final String name;
-    private ItemType( int id, String name) {
+    @JsonCreator
+    private ItemType( @JsonProperty("id") int id, @JsonProperty("name") String name) {
       this.id = id;
       this.name = name;
     }

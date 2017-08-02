@@ -17,6 +17,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Give access to location data by code or number. Will load loaded into memory
  * from the Voyager database on the first instantiation of the class.
@@ -122,7 +125,12 @@ public final class Locations {
       return this.number.compareTo(other.number);
     }
 
-    private Location(String code, Integer number, String name, String library) {
+    @JsonCreator
+    private Location(
+        @JsonProperty("code")    String code,
+        @JsonProperty("number")  Integer number,
+        @JsonProperty("name")    String name,
+        @JsonProperty("library") String library) {
       this.code = code;
       this.number = number;
       this.name = name;
