@@ -10,12 +10,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ItemStatus {
   public final boolean available;
   public final Map<Integer,String> codes;
   public final Timestamp current_due_date;
+
+  @JsonIgnore
+  public final Timestamp date;
 
   @JsonCreator
   public ItemStatus(
@@ -25,6 +29,7 @@ public class ItemStatus {
     this.available = available;
     this.codes = codes;
     this.current_due_date = current_due_date;
+    this.date = null;
   }
   public ItemStatus( Connection voyager, int item_id ) throws SQLException {
     
@@ -32,6 +37,7 @@ public class ItemStatus {
     String circQ = "SELECT current_due_date FROM circ_transactions WHERE item_id = ?";
     boolean foundUnavailable = false;
     Map<Integer,String> statuses = new HashMap<>();
+    Timestamp statusModDate = null;
     try ( PreparedStatement pstmt = voyager.prepareStatement(statusQ)) {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
@@ -39,6 +45,8 @@ public class ItemStatus {
           int status_id = rs.getInt("item_status");
           String status_desc = ItemStatuses.getStatusNameById(voyager, status_id);
           statuses.put(status_id, status_desc);
+          if (statusModDate == null || statusModDate.before(rs.getTimestamp("item_status_date")))
+            statusModDate = rs.getTimestamp("item_status_date");
           if (ItemStatuses.getIsUnavailable(status_id))
             foundUnavailable = true;
         }
@@ -57,14 +65,15 @@ public class ItemStatus {
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
           dueDate = rs.getTimestamp(1);
-//        ResultSetMetaData rsmd = rs.getMetaData();
-//        for (int i=1; i <= rsmd.getColumnCount() ; i++) {
-//          String colname = rsmd.getColumnName(i).toLowerCase();
-//          System.out.println(colname);
-//        }
+/*      ResultSetMetaData rsmd = rs.getMetaData();
+        for (int i=1; i <= rsmd.getColumnCount() ; i++) {
+          String colname = rsmd.getColumnName(i).toLowerCase();
+          System.out.println(colname+" : "+rs.getString(i));
+        } */
       }
     }
     this.current_due_date = dueDate;
+    this.date = statusModDate;
   }
 
 }

@@ -1,6 +1,6 @@
 package edu.cornell.library.integration.voyager;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,7 +36,7 @@ public class ItemsTest {
   public void getItemsByHoldingId1() throws SQLException, JsonProcessingException {
     List<Item> items = Items.retrieveItemsByHoldingId(voyager, 1234567);
     String expected =
-        "{\"item_id\":2282772,"
+        "{\"id\":2282772,"
         + "\"mfhd_id\":1234567,"
         + "\"barcode\":\"31924067383830\","
         + "\"copy_number\":1,"
@@ -52,15 +52,18 @@ public class ItemsTest {
         +         " (Request in advance)\",\"library\":\"Kroch Library Rare & Manuscripts\"},"
         + "\"type\":{\"id\":9,\"name\":\"nocirc\"},"
         + "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"current_due_date\":null}}";
-    for (Item item : items)
+    for (Item item : items) {
       assertEquals(expected,item.toJson());
+      assertEquals("2000-05-31 00:00:00.0",item.date.toString());
+      assertNull(item.status.date);
+    }
   }
 
   @Test
   public void getItemsByHoldingId2() throws SQLException, JsonProcessingException {
     List<Item> items = Items.retrieveItemsByHoldingId(voyager, 1184953);
     String expected =
-        "{\"item_id\":2236014,"
+        "{\"id\":2236014,"
         + "\"mfhd_id\":1184953,"
         + "\"barcode\":\"31924002209538\","
         + "\"copy_number\":1,"
@@ -75,8 +78,11 @@ public class ItemsTest {
         + "\"location\":{\"code\":\"ilr,anx\",\"number\":52,\"name\":\"Library Annex\",\"library\":\"Library Annex\"},"
         + "\"type\":{\"id\":3,\"name\":\"book\"},"
         + "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"current_due_date\":null}}";
-    for (Item item : items)
+    for (Item item : items) {
       assertEquals(expected,item.toJson());
+      assertEquals("2000-05-31 00:00:00.0",item.date.toString());
+      assertEquals("2016-02-29 05:37:58.0",item.status.date.toString());
+    }
 //     System.out.println(item.toJson().replaceAll("\"", "\\\\\""));
   }
 
@@ -93,6 +99,13 @@ public class ItemsTest {
     String json1 = item1.toJson();
     Item item2 = Items.extractItemFromJson(json1);
     String json2 = item2.toJson();
+
     assertEquals(json1,json2);
+
+    // Because item & status date aren't serialized, they doesn't survive round trip.
+    assertEquals("2000-05-31 00:00:00.0",item1.date.toString());
+    assertEquals("2016-02-29 05:37:58.0",item1.status.date.toString());
+    assertNull(item2.date);
+    assertNull(item2.status.date);
   }
 }

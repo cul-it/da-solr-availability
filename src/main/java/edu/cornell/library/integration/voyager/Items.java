@@ -5,12 +5,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,7 +22,7 @@ import edu.cornell.library.integration.voyager.Locations.Location;
 
 public class Items {
 
-  static final String itemByMfhdIdQuery = 
+  private static final String itemByMfhdIdQuery = 
       "SELECT mfhd_item.*, item.*, item_barcode.item_barcode " +
       " FROM mfhd_item, item" +
       " LEFT OUTER JOIN item_barcode" +
@@ -28,7 +30,7 @@ public class Items {
       "       AND item_barcode.barcode_status = '1'" +
       " WHERE mfhd_item.mfhd_id = ?" +
       "   AND mfhd_item.item_id = item.item_id" ;
-  static final String itemByItemIdQuery = 
+  private static final String itemByItemIdQuery = 
       "SELECT mfhd_item.*, item.*, item_barcode.item_barcode " +
       " FROM mfhd_item, item" +
       " LEFT OUTER JOIN item_barcode" +
@@ -86,8 +88,7 @@ public class Items {
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Item {
 
-    // BEGIN FIELDS FOR JSON
-    @JsonProperty("item_id")         private final int itemId;
+    @JsonProperty("id")              private final int itemId;
     @JsonProperty("mfhd_id")         private final int mfhdId;
     @JsonProperty("barcode")         private final String barcode;
     @JsonProperty("copy_number")     private final int copyNumber;
@@ -101,8 +102,9 @@ public class Items {
     @JsonProperty("on_reserve")      private final Boolean onReserve;
     @JsonProperty("location")        private final Location location;
     @JsonProperty("type")            private final ItemType type;
-    @JsonProperty("status")          private final ItemStatus status;
-    // END FIELDS FOR JSON
+    @JsonProperty("status")          public final ItemStatus status;
+
+    @JsonIgnore public final Timestamp date;
 
     private Item(Connection voyager, ResultSet rs) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
@@ -127,11 +129,13 @@ public class Items {
         itemTypeId = rs.getInt("ITEM_TYPE_ID");
       this.type = itemTypes.getById(itemTypeId);
       this.status = new ItemStatus( voyager, this.itemId );
+      this.date = (rs.getTimestamp("MODIFY_DATE") == null)
+          ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE");
     }
 
     @JsonCreator
     private Item(
-        @JsonProperty("item_id")         int itemId,
+        @JsonProperty("id")              int itemId,
         @JsonProperty("mfhd_id")         int mfhdId,
         @JsonProperty("barcode")         String barcode,
         @JsonProperty("copy_number")     int copyNumber,
@@ -162,6 +166,7 @@ public class Items {
       this.location = location;
       this.type = type;
       this.status = status;
+      this.date = null;
     }
 
     public String toJson() throws JsonProcessingException {
