@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
@@ -51,10 +52,11 @@ public class ItemsTest {
         + "\"location\":{\"code\":\"rmc,anx\",\"number\":203,\"name\":\"Kroch Library Rare & Manuscripts"
         +         " (Request in advance)\",\"library\":\"Kroch Library Rare & Manuscripts\"},"
         + "\"type\":{\"id\":9,\"name\":\"nocirc\"},"
-        + "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"current_due_date\":null}}";
+        + "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"due\":null,\"date\":null},"
+        + "\"date\":959745600}";
     for (Item item : items) {
       assertEquals(expected,item.toJson());
-      assertEquals("2000-05-31 00:00:00.0",item.date.toString());
+      assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*item.date)).toString());
       assertNull(item.status.date);
     }
   }
@@ -77,11 +79,15 @@ public class ItemsTest {
         + "\"on_reserve\":false,"
         + "\"location\":{\"code\":\"ilr,anx\",\"number\":52,\"name\":\"Library Annex\",\"library\":\"Library Annex\"},"
         + "\"type\":{\"id\":3,\"name\":\"book\"},"
-        + "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"current_due_date\":null}}";
+        + "\"status\":{\"available\":true,"
+        +             "\"codes\":{\"1\":\"Not Charged\"},"
+        +             "\"due\":null,"
+        +             "\"date\":1456742278},"
+        + "\"date\":959745600}";
     for (Item item : items) {
       assertEquals(expected,item.toJson());
-      assertEquals("2000-05-31 00:00:00.0",item.date.toString());
-      assertEquals("2016-02-29 05:37:58.0",item.status.date.toString());
+      assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*item.date)).toString());
+      assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*item.status.date)).toString());
     }
 //     System.out.println(item.toJson().replaceAll("\"", "\\\\\""));
   }
@@ -102,10 +108,9 @@ public class ItemsTest {
 
     assertEquals(json1,json2);
 
-    // Because item & status date aren't serialized, they doesn't survive round trip.
-    assertEquals("2000-05-31 00:00:00.0",item1.date.toString());
-    assertEquals("2016-02-29 05:37:58.0",item1.status.date.toString());
-    assertNull(item2.date);
-    assertNull(item2.status.date);
+    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*item1.date)).toString());
+    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*item2.date)).toString());
+    assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*item1.status.date)).toString());
+    assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*item2.status.date)).toString());
   }
 }

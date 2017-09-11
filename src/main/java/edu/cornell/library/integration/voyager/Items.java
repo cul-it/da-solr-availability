@@ -5,14 +5,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -103,8 +101,7 @@ public class Items {
     @JsonProperty("location")        private final Location location;
     @JsonProperty("type")            private final ItemType type;
     @JsonProperty("status")          public final ItemStatus status;
-
-    @JsonIgnore public final Timestamp date;
+    @JsonProperty("date")            public final Integer date;
 
     private Item(Connection voyager, ResultSet rs) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
@@ -129,8 +126,8 @@ public class Items {
         itemTypeId = rs.getInt("ITEM_TYPE_ID");
       this.type = itemTypes.getById(itemTypeId);
       this.status = new ItemStatus( voyager, this.itemId );
-      this.date = (rs.getTimestamp("MODIFY_DATE") == null)
-          ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE");
+      this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
+          ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
     }
 
     @JsonCreator
@@ -149,7 +146,8 @@ public class Items {
         @JsonProperty("onReserve")       Boolean onReserve,
         @JsonProperty("location")        Location location,
         @JsonProperty("type")            ItemType type,
-        @JsonProperty("status")          ItemStatus status
+        @JsonProperty("status")          ItemStatus status,
+        @JsonProperty("date")            Integer date
         ) {
       this.itemId = itemId;
       this.mfhdId = mfhdId;
@@ -166,7 +164,7 @@ public class Items {
       this.location = location;
       this.type = type;
       this.status = status;
-      this.date = null;
+      this.date = date;
     }
 
     public String toJson() throws JsonProcessingException {

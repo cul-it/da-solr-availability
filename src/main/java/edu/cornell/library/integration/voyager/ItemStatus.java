@@ -10,26 +10,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ItemStatus {
   public final boolean available;
   public final Map<Integer,String> codes;
-  public final Timestamp current_due_date;
-
-  @JsonIgnore
-  public final Timestamp date;
+  public final Integer due;
+  public final Integer date;
 
   @JsonCreator
   public ItemStatus(
-      @JsonProperty("available")        boolean available,
-      @JsonProperty("codes")            Map<Integer,String> codes,
-      @JsonProperty("current_due_date") Timestamp current_due_date ) {
+      @JsonProperty("available") boolean available,
+      @JsonProperty("codes")     Map<Integer,String> codes,
+      @JsonProperty("due")       Integer due,
+      @JsonProperty("date")      Integer date) {
     this.available = available;
     this.codes = codes;
-    this.current_due_date = current_due_date;
-    this.date = null;
+    this.due = due;
+    this.date = date;
   }
   public ItemStatus( Connection voyager, int item_id ) throws SQLException {
     
@@ -59,12 +57,15 @@ public class ItemStatus {
     else
       this.available = false;
     this.codes = Collections.unmodifiableMap(statuses);
-    Timestamp dueDate = null;
+    Integer dueDate = null;
     try ( PreparedStatement pstmt = voyager.prepareStatement(circQ)) {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next())
-          dueDate = rs.getTimestamp(1);
+        while (rs.next()) {
+          Timestamp tmp = rs.getTimestamp(1);
+          if (tmp != null)
+            dueDate = (int) (tmp.getTime() / 1000) ;
+        }
 /*      ResultSetMetaData rsmd = rs.getMetaData();
         for (int i=1; i <= rsmd.getColumnCount() ; i++) {
           String colname = rsmd.getColumnName(i).toLowerCase();
@@ -72,8 +73,8 @@ public class ItemStatus {
         } */
       }
     }
-    this.current_due_date = dueDate;
-    this.date = statusModDate;
+    this.due = dueDate;
+    this.date = (statusModDate == null)?null:(int)(statusModDate.getTime() / 1000);
   }
 
 }
