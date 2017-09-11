@@ -27,7 +27,8 @@ public class Items {
       "      ON item_barcode.item_id = item.item_id "+
       "       AND item_barcode.barcode_status = '1'" +
       " WHERE mfhd_item.mfhd_id = ?" +
-      "   AND mfhd_item.item_id = item.item_id" ;
+      "   AND mfhd_item.item_id = item.item_id"+
+      " ORDER BY mfhd_item.item_id";
   private static final String itemByItemIdQuery = 
       "SELECT mfhd_item.*, item.*, item_barcode.item_barcode " +
       " FROM mfhd_item, item" +
