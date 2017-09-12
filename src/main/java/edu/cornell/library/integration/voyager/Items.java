@@ -108,33 +108,27 @@ public class Items {
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Item {
 
-    @JsonProperty("id")              public final int itemId;
-    @JsonProperty("mfhd_id")         public final int mfhdId;
-    @JsonProperty("barcode")         private final String barcode;
-    @JsonProperty("copy_number")     private final int copyNumber;
-    @JsonProperty("sequence_number") private final int sequenceNumber;
-    @JsonProperty("year")            public final String year;
-    @JsonProperty("chron")           public final String chron;
-    @JsonProperty("enum")            public final String enumeration;
-    @JsonProperty("caption")         private final String caption;
-    @JsonProperty("holds")           private final int holds;
-    @JsonProperty("recalls")         private final int recalls;
-    @JsonProperty("on_reserve")      private final Boolean onReserve;
-    @JsonProperty("location")        private final Location location;
-    @JsonProperty("type")            private final ItemType type;
-    @JsonProperty("status")          public final ItemStatus status;
-    @JsonProperty("date")            public final Integer date;
+    @JsonProperty("id")             public final int itemId;
+    @JsonProperty("mfhdId")         public final int mfhdId;
+    @JsonProperty("copyNumber")     private final int copyNumber;
+    @JsonProperty("sequenceNumber") private final int sequenceNumber;
+    @JsonProperty("enum")           public final String enumeration;
+    @JsonProperty("caption")        private final String caption;
+    @JsonProperty("holds")          private final int holds;
+    @JsonProperty("recalls")        private final int recalls;
+    @JsonProperty("onReserve")      private final Boolean onReserve;
+    @JsonProperty("location")       private final Location location;
+    @JsonProperty("type")           private final ItemType type;
+    @JsonProperty("status")         public final ItemStatus status;
+    @JsonProperty("date")           public final Integer date;
 
     private Item(Connection voyager, ResultSet rs) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
       this.mfhdId = rs.getInt("MFHD_ID");
-      this.barcode = rs.getString("ITEM_BARCODE");
 
       this.copyNumber = rs.getInt("COPY_NUMBER");
       this.sequenceNumber = rs.getInt("ITEM_SEQUENCE_NUMBER");
-      this.year = rs.getString("YEAR");
-      this.chron = rs.getString("CHRON");
-      this.enumeration = rs.getString("ITEM_ENUM");
+      this.enumeration = concatEnum(rs.getString("ITEM_ENUM"),rs.getString("CHRON"),rs.getString("YEAR"));;
       this.caption = rs.getString("CAPTION");
       this.holds = rs.getInt("HOLDS_PLACED");
       this.recalls = rs.getInt("RECALLS_PLACED");
@@ -154,30 +148,24 @@ public class Items {
 
     @JsonCreator
     private Item(
-        @JsonProperty("id")              int itemId,
-        @JsonProperty("mfhd_id")         int mfhdId,
-        @JsonProperty("barcode")         String barcode,
-        @JsonProperty("copy_number")     int copyNumber,
-        @JsonProperty("sequence_number") int sequenceNumber,
-        @JsonProperty("year")            String year,
-        @JsonProperty("chron")           String chron,
-        @JsonProperty("enum")            String enumeration,
-        @JsonProperty("caption")         String caption,
-        @JsonProperty("holds")           int holds,
-        @JsonProperty("recalls")         int recalls,
-        @JsonProperty("onReserve")       Boolean onReserve,
-        @JsonProperty("location")        Location location,
-        @JsonProperty("type")            ItemType type,
-        @JsonProperty("status")          ItemStatus status,
-        @JsonProperty("date")            Integer date
+        @JsonProperty("id")             int itemId,
+        @JsonProperty("mfhdId")         int mfhdId,
+        @JsonProperty("copyNumber")     int copyNumber,
+        @JsonProperty("sequenceNumber") int sequenceNumber,
+        @JsonProperty("enum")           String enumeration,
+        @JsonProperty("caption")        String caption,
+        @JsonProperty("holds")          int holds,
+        @JsonProperty("recalls")        int recalls,
+        @JsonProperty("onReserve")      Boolean onReserve,
+        @JsonProperty("location")       Location location,
+        @JsonProperty("type")           ItemType type,
+        @JsonProperty("status")         ItemStatus status,
+        @JsonProperty("date")           Integer date
         ) {
       this.itemId = itemId;
       this.mfhdId = mfhdId;
-      this.barcode = barcode;
       this.copyNumber = copyNumber;
       this.sequenceNumber = sequenceNumber;
-      this.year = year;
-      this.chron = chron;
       this.enumeration = enumeration;
       this.caption = caption;
       this.holds = holds;
@@ -192,5 +180,14 @@ public class Items {
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this);
     }
+  }
+  public static String concatEnum(String enumeration, String chron, String year) {
+    List<String> enumchronyear = new ArrayList<>();
+    if (enumeration != null && !enumeration.isEmpty()) enumchronyear.add(enumeration);
+    if (chron != null && !chron.isEmpty()) enumchronyear.add(chron);
+    if (year != null && !year.isEmpty()) enumchronyear.add(year);
+    if (enumchronyear.isEmpty())
+      return null;
+    return String.join(" ", enumchronyear);
   }
 }

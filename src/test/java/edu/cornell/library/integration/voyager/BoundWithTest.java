@@ -23,8 +23,7 @@ public class BoundWithTest {
   +"\"masterBibId\":2248567,"
   +"\"masterTitle\":\"Black biographical dictionaries, 1790-1950\","
   +"\"masterEnum\":\"title# 291 fiche 3/5\","
-  +"\"thisEnum\":\"\","
-  +"\"barcode\":\"31924064096195\","
+  +"\"thisEnum\":\"fiche 3/5\","
   +"\"status\":{\"available\":true,"
   +            "\"codes\":{\"1\":\"Not Charged\"},"
   +            "\"due\":null,"
@@ -33,17 +32,15 @@ public class BoundWithTest {
   String expectedBoundWithJson1726636 =
   "{\"masterItemId\":1726636,"
   +"\"masterBibId\":3827392,"
-  +"\"masterTitle\":\"Monograph of the Palaeontographical Society\","
+  +"\"masterTitle\":\"Monograph of the Palaeontographical Society.\","
   +"\"masterEnum\":\"v.14\","
   +"\"thisEnum\":\"v.14\","
-  +"\"barcode\":\"31924004546812\","
   +"\"status\":{\"available\":true,"
   +            "\"codes\":{\"1\":\"Not Charged\"},"
   +            "\"due\":null,"
   +            "\"date\":null}}";
 
   static Connection voyager = null;
-  static Connection inventory = null;
 
   @BeforeClass
   public static void connect() throws SQLException, ClassNotFoundException, IOException {
@@ -54,17 +51,15 @@ public class BoundWithTest {
     Class.forName("oracle.jdbc.driver.OracleDriver");
     voyager = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
-    inventory = DriverManager.getConnection(
-        prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
   }
 
   @Test
   public void boundWithMainConstructor() throws SQLException, JsonProcessingException {
-    DataField f = new DataField(6,"876",' ',' ',"‡p 31924064096195");
-    BoundWith b = BoundWith.from876Field(voyager, inventory, f);
+    DataField f = new DataField(6,"876",' ',' ',"‡3 fiche 3/5 ‡p 31924064096195");
+    BoundWith b = BoundWith.from876Field(voyager, f);
     assertEquals(expectedBoundWithJson4102195,b.toJson());
     f = new DataField(6,"876",' ',' ',"‡3 v.14 ‡p 31924004546812");
-    b = BoundWith.from876Field(voyager, inventory, f);
+    b = BoundWith.from876Field(voyager, f);
     assertEquals(expectedBoundWithJson1726636,b.toJson());
 //    System.out.println(b.toJson().replaceAll("\"", "\\\\\""));
   }

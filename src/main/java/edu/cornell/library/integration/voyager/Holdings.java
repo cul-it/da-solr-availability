@@ -7,8 +7,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
@@ -82,18 +84,18 @@ public class Holdings {
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Holding {
 
-    @JsonProperty("id")         private final int mfhdId;
-    @JsonProperty("bib_id")     private final int bibId;
-    @JsonProperty("copy_num")   private final String copyNum;
-    @JsonProperty("notes")      private final List<String> notes;
-    @JsonProperty("desc")       private final List<String> desc;
-    @JsonProperty("suppl_desc") private final List<String> supplDesc;
-    @JsonProperty("index_desc") private final List<String> indexDesc;
-    @JsonProperty("location")   private final Location location;
-    @JsonProperty("date")       public final Integer date;
+    @JsonProperty("id")        private final int mfhdId;
+    @JsonProperty("bibId")     private final int bibId;
+    @JsonProperty("copyNum")   private final String copyNum;
+    @JsonProperty("notes")     private final List<String> notes;
+    @JsonProperty("desc")      private final List<String> desc;
+    @JsonProperty("supplDesc") private final List<String> supplDesc;
+    @JsonProperty("indexDesc") private final List<String> indexDesc;
+    @JsonProperty("location")  private final Location location;
+    @JsonProperty("date")      public final Integer date;
+    @JsonProperty("boundWith") public final Map<Integer,BoundWith> boundWiths;
 
     @JsonIgnore public MarcRecord record;
-    @JsonIgnore public Collection<BoundWith> boundWiths;
 
     private Holding(Connection voyager, ResultSet rs) throws SQLException, IOException, XMLStreamException {
       this.mfhdId = rs.getInt("mfhd_id");
@@ -104,7 +106,7 @@ public class Holdings {
       this.record = new MarcRecord( RecordType.HOLDINGS, mrc );
 
       // process data from holdings marc
-      Collection<BoundWith> boundWiths = new ArrayList<>();
+      final Map<Integer,BoundWith> boundWiths = new HashMap<>();
       Location holdingLocation = null;
       Collection<String> callnos = new HashSet<>();
       List<String> holdingDescs = new ArrayList<>();
@@ -174,8 +176,8 @@ public class Holdings {
           indexHoldings.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           break;
         case "876":
-          BoundWith b = BoundWith.from876Field(voyager, null, f);
-          if (b != null) boundWiths.add(b);
+          BoundWith b = BoundWith.from876Field(voyager, f);
+          if (b != null) boundWiths.put(b.masterItemId,b);
         }
         if (callno != null)
           callnos.add(callno);
@@ -186,7 +188,7 @@ public class Holdings {
       this.supplDesc = supplementalHoldings;
       this.indexDesc = indexHoldings;
       this.location = holdingLocation;
-      this.boundWiths = boundWiths;
+      this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
     }
 
     public String toJson() throws JsonProcessingException {
