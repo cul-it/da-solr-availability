@@ -20,6 +20,54 @@ import edu.cornell.library.integration.voyager.Items.Item;
 
 public class ItemsTest {
 
+  String expectedJson2282772 =
+      "{\"id\":2282772,"
+      + "\"mfhd_id\":1234567,"
+      + "\"barcode\":\"31924067383830\","
+      + "\"copy_number\":1,"
+      + "\"sequence_number\":1,"
+      + "\"year\":null,"
+      + "\"chron\":null,"
+      + "\"enum\":null,"
+      + "\"caption\":null,"
+      + "\"holds\":0,"
+      + "\"recalls\":0,"
+      + "\"on_reserve\":false,"
+      + "\"location\":{\"code\":\"rmc,anx\","
+      +               "\"number\":203,"
+      +               "\"name\":\"Kroch Library Rare & Manuscripts (Request in advance)\","
+      +               "\"library\":\"Kroch Library Rare & Manuscripts\"},"
+      + "\"type\":{\"id\":9,\"name\":\"nocirc\"},"
+      + "\"status\":{\"available\":true,"
+      +             "\"codes\":{\"1\":\"Not Charged\"},"
+      +             "\"due\":null,"
+      +             "\"date\":null},"
+      + "\"date\":959745600}";
+
+  String expectedJson2236014 =
+      "{\"id\":2236014,"
+      + "\"mfhd_id\":1184953,"
+      + "\"barcode\":\"31924002209538\","
+      + "\"copy_number\":1,"
+      + "\"sequence_number\":1,"
+      + "\"year\":null,"
+      + "\"chron\":null,"
+      + "\"enum\":null,"
+      + "\"caption\":null,"
+      + "\"holds\":0,"
+      + "\"recalls\":0,"
+      + "\"on_reserve\":false,"
+      + "\"location\":{\"code\":\"ilr,anx\","
+      +               "\"number\":52,"
+      +               "\"name\":\"Library Annex\","
+      +               "\"library\":\"Library Annex\"},"
+      + "\"type\":{\"id\":3,\"name\":\"book\"},"
+      + "\"status\":{\"available\":true,"
+      +             "\"codes\":{\"1\":\"Not Charged\"},"
+      +             "\"due\":null,"
+      +             "\"date\":1456742278},"
+      + "\"date\":959745600}";
+
   static Connection voyager = null;
 
   @BeforeClass
@@ -36,59 +84,19 @@ public class ItemsTest {
   @Test
   public void getItemsByHoldingId1() throws SQLException, JsonProcessingException {
     List<Item> items = Items.retrieveItemsByHoldingId(voyager, 1234567);
-    String expected =
-        "{\"id\":2282772,"
-        + "\"mfhd_id\":1234567,"
-        + "\"barcode\":\"31924067383830\","
-        + "\"copy_number\":1,"
-        + "\"sequence_number\":1,"
-        + "\"year\":null,"
-        + "\"chron\":null,"
-        + "\"enum\":null,"
-        + "\"caption\":null,"
-        + "\"holds\":0,"
-        + "\"recalls\":0,"
-        + "\"on_reserve\":false,"
-        + "\"location\":{\"code\":\"rmc,anx\",\"number\":203,\"name\":\"Kroch Library Rare & Manuscripts"
-        +         " (Request in advance)\",\"library\":\"Kroch Library Rare & Manuscripts\"},"
-        + "\"type\":{\"id\":9,\"name\":\"nocirc\"},"
-        + "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"due\":null,\"date\":null},"
-        + "\"date\":959745600}";
-    for (Item item : items) {
-      assertEquals(expected,item.toJson());
-      assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*item.date)).toString());
-      assertNull(item.status.date);
-    }
+    assertEquals(1,items.size());
+    assertEquals(expectedJson2282772,items.get(0).toJson());
+    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*items.get(0).date)).toString());
+    assertNull(items.get(0).status.date);
   }
 
   @Test
   public void getItemsByHoldingId2() throws SQLException, JsonProcessingException {
     List<Item> items = Items.retrieveItemsByHoldingId(voyager, 1184953);
-    String expected =
-        "{\"id\":2236014,"
-        + "\"mfhd_id\":1184953,"
-        + "\"barcode\":\"31924002209538\","
-        + "\"copy_number\":1,"
-        + "\"sequence_number\":1,"
-        + "\"year\":null,"
-        + "\"chron\":null,"
-        + "\"enum\":null,"
-        + "\"caption\":null,"
-        + "\"holds\":0,"
-        + "\"recalls\":0,"
-        + "\"on_reserve\":false,"
-        + "\"location\":{\"code\":\"ilr,anx\",\"number\":52,\"name\":\"Library Annex\",\"library\":\"Library Annex\"},"
-        + "\"type\":{\"id\":3,\"name\":\"book\"},"
-        + "\"status\":{\"available\":true,"
-        +             "\"codes\":{\"1\":\"Not Charged\"},"
-        +             "\"due\":null,"
-        +             "\"date\":1456742278},"
-        + "\"date\":959745600}";
-    for (Item item : items) {
-      assertEquals(expected,item.toJson());
-      assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*item.date)).toString());
-      assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*item.status.date)).toString());
-    }
+    assertEquals(1,items.size());
+    assertEquals(expectedJson2236014,items.get(0).toJson());
+    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*items.get(0).date)).toString());
+    assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*items.get(0).status.date)).toString());
 //     System.out.println(item.toJson().replaceAll("\"", "\\\\\""));
   }
 
@@ -107,7 +115,6 @@ public class ItemsTest {
     String json2 = item2.toJson();
 
     assertEquals(json1,json2);
-
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*item1.date)).toString());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*item2.date)).toString());
     assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*item1.status.date)).toString());

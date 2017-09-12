@@ -4,31 +4,26 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.MarcRecord;
-import edu.cornell.library.integration.marc.Subfield;
 import edu.cornell.library.integration.marc.MarcRecord.RecordType;
+import edu.cornell.library.integration.marc.Subfield;
 import edu.cornell.library.integration.voyager.Locations.Location;
 
 public class Holdings {
@@ -37,7 +32,8 @@ public class Holdings {
       "SELECT *"+
       "  FROM bib_mfhd, mfhd_master"+
       " WHERE bib_mfhd.mfhd_id = mfhd_master.mfhd_id"+
-      "   AND bib_mfhd.bib_id = ?";
+      "   AND bib_mfhd.bib_id = ?"+
+      " ORDER BY bib_mfhd.mfhd_id";
   private static final String holdingByHoldingIdQuery =
       "SELECT *"+
       "  FROM bib_mfhd, mfhd_master"+
@@ -53,21 +49,19 @@ public class Holdings {
 
   }
 
-  public static void retrieveHoldingsByBibId( Connection voyager, int bib_id ) throws SQLException {
+  public static List<Holding> retrieveHoldingsByBibId( Connection voyager, int bib_id )
+      throws SQLException, IOException, XMLStreamException {
     if (locations == null)
       locations = new Locations( voyager );
+    List<Holding> holdings = new ArrayList<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(holdingsByBibIdQuery)) {
       pstmt.setInt(1, bib_id);
       try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next()) {
-          ResultSetMetaData rsmd = rs.getMetaData();
-          for (int i=1; i <= rsmd.getColumnCount() ; i++) {
-            String colname = rsmd.getColumnName(i).toLowerCase();
-            System.out.println(colname+" : "+rs.getString(i));
-          }
-        }
+        while (rs.next())
+          holdings.add(new Holding(voyager,rs));
       }
     }
+    return holdings;
   }
 
   public static Holding retrieveHoldingsByHoldingId( Connection voyager, int mfhd_id )
@@ -96,21 +90,21 @@ public class Holdings {
     @JsonProperty("suppl_desc") private final List<String> supplDesc;
     @JsonProperty("index_desc") private final List<String> indexDesc;
     @JsonProperty("location")   private final Location location;
+    @JsonProperty("date")       public final Integer date;
 
-    @JsonIgnore public final Timestamp date;
     @JsonIgnore public MarcRecord record;
-    @JsonIgnore public Collection<Map<String,Object>> boundWiths;
+    @JsonIgnore public Collection<BoundWith> boundWiths;
 
     private Holding(Connection voyager, ResultSet rs) throws SQLException, IOException, XMLStreamException {
       this.mfhdId = rs.getInt("mfhd_id");
       this.bibId = rs.getInt("bib_id");
-      this.date = ((rs.getTimestamp("update_date") == null)
-          ? rs.getTimestamp("create_date") : rs.getTimestamp("update_date"));
+      this.date = (int)(((rs.getTimestamp("update_date") == null)
+          ? rs.getTimestamp("create_date") : rs.getTimestamp("update_date")).getTime()/1000);
       String mrc = DownloadMARC.downloadMrc(voyager, RecordType.HOLDINGS, this.mfhdId);
       this.record = new MarcRecord( RecordType.HOLDINGS, mrc );
 
       // process data from holdings marc
-      Collection<Map<String,Object>> boundWiths = new ArrayList<>();
+      Collection<BoundWith> boundWiths = new ArrayList<>();
       Location holdingLocation = null;
       Collection<String> callnos = new HashSet<>();
       List<String> holdingDescs = new ArrayList<>();
@@ -180,7 +174,8 @@ public class Holdings {
           indexHoldings.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           break;
         case "876":
-          registerBoundWith(voyager, this.mfhdId, f, boundWiths);
+          BoundWith b = BoundWith.from876Field(voyager, null, f);
+          if (b != null) boundWiths.add(b);
         }
         if (callno != null)
           callnos.add(callno);
@@ -207,40 +202,6 @@ public class Holdings {
       if (commaFollowedByNonSpace == null)
         commaFollowedByNonSpace = Pattern.compile(",([^\\s])");
       return commaFollowedByNonSpace.matcher(s).replaceAll(", $1");
-    }
-
-    private static void registerBoundWith(
-        Connection voyager, int mfhd_id, DataField f, Collection<Map<String,Object>> boundWiths)
-            throws SQLException {
-      String item_enum = "";
-      String barcode = null;
-      for (Subfield sf : f.subfields) {
-        switch (sf.code) {
-        case 'p': barcode = sf.value; break;
-        case '3': item_enum = sf.value; break;
-        }
-      }
-      if (barcode == null) return;
-
-      // lookup item id here!!!
-      int item_id = 0;
-      try ( Statement stmt = voyager.createStatement() ){
-        String query =
-          "SELECT CORNELLDB.ITEM_BARCODE.ITEM_ID "
-          + "FROM CORNELLDB.ITEM_BARCODE WHERE CORNELLDB.ITEM_BARCODE.ITEM_BARCODE = '"+barcode+"'";
-        try (  java.sql.ResultSet rs = stmt.executeQuery(query)  ){
-          while (rs.next()) {
-            item_id = rs.getInt(1);
-          }
-          if (item_id == 0) return;
-        }
-      }
-      Map<String,Object> boundWith = new HashMap<>();
-      boundWith.put("item_id", item_id);
-      boundWith.put("mfhd_id", mfhd_id);
-      boundWith.put("item_enum", item_enum);
-      boundWith.put("barcode", barcode);
-      boundWiths.add(boundWith);
     }
 
   }

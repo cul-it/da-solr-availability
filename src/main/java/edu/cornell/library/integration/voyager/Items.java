@@ -37,6 +37,12 @@ public class Items {
       "       AND item_barcode.barcode_status = '1'" +
       " WHERE item.item_id = ?" +
       "   AND mfhd_item.item_id = item.item_id" ;
+  private static final String itemByBarcodeQuery = 
+      "SELECT mfhd_item.*, item.*, item_barcode.item_barcode " +
+      " FROM mfhd_item, item, item_barcode" +
+      " WHERE mfhd_item.item_id = item.item_id" +
+      "   AND item_barcode.item_id = item.item_id "+
+      "   AND item_barcode.item_barcode = ?";
   static Locations locations = null;
   static ItemTypes itemTypes = null;
 
@@ -79,6 +85,21 @@ public class Items {
     return null;
   }
 
+  public static Item retrieveItemByBarcode( Connection voyager, String barcode) throws SQLException {
+    if (locations == null) {
+      locations = new Locations( voyager );
+      itemTypes = new ItemTypes( voyager );
+    }
+    try (PreparedStatement pstmt = voyager.prepareStatement(itemByBarcodeQuery)) {
+      pstmt.setString(1, barcode);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next())
+          return new Item(voyager,rs);
+      }
+    }
+    return null;
+  }
+
   public static Item extractItemFromJson( String json ) throws IOException {
     return mapper.readValue(json, Item.class);
   }
@@ -87,14 +108,14 @@ public class Items {
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Item {
 
-    @JsonProperty("id")              private final int itemId;
-    @JsonProperty("mfhd_id")         private final int mfhdId;
+    @JsonProperty("id")              public final int itemId;
+    @JsonProperty("mfhd_id")         public final int mfhdId;
     @JsonProperty("barcode")         private final String barcode;
     @JsonProperty("copy_number")     private final int copyNumber;
     @JsonProperty("sequence_number") private final int sequenceNumber;
-    @JsonProperty("year")            private final String year;
-    @JsonProperty("chron")           private final String chron;
-    @JsonProperty("enum")            private final String enumeration;
+    @JsonProperty("year")            public final String year;
+    @JsonProperty("chron")           public final String chron;
+    @JsonProperty("enum")            public final String enumeration;
     @JsonProperty("caption")         private final String caption;
     @JsonProperty("holds")           private final int holds;
     @JsonProperty("recalls")         private final int recalls;
