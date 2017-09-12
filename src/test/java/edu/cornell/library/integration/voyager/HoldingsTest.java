@@ -144,4 +144,13 @@ public class HoldingsTest {
     assertEquals(expectedJson9850688,holdings.get(0).toJson());
     assertEquals("Thu May 18 16:21:19 EDT 2017",(new Date(1000L*holdings.get(0).date)).toString());
   }
+
+  @Test
+  public void roundTripHoldingThroughJson() throws SQLException, IOException, XMLStreamException {
+    Holding h1 = Holdings.retrieveHoldingsByHoldingId(voyager, 9850688);
+    String j1 = h1.toJson();
+    Holding h2 = Holdings.extractHoldingFromJson(j1);
+    String j2 = h2.toJson();
+    assertEquals(expectedJson9850688,j2);
+  }
 }

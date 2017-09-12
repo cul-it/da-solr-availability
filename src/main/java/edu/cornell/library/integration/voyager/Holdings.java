@@ -80,6 +80,9 @@ public class Holdings {
     return null;
   }
 
+  public static Holding extractHoldingFromJson( String json ) throws IOException {
+    return mapper.readValue(json, Holding.class);
+  }
   static ObjectMapper mapper = new ObjectMapper();
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Holding {
@@ -189,6 +192,29 @@ public class Holdings {
       this.indexDesc = indexHoldings;
       this.location = holdingLocation;
       this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
+    }
+
+    private Holding(
+        @JsonProperty("id")        int mfhdId,
+        @JsonProperty("bibId")     int bibId,
+        @JsonProperty("copyNum")   String copyNum,
+        @JsonProperty("notes")     List<String> notes,
+        @JsonProperty("desc")      List<String> desc,
+        @JsonProperty("supplDesc") List<String> supplDesc,
+        @JsonProperty("indexDesc") List<String> indexDesc,
+        @JsonProperty("location")  Location location,
+        @JsonProperty("date")      Integer date,
+        @JsonProperty("boundWith") Map<Integer,BoundWith> boundWiths ) {
+      this.mfhdId = mfhdId;
+      this.bibId = bibId;
+      this.copyNum = copyNum;
+      this.notes = notes;
+      this.desc = desc;
+      this.supplDesc = supplDesc;
+      this.indexDesc = indexDesc;
+      this.location = location;
+      this.date = date;
+      this.boundWiths = boundWiths;
     }
 
     public String toJson() throws JsonProcessingException {
