@@ -88,7 +88,6 @@ public class Holdings {
   public static class Holding {
 
     @JsonProperty("id")        private final int mfhdId;
-    @JsonProperty("bibId")     private final int bibId;
     @JsonProperty("copyNum")   private final String copyNum;
     @JsonProperty("notes")     private final List<String> notes;
     @JsonProperty("desc")      private final List<String> desc;
@@ -102,7 +101,6 @@ public class Holdings {
 
     private Holding(Connection voyager, ResultSet rs) throws SQLException, IOException, XMLStreamException {
       this.mfhdId = rs.getInt("mfhd_id");
-      this.bibId = rs.getInt("bib_id");
       this.date = (int)(((rs.getTimestamp("update_date") == null)
           ? rs.getTimestamp("create_date") : rs.getTimestamp("update_date")).getTime()/1000);
       String mrc = DownloadMARC.downloadMrc(voyager, RecordType.HOLDINGS, this.mfhdId);
@@ -196,7 +194,6 @@ public class Holdings {
 
     private Holding(
         @JsonProperty("id")        int mfhdId,
-        @JsonProperty("bibId")     int bibId,
         @JsonProperty("copyNum")   String copyNum,
         @JsonProperty("notes")     List<String> notes,
         @JsonProperty("desc")      List<String> desc,
@@ -206,7 +203,6 @@ public class Holdings {
         @JsonProperty("date")      Integer date,
         @JsonProperty("boundWith") Map<Integer,BoundWith> boundWiths ) {
       this.mfhdId = mfhdId;
-      this.bibId = bibId;
       this.copyNum = copyNum;
       this.notes = notes;
       this.desc = desc;

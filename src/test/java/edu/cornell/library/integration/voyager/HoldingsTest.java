@@ -22,7 +22,6 @@ public class HoldingsTest {
 
   String expectedJson1184953 =
   "{\"id\":1184953,"
-  + "\"bibId\":969430,"
   + "\"copyNum\":null,"
   + "\"notes\":[],"
   + "\"desc\":[],"
@@ -37,7 +36,6 @@ public class HoldingsTest {
 
   String expectedJson1184954 =
   "{\"id\":1184954,"
-  + "\"bibId\":969430,"
   + "\"copyNum\":\"2\","
   + "\"notes\":[],"
   + "\"desc\":[],"
@@ -52,7 +50,6 @@ public class HoldingsTest {
 
   String expectedJson9850688 =
   "{\"id\":9850688,"
-  + "\"bibId\":9520154,"
   + "\"copyNum\":null,"
   + "\"notes\":[],"
   + "\"desc\":[\"no.177-182 (2016)\"],"
@@ -67,7 +64,6 @@ public class HoldingsTest {
 
   String expectedJson2202712 =
   "{\"id\":2202712,"
-  +"\"bibId\":1799377,"
   +"\"copyNum\":null,"
   +"\"notes\":[\"1987 bound with: Quest no.91-95, sasa BR 128 B8 E53+ no.93.  --1989 bound with: Quest no.105, sasa BR 128 B8 E53+ no.105-106.\"],"
   +"\"desc\":[\"1978, 1980-1982, 1985, 1987-1992, 1994-1996\"],"
