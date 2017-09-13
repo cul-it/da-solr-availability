@@ -93,7 +93,8 @@ public class HoldingsTest {
   "014 0  ‡9 001182083\n"+
   "852 00 ‡b ilr,anx ‡h HC59.7 ‡i .B16 1977 ‡x os=y\n";
 
-  static Connection voyager = null;
+  static Connection voyagerTest = null;
+  static Connection voyagerLive = null;
 
   @BeforeClass
   public static void connect() throws SQLException, ClassNotFoundException, IOException {
@@ -101,23 +102,25 @@ public class HoldingsTest {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    voyager = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+    Class.forName("org.sqlite.JDBC");
+    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
+//    Class.forName("oracle.jdbc.driver.OracleDriver");
+//    voyagerLive = DriverManager.getConnection(
+//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
   }
 
   @Test
   public void getHoldingByHoldingId() throws SQLException, IOException, XMLStreamException {
-    Holding holding = Holdings.retrieveHoldingsByHoldingId(voyager, 1184953);
+    Holding holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1184953);
     assertEquals(expectedJson1184953,holding.toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holding.date)).toString());
     assertEquals(expectedMarc1184953,holding.record.toString());
 
-    holding = Holdings.retrieveHoldingsByHoldingId(voyager, 9850688);
+    holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9850688);
     assertEquals(expectedJson9850688,holding.toJson());
     assertEquals("Thu May 18 16:21:19 EDT 2017",(new Date(1000L*holding.date)).toString());
 
-    holding = Holdings.retrieveHoldingsByHoldingId(voyager, 2202712);
+    holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 2202712);
     assertEquals(expectedJson2202712,holding.toJson());
     assertEquals("Tue Jul 14 13:03:11 EDT 2009",(new Date(1000L*holding.date)).toString());
 //    System.out.println(holding.toJson().replaceAll("\"","\\\\\""));
@@ -127,7 +130,7 @@ public class HoldingsTest {
 
   @Test
   public void getHoldingByBibId() throws SQLException, IOException, XMLStreamException {
-    List<Holding> holdings = Holdings.retrieveHoldingsByBibId(voyager, 969430);
+    List<Holding> holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 969430);
     assertEquals(2,holdings.size());
     assertEquals(expectedJson1184953,holdings.get(0).toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holdings.get(0).date)).toString());
@@ -135,7 +138,7 @@ public class HoldingsTest {
     assertEquals(expectedJson1184954,holdings.get(1).toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holdings.get(1).date)).toString());
 
-    holdings = Holdings.retrieveHoldingsByBibId(voyager, 9520154);
+    holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 9520154);
     assertEquals(1,holdings.size());
     assertEquals(expectedJson9850688,holdings.get(0).toJson());
     assertEquals("Thu May 18 16:21:19 EDT 2017",(new Date(1000L*holdings.get(0).date)).toString());
@@ -143,7 +146,7 @@ public class HoldingsTest {
 
   @Test
   public void roundTripHoldingThroughJson() throws SQLException, IOException, XMLStreamException {
-    Holding h1 = Holdings.retrieveHoldingsByHoldingId(voyager, 9850688);
+    Holding h1 = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9850688);
     String j1 = h1.toJson();
     Holding h2 = Holdings.extractHoldingFromJson(j1);
     String j2 = h2.toJson();

@@ -40,7 +40,7 @@ public class BoundWith {
     Integer masterBibId = null;
     String masterTitle = null;
     try (PreparedStatement pstmt = voyager.prepareStatement(
-        "SELECT bt.*"
+        "SELECT bt.bib_id, bt.title_brief"
         + " FROM bib_mfhd bm, bib_text bt"
         + " WHERE bt.bib_id = bm.bib_id AND bm.mfhd_id = ?")) {
       pstmt.setInt(1, masterItem.mfhdId);

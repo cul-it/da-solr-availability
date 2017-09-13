@@ -40,7 +40,8 @@ public class BoundWithTest {
   +            "\"due\":null,"
   +            "\"date\":null}}";
 
-  static Connection voyager = null;
+  static Connection voyagerTest = null;
+  static Connection voyagerLive = null;
 
   @BeforeClass
   public static void connect() throws SQLException, ClassNotFoundException, IOException {
@@ -48,19 +49,22 @@ public class BoundWithTest {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    voyager = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+    Class.forName("org.sqlite.JDBC");
+    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
+//    Class.forName("oracle.jdbc.driver.OracleDriver");
+//  voyagerLive = DriverManager.getConnection(
+//     prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
   }
 
   @Test
   public void boundWithMainConstructor() throws SQLException, JsonProcessingException {
     DataField f = new DataField(6,"876",' ',' ',"‡3 fiche 3/5 ‡p 31924064096195");
-    BoundWith b = BoundWith.from876Field(voyager, f);
+    BoundWith b = BoundWith.from876Field(voyagerTest, f);
     assertEquals(expectedBoundWithJson4102195,b.toJson());
     f = new DataField(6,"876",' ',' ',"‡3 v.14 ‡p 31924004546812");
-    b = BoundWith.from876Field(voyager, f);
+    b = BoundWith.from876Field(voyagerTest, f);
     assertEquals(expectedBoundWithJson1726636,b.toJson());
 //    System.out.println(b.toJson().replaceAll("\"", "\\\\\""));
   }
 }
+// 4690713 2473239 7301315 2098051 2305477 3212523

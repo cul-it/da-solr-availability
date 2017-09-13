@@ -62,7 +62,8 @@ public class ItemsTest {
       +             "\"date\":1456742278},"
       + "\"date\":959745600}";
 
-  static Connection voyager = null;
+  static Connection voyagerTest = null;
+  static Connection voyagerLive = null;
 
   @BeforeClass
   public static void connect() throws SQLException, ClassNotFoundException, IOException {
@@ -70,14 +71,16 @@ public class ItemsTest {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    voyager = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+    Class.forName("org.sqlite.JDBC");
+    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
+//    Class.forName("oracle.jdbc.driver.OracleDriver");
+//    voyagerLive = DriverManager.getConnection(
+//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
   }
 
   @Test
   public void getItemsByHoldingId1() throws SQLException, JsonProcessingException {
-    List<Item> items = Items.retrieveItemsByHoldingId(voyager, 1234567);
+    List<Item> items = Items.retrieveItemsByHoldingId(voyagerTest, 1234567);
     assertEquals(1,items.size());
     assertEquals(expectedJson2282772,items.get(0).toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*items.get(0).date)).toString());
@@ -86,7 +89,7 @@ public class ItemsTest {
 
   @Test
   public void getItemsByHoldingId2() throws SQLException, JsonProcessingException {
-    List<Item> items = Items.retrieveItemsByHoldingId(voyager, 1184953);
+    List<Item> items = Items.retrieveItemsByHoldingId(voyagerTest, 1184953);
     assertEquals(1,items.size());
     assertEquals(expectedJson2236014,items.get(0).toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*items.get(0).date)).toString());
@@ -96,14 +99,14 @@ public class ItemsTest {
 
   @Test
   public void getItemByItemIdTest() throws SQLException, JsonProcessingException {
-    Item item = Items.retrieveItemByItemId(voyager, 2236014);
-    List<Item> items = Items.retrieveItemsByHoldingId(voyager, 1184953);
+    Item item = Items.retrieveItemByItemId(voyagerTest, 2236014);
+    List<Item> items = Items.retrieveItemsByHoldingId(voyagerTest, 1184953);
     assertEquals( items.get(0).toJson(), item.toJson());
   }
 
   @Test
   public void roundTripItemsThroughJsonTest() throws SQLException, IOException {
-    Item item1 = Items.retrieveItemByItemId(voyager, 2236014);
+    Item item1 = Items.retrieveItemByItemId(voyagerTest, 2236014);
     String json1 = item1.toJson();
     Item item2 = Items.extractItemFromJson(json1);
     String json2 = item2.toJson();
