@@ -25,8 +25,6 @@ public class ItemsTest {
       + "\"mfhdId\":1234567,"
       + "\"copyNumber\":1,"
       + "\"sequenceNumber\":1,"
-      + "\"enum\":null,"
-      + "\"caption\":null,"
       + "\"holds\":0,"
       + "\"recalls\":0,"
       + "\"onReserve\":false,"
@@ -36,9 +34,7 @@ public class ItemsTest {
       +               "\"library\":\"Kroch Library Rare & Manuscripts\"},"
       + "\"type\":{\"id\":9,\"name\":\"nocirc\"},"
       + "\"status\":{\"available\":true,"
-      +             "\"codes\":{\"1\":\"Not Charged\"},"
-      +             "\"due\":null,"
-      +             "\"date\":null},"
+      +             "\"codes\":{\"1\":\"Not Charged\"}},"
       + "\"date\":959745600}";
 
   String expectedJson2236014 =
@@ -46,8 +42,6 @@ public class ItemsTest {
       + "\"mfhdId\":1184953,"
       + "\"copyNumber\":1,"
       + "\"sequenceNumber\":1,"
-      + "\"enum\":null,"
-      + "\"caption\":null,"
       + "\"holds\":0,"
       + "\"recalls\":0,"
       + "\"onReserve\":false,"
@@ -58,9 +52,27 @@ public class ItemsTest {
       + "\"type\":{\"id\":3,\"name\":\"book\"},"
       + "\"status\":{\"available\":true,"
       +             "\"codes\":{\"1\":\"Not Charged\"},"
-      +             "\"due\":null,"
       +             "\"date\":1456742278},"
       + "\"date\":959745600}";
+
+  String expectedJson10013120 =
+      "{\"id\":10013120,"
+      +"\"mfhdId\":9975971,"
+      +"\"copyNumber\":1,"
+      +"\"sequenceNumber\":1,"
+      +"\"holds\":0,"
+      +"\"recalls\":0,"
+      +"\"onReserve\":false,"
+      +"\"location\":{\"code\":\"olin\","
+      +              "\"number\":99,"
+      +              "\"name\":\"Olin Library\","
+      +              "\"library\":\"Olin Library\"},"
+      +"\"type\":{\"id\":14,\"name\":\"2wkloan\"},"
+      +"\"status\":{\"available\":false,"
+      +            "\"codes\":{\"3\":\"Renewed\"},"
+      +            "\"due\":1506218400,"
+      +            "\"date\":1504965705},"
+      +"\"date\":1473796009}";
 
   static Connection voyagerTest = null;
   static Connection voyagerLive = null;
@@ -102,7 +114,9 @@ public class ItemsTest {
     Item item = Items.retrieveItemByItemId(voyagerTest, 2236014);
     List<Item> items = Items.retrieveItemsByHoldingId(voyagerTest, 1184953);
     assertEquals( items.get(0).toJson(), item.toJson());
-  }
+
+    item = Items.retrieveItemByItemId(voyagerTest, 10013120);
+    assertEquals( expectedJson10013120, item.toJson());  }
 
   @Test
   public void roundTripItemsThroughJsonTest() throws SQLException, IOException {

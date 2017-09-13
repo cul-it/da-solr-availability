@@ -18,6 +18,7 @@ import javax.xml.stream.XMLStreamException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -84,10 +85,14 @@ public class Holdings {
     return mapper.readValue(json, Holding.class);
   }
   static ObjectMapper mapper = new ObjectMapper();
+  static {
+    mapper.setSerializationInclusion(Include.NON_NULL);
+  }
+
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Holding {
 
-    @JsonProperty("id")        private final int mfhdId;
+    @JsonProperty("id")        public final int mfhdId;
     @JsonProperty("copyNum")   private final String copyNum;
     @JsonProperty("notes")     private final List<String> notes;
     @JsonProperty("desc")      private final List<String> desc;
@@ -96,6 +101,7 @@ public class Holdings {
     @JsonProperty("location")  private final Location location;
     @JsonProperty("date")      public final Integer date;
     @JsonProperty("boundWith") public final Map<Integer,BoundWith> boundWiths;
+//    @JsonProperty("avail")     public HoldingsAvailability avail = null;
 
     @JsonIgnore public MarcRecord record;
 
@@ -110,10 +116,10 @@ public class Holdings {
       final Map<Integer,BoundWith> boundWiths = new HashMap<>();
       Location holdingLocation = null;
       Collection<String> callnos = new HashSet<>();
-      List<String> holdingDescs = new ArrayList<>();
+      List<String> desc = new ArrayList<>();
       List<String> recentHoldings = new ArrayList<>();
-      List<String> supplementalHoldings = new ArrayList<>();
-      List<String> indexHoldings = new ArrayList<>();
+      List<String> supplDesc = new ArrayList<>();
+      List<String> indexDesc = new ArrayList<>();
       List<String> notes = new ArrayList<>();
       String copyNum = null;
       Collection<DataField> sortedFields = this.record.matchSortAndFlattenDataFields();
@@ -168,13 +174,13 @@ public class Holdings {
           if (f.ind1.equals(' ') && f.ind2.equals(' '))
             recentHoldings.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           else
-            holdingDescs.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
+            desc.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           break;
         case "867":
-          supplementalHoldings.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
+          supplDesc.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           break;
         case "868":
-          indexHoldings.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
+          indexDesc.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           break;
         case "876":
           BoundWith b = BoundWith.from876Field(voyager, f);
@@ -184,10 +190,10 @@ public class Holdings {
           callnos.add(callno);
       }
       this.copyNum = copyNum;
-      this.notes = notes;
-      this.desc = holdingDescs;
-      this.supplDesc = supplementalHoldings;
-      this.indexDesc = indexHoldings;
+      this.notes = (notes.isEmpty()) ? null : notes;
+      this.desc = (desc.isEmpty()) ? null : desc;
+      this.supplDesc = (supplDesc.isEmpty()) ? null : supplDesc;
+      this.indexDesc = (indexDesc.isEmpty()) ? null : indexDesc;
       this.location = holdingLocation;
       this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
     }
@@ -204,10 +210,10 @@ public class Holdings {
         @JsonProperty("boundWith") Map<Integer,BoundWith> boundWiths ) {
       this.mfhdId = mfhdId;
       this.copyNum = copyNum;
-      this.notes = notes;
-      this.desc = desc;
-      this.supplDesc = supplDesc;
-      this.indexDesc = indexDesc;
+      this.notes = (notes == null || notes.isEmpty()) ? null : notes;
+      this.desc = (desc == null || desc.isEmpty()) ? null : desc;
+      this.supplDesc = (supplDesc == null || supplDesc.isEmpty()) ? null : supplDesc;
+      this.indexDesc = (indexDesc == null || indexDesc.isEmpty()) ? null : indexDesc;
       this.location = location;
       this.date = date;
       this.boundWiths = boundWiths;

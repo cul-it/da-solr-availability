@@ -8,8 +8,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -104,7 +103,9 @@ public class Items {
   }
 
   static ObjectMapper mapper = new ObjectMapper();
-  @JsonAutoDetect(fieldVisibility = Visibility.ANY)
+  static {
+    mapper.setSerializationInclusion(Include.NON_NULL);
+  }
   public static class Item {
 
     @JsonProperty("id")             public final int itemId;

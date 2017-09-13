@@ -25,9 +25,7 @@ public class BoundWithTest {
   +"\"masterEnum\":\"title# 291 fiche 3/5\","
   +"\"thisEnum\":\"fiche 3/5\","
   +"\"status\":{\"available\":true,"
-  +            "\"codes\":{\"1\":\"Not Charged\"},"
-  +            "\"due\":null,"
-  +            "\"date\":null}}";
+  +            "\"codes\":{\"1\":\"Not Charged\"}}}";
 
   String expectedBoundWithJson1726636 =
   "{\"masterItemId\":1726636,"
@@ -36,9 +34,7 @@ public class BoundWithTest {
   +"\"masterEnum\":\"v.14\","
   +"\"thisEnum\":\"v.14\","
   +"\"status\":{\"available\":true,"
-  +            "\"codes\":{\"1\":\"Not Charged\"},"
-  +            "\"due\":null,"
-  +            "\"date\":null}}";
+  +            "\"codes\":{\"1\":\"Not Charged\"}}}";
 
   static Connection voyagerTest = null;
   static Connection voyagerLive = null;

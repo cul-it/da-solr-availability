@@ -22,53 +22,34 @@ public class HoldingsTest {
 
   String expectedJson1184953 =
   "{\"id\":1184953,"
-  + "\"copyNum\":null,"
-  + "\"notes\":[],"
-  + "\"desc\":[],"
-  + "\"supplDesc\":[],"
-  + "\"indexDesc\":[],"
   + "\"location\":{\"code\":\"ilr,anx\","
   +               "\"number\":52,"
   +               "\"name\":\"Library Annex\","
   +               "\"library\":\"Library Annex\"},"
-  + "\"date\":959745600,"
-  + "\"boundWith\":null}";
+  + "\"date\":959745600}";
 
   String expectedJson1184954 =
   "{\"id\":1184954,"
   + "\"copyNum\":\"2\","
-  + "\"notes\":[],"
-  + "\"desc\":[],"
-  + "\"supplDesc\":[],"
-  + "\"indexDesc\":[],"
   + "\"location\":{\"code\":\"ilr\","
   +               "\"number\":51,"
   +               "\"name\":\"ILR Library (Ives Hall)\","
   +               "\"library\":\"ILR Library\"},"
-  + "\"date\":959745600,"
-  + "\"boundWith\":null}";
+  + "\"date\":959745600}";
 
   String expectedJson9850688 =
   "{\"id\":9850688,"
-  + "\"copyNum\":null,"
-  + "\"notes\":[],"
   + "\"desc\":[\"no.177-182 (2016)\"],"
-  + "\"supplDesc\":[],"
-  + "\"indexDesc\":[],"
   + "\"location\":{\"code\":\"was\","
   +               "\"number\":139,"
   +               "\"name\":\"Kroch Library Asia\","
   +               "\"library\":\"Kroch Library Asia\"},"
-  + "\"date\":1495138879,"
-  + "\"boundWith\":null}";
+  + "\"date\":1495138879}";
 
   String expectedJson2202712 =
   "{\"id\":2202712,"
-  +"\"copyNum\":null,"
   +"\"notes\":[\"1987 bound with: Quest no.91-95, sasa BR 128 B8 E53+ no.93.  --1989 bound with: Quest no.105, sasa BR 128 B8 E53+ no.105-106.\"],"
   +"\"desc\":[\"1978, 1980-1982, 1985, 1987-1992, 1994-1996\"],"
-  +"\"supplDesc\":[],"
-  +"\"indexDesc\":[],"
   +"\"location\":{\"code\":\"sasa\",\"number\":122,\"name\":\"Kroch Library Asia\",\"library\":\"Kroch Library Asia\"},"
   +"\"date\":1247590991,"
   +"\"boundWith\":{\"3910960\":{\"masterItemId\":3910960,"
@@ -76,13 +57,30 @@ public class HoldingsTest {
   +                            "\"masterTitle\":\"Accelerated Mahaweli, Sri Lanka Development Programme /\","
   +                            "\"masterEnum\":\"no.105-106\","
   +                            "\"thisEnum\":\"1989\","
-  +                            "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"due\":null,\"date\":null}},"
+  +                            "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"}}},"
   +               "\"3131680\":{\"masterItemId\":3131680,"
   +                            "\"masterBibId\":1575369,"
   +                            "\"masterTitle\":\"Emerging community : two dialoguing religions of South-East Asia /\","
   +                            "\"masterEnum\":\"no.91-95\","
   +                            "\"thisEnum\":\"1987\","
-  +                            "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"},\"due\":null,\"date\":null}}}}";
+  +                            "\"status\":{\"available\":true,\"codes\":{\"1\":\"Not Charged\"}}}}}";
+
+  String expectedJson1131911 =
+  "{\"id\":1131911,"
+  +"\"desc\":[\"v.1-2;\"],"
+  +"\"supplDesc\":[\"Fifth suppl.:1982-1988\"],"
+  +"\"location\":{\"code\":\"law\","
+  +              "\"number\":63,"
+  +              "\"name\":\"Law Library (Myron Taylor Hall)\","
+  +              "\"library\":\"Law Library\"},"
+  +"\"date\":959745600}";
+
+  String expectedJson413836 =
+  "{\"id\":413836,"
+  +"\"desc\":[\"1959-1974\"],"
+  +"\"indexDesc\":[\"1959/1974\"],"
+  +"\"location\":{\"code\":\"olin,anx\",\"number\":101,\"name\":\"Library Annex\",\"library\":\"Library Annex\"},"
+  +"\"date\":959745600}";
 
   String expectedMarc1184953 =
   "000    00214nx  a2200097z  4500\n"+
@@ -123,9 +121,9 @@ public class HoldingsTest {
     holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 2202712);
     assertEquals(expectedJson2202712,holding.toJson());
     assertEquals("Tue Jul 14 13:03:11 EDT 2009",(new Date(1000L*holding.date)).toString());
-//    System.out.println(holding.toJson().replaceAll("\"","\\\\\""));
-//    System.out.println((new Date(1000L*holding.date)).toString());
-//    System.out.println(holding.record.toString());
+
+    assertEquals(expectedJson1131911,Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1131911).toJson());
+    assertEquals(expectedJson413836,Holdings.retrieveHoldingsByHoldingId(voyagerTest, 413836).toJson());
   }
 
   @Test
