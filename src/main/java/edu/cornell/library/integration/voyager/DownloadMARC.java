@@ -16,7 +16,7 @@ public class DownloadMARC {
   /**
    * Retrieve specified MARC record and return MARC21 format as string.
    * 
-   * @param voyagerTest Database connection to Oracle
+   * @param voyager Database connection to Oracle
    * @param type
    *          (RecordType.BIBLIOGRAPHIC, RecordType.HOLDINGS, RecordType.AUTHORITY)
    * @param id
@@ -34,7 +34,7 @@ public class DownloadMARC {
   /**
    * Retrieve specified MARC record and return MARC XML format as string.
    * 
-   * @param voyagerTest Database connection to Oracle
+   * @param voyager Database connection to Oracle
    * @param type
    *          (RecordType.BIBLIOGRAPHIC, RecordType.HOLDINGS, RecordType.AUTHORITY)
    * @param id
