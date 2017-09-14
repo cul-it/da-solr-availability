@@ -6,10 +6,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -52,7 +57,7 @@ public class Items {
     // SELECT * FROM item_STATUS WHERE item_STATUS_DATE > ?
   }
 
-  public static List<Item> retrieveItemsByHoldingId( Connection voyager, int mfhd_id ) throws SQLException {
+  public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhd_id ) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
@@ -62,11 +67,34 @@ public class Items {
       try (ResultSet rs = pstmt.executeQuery()) {
         List<Item> items = new ArrayList<>();
         while (rs.next())
-          items.add(new Item(voyager,rs));
-        return items;
+          items.add(new Item(voyager,rs, false));
+        Map<Integer,List<Item>> itemList = new HashMap<>();
+        itemList.put(mfhd_id, items);
+        return new ItemList(itemList);
       }
     }
   }
+
+  public static ItemList retrieveItemsByHoldingIds( Connection voyager, List<Integer> mfhd_ids ) throws SQLException {
+    if (locations == null) {
+      locations = new Locations( voyager );
+      itemTypes = new ItemTypes( voyager );
+    }
+    ItemList il = new ItemList();
+    try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
+      for (int mfhd_id : mfhd_ids) {
+        pstmt.setInt(1, mfhd_id);
+        try (ResultSet rs = pstmt.executeQuery()) {
+          List<Item> items = new ArrayList<>();
+          while (rs.next())
+            items.add(new Item(voyager,rs, false));
+          il.put(mfhd_id, items);
+        }
+      }
+    }
+    return il;
+  }
+
 
   public static Item retrieveItemByItemId( Connection voyager, int item_id ) throws SQLException {
     if (locations == null) {
@@ -77,7 +105,7 @@ public class Items {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
-          return new Item(voyager,rs);
+          return new Item(voyager,rs, true);
       }
     }
     return null;
@@ -92,7 +120,7 @@ public class Items {
       pstmt.setString(1, barcode);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
-          return new Item(voyager,rs);
+          return new Item(voyager,rs, true);
       }
     }
     return null;
@@ -104,35 +132,81 @@ public class Items {
 
   static ObjectMapper mapper = new ObjectMapper();
   static {
-    mapper.setSerializationInclusion(Include.NON_NULL);
+    mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
+
+  public static class ItemList {
+    public Map<Integer,List<Item>> items;
+
+    @JsonValue
+    public Map<Integer,List<Item>> getItems() {
+      return items;
+    }
+
+    @JsonCreator
+    public ItemList( Map<Integer,List<Item>> items ) {
+      this.items = items;
+    }
+
+    public ItemList( ) {
+      this.items = new LinkedHashMap<>();
+    }
+
+    public void add( Map<Integer,List<Item>> items ) {
+      this.items.putAll(items);
+    }
+
+    public void put( Integer mfhd_id, List<Item> items ) {
+      this.items.put(mfhd_id, items);
+    }
+
+    public String toJson() throws JsonProcessingException {
+      return mapper.writeValueAsString(this.items);
+    }
+
+    public int mfhdCount() {
+      return items.size();
+    }
+    public int itemCount() {
+      return items.values().stream().mapToInt(p -> p.size()).sum();
+    }
+
+    public Item getItem (int mfhd_id, int item_id) {
+      if (items.containsKey(mfhd_id))
+        for (Item i : items.get(mfhd_id))
+          if (i.itemId == item_id)
+            return i;
+      return null;
+    }
+  }
+
   public static class Item {
 
     @JsonProperty("id")             public final int itemId;
-    @JsonProperty("mfhdId")         public final int mfhdId;
+    @JsonProperty("mfhdId")         public Integer mfhdId;
     @JsonProperty("copyNumber")     private final int copyNumber;
     @JsonProperty("sequenceNumber") private final int sequenceNumber;
     @JsonProperty("enum")           public final String enumeration;
     @JsonProperty("caption")        private final String caption;
-    @JsonProperty("holds")          private final int holds;
-    @JsonProperty("recalls")        private final int recalls;
+    @JsonProperty("holds")          private final Integer holds;
+    @JsonProperty("recalls")        private final Integer recalls;
     @JsonProperty("onReserve")      private final Boolean onReserve;
     @JsonProperty("location")       private final Location location;
     @JsonProperty("type")           private final ItemType type;
     @JsonProperty("status")         public final ItemStatus status;
     @JsonProperty("date")           public final Integer date;
 
-    private Item(Connection voyager, ResultSet rs) throws SQLException {
+    private Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
-      this.mfhdId = rs.getInt("MFHD_ID");
+      this.mfhdId = (includeMfhdId)?rs.getInt("MFHD_ID"):null;
 
       this.copyNumber = rs.getInt("COPY_NUMBER");
       this.sequenceNumber = rs.getInt("ITEM_SEQUENCE_NUMBER");
       this.enumeration = concatEnum(rs.getString("ITEM_ENUM"),rs.getString("CHRON"),rs.getString("YEAR"));;
       this.caption = rs.getString("CAPTION");
-      this.holds = rs.getInt("HOLDS_PLACED");
-      this.recalls = rs.getInt("RECALLS_PLACED");
-      this.onReserve = (rs.getString("ON_RESERVE").equals("N"))?false:true;
+      this.holds = (rs.getInt("HOLDS_PLACED") == 0)?null:rs.getInt("HOLDS_PLACED");
+      this.recalls = (rs.getInt("RECALLS_PLACED") == 0)?null:rs.getInt("RECALLS_PLACED");
+      this.onReserve = (rs.getString("ON_RESERVE").equals("N"))?null:true;
       int locationNumber = rs.getInt("TEMP_LOCATION");
       if (0 == locationNumber)
         locationNumber = rs.getInt("PERM_LOCATION");
@@ -148,13 +222,13 @@ public class Items {
 
     private Item(
         @JsonProperty("id")             int itemId,
-        @JsonProperty("mfhdId")         int mfhdId,
+        @JsonProperty("mfhdId")         Integer mfhdId,
         @JsonProperty("copyNumber")     int copyNumber,
         @JsonProperty("sequenceNumber") int sequenceNumber,
         @JsonProperty("enum")           String enumeration,
         @JsonProperty("caption")        String caption,
-        @JsonProperty("holds")          int holds,
-        @JsonProperty("recalls")        int recalls,
+        @JsonProperty("holds")          Integer holds,
+        @JsonProperty("recalls")        Integer recalls,
         @JsonProperty("onReserve")      Boolean onReserve,
         @JsonProperty("location")       Location location,
         @JsonProperty("type")           ItemType type,
@@ -187,6 +261,6 @@ public class Items {
     if (year != null && !year.isEmpty()) enumchronyear.add(year);
     if (enumchronyear.isEmpty())
       return null;
-    return String.join(" ", enumchronyear);
+    return String.join(" - ", enumchronyear);
   }
 }

@@ -1,81 +1,41 @@
 package edu.cornell.library.integration.voyager;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.voyager.Items.Item;
+import edu.cornell.library.integration.voyager.Items.ItemList;
+
+import static edu.cornell.library.integration.voyager.TestUtil.convertStreamToString;
 
 public class ItemsTest {
 
-  String expectedJson2282772 =
-      "{\"id\":2282772,"
-      + "\"mfhdId\":1234567,"
-      + "\"copyNumber\":1,"
-      + "\"sequenceNumber\":1,"
-      + "\"holds\":0,"
-      + "\"recalls\":0,"
-      + "\"onReserve\":false,"
-      + "\"location\":{\"code\":\"rmc,anx\","
-      +               "\"number\":203,"
-      +               "\"name\":\"Kroch Library Rare & Manuscripts (Request in advance)\","
-      +               "\"library\":\"Kroch Library Rare & Manuscripts\"},"
-      + "\"type\":{\"id\":9,\"name\":\"nocirc\"},"
-      + "\"status\":{\"available\":true,"
-      +             "\"codes\":{\"1\":\"Not Charged\"}},"
-      + "\"date\":959745600}";
-
-  String expectedJson2236014 =
-      "{\"id\":2236014,"
-      + "\"mfhdId\":1184953,"
-      + "\"copyNumber\":1,"
-      + "\"sequenceNumber\":1,"
-      + "\"holds\":0,"
-      + "\"recalls\":0,"
-      + "\"onReserve\":false,"
-      + "\"location\":{\"code\":\"ilr,anx\","
-      +               "\"number\":52,"
-      +               "\"name\":\"Library Annex\","
-      +               "\"library\":\"Library Annex\"},"
-      + "\"type\":{\"id\":3,\"name\":\"book\"},"
-      + "\"status\":{\"available\":true,"
-      +             "\"codes\":{\"1\":\"Not Charged\"},"
-      +             "\"date\":1456742278},"
-      + "\"date\":959745600}";
-
-  String expectedJson10013120 =
-      "{\"id\":10013120,"
-      +"\"mfhdId\":9975971,"
-      +"\"copyNumber\":1,"
-      +"\"sequenceNumber\":1,"
-      +"\"holds\":0,"
-      +"\"recalls\":0,"
-      +"\"onReserve\":false,"
-      +"\"location\":{\"code\":\"olin\","
-      +              "\"number\":99,"
-      +              "\"name\":\"Olin Library\","
-      +              "\"library\":\"Olin Library\"},"
-      +"\"type\":{\"id\":14,\"name\":\"2wkloan\"},"
-      +"\"status\":{\"available\":false,"
-      +            "\"codes\":{\"3\":\"Renewed\"},"
-      +            "\"due\":1506218400,"
-      +            "\"date\":1504965705},"
-      +"\"date\":1473796009}";
-
   static Connection voyagerTest = null;
   static Connection voyagerLive = null;
+  static ObjectMapper mapper = new ObjectMapper();
+  static {
+    mapper.setSerializationInclusion(Include.NON_EMPTY);
+  }
+  static Map<String,ItemList> examples ;
 
   @BeforeClass
   public static void connect() throws SQLException, ClassNotFoundException, IOException {
@@ -88,35 +48,72 @@ public class ItemsTest {
 //    Class.forName("oracle.jdbc.driver.OracleDriver");
 //    voyagerLive = DriverManager.getConnection(
 //        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("items_examples.json")){
+      examples = mapper.readValue(convertStreamToString(in).replaceAll("(?m)^#.*$" , ""),
+          new TypeReference<HashMap<String,ItemList>>() {});
+    }
+
   }
 
   @Test
-  public void getItemsByHoldingId1() throws SQLException, JsonProcessingException {
-    List<Item> items = Items.retrieveItemsByHoldingId(voyagerTest, 1234567);
-    assertEquals(1,items.size());
-    assertEquals(expectedJson2282772,items.get(0).toJson());
-    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*items.get(0).date)).toString());
-    assertNull(items.get(0).status.date);
+  public void getItemsByHoldingId() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1234567);
+    assertEquals(examples.get("expectedJson2282772").toJson(),items.toJson());
+    assertEquals(1,items.mfhdCount());
+    assertEquals(1,items.itemCount());
+
+    items = Items.retrieveItemsByHoldingId(voyagerTest, 1184953);
+    assertEquals(examples.get("expectedJson2236014").toJson(),items.toJson());
+    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L* items.getItem(1184953,2236014).date )).toString());
+
+    items = Items.retrieveItemsByHoldingId(voyagerTest, 9975971);
+    assertEquals(examples.get("expectedJson10013120").toJson(),items.toJson());
+    assertFalse( items.getItem(9975971,10013120).status.available );
+
   }
 
   @Test
-  public void getItemsByHoldingId2() throws SQLException, JsonProcessingException {
-    List<Item> items = Items.retrieveItemsByHoldingId(voyagerTest, 1184953);
-    assertEquals(1,items.size());
-    assertEquals(expectedJson2236014,items.get(0).toJson());
-    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*items.get(0).date)).toString());
-    assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*items.get(0).status.date)).toString());
-//     System.out.println(item.toJson().replaceAll("\"", "\\\\\""));
+  public void getItemsWithMultipleHoldingsTest() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingIds(voyagerTest, Arrays.asList(1234567));
+    assertEquals(examples.get("expectedJson2282772").toJson(),items.toJson());
+
+    items = Items.retrieveItemsByHoldingIds(voyagerTest, Arrays.asList(
+        4977210,4977214,5860317,7367226,7371275,7371277,7371279,7371281,7371283,7371284,
+        7371302,7383225,7383631,7383632,7383752,7383755,7383965,7383966,7387210,7391702  ));
+    assertEquals(examples.get("expectedJsonELECTRICSHEEP").toJson(),items.toJson());
+  }
+
+  @Test
+  public void onHoldTest() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 2932);
+    assertEquals(examples.get("expectedJson18847").toJson(),items.toJson());
+  }
+
+  @Test
+  public void recalledTest() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 6511093);
+    assertEquals(examples.get("expectedJSON8060353").toJson(),items.toJson());
+  }
+
+  @Test
+  public void onReserveTest() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingIds(voyagerTest, Arrays.asList(10287643,9957560));
+    assertEquals(examples.get("expectedJsonOnReserve").toJson(),items.toJson());
+  }
+
+  @Test
+  public void multiVolTest() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingIds(voyagerTest, Arrays.asList(4521000));
+    assertEquals(examples.get("expectedJsonMultiVol").toJson(),items.toJson());
   }
 
   @Test
   public void getItemByItemIdTest() throws SQLException, JsonProcessingException {
-    Item item = Items.retrieveItemByItemId(voyagerTest, 2236014);
-    List<Item> items = Items.retrieveItemsByHoldingId(voyagerTest, 1184953);
-    assertEquals( items.get(0).toJson(), item.toJson());
-
-    item = Items.retrieveItemByItemId(voyagerTest, 10013120);
-    assertEquals( expectedJson10013120, item.toJson());  }
+    Item item = Items.retrieveItemByItemId(voyagerTest,2236014);
+    item.mfhdId = null; // mfhdId is not present in example mode, so remove for comparison
+    assertEquals( examples.get("expectedJson2236014").getItem(1184953,2236014).toJson(),
+        item.toJson());
+    }
 
   @Test
   public void roundTripItemsThroughJsonTest() throws SQLException, IOException {
