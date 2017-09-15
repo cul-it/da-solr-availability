@@ -60,7 +60,6 @@ public class BoundWithTest {
     f = new DataField(6,"876",' ',' ',"‡3 v.14 ‡p 31924004546812");
     b = BoundWith.from876Field(voyagerTest, f);
     assertEquals(expectedBoundWithJson1726636,b.toJson());
-//    System.out.println(b.toJson().replaceAll("\"", "\\\\\""));
   }
 }
 // 4690713 2473239 7301315 2098051 2305477 3212523

@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,8 +59,14 @@ public class BoundWith {
         masterItem.enumeration, thisEnum, masterItem.status);
   }
 
-  public BoundWith(int masterItemId, int masterBibId, String masterTitle,
-      String masterEnum, String thisEnum, ItemStatus status) {
+  @JsonCreator
+  public BoundWith(
+      @JsonProperty("masterItemId") int masterItemId,
+      @JsonProperty("masterBibId")  int masterBibId,
+      @JsonProperty("masterTitle")  String masterTitle,
+      @JsonProperty("masterEnum")   String masterEnum,
+      @JsonProperty("thisEnum")     String thisEnum,
+      @JsonProperty("status")       ItemStatus status) {
     this.masterItemId = masterItemId;
     this.masterBibId = masterBibId;
     this.masterTitle = masterTitle;

@@ -1,5 +1,6 @@
 package edu.cornell.library.integration.voyager;
 
+import static edu.cornell.library.integration.voyager.TestUtil.convertStreamToString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -17,7 +18,6 @@ import java.util.Properties;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,16 +25,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cornell.library.integration.voyager.Items.Item;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
-import static edu.cornell.library.integration.voyager.TestUtil.convertStreamToString;
-
 public class ItemsTest {
 
   static Connection voyagerTest = null;
   static Connection voyagerLive = null;
-  static ObjectMapper mapper = new ObjectMapper();
-  static {
-    mapper.setSerializationInclusion(Include.NON_EMPTY);
-  }
   static Map<String,ItemList> examples ;
 
   @BeforeClass
@@ -49,6 +43,7 @@ public class ItemsTest {
 //    voyagerLive = DriverManager.getConnection(
 //        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("items_examples.json")){
+      ObjectMapper mapper = new ObjectMapper();
       examples = mapper.readValue(convertStreamToString(in).replaceAll("(?m)^#.*$" , ""),
           new TypeReference<HashMap<String,ItemList>>() {});
     }
