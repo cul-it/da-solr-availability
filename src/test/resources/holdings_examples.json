@@ -91,7 +91,7 @@
    "date":1473796018,
    "items":{"count":1,
             "unavail":[{"id":10013120,
-                        "status":{"available":false,"codes":{"3":"Renewed"},"due":1506218400,"date":1504965705}}]}}}
+                        "status":{"codes":{"3":"Renewed"},"due":1506218400,"date":1504965705}}]}}}
 
 
 
@@ -115,7 +115,7 @@
    "date":1275657369,
    "items":{"count":1,
             "unavail":[{"id":6571313,
-                        "status":{"available":false,"codes":{"2":"Charged"},"due":1516863600,"date":1504104315}}]}},
+                        "status":{"codes":{"2":"Charged"},"due":1516863600,"date":1504104315}}]}},
  "4977214":{
    "copyNum":"2",
    "location":{"code":"uris,anx","number":210,"name":"Library Annex","library":"Library Annex"},
@@ -137,7 +137,7 @@
    "date":1305137497,
    "items":{"count":1,
             "unavail":[{"id":8764607,
-                        "status":{"available":false,"codes":{"2":"Charged"},"due":1517468400,"date":1505317642}}]}},
+                        "status":{"codes":{"2":"Charged"},"due":1517468400,"date":1505317642}}]}},
  "7371277":{
    "copyNum":"2",
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
@@ -159,7 +159,7 @@
    "date":1305137472,
    "items":{"count":1,
             "unavail":[{"id":8764617,
-                        "status":{"available":false,"codes":{"2":"Charged"},"due":1512975600,"date":1481401648}}]}},
+                        "status":{"codes":{"2":"Charged"},"due":1512975600,"date":1481401648}}]}},
  "7371284":{
    "copyNum":"6",
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
@@ -175,13 +175,13 @@
    "date":1306857113,
    "items":{"count":1,
             "unavail":[{"id":8771100,
-                        "status":{"available":false,"codes":{"2":"Charged"},"due":1517554800,"date":1505399640}}]}},
+                        "status":{"codes":{"2":"Charged"},"due":1517554800,"date":1505399640}}]}},
  "7383631":{
    "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
    "date":1276784928,
    "items":{"count":1,
             "unavail":[{"id":8771167,
-                        "status":{"available":false,"codes":{"3":"Renewed"},"due":1516856340,"date":1484314092}}]}},
+                        "status":{"codes":{"3":"Renewed"},"due":1516856340,"date":1484314092}}]}},
  "7383632":{
    "copyNum":"2",
    "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},

@@ -13,14 +13,14 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ItemStatus {
-  public final boolean available;
+  public Boolean available;
   public final Map<Integer,String> codes;
   public final Integer due;
   public final Integer date;
 
   @JsonCreator
   public ItemStatus(
-      @JsonProperty("available") boolean available,
+      @JsonProperty("available") Boolean available,
       @JsonProperty("codes")     Map<Integer,String> codes,
       @JsonProperty("due")       Integer due,
       @JsonProperty("date")      Integer date) {

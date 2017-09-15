@@ -272,8 +272,10 @@ public class Holdings {
       for (Integer holdingId : items.getItems().keySet())
         for (Item item : items.getItems().get(holdingId)) {
           itemCount++;
-          if (! item.status.available)
+          if (! item.status.available) {
+            item.status.available = null;
             unavails.add(new ItemUnavailability(item.itemId,null,item.enumeration,item.status));
+          }
         }
       if (itemCount > 0)
         this.avail = new HoldingsAvailability( itemCount, (unavails.size() == 0)?null:unavails);
