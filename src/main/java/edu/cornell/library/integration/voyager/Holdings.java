@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -17,6 +18,7 @@ import javax.xml.stream.XMLStreamException;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,22 +54,22 @@ public class Holdings {
 
   }
 
-  public static List<Holding> retrieveHoldingsByBibId( Connection voyager, int bib_id )
+  public static HoldingSet retrieveHoldingsByBibId( Connection voyager, int bib_id )
       throws SQLException, IOException, XMLStreamException {
     if (locations == null)
       locations = new Locations( voyager );
-    List<Holding> holdings = new ArrayList<>();
+    HoldingSet holdings = new HoldingSet();
     try (PreparedStatement pstmt = voyager.prepareStatement(holdingsByBibIdQuery)) {
       pstmt.setInt(1, bib_id);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
-          holdings.add(new Holding(voyager,rs));
+          holdings.put(rs.getInt("mfhd_id"),new Holding(voyager,rs));
       }
     }
     return holdings;
   }
 
-  public static Holding retrieveHoldingsByHoldingId( Connection voyager, int mfhd_id )
+  public static HoldingSet retrieveHoldingsByHoldingId( Connection voyager, int mfhd_id )
       throws SQLException, IOException, XMLStreamException {
     if (locations == null)
       locations = new Locations( voyager );
@@ -75,24 +77,53 @@ public class Holdings {
       pstmt.setInt(1, mfhd_id);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
-          return new Holding(voyager,rs);
+          return new HoldingSet( mfhd_id, new Holding(voyager,rs));
       }
     }
     return null;
   }
 
-  public static Holding extractHoldingFromJson( String json ) throws IOException {
-    return mapper.readValue(json, Holding.class);
+  public static HoldingSet extractHoldingsFromJson( String json ) throws IOException {
+    return mapper.readValue(json, HoldingSet.class);
   }
   static ObjectMapper mapper = new ObjectMapper();
   static {
     mapper.setSerializationInclusion(Include.NON_NULL);
   }
 
+  public static class HoldingSet {
+    private Map<Integer,Holding> holdings;
+
+    @JsonCreator
+    public HoldingSet( Map<Integer,Holding> holdings ) {
+      this.holdings = holdings;
+    }
+
+    public HoldingSet() {
+      this.holdings = new LinkedHashMap<>();
+    }
+    public HoldingSet(Integer mfhdId, Holding holding) {
+      this.holdings = new LinkedHashMap<>();
+      this.holdings.put(mfhdId, holding);
+    }
+    public void put(Integer mfhdId, Holding holding) {
+      holdings.put(mfhdId, holding);
+    }
+    public int size() {
+      return holdings.size();
+    }
+    public Holding get( Integer mfhdId ) {
+      return holdings.get(mfhdId);
+    }
+
+    public String toJson() throws JsonProcessingException {
+      return mapper.writeValueAsString(this.holdings);
+    }
+  }
+
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Holding {
 
-    @JsonProperty("id")        public final int mfhdId;
     @JsonProperty("copyNum")   private final String copyNum;
     @JsonProperty("notes")     private final List<String> notes;
     @JsonProperty("desc")      private final List<String> desc;
@@ -106,10 +137,9 @@ public class Holdings {
     @JsonIgnore public MarcRecord record;
 
     private Holding(Connection voyager, ResultSet rs) throws SQLException, IOException, XMLStreamException {
-      this.mfhdId = rs.getInt("mfhd_id");
       this.date = (int)(((rs.getTimestamp("update_date") == null)
           ? rs.getTimestamp("create_date") : rs.getTimestamp("update_date")).getTime()/1000);
-      String mrc = DownloadMARC.downloadMrc(voyager, RecordType.HOLDINGS, this.mfhdId);
+      String mrc = DownloadMARC.downloadMrc(voyager, RecordType.HOLDINGS, rs.getInt("mfhd_id"));
       this.record = new MarcRecord( RecordType.HOLDINGS, mrc );
 
       // process data from holdings marc
@@ -199,7 +229,6 @@ public class Holdings {
     }
 
     private Holding(
-        @JsonProperty("id")        int mfhdId,
         @JsonProperty("copyNum")   String copyNum,
         @JsonProperty("notes")     List<String> notes,
         @JsonProperty("desc")      List<String> desc,
@@ -208,7 +237,6 @@ public class Holdings {
         @JsonProperty("location")  Location location,
         @JsonProperty("date")      Integer date,
         @JsonProperty("boundWith") Map<Integer,BoundWith> boundWiths ) {
-      this.mfhdId = mfhdId;
       this.copyNum = copyNum;
       this.notes = (notes == null || notes.isEmpty()) ? null : notes;
       this.desc = (desc == null || desc.isEmpty()) ? null : desc;

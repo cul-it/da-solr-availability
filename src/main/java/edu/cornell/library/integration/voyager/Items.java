@@ -136,7 +136,7 @@ public class Items {
   }
 
   public static class ItemList {
-    public Map<Integer,List<Item>> items;
+    private Map<Integer,List<Item>> items;
 
     @JsonValue
     public Map<Integer,List<Item>> getItems() {

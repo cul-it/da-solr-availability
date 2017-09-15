@@ -2,80 +2,84 @@
 { "expectedJson1184953":
 
 
-{"id":1184953,
- "location":{"code":"ilr,anx",
-             "number":52,
-             "name":"Library Annex",
-             "library":"Library Annex"},
- "date":959745600}
+{"1184953":{
+    "location":{"code":"ilr,anx",
+                "number":52,
+                "name":"Library Annex",
+                "library":"Library Annex"},
+    "date":959745600}}
 
 
 
-, "expectedJson1184954":
+, "expectedJsonBib969430":
 
 
-{"id":1184954,
- "copyNum":"2",
- "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
- "date":959745600}
+
+{"1184953":{
+   "location":{"code":"ilr,anx","number":52,"name":"Library Annex","library":"Library Annex"},
+   "date":959745600},
+ "1184954":{
+   "copyNum":"2",
+   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "date":959745600}}
 
 
 ,"expectedJson9850688":
 
 
-{"id":9850688,
- "desc":["no.177-182 (2016)"],
- "location":{"code":"was","number":139,"name":"Kroch Library Asia","library":"Kroch Library Asia"},
- "date":1495138879}
+{"9850688":{
+    "desc":["no.177-182 (2016)"],
+    "location":{"code":"was","number":139,"name":"Kroch Library Asia","library":"Kroch Library Asia"},
+    "date":1495138879}}
 
 
 
 ,"expectedJson2202712":
 
 
-{"id":2202712,
- "notes":["1987 bound with: Quest no.91-95, sasa BR 128 B8 E53+ no.93.  --1989 bound with: Quest no.105, sasa BR 128 B8 E53+ no.105-106."],
- "desc":["1978, 1980-1982, 1985, 1987-1992, 1994-1996"],
- "location":{"code":"sasa",
-             "number":122,
-             "name":"Kroch Library Asia",
-             "library":"Kroch Library Asia"},
- "date":1247590991,
- "boundWith":{"3910960":{"masterItemId":3910960,
-                         "masterBibId":2095674,
-                         "masterTitle":"Accelerated Mahaweli, Sri Lanka Development Programme /",
-                         "masterEnum":"no.105-106",
-                         "thisEnum":"1989",
-                         "status":{"available":true,"codes":{"1":"Not Charged"}}},
-              "3131680":{"masterItemId":3131680,
-                         "masterBibId":1575369,
-                         "masterTitle":"Emerging community : two dialoguing religions of South-East Asia /",
-                         "masterEnum":"no.91-95",
-                         "thisEnum":"1987",
-                         "status":{"available":true,"codes":{"1":"Not Charged"}}}}}
+{"2202712":{
+    "notes":["1987 bound with: Quest no.91-95, sasa BR 128 B8 E53+ no.93.  --1989 bound with: Quest no.105, sasa BR 128 B8 E53+ no.105-106."],
+    "desc":["1978, 1980-1982, 1985, 1987-1992, 1994-1996"],
+    "location":{"code":"sasa",
+                "number":122,
+                "name":"Kroch Library Asia",
+                "library":"Kroch Library Asia"},
+    "date":1247590991,
+    "boundWith":{"3910960":{"masterItemId":3910960,
+                            "masterBibId":2095674,
+                            "masterTitle":"Accelerated Mahaweli, Sri Lanka Development Programme /",
+                            "masterEnum":"no.105-106",
+                            "thisEnum":"1989",
+                            "status":{"available":true,"codes":{"1":"Not Charged"}}},
+                 "3131680":{"masterItemId":3131680,
+                            "masterBibId":1575369,
+                            "masterTitle":"Emerging community : two dialoguing religions of South-East Asia /",
+                            "masterEnum":"no.91-95",
+                            "thisEnum":"1987",
+                            "status":{"available":true,"codes":{"1":"Not Charged"}}}}}}
 
 
 
 ,"expectedJson1131911":
 
 
-{"id":1131911,
- "desc":["v.1-2;"],
- "supplDesc":["Fifth suppl.:1982-1988"],
- "location":{"code":"law",
-             "number":63,
-             "name":"Law Library (Myron Taylor Hall)",
-             "library":"Law Library"},
- "date":959745600}
+{"1131911":{
+    "desc":["v.1-2;"],
+	"supplDesc":["Fifth suppl.:1982-1988"],
+  	"location":{"code":"law",
+                "number":63,
+                "name":"Law Library (Myron Taylor Hall)",
+                "library":"Law Library"},
+	"date":959745600}}
 
 
 ,"expectedJson413836":
 
-{"id":413836,
- "desc":["1959-1974"],
- "indexDesc":["1959/1974"],
- "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex"},
- "date":959745600}
+{"413836":{
+    "desc":["1959-1974"],
+    "indexDesc":["1959/1974"],
+    "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex"},
+    "date":959745600}}
 
 
 
