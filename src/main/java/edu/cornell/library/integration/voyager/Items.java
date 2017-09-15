@@ -182,19 +182,19 @@ public class Items {
 
   public static class Item {
 
-    @JsonProperty("id")             public final int itemId;
-    @JsonProperty("mfhdId")         public Integer mfhdId;
-    @JsonProperty("copyNumber")     private final int copyNumber;
-    @JsonProperty("sequenceNumber") private final int sequenceNumber;
-    @JsonProperty("enum")           public final String enumeration;
-    @JsonProperty("caption")        private final String caption;
-    @JsonProperty("holds")          private final Integer holds;
-    @JsonProperty("recalls")        private final Integer recalls;
-    @JsonProperty("onReserve")      private final Boolean onReserve;
-    @JsonProperty("location")       private final Location location;
-    @JsonProperty("type")           private final ItemType type;
-    @JsonProperty("status")         public final ItemStatus status;
-    @JsonProperty("date")           public final Integer date;
+    @JsonProperty("id")          public final int itemId;
+    @JsonProperty("mfhdId")      public Integer mfhdId;
+    @JsonProperty("copyNum")     private final int copyNumber;
+    @JsonProperty("sequenceNum") private final int sequenceNumber;
+    @JsonProperty("enum")        public final String enumeration;
+    @JsonProperty("caption")     private final String caption;
+    @JsonProperty("holds")       private final Integer holds;
+    @JsonProperty("recalls")     private final Integer recalls;
+    @JsonProperty("onReserve")   private final Boolean onReserve;
+    @JsonProperty("location")    private final Location location;
+    @JsonProperty("type")        private final ItemType type;
+    @JsonProperty("status")      public final ItemStatus status;
+    @JsonProperty("date")        public final Integer date;
 
     private Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
@@ -221,19 +221,19 @@ public class Items {
     }
 
     private Item(
-        @JsonProperty("id")             int itemId,
-        @JsonProperty("mfhdId")         Integer mfhdId,
-        @JsonProperty("copyNumber")     int copyNumber,
-        @JsonProperty("sequenceNumber") int sequenceNumber,
-        @JsonProperty("enum")           String enumeration,
-        @JsonProperty("caption")        String caption,
-        @JsonProperty("holds")          Integer holds,
-        @JsonProperty("recalls")        Integer recalls,
-        @JsonProperty("onReserve")      Boolean onReserve,
-        @JsonProperty("location")       Location location,
-        @JsonProperty("type")           ItemType type,
-        @JsonProperty("status")         ItemStatus status,
-        @JsonProperty("date")           Integer date
+        @JsonProperty("id")          int itemId,
+        @JsonProperty("mfhdId")      Integer mfhdId,
+        @JsonProperty("copyNum")     int copyNumber,
+        @JsonProperty("sequenceNum") int sequenceNumber,
+        @JsonProperty("enum")        String enumeration,
+        @JsonProperty("caption")     String caption,
+        @JsonProperty("holds")       Integer holds,
+        @JsonProperty("recalls")     Integer recalls,
+        @JsonProperty("onReserve")   Boolean onReserve,
+        @JsonProperty("location")    Location location,
+        @JsonProperty("type")        ItemType type,
+        @JsonProperty("status")      ItemStatus status,
+        @JsonProperty("date")        Integer date
         ) {
       this.itemId = itemId;
       this.mfhdId = mfhdId;
