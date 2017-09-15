@@ -83,4 +83,150 @@
 
 
 
+,"expectedJsonWithAvailability9975971":
+
+
+{"9975971":{
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1473796018,
+   "avail":{"itemCount":1,
+            "unavail":[{"id":10013120,
+                        "status":{"available":false,"codes":{"3":"Renewed"},
+                        "due":1506218400,
+                        "date":1504965705}}]}}}
+
+
+
+,"expectedJsonWithAvailability1131911":
+
+
+{"1131911":{
+   "desc":["v.1-2;"],
+   "supplDesc":["Fifth suppl.:1982-1988"],
+   "location":{"code":"law","number":63,"name":"Law Library (Myron Taylor Hall)","library":"Law Library"},
+   "date":959745600,
+   "avail":{"itemCount":3}}}
+
+
+
+,"expectedJsonWithAvailabilityELECTRICSHEEP":
+
+
+{"4977210":{
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1275657369,
+   "avail":{"itemCount":1,
+            "unavail":[{"id":6571313,
+                        "status":{"available":false,"codes":{"2":"Charged"},
+                        "due":1516863600,
+                        "date":1504104315}}]}},
+ "4977214":{
+   "copyNum":"2",
+   "location":{"code":"uris,anx","number":210,"name":"Library Annex","library":"Library Annex"},
+   "date":1274884635,
+   "avail":{"itemCount":1}},
+ "5860317":{
+   "copyNum":"3",
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1278418987,
+   "avail":{"itemCount":1}},
+ "7367226":{
+   "notes":["Signed by Joanna Cassidy, actress in Blade Runner, the film version of the book."],
+   "location":{"code":"rmc","number":87,"name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
+   "library":"Kroch Library Rare & Manuscripts"},
+   "date":1274283600,
+   "avail":{"itemCount":1}},
+ "7371275":{
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1305137497,
+   "avail":{"itemCount":1,
+            "unavail":[{"id":8764607,
+                        "status":{"available":false,"codes":{"2":"Charged"},
+                        "due":1517468400,
+                        "date":1505317642}}]}},
+ "7371277":{
+   "copyNum":"2",
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1410380685,
+   "avail":{"itemCount":1}},
+ "7371279":{
+   "copyNum":"3",
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1307478334,
+   "avail":{"itemCount":1}},
+ "7371281":{
+   "copyNum":"4",
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1309886750,
+   "avail":{"itemCount":1}},
+ "7371283":{
+   "copyNum":"5",
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1305137472,
+   "avail":{"itemCount":1,
+            "unavail":[{"id":8764617,
+                        "status":{"available":false,"codes":{"2":"Charged"},
+                        "due":1512975600,
+                        "date":1481401648}}]}},
+ "7371284":{
+   "copyNum":"6",
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1310147166,
+   "avail":{"itemCount":1}},
+ "7371302":{
+   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)",
+   "library":"ILR Library"},
+   "date":1275074667,
+   "avail":{"itemCount":1}},
+ "7383225":{
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "date":1306857113,
+   "avail":{"itemCount":1,
+            "unavail":[{"id":8771100,
+                        "status":{"available":false,"codes":{"2":"Charged"},
+                        "due":1517554800,
+                        "date":1505399640}}]}},
+ "7383631":{
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "date":1276784928,
+   "avail":{"itemCount":1,
+            "unavail":[{"id":8771167,
+                        "status":{"available":false,"codes":{"3":"Renewed"},
+                        "due":1516856340,
+                        "date":1484314092}}]}},
+ "7383632":{
+   "copyNum":"2",
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "date":1276784987,
+   "avail":{"itemCount":1}},
+ "7383752":{
+   "copyNum":"3",
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "date":1276790437,
+   "avail":{"itemCount":1}},
+ "7383755":{
+   "copyNum":"4",
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "date":1276790545,
+   "avail":{"itemCount":1}},
+ "7383965":{
+   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "date":1276884581,
+   "avail":{"itemCount":1}},
+ "7383966":{
+   "copyNum":"2",
+   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "date":1276884651,
+   "avail":{"itemCount":1}},
+ "7387210":{
+   "copyNum":"5",
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "date":1404301940,
+   "avail":{"itemCount":1}},
+ "7391702":{
+    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "date":1278703820,
+   "avail":{"itemCount":1}}}
+
+
 }

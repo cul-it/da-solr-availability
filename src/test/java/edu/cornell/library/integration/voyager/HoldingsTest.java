@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
+import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class HoldingsTest {
 
@@ -99,5 +100,25 @@ public class HoldingsTest {
     HoldingSet h2 = Holdings.extractHoldingsFromJson(j1);
     String j2 = h2.toJson();
     assertEquals(examples.get("expectedJson9850688").toJson(),j2);
+  }
+
+  @Test
+  public void summarizeAvailability() throws SQLException, IOException, XMLStreamException {
+    HoldingSet h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9975971);
+    ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, 9975971);
+    h.get(9975971).summarizeItemAvailability(i);
+    assertEquals(examples.get("expectedJsonWithAvailability9975971").toJson(),h.toJson());
+
+    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1131911);
+    i = Items.retrieveItemsByHoldingId(voyagerTest, 1131911);
+    h.get(1131911).summarizeItemAvailability(i);
+    assertEquals(examples.get("expectedJsonWithAvailability1131911").toJson(),h.toJson());
+
+    h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
+    for (int mfhdId : h.getMfhdIds()) {
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i);
+    }
+    assertEquals(examples.get("expectedJsonWithAvailabilityELECTRICSHEEP").toJson(),h.toJson());
   }
 }

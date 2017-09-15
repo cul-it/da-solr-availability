@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
@@ -29,6 +31,8 @@ import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.MarcRecord;
 import edu.cornell.library.integration.marc.MarcRecord.RecordType;
 import edu.cornell.library.integration.marc.Subfield;
+import edu.cornell.library.integration.voyager.Items.Item;
+import edu.cornell.library.integration.voyager.Items.ItemList;
 import edu.cornell.library.integration.voyager.Locations.Location;
 
 public class Holdings {
@@ -116,6 +120,9 @@ public class Holdings {
       return holdings.get(mfhdId);
     }
 
+    public Set<Integer> getMfhdIds( ) {
+      return holdings.keySet();
+    }
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this.holdings);
     }
@@ -132,7 +139,7 @@ public class Holdings {
     @JsonProperty("location")  private final Location location;
     @JsonProperty("date")      public final Integer date;
     @JsonProperty("boundWith") public final Map<Integer,BoundWith> boundWiths;
-//    @JsonProperty("avail")     public HoldingsAvailability avail = null;
+    @JsonProperty("avail")     public HoldingsAvailability avail = null;
 
     @JsonIgnore public MarcRecord record;
 
@@ -236,7 +243,8 @@ public class Holdings {
         @JsonProperty("indexDesc") List<String> indexDesc,
         @JsonProperty("location")  Location location,
         @JsonProperty("date")      Integer date,
-        @JsonProperty("boundWith") Map<Integer,BoundWith> boundWiths ) {
+        @JsonProperty("boundWith") Map<Integer,BoundWith> boundWiths,
+        @JsonProperty("avail")     HoldingsAvailability avail) {
       this.copyNum = copyNum;
       this.notes = (notes == null || notes.isEmpty()) ? null : notes;
       this.desc = (desc == null || desc.isEmpty()) ? null : desc;
@@ -245,12 +253,31 @@ public class Holdings {
       this.location = location;
       this.date = date;
       this.boundWiths = boundWiths;
+      this.avail = avail;
     }
 
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this);
     }
 
+    public void summarizeItemAvailability( ItemList items ) {
+      int itemCount = 0;
+      List<ItemUnavailability> unavails = new ArrayList<>();
+      if (boundWiths != null)
+        for (Entry<Integer,BoundWith> bw : boundWiths.entrySet()) {
+          itemCount++;
+          if (! bw.getValue().status.available)
+            unavails.add(new ItemUnavailability(bw.getKey(),true,bw.getValue().thisEnum,null));
+        }
+      for (Integer holdingId : items.getItems().keySet())
+        for (Item item : items.getItems().get(holdingId)) {
+          itemCount++;
+          if (! item.status.available)
+            unavails.add(new ItemUnavailability(item.itemId,null,item.enumeration,item.status));
+        }
+      if (itemCount > 0)
+        this.avail = new HoldingsAvailability( itemCount, (unavails.size() == 0)?null:unavails);
+    }
     /**
      * Any time a comma is followed by a character that is not a space, a
      * space will be inserted.
@@ -262,5 +289,18 @@ public class Holdings {
       return commaFollowedByNonSpace.matcher(s).replaceAll(", $1");
     }
 
+  }
+
+  public static class HoldingsAvailability {
+    @JsonProperty("itemCount") public final int itemCount;
+    @JsonProperty("unavail") public final List<ItemUnavailability> unavail;
+
+    @JsonCreator
+    public HoldingsAvailability(
+        @JsonProperty("itemCount") int itemCount,
+        @JsonProperty("unavail") List<ItemUnavailability> unavail ) {
+      this.itemCount = itemCount;
+      this.unavail = unavail;
+    }
   }
 }
