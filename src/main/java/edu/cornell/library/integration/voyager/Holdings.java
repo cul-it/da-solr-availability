@@ -139,7 +139,7 @@ public class Holdings {
     @JsonProperty("location")  private final Location location;
     @JsonProperty("date")      public final Integer date;
     @JsonProperty("boundWith") public final Map<Integer,BoundWith> boundWiths;
-    @JsonProperty("avail")     public HoldingsAvailability avail = null;
+    @JsonProperty("items")     public HoldingsAvailability avail = null;
 
     @JsonIgnore public MarcRecord record;
 
@@ -244,7 +244,7 @@ public class Holdings {
         @JsonProperty("location")  Location location,
         @JsonProperty("date")      Integer date,
         @JsonProperty("boundWith") Map<Integer,BoundWith> boundWiths,
-        @JsonProperty("avail")     HoldingsAvailability avail) {
+        @JsonProperty("items")     HoldingsAvailability avail) {
       this.copyNum = copyNum;
       this.notes = (notes == null || notes.isEmpty()) ? null : notes;
       this.desc = (desc == null || desc.isEmpty()) ? null : desc;
@@ -292,12 +292,12 @@ public class Holdings {
   }
 
   public static class HoldingsAvailability {
-    @JsonProperty("itemCount") public final int itemCount;
+    @JsonProperty("count") public final int itemCount;
     @JsonProperty("unavail") public final List<ItemUnavailability> unavail;
 
     @JsonCreator
     public HoldingsAvailability(
-        @JsonProperty("itemCount") int itemCount,
+        @JsonProperty("count") int itemCount,
         @JsonProperty("unavail") List<ItemUnavailability> unavail ) {
       this.itemCount = itemCount;
       this.unavail = unavail;
