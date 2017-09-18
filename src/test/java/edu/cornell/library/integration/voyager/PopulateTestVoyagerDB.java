@@ -28,15 +28,15 @@ import java.util.Properties;
  */
 public class PopulateTestVoyagerDB {
 
-  public static boolean replaceDBContents = true; // if false, will add specified bibs to existing tables
+  public static boolean replaceDBContents = false; // if false, will add specified bibs to existing tables
   public static String testDbConnectionString = "jdbc:sqlite:src/test/resources/voyagerTest.db";
-  private static List<Integer> testBibs = Arrays.asList( 9647384 );
+  private static List<Integer> testBibs = Arrays.asList( 329763 );
 
   // Bibs in "jdbc:sqlite:src/test/resources/voyagerTest.db"
   // 330581,3212531,2248567,576519,3827392,1016847,969430,1799377,2095674,1575369,9520154,927983,
-  // 342724,4442869,784908,6047653,9628566,3956404,9647384
+  // 342724,4442869,784908,6047653,9628566,3956404,9647384,306998,329763
 
-  private static boolean debugOutput = false;
+  private static boolean dumpTestDBToStdout = false;
   private static List<Integer> testMfhds = new ArrayList<>();
   private static List<Integer> testItems = new ArrayList<>();
 
@@ -55,58 +55,46 @@ public class PopulateTestVoyagerDB {
             prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"))) {
 
       bib_mfhd(testDb,voyager,testDbstmt);
+      bib_text(testDb,voyager,testDbstmt);
+      bib_data(testDb,voyager,testDbstmt);
+      mfhd_data(testDb,voyager,testDbstmt);
+      mfhd_item(testDb,voyager,testDbstmt);
+      mfhd_master(testDb,voyager,testDbstmt);
+      item(testDb,voyager,testDbstmt);
+      item_barcode(testDb,voyager,testDbstmt);
+      item_status_type(testDb,voyager,testDbstmt);
+      item_type(testDb,voyager,testDbstmt);
+      item_status(testDb,voyager,testDbstmt);
+      circ_transactions(testDb,voyager,testDbstmt);
+      location(testDb,voyager,testDbstmt);
 
-      if (debugOutput)
+      if (dumpTestDBToStdout) {
         try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, mfhd_id FROM BIB_MFHD")) {
           while (rs.next())
             System.out.println("bib_id "+rs.getInt(1)+"; mfhd_id "+rs.getInt(2));
         }
-
-      bib_text(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, title_brief FROM bib_text")) {
           while (rs.next())
             System.out.println("bib_id "+rs.getInt(1)+"; title_brief "+rs.getString(2));
         }
-
-      bib_data(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, seqnum, RECORD_SEGMENT FROM bib_data")) {
           while (rs.next())
             System.out.println("bib_id "+rs.getInt(1)+"; seq_num "+rs.getInt(2)+"; RECORD_SEGMENT "+rs.getString(3));
         }
-
-      mfhd_data(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT mfhd_id, seqnum, RECORD_SEGMENT FROM mfhd_data")) {
           while (rs.next())
             System.out.println("mfhd_id "+rs.getInt(1)+"; seq_num "+rs.getInt(2)+"; RECORD_SEGMENT "+rs.getString(3));
         }
-
-      mfhd_item(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT mfhd_id, item_id, item_enum, chron, year, caption FROM MFHD_ITEM")) {
           while (rs.next())
             System.out.println("mfhd_id "+rs.getInt(1)+"; item_id "+rs.getInt(2)+"; item_enum "+rs.getString(3)
             +"; chron "+rs.getString(4)+"; year "+rs.getString(5)+"; caption "+rs.getString(6));
         }
-
-      mfhd_master(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT mfhd_id, create_date, update_date FROM MFHD_MASTER")) {
           while (rs.next())
             System.out.println("mfhd_id "+rs.getInt(1)+"; create_date "+rs.getTimestamp(2)
             +"; update_date "+rs.getTimestamp(3));
         }
-
-      item(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT ITEM_ID, COPY_NUMBER, ITEM_SEQUENCE_NUMBER, "
         +     " HOLDS_PLACED, RECALLS_PLACED, ON_RESERVE, TEMP_LOCATION, PERM_LOCATION,"
         +     " TEMP_ITEM_TYPE_ID, ITEM_TYPE_ID, MODIFY_DATE, CREATE_DATE FROM ITEM")) {
@@ -117,52 +105,28 @@ public class PopulateTestVoyagerDB {
             +"; temp_item_type_id "+rs.getInt(9)+"; item_type_id "+rs.getInt(10)
             +"; modify_date "+rs.getTimestamp(11)+"; create_date "+rs.getTimestamp(12));
         }
-
-      item_barcode(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT item_id, item_barcode, barcode_status FROM item_barcode")) {
           while (rs.next())
             System.out.println("item_id "+rs.getInt(1)+"; item_barcode "+rs.getString(2)
             +"; barcode_status "+rs.getString(3));
         }
-
-      item_status_type(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT item_status_type, item_status_desc FROM item_status_type")) {
           while (rs.next())
             System.out.println("item_status_type "+rs.getInt(1)+"; item_status_desc "+rs.getString(2));
         }
-
-      item_type(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT item_type_id, item_type_name FROM item_type")) {
           while (rs.next())
             System.out.println("item_type_id "+rs.getInt(1)+"; item_type_name "+rs.getString(2));
         }
-
-      item_status(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT item_id, item_status, item_status_date FROM item_status")) {
           while (rs.next())
             System.out.println("item_id "+rs.getInt(1)+"; item_status "+rs.getInt(2)
             +"; item_status_date "+rs.getTimestamp(3));
         }
-
-      circ_transactions(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT item_id, current_due_date FROM circ_transactions")) {
           while (rs.next())
             System.out.println("item_id "+rs.getInt(1)+"; current_due_date "+rs.getTimestamp(2));
         }
-
-      location(testDb,voyager,testDbstmt);
-
-      if (debugOutput)
         try (ResultSet rs = testDbstmt.executeQuery("SELECT * FROM location")) {
           while (rs.next())
             System.out.println("location_id "+rs.getInt("location_id")
@@ -170,6 +134,7 @@ public class PopulateTestVoyagerDB {
             +"; location_display_name "+rs.getString("location_display_name")
             +"; location_name "+rs.getString("location_name"));
         }
+      }
     }
   }
 
@@ -305,13 +270,13 @@ public class PopulateTestVoyagerDB {
   private static void mfhd_master(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
     if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists MFHD_MASTER");
-      testDbstmt.executeUpdate("create table MFHD_MASTER ( MFHD_ID int, create_date date, update_date date )");
+      testDbstmt.executeUpdate("create table MFHD_MASTER ( MFHD_ID int, create_date date, update_date date, suppress_in_opac text )");
     }
     System.out.println("Loading mfhd_master data for "+testMfhds.size()+" mfhds.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
-        "SELECT update_date, create_date FROM MFHD_MASTER WHERE MFHD_ID = ?");
+        "SELECT update_date, create_date, suppress_in_opac FROM MFHD_MASTER WHERE MFHD_ID = ?");
         PreparedStatement writeStmt = testDb.prepareStatement(
-            "INSERT INTO MFHD_MASTER (MFHD_ID, update_date, create_date ) VALUES (?,?,?)")){
+            "INSERT INTO MFHD_MASTER (MFHD_ID, update_date, create_date, suppress_in_opac ) VALUES (?,?,?,?)")){
       for (int mfhd : testMfhds) {
         readStmt.setInt(1, mfhd);
         try (ResultSet rs = readStmt.executeQuery()) {
@@ -319,6 +284,7 @@ public class PopulateTestVoyagerDB {
             writeStmt.setInt(1, mfhd);
             writeStmt.setTimestamp(2, rs.getTimestamp(1));
             writeStmt.setTimestamp(3, rs.getTimestamp(2));
+            writeStmt.setString(4, rs.getString(3));
             writeStmt.addBatch();
           }
         }
@@ -508,5 +474,3 @@ public class PopulateTestVoyagerDB {
   }
 
 }
-
-// location

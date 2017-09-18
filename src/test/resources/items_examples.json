@@ -282,6 +282,17 @@
 
 
 
+,"expectedJsonMissing":
+
+
+{"1055":[
+  {"id":6294,
+   "copyNum":1,
+   "sequenceNum":1,
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "type":{"id":3,"name":"book"},
+   "status":{"available":false,"codes":{"1":"Not Charged","12":"Missing"},"date":1355862860},
+   "date":1355862860}]}
 
 
 }

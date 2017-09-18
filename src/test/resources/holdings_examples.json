@@ -11,19 +11,6 @@
 
 
 
-, "expectedJsonBib969430":
-
-
-
-{"1184953":{
-   "location":{"code":"ilr,anx","number":52,"name":"Library Annex","library":"Library Annex"},
-   "date":959745600},
- "1184954":{
-   "copyNum":"2",
-   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
-   "date":959745600}}
-
-
 ,"expectedJson9850688":
 
 
@@ -212,9 +199,69 @@
    "date":1404301940,
    "items":{"count":1}},
  "7391702":{
-    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
    "date":1278703820,
    "items":{"count":1}}}
+
+
+
+,"expectedJsonMissing":
+
+
+{"1055":{
+   "desc":["no.26, 28, 30-36 (1978-1982)"],
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "date":959745600,
+   "items":{"count":1,
+            "unavail":[{"id":6294,"status":{"codes":{"1":"Not Charged","12":"Missing"},"date":1355862860}}]}}}
+
+
+
+,"expectedMultivolMixedAvail":
+
+
+{"1115":{
+   "notes":["Shelved alphabetically by title in Periodicals Area. Current issue on display.",
+            "Electronic version only starting with 2010. Print subscription cancelled after 2009."],
+   "desc":["v.398 (1999)","v.410 (2001)",
+           "v.414-415 (2001-2002)",
+           "v.419-421 (2002-2003)",
+           "v.424-426 (2003-2004)",
+           "v.427:no.6974-6977 (2004)",
+           "v.433:no.7021-7023, 7026-7028 (2005)"],
+   "supplDesc":["v.392:no.6679 (1998:Apr.30)",
+                "v.398-408 (2000)",
+                "Assorted Suppl. 2002-2004"],
+   "indexDesc":["v.229/234-247/252 (1971-1974)",
+                "v.403/408 (2000)",
+                "v.415/420 (2002)"],
+   "location":{"code":"vet","number":133,"name":"Veterinary Library (Schurman Hall)","library":"Veterinary Library"},
+   "date":1363963641,
+   "items":{"count":17}},
+ "398886":{
+   "notes":["Subscription cancelled after 2009"],
+   "desc":["v.229-470:no.5279-7335 (1971-2011)",
+           "v.471:no.7336, 7338-7340 (2011)",
+           "v.472-501:no.7341-7468 (2011-2013)",
+           "v.502:no.7469-7472 (2013)",
+           "v.503-528:no.7474-7583 (2013-2015)"],
+   "supplDesc":["Human Genome Project: CD-ROM: v.409:no.6822 (2001)"],
+   "location":{"code":"phys,anx","number":116,"name":"Library Annex","library":"Library Annex"},
+   "date":1495197912,
+   "items":{"count":292,
+            "unavail":[{"id":9724204,"enum":"v.515-516:no.7527-7531 - 2014",
+   "status":{"codes":{"1":"Not Charged","18":"At Bindery"},"date":1429839935}}]}}}
+
+
+
+
+
+
+
+
+
+
+
 
 
 }

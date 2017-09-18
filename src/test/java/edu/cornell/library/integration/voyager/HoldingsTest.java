@@ -41,15 +41,21 @@ public class HoldingsTest {
 
   @BeforeClass
   public static void connect() throws SQLException, ClassNotFoundException, IOException {
-    Properties prop = new Properties();
+
+    // Connect to live Voyager database
+/*    Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
+    Class.forName("oracle.jdbc.driver.OracleDriver");
+    voyagerLive = DriverManager.getConnection(
+        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));*/
+
+    // Connect to test Voyager database
     Class.forName("org.sqlite.JDBC");
     voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
-//    Class.forName("oracle.jdbc.driver.OracleDriver");
-//    voyagerLive = DriverManager.getConnection(
-//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+
+    // Load expected result JSON for tests
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("holdings_examples.json")){
       ObjectMapper mapper = new ObjectMapper();
       examples = mapper.readValue(convertStreamToString(in).replaceAll("(?m)^#.*$" , ""),
@@ -81,16 +87,9 @@ public class HoldingsTest {
   @Test
   public void getHoldingByBibId() throws SQLException, IOException, XMLStreamException {
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 969430);
-    assertEquals(2,holdings.size());
-    assertEquals(examples.get("expectedJsonBib969430").toJson(),holdings.toJson());
-    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holdings.get(1184953).date)).toString());
-    assertEquals(expectedMarc1184953,holdings.get(1184953).record.toString());
-    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holdings.get(1184954).date)).toString());
-
-    holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 9520154);
     assertEquals(1,holdings.size());
-    assertEquals(examples.get("expectedJson9850688").toJson(),holdings.toJson());
-    assertEquals("Thu May 18 16:21:19 EDT 2017",(new Date(1000L*holdings.get(9850688).date)).toString());
+    assertEquals(examples.get("expectedJson1184953").toJson(),holdings.toJson());
+    assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holdings.get(1184953).date)).toString());
   }
 
   @Test
@@ -120,5 +119,20 @@ public class HoldingsTest {
       h.get(mfhdId).summarizeItemAvailability(i);
     }
     assertEquals(examples.get("expectedJsonWithAvailabilityELECTRICSHEEP").toJson(),h.toJson());
+
+    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1055);
+    for (int mfhdId : h.getMfhdIds()) {
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i);
+    }
+    assertEquals(examples.get("expectedJsonMissing").toJson(),h.toJson());
+
+    h = Holdings.retrieveHoldingsByBibId(voyagerTest, 329763);
+    for (int mfhdId : h.getMfhdIds()) {
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i);
+    }
+    assertEquals(examples.get("expectedMultivolMixedAvail").toJson(),h.toJson());
+
   }
 }

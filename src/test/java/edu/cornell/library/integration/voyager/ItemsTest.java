@@ -103,6 +103,13 @@ public class ItemsTest {
   }
 
   @Test
+  public void missingTest() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1055);
+    assertEquals(examples.get("expectedJsonMissing").toJson(),items.toJson());
+//    System.out.println(items.toJson());
+  }
+
+  @Test
   public void getItemByItemIdTest() throws SQLException, JsonProcessingException {
     Item item = Items.retrieveItemByItemId(voyagerTest,2236014);
     item.mfhdId = null; // mfhdId is not present in example mode, so remove for comparison
