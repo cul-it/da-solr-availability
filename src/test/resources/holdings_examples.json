@@ -309,6 +309,29 @@
 
 
 
+,"expectedJsonPartiallyInTempLocAndUnavail":
+
+
+{"5071819":{
+   "notes":["Latest edition available in Sage Hall Management Library Reference; CD-Rom available at the ILR circulation desk."],
+   "desc":["2002, 2005-2016"],
+   "supplDesc":["CD-Rom: 2002"],
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "date":1493048691,
+   "items":{
+      "count":15,
+      "unavail":[{
+         "id":10246511,
+         "enum":"2016",
+         "status":{"codes":{"9":"In Transit Discharged"},"date":1493210496}}],
+      "tempLoc":[{
+         "id":10246511,
+         "enum":"2016",
+         "location":{
+            "code":"jgsm,ref",
+            "number":62,
+            "name":"ILR Library Reference (Non-Circulating)",
+            "library":"ILR Library"}}]}}}
 
 
 

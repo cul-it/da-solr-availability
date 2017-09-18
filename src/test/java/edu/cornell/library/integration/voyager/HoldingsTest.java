@@ -148,5 +148,11 @@ public class HoldingsTest {
     }
     assertEquals(examples.get("expectedJsonPartialReserveHolding").toJson(),h.toJson());
 
+    h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4546769);
+    for (int mfhdId : h.getMfhdIds()) {
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    assertEquals(examples.get("expectedJsonPartiallyInTempLocAndUnavail").toJson(),h.toJson());
   }
 }
