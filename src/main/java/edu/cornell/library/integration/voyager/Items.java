@@ -191,7 +191,7 @@ public class Items {
     @JsonProperty("holds")       private final Integer holds;
     @JsonProperty("recalls")     private final Integer recalls;
     @JsonProperty("onReserve")   private final Boolean onReserve;
-    @JsonProperty("location")    private final Location location;
+    @JsonProperty("location")    public final Location location;
     @JsonProperty("type")        private final ItemType type;
     @JsonProperty("status")      public final ItemStatus status;
     @JsonProperty("date")        public final Integer date;

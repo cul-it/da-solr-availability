@@ -137,7 +137,7 @@ public class Holdings {
     @JsonProperty("desc")      private final List<String> desc;
     @JsonProperty("supplDesc") private final List<String> supplDesc;
     @JsonProperty("indexDesc") private final List<String> indexDesc;
-    @JsonProperty("location")  private final Location location;
+    @JsonProperty("location")  private Location location;
     @JsonProperty("date")      public final Integer date;
     @JsonProperty("boundWith") public final Map<Integer,BoundWith> boundWiths;
     @JsonProperty("items")     public HoldingsAvailability avail = null;
@@ -264,6 +264,7 @@ public class Holdings {
     public void summarizeItemAvailability( ItemList items ) {
       int itemCount = 0;
       List<ItemUnavailability> unavails = new ArrayList<>();
+      Set<Location> itemLocations = new HashSet<>();
       if (boundWiths != null)
         for (Entry<Integer,BoundWith> bw : boundWiths.entrySet()) {
           itemCount++;
@@ -273,11 +274,17 @@ public class Holdings {
       for (Integer holdingId : items.getItems().keySet())
         for (Item item : items.getItems().get(holdingId)) {
           itemCount++;
+          itemLocations.add(item.location);
           if (! item.status.available) {
             item.status.available = null;
             unavails.add(new ItemUnavailability(item.itemId,null,item.enumeration,item.status));
           }
         }
+      if (itemLocations.size() == 1) {
+        Location itemLoc = itemLocations.iterator().next();
+        if (! itemLoc.equals(this.location))
+          this.location = itemLoc;
+      }
       if (itemCount > 0)
         this.avail = new HoldingsAvailability( itemCount, (unavails.size() == 0)?null:unavails);
     }

@@ -255,6 +255,20 @@
 
 
 
+,"expectedJsonOnReserve":
+# bib 9628566, both holdings have loc "ilr", but they are overriden because the items have temp loc "ilr,res"
+
+
+{"9957560":{
+   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
+   "date":1472212100,
+   "items":{"count":1}},
+ "10287643":{
+   "copyNum":"2",
+   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
+   "date":1502385643,
+   "items":{"count":1}}}
+
 
 
 

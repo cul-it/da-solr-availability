@@ -134,5 +134,11 @@ public class HoldingsTest {
     }
     assertEquals(examples.get("expectedMultivolMixedAvail").toJson(),h.toJson());
 
+    h = Holdings.retrieveHoldingsByBibId(voyagerTest, 9628566);
+    for (int mfhdId : h.getMfhdIds()) {
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i);
+    }
+    assertEquals(examples.get("expectedJsonOnReserve").toJson(),h.toJson());
   }
 }

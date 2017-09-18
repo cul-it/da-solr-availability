@@ -82,9 +82,10 @@
     "date":1502385694}],
  "9957560":[
    {"id":10007450,"copyNum":1,"sequenceNum":1,"onReserve":true,
-   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
-   "type":{"id":26,"name":"2hrres"},
-   "status":{"available":true,"codes":{"11":"Discharged"},"date":1505328069},"date":1472147590}]}
+    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
+    "type":{"id":26,"name":"2hrres"},
+    "status":{"available":true,"codes":{"11":"Discharged"},"date":1505328069},
+    "date":1472147590}]}
 
 
 
