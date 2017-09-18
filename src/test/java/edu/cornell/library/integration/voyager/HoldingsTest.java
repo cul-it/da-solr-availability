@@ -49,8 +49,8 @@ public class HoldingsTest {
     }
     Class.forName("oracle.jdbc.driver.OracleDriver");
     voyagerLive = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));*/
-
+        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+*/
     // Connect to test Voyager database
     Class.forName("org.sqlite.JDBC");
     voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
@@ -105,40 +105,48 @@ public class HoldingsTest {
   public void summarizeAvailability() throws SQLException, IOException, XMLStreamException {
     HoldingSet h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9975971);
     ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, 9975971);
-    h.get(9975971).summarizeItemAvailability(i);
+    h.get(9975971).summarizeItemAvailability(i.getItems().get(9975971));
     assertEquals(examples.get("expectedJsonWithAvailability9975971").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1131911);
     i = Items.retrieveItemsByHoldingId(voyagerTest, 1131911);
-    h.get(1131911).summarizeItemAvailability(i);
+    h.get(1131911).summarizeItemAvailability(i.getItems().get(1131911));
     assertEquals(examples.get("expectedJsonWithAvailability1131911").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
     for (int mfhdId : h.getMfhdIds()) {
       i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
-      h.get(mfhdId).summarizeItemAvailability(i);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonWithAvailabilityELECTRICSHEEP").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1055);
     for (int mfhdId : h.getMfhdIds()) {
       i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
-      h.get(mfhdId).summarizeItemAvailability(i);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(1055));
     }
     assertEquals(examples.get("expectedJsonMissing").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 329763);
     for (int mfhdId : h.getMfhdIds()) {
       i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
-      h.get(mfhdId).summarizeItemAvailability(i);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedMultivolMixedAvail").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 9628566);
     for (int mfhdId : h.getMfhdIds()) {
       i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
-      h.get(mfhdId).summarizeItemAvailability(i);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonOnReserve").toJson(),h.toJson());
+
+    h = Holdings.retrieveHoldingsByBibId(voyagerTest, 2026746);
+    for (int mfhdId : h.getMfhdIds()) {
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    assertEquals(examples.get("expectedJsonPartialReserveHolding").toJson(),h.toJson());
+
   }
 }

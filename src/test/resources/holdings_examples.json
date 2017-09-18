@@ -272,6 +272,40 @@
 
 
 
+,"expectedJsonPartialReserveHolding":
+
+
+{"2083678":{"desc":["Program 1-8"],
+   "location":{"code":"afr","number":2,"name":"Africana Library (Africana Center)","library":"Africana Library"},
+   "date":1108394508,
+   "items":{
+      "count":4,
+      "tempLoc":[
+         {"id":3321791,
+          "enum":"Programs 1-2",
+          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}},
+         {"id":3321793,
+          "enum":"Programs 5-6",
+          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}}]}},
+ "2083679":{
+   "copyNum":"2",
+   "desc":["Program 1-8"],
+   "location":{"code":"afr","number":2,"name":"Africana Library (Africana Center)","library":"Africana Library"},
+   "date":1108129539,
+   "items":{
+      "count":4,
+      "tempLoc":[
+         {"id":3321796,
+          "enum":"Programs 3-4",
+          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}},
+         {"id":3321798,
+          "enum":"Programs 7-8",
+          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}}]}},
+ "2456923":{
+   "desc":["Program 1-8"],
+   "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex"},
+   "date":1321365882,
+   "items":{"count":4}}}
 
 
 

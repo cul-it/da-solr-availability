@@ -261,32 +261,41 @@ public class Holdings {
       return mapper.writeValueAsString(this);
     }
 
-    public void summarizeItemAvailability( ItemList items ) {
+    public void summarizeItemAvailability( List<Item> items ) {
       int itemCount = 0;
-      List<ItemUnavailability> unavails = new ArrayList<>();
+      List<ItemReference> unavails = new ArrayList<>();
+      List<ItemReference> tempLocs = null;
       Set<Location> itemLocations = new HashSet<>();
       if (boundWiths != null)
         for (Entry<Integer,BoundWith> bw : boundWiths.entrySet()) {
           itemCount++;
           if (! bw.getValue().status.available)
-            unavails.add(new ItemUnavailability(bw.getKey(),true,bw.getValue().thisEnum,null));
+            unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null));
         }
-      for (Integer holdingId : items.getItems().keySet())
-        for (Item item : items.getItems().get(holdingId)) {
-          itemCount++;
-          itemLocations.add(item.location);
-          if (! item.status.available) {
-            item.status.available = null;
-            unavails.add(new ItemUnavailability(item.itemId,null,item.enumeration,item.status));
-          }
+//      for (Integer holdingId : items.getItems().keySet())
+      for (Item item : items) {
+        itemCount++;
+        itemLocations.add(item.location);
+        if (! item.status.available) {
+          item.status.available = null;
+          unavails.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null));
+//          }
         }
+      }
+      if (itemCount == 0)
+        return;
       if (itemLocations.size() == 1) {
         Location itemLoc = itemLocations.iterator().next();
         if (! itemLoc.equals(this.location))
           this.location = itemLoc;
+      } else {
+        tempLocs = new ArrayList<>();
+        for (Item i : items)
+          if (! i.location.equals(this.location))
+            tempLocs.add(new ItemReference(i.itemId,null,i.enumeration,null,i.location));
+            
       }
-      if (itemCount > 0)
-        this.avail = new HoldingsAvailability( itemCount, (unavails.size() == 0)?null:unavails);
+      this.avail = new HoldingsAvailability( itemCount, (unavails.size() == 0)?null:unavails,tempLocs);
     }
     /**
      * Any time a comma is followed by a character that is not a space, a
@@ -303,14 +312,17 @@ public class Holdings {
 
   public static class HoldingsAvailability {
     @JsonProperty("count") public final int itemCount;
-    @JsonProperty("unavail") public final List<ItemUnavailability> unavail;
+    @JsonProperty("unavail") public final List<ItemReference> unavail;
+    @JsonProperty("tempLoc") public final List<ItemReference> tempLocs;
 
     @JsonCreator
     public HoldingsAvailability(
         @JsonProperty("count") int itemCount,
-        @JsonProperty("unavail") List<ItemUnavailability> unavail ) {
+        @JsonProperty("unavail") List<ItemReference> unavail,
+        @JsonProperty("tempLoc") List<ItemReference> tempLocs) {
       this.itemCount = itemCount;
       this.unavail = unavail;
+      this.tempLocs = tempLocs;
     }
   }
 }
