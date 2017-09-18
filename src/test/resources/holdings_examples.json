@@ -249,8 +249,9 @@
    "location":{"code":"phys,anx","number":116,"name":"Library Annex","library":"Library Annex"},
    "date":1495197912,
    "items":{"count":292,
-            "unavail":[{"id":9724204,"enum":"v.515-516:no.7527-7531 - 2014",
-   "status":{"codes":{"1":"Not Charged","18":"At Bindery"},"date":1429839935}}]}}}
+            "unavail":[{"id":9724204,
+                        "enum":"v.515-516:no.7527-7531 - 2014",
+                        "status":{"codes":{"1":"Not Charged","18":"At Bindery"},"date":1429839935}}]}}}
 
 
 
