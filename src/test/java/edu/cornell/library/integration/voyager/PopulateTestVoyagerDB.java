@@ -30,11 +30,11 @@ public class PopulateTestVoyagerDB {
 
   public static boolean replaceDBContents = false; // if false, will add specified bibs to existing tables
   public static String testDbConnectionString = "jdbc:sqlite:src/test/resources/voyagerTest.db";
-  private static List<Integer> testBibs = Arrays.asList( 4546769 );
+  private static List<Integer> testBibs = Arrays.asList( 10023626 );
 
   // Bibs in "jdbc:sqlite:src/test/resources/voyagerTest.db"
   // 330581,3212531,2248567,576519,3827392,1016847,969430,1799377,2095674,1575369,9520154,927983,
-  // 342724,4442869,784908,6047653,9628566,3956404,9647384,306998,329763,2026746,4546769
+  // 342724,4442869,784908,6047653,9628566,3956404,9647384,306998,329763,2026746,4546769,10023626
 
   private static boolean dumpTestDBToStdout = false;
   private static List<Integer> testMfhds = new ArrayList<>();

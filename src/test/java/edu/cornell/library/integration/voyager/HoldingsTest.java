@@ -147,12 +147,17 @@ public class HoldingsTest {
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonPartialReserveHolding").toJson(),h.toJson());
-
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4546769);
     for (int mfhdId : h.getMfhdIds()) {
       i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonPartiallyInTempLocAndUnavail").toJson(),h.toJson());
+    h = Holdings.retrieveHoldingsByBibId(voyagerTest, 10023626);
+    for (int mfhdId : h.getMfhdIds()) {
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    assertEquals(examples.get("expectedJsonOnline").toJson(),h.toJson());
   }
 }
