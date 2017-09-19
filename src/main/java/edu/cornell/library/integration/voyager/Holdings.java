@@ -32,7 +32,6 @@ import edu.cornell.library.integration.marc.MarcRecord;
 import edu.cornell.library.integration.marc.MarcRecord.RecordType;
 import edu.cornell.library.integration.marc.Subfield;
 import edu.cornell.library.integration.voyager.Items.Item;
-import edu.cornell.library.integration.voyager.Items.ItemList;
 import edu.cornell.library.integration.voyager.Locations.Location;
 
 public class Holdings {
@@ -264,6 +263,7 @@ public class Holdings {
     public void summarizeItemAvailability( List<Item> items ) {
       int itemCount = 0;
       List<ItemReference> unavails = new ArrayList<>();
+      List<ItemReference> returned = new ArrayList<>();
       List<ItemReference> tempLocs = null;
       Set<Location> itemLocations = new HashSet<>();
       if (boundWiths != null)
@@ -272,14 +272,14 @@ public class Holdings {
           if (! bw.getValue().status.available)
             unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null));
         }
-//      for (Integer holdingId : items.getItems().keySet())
       for (Item item : items) {
         itemCount++;
         itemLocations.add(item.location);
         if (! item.status.available) {
           item.status.available = null;
           unavails.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null));
-//          }
+        } else if (item.status.codes.values().contains("Discharged")) {
+          returned.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null));
         }
       }
       if (itemCount == 0)
@@ -295,7 +295,9 @@ public class Holdings {
             tempLocs.add(new ItemReference(i.itemId,null,i.enumeration,null,i.location));
             
       }
-      this.avail = new HoldingsAvailability( itemCount, (unavails.size() == 0)?null:unavails,tempLocs);
+      this.avail = new HoldingsAvailability(
+          itemCount, (unavails.size() == 0)?null:unavails,
+          tempLocs, (returned.size() == 0)?null:returned);
     }
     /**
      * Any time a comma is followed by a character that is not a space, a
@@ -314,15 +316,18 @@ public class Holdings {
     @JsonProperty("count") public final int itemCount;
     @JsonProperty("unavail") public final List<ItemReference> unavail;
     @JsonProperty("tempLoc") public final List<ItemReference> tempLocs;
+    @JsonProperty("returned") public final List<ItemReference> returned;
 
     @JsonCreator
     public HoldingsAvailability(
         @JsonProperty("count") int itemCount,
         @JsonProperty("unavail") List<ItemReference> unavail,
-        @JsonProperty("tempLoc") List<ItemReference> tempLocs) {
+        @JsonProperty("tempLoc") List<ItemReference> tempLocs,
+        @JsonProperty("returned") List<ItemReference> returned) {
       this.itemCount = itemCount;
       this.unavail = unavail;
       this.tempLocs = tempLocs;
+      this.returned = returned;
     }
   }
 }

@@ -262,13 +262,16 @@
 {"9957560":{
    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
    "date":1472212100,
-   "items":{"count":1}},
+   "items":{
+      "count":1,
+      "returned":[{"id":10007450,"status":{"available":true,"codes":{"11":"Discharged"},"date":1505328069}}]}},
  "10287643":{
    "copyNum":"2",
    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
    "date":1502385643,
-   "items":{"count":1}}}
-
+   "items":{
+      "count":1,
+      "returned":[{"id":10345845,"status":{"available":true,"codes":{"11":"Discharged"},"date":1505164520}}]}}}
 
 
 
