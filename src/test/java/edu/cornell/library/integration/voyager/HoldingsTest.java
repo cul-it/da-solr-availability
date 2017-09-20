@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
+//import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -73,10 +73,6 @@ public class HoldingsTest {
     holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9850688);
     assertEquals(examples.get("expectedJson9850688").toJson(),holding.toJson());
     assertEquals("Thu May 18 16:21:19 EDT 2017",(new Date(1000L*holding.get(9850688).date)).toString());
-
-    holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 2202712);
-    assertEquals(examples.get("expectedJson2202712").toJson(),holding.toJson());
-    assertEquals("Tue Jul 14 13:03:11 EDT 2009",(new Date(1000L*holding.get(2202712).date)).toString());
 
     assertEquals(examples.get("expectedJson1131911").toJson(),
         Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1131911).toJson());
@@ -159,5 +155,11 @@ public class HoldingsTest {
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonOnline").toJson(),h.toJson());
+    h = Holdings.retrieveHoldingsByBibId(voyagerTest, 1799377);
+    for (int mfhdId : h.getMfhdIds()) {
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    assertEquals(examples.get("expectedJson2202712").toJson(),h.toJson());
   }
 }

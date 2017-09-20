@@ -65,6 +65,8 @@ public class ItemsTest {
     assertEquals(examples.get("expectedJson10013120").toJson(),items.toJson());
     assertFalse( items.getItem(9975971,10013120).status.available );
 
+    items = Items.retrieveItemsByHoldingId(voyagerTest, 2202712);
+    assertEquals(examples.get("expectedJson2202712").toJson(),items.toJson());
   }
 
   @Test

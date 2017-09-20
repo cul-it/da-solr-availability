@@ -15,35 +15,41 @@
 
 
 {"9850688":{
-    "desc":["no.177-182 (2016)"],
+    "holdings":["no.177-182 (2016)"],
     "location":{"code":"was","number":139,"name":"Kroch Library Asia","library":"Kroch Library Asia"},
     "date":1495138879}}
 
 
 
 ,"expectedJson2202712":
+# bib 1799377; item count includes bound-withs
 
 
 {"2202712":{
-    "notes":["1987 bound with: Quest no.91-95, sasa BR 128 B8 E53+ no.93.  --1989 bound with: Quest no.105, sasa BR 128 B8 E53+ no.105-106."],
-    "desc":["1978, 1980-1982, 1985, 1987-1992, 1994-1996"],
-    "location":{"code":"sasa",
-                "number":122,
-                "name":"Kroch Library Asia",
-                "library":"Kroch Library Asia"},
-    "date":1247590991,
-    "boundWith":{"3910960":{"masterItemId":3910960,
-                            "masterBibId":2095674,
-                            "masterTitle":"Accelerated Mahaweli, Sri Lanka Development Programme /",
-                            "masterEnum":"no.105-106",
-                            "thisEnum":"1989",
-                            "status":{"available":true,"codes":{"1":"Not Charged"}}},
-                 "3131680":{"masterItemId":3131680,
-                            "masterBibId":1575369,
-                            "masterTitle":"Emerging community : two dialoguing religions of South-East Asia /",
-                            "masterEnum":"no.91-95",
-                            "thisEnum":"1987",
-                            "status":{"available":true,"codes":{"1":"Not Charged"}}}}}}
+   "notes":["1987 bound with: Quest no.91-95, sasa BR 128 B8 E53+ no.93.  --1989 bound with: Quest no.105, sasa BR 128 B8 E53+ no.105-106."],
+   "holdings":["1978, 1980-1982, 1985, 1987-1992, 1994-1996"],
+   "location":{"code":"sasa",
+               "number":122,
+               "name":"Kroch Library Asia",
+               "library":"Kroch Library Asia"},
+   "date":1247590991,
+   "boundWith":{"3910960":{"masterItemId":3910960,
+                           "masterBibId":2095674,
+                           "masterTitle":"Accelerated Mahaweli, Sri Lanka Development Programme /",
+                           "masterEnum":"no.105-106",
+                           "thisEnum":"1989",
+                           "status":{"available":true,"codes":{"1":"Not Charged"}}},
+                "3131680":{"masterItemId":3131680,
+                           "masterBibId":1575369,
+                           "masterTitle":"Emerging community : two dialoguing religions of South-East Asia /",
+                           "masterEnum":"no.91-95",
+                           "thisEnum":"1987",
+                           "status":{"available":true,"codes":{"1":"Not Charged"}}}},
+   "items":{"count":13,
+            "unavail":[{"id":8609801,
+                        "enum":"1990",
+                        "status":{"codes":{"1":"Not Charged","19":"Cataloging Review","12":"Missing"},
+                                  "date":1247590864}}]}}}
 
 
 
@@ -51,8 +57,8 @@
 
 
 {"1131911":{
-    "desc":["v.1-2;"],
-	"supplDesc":["Fifth suppl.:1982-1988"],
+    "holdings":["v.1-2;"],
+	"supplements":["Fifth suppl.:1982-1988"],
   	"location":{"code":"law",
                 "number":63,
                 "name":"Law Library (Myron Taylor Hall)",
@@ -63,8 +69,8 @@
 ,"expectedJson413836":
 
 {"413836":{
-    "desc":["1959-1974"],
-    "indexDesc":["1959/1974"],
+    "holdings":["1959-1974"],
+    "indexes":["1959/1974"],
     "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex"},
     "date":959745600}}
 
@@ -86,8 +92,8 @@
 
 
 {"1131911":{
-   "desc":["v.1-2;"],
-   "supplDesc":["Fifth suppl.:1982-1988"],
+   "holdings":["v.1-2;"],
+   "supplements":["Fifth suppl.:1982-1988"],
    "location":{"code":"law","number":63,"name":"Law Library (Myron Taylor Hall)","library":"Law Library"},
    "date":959745600,
    "items":{"count":3}}}
@@ -104,12 +110,12 @@
             "unavail":[{"id":6571313,
                         "status":{"codes":{"2":"Charged"},"due":1516863600,"date":1504104315}}]}},
  "4977214":{
-   "copyNum":"2",
+   "copy":2,
    "location":{"code":"uris,anx","number":210,"name":"Library Annex","library":"Library Annex"},
    "date":1274884635,
    "items":{"count":1}},
  "5860317":{
-   "copyNum":"3",
+   "copy":3,
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
    "date":1278418987,
    "items":{"count":1}},
@@ -126,29 +132,29 @@
             "unavail":[{"id":8764607,
                         "status":{"codes":{"2":"Charged"},"due":1517468400,"date":1505317642}}]}},
  "7371277":{
-   "copyNum":"2",
+   "copy":2,
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
    "date":1410380685,
    "items":{"count":1}},
  "7371279":{
-   "copyNum":"3",
+   "copy":3,
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
    "date":1307478334,
    "items":{"count":1}},
  "7371281":{
-   "copyNum":"4",
+   "copy":4,
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
    "date":1309886750,
    "items":{"count":1}},
  "7371283":{
-   "copyNum":"5",
+   "copy":5,
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
    "date":1305137472,
    "items":{"count":1,
             "unavail":[{"id":8764617,
                         "status":{"codes":{"2":"Charged"},"due":1512975600,"date":1481401648}}]}},
  "7371284":{
-   "copyNum":"6",
+   "copy":6,
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
    "date":1310147166,
    "items":{"count":1}},
@@ -170,17 +176,17 @@
             "unavail":[{"id":8771167,
                         "status":{"codes":{"3":"Renewed"},"due":1516856340,"date":1484314092}}]}},
  "7383632":{
-   "copyNum":"2",
+   "copy":2,
    "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
    "date":1276784987,
    "items":{"count":1}},
  "7383752":{
-   "copyNum":"3",
+   "copy":3,
    "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
    "date":1276790437,
    "items":{"count":1}},
  "7383755":{
-   "copyNum":"4",
+   "copy":4,
    "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
    "date":1276790545,
    "items":{"count":1}},
@@ -189,12 +195,12 @@
    "date":1276884581,
    "items":{"count":1}},
  "7383966":{
-   "copyNum":"2",
+   "copy":2,
    "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
    "date":1276884651,
    "items":{"count":1}},
  "7387210":{
-   "copyNum":"5",
+   "copy":5,
    "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
    "date":1404301940,
    "items":{"count":1}},
@@ -209,7 +215,7 @@
 
 
 {"1055":{
-   "desc":["no.26, 28, 30-36 (1978-1982)"],
+   "holdings":["no.26, 28, 30-36 (1978-1982)"],
    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
    "date":959745600,
    "items":{"count":1,
@@ -223,29 +229,29 @@
 {"1115":{
    "notes":["Shelved alphabetically by title in Periodicals Area. Current issue on display.",
             "Electronic version only starting with 2010. Print subscription cancelled after 2009."],
-   "desc":["v.398 (1999)","v.410 (2001)",
-           "v.414-415 (2001-2002)",
-           "v.419-421 (2002-2003)",
-           "v.424-426 (2003-2004)",
-           "v.427:no.6974-6977 (2004)",
-           "v.433:no.7021-7023, 7026-7028 (2005)"],
-   "supplDesc":["v.392:no.6679 (1998:Apr.30)",
-                "v.398-408 (2000)",
-                "Assorted Suppl. 2002-2004"],
-   "indexDesc":["v.229/234-247/252 (1971-1974)",
-                "v.403/408 (2000)",
-                "v.415/420 (2002)"],
+   "holdings":["v.398 (1999)","v.410 (2001)",
+               "v.414-415 (2001-2002)",
+               "v.419-421 (2002-2003)",
+               "v.424-426 (2003-2004)",
+               "v.427:no.6974-6977 (2004)",
+               "v.433:no.7021-7023, 7026-7028 (2005)"],
+   "supplements":["v.392:no.6679 (1998:Apr.30)",
+                  "v.398-408 (2000)",
+                  "Assorted Suppl. 2002-2004"],
+   "indexes":["v.229/234-247/252 (1971-1974)",
+              "v.403/408 (2000)",
+              "v.415/420 (2002)"],
    "location":{"code":"vet","number":133,"name":"Veterinary Library (Schurman Hall)","library":"Veterinary Library"},
    "date":1363963641,
    "items":{"count":17}},
  "398886":{
    "notes":["Subscription cancelled after 2009"],
-   "desc":["v.229-470:no.5279-7335 (1971-2011)",
-           "v.471:no.7336, 7338-7340 (2011)",
-           "v.472-501:no.7341-7468 (2011-2013)",
-           "v.502:no.7469-7472 (2013)",
-           "v.503-528:no.7474-7583 (2013-2015)"],
-   "supplDesc":["Human Genome Project: CD-ROM: v.409:no.6822 (2001)"],
+   "holdings":["v.229-470:no.5279-7335 (1971-2011)",
+               "v.471:no.7336, 7338-7340 (2011)",
+               "v.472-501:no.7341-7468 (2011-2013)",
+               "v.502:no.7469-7472 (2013)",
+               "v.503-528:no.7474-7583 (2013-2015)"],
+   "supplements":["Human Genome Project: CD-ROM: v.409:no.6822 (2001)"],
    "location":{"code":"phys,anx","number":116,"name":"Library Annex","library":"Library Annex"},
    "date":1495197912,
    "items":{"count":292,
@@ -266,7 +272,7 @@
       "count":1,
       "returned":[{"id":10007450,"status":{"available":true,"codes":{"11":"Discharged"},"date":1505328069}}]}},
  "10287643":{
-   "copyNum":"2",
+   "copy":2,
    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
    "date":1502385643,
    "items":{
@@ -278,7 +284,8 @@
 ,"expectedJsonPartialReserveHolding":
 
 
-{"2083678":{"desc":["Program 1-8"],
+{"2083678":{
+   "holdings":["Program 1-8"],
    "location":{"code":"afr","number":2,"name":"Africana Library (Africana Center)","library":"Africana Library"},
    "date":1108394508,
    "items":{
@@ -291,8 +298,8 @@
           "enum":"Programs 5-6",
           "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}}]}},
  "2083679":{
-   "copyNum":"2",
-   "desc":["Program 1-8"],
+   "copy":2,
+   "holdings":["Program 1-8"],
    "location":{"code":"afr","number":2,"name":"Africana Library (Africana Center)","library":"Africana Library"},
    "date":1108129539,
    "items":{
@@ -305,7 +312,7 @@
           "enum":"Programs 7-8",
           "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}}]}},
  "2456923":{
-   "desc":["Program 1-8"],
+   "holdings":["Program 1-8"],
    "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex"},
    "date":1321365882,
    "items":{"count":4}}}
@@ -317,8 +324,8 @@
 
 {"5071819":{
    "notes":["Latest edition available in Sage Hall Management Library Reference; CD-Rom available at the ILR circulation desk."],
-   "desc":["2002, 2005-2016"],
-   "supplDesc":["CD-Rom: 2002"],
+   "holdings":["2002, 2005-2016"],
+   "supplements":["CD-Rom: 2002"],
    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
    "date":1493048691,
    "items":{

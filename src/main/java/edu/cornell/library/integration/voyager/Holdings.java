@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
@@ -131,15 +132,15 @@ public class Holdings {
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Holding {
 
-    @JsonProperty("copyNum")   private final String copyNum;
-    @JsonProperty("notes")     private final List<String> notes;
-    @JsonProperty("desc")      private final List<String> desc;
-    @JsonProperty("supplDesc") private final List<String> supplDesc;
-    @JsonProperty("indexDesc") private final List<String> indexDesc;
-    @JsonProperty("location")  private Location location;
-    @JsonProperty("date")      public final Integer date;
-    @JsonProperty("boundWith") public final Map<Integer,BoundWith> boundWiths;
-    @JsonProperty("items")     public HoldingsAvailability avail = null;
+    @JsonProperty("copy")        private final Integer copy;
+    @JsonProperty("notes")       private final List<String> notes;
+    @JsonProperty("holdings")    private final List<String> holdings;
+    @JsonProperty("supplements") private final List<String> supplements;
+    @JsonProperty("indexes")     private final List<String> indexes;
+    @JsonProperty("location")    private Location location;
+    @JsonProperty("date")        public final Integer date;
+    @JsonProperty("boundWith")   public final Map<Integer,BoundWith> boundWiths;
+    @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
 
     @JsonIgnore public MarcRecord record;
 
@@ -153,12 +154,12 @@ public class Holdings {
       final Map<Integer,BoundWith> boundWiths = new HashMap<>();
       Location holdingLocation = null;
       Collection<String> callnos = new HashSet<>();
-      List<String> desc = new ArrayList<>();
-      List<String> recentHoldings = new ArrayList<>();
-      List<String> supplDesc = new ArrayList<>();
-      List<String> indexDesc = new ArrayList<>();
+      List<String> holdings = new ArrayList<>();
+      List<String> recent = new ArrayList<>();
+      List<String> supplements = new ArrayList<>();
+      List<String> indexes = new ArrayList<>();
       List<String> notes = new ArrayList<>();
-      String copyNum = null;
+      Integer copy = null;
       Collection<DataField> sortedFields = this.record.matchSortAndFlattenDataFields();
       for( DataField f: sortedFields ) {
         String callno = null;
@@ -203,21 +204,21 @@ public class Holdings {
             case 'z':
               notes.add(sf.value); break CODE;
             case 't':
-              copyNum = sf.value; break CODE;
+              copy = Integer.valueOf(sf.value); break CODE;
             }
           }
           break;
         case "866":
           if (f.ind1.equals(' ') && f.ind2.equals(' '))
-            recentHoldings.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
+            recent.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           else
-            desc.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
+            holdings.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           break;
         case "867":
-          supplDesc.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
+          supplements.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           break;
         case "868":
-          indexDesc.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
+          indexes.add(insertSpaceAfterCommas(f.concatenateSpecificSubfields("az")));
           break;
         case "876":
           BoundWith b = BoundWith.from876Field(voyager, f);
@@ -226,41 +227,41 @@ public class Holdings {
         if (callno != null)
           callnos.add(callno);
       }
-      this.copyNum = copyNum;
+      this.copy = copy;
       this.notes = (notes.isEmpty()) ? null : notes;
-      this.desc = (desc.isEmpty()) ? null : desc;
-      this.supplDesc = (supplDesc.isEmpty()) ? null : supplDesc;
-      this.indexDesc = (indexDesc.isEmpty()) ? null : indexDesc;
+      this.holdings = (holdings.isEmpty()) ? null : holdings;
+      this.supplements = (supplements.isEmpty()) ? null : supplements;
+      this.indexes = (indexes.isEmpty()) ? null : indexes;
       this.location = holdingLocation;
       this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
     }
 
     private Holding(
-        @JsonProperty("copyNum")   String copyNum,
-        @JsonProperty("notes")     List<String> notes,
-        @JsonProperty("desc")      List<String> desc,
-        @JsonProperty("supplDesc") List<String> supplDesc,
-        @JsonProperty("indexDesc") List<String> indexDesc,
-        @JsonProperty("location")  Location location,
-        @JsonProperty("date")      Integer date,
-        @JsonProperty("boundWith") Map<Integer,BoundWith> boundWiths,
-        @JsonProperty("items")     HoldingsAvailability avail) {
-      this.copyNum = copyNum;
+        @JsonProperty("copy")        Integer copy,
+        @JsonProperty("notes")       List<String> notes,
+        @JsonProperty("holdings")    List<String> holdings,
+        @JsonProperty("supplements") List<String> supplements,
+        @JsonProperty("indexes")     List<String> indexes,
+        @JsonProperty("location")    Location location,
+        @JsonProperty("date")        Integer date,
+        @JsonProperty("boundWith")   Map<Integer,BoundWith> boundWiths,
+        @JsonProperty("items")       HoldingsItemSummary itemSummary) {
+      this.copy = copy;
       this.notes = (notes == null || notes.isEmpty()) ? null : notes;
-      this.desc = (desc == null || desc.isEmpty()) ? null : desc;
-      this.supplDesc = (supplDesc == null || supplDesc.isEmpty()) ? null : supplDesc;
-      this.indexDesc = (indexDesc == null || indexDesc.isEmpty()) ? null : indexDesc;
+      this.holdings = (holdings == null || holdings.isEmpty()) ? null : holdings;
+      this.supplements = (supplements == null || supplements.isEmpty()) ? null : supplements;
+      this.indexes = (indexes == null || indexes.isEmpty()) ? null : indexes;
       this.location = location;
       this.date = date;
       this.boundWiths = boundWiths;
-      this.avail = avail;
+      this.itemSummary = itemSummary;
     }
 
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this);
     }
 
-    public void summarizeItemAvailability( List<Item> items ) {
+    public void summarizeItemAvailability( TreeSet<Item> treeSet ) {
       int itemCount = 0;
       List<ItemReference> unavails = new ArrayList<>();
       List<ItemReference> returned = new ArrayList<>();
@@ -272,7 +273,7 @@ public class Holdings {
           if (! bw.getValue().status.available)
             unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null));
         }
-      for (Item item : items) {
+      for (Item item : treeSet) {
         itemCount++;
         itemLocations.add(item.location);
         if (! item.status.available) {
@@ -290,12 +291,12 @@ public class Holdings {
           this.location = itemLoc;
       } else {
         tempLocs = new ArrayList<>();
-        for (Item i : items)
+        for (Item i : treeSet)
           if (! i.location.equals(this.location))
             tempLocs.add(new ItemReference(i.itemId,null,i.enumeration,null,i.location));
             
       }
-      this.avail = new HoldingsAvailability(
+      this.itemSummary = new HoldingsItemSummary(
           itemCount, (unavails.size() == 0)?null:unavails,
           tempLocs, (returned.size() == 0)?null:returned);
     }
@@ -312,17 +313,17 @@ public class Holdings {
 
   }
 
-  public static class HoldingsAvailability {
-    @JsonProperty("count") public final int itemCount;
-    @JsonProperty("unavail") public final List<ItemReference> unavail;
-    @JsonProperty("tempLoc") public final List<ItemReference> tempLocs;
+  public static class HoldingsItemSummary {
+    @JsonProperty("count")    public final int itemCount;
+    @JsonProperty("unavail")  public final List<ItemReference> unavail;
+    @JsonProperty("tempLoc")  public final List<ItemReference> tempLocs;
     @JsonProperty("returned") public final List<ItemReference> returned;
 
     @JsonCreator
-    public HoldingsAvailability(
-        @JsonProperty("count") int itemCount,
-        @JsonProperty("unavail") List<ItemReference> unavail,
-        @JsonProperty("tempLoc") List<ItemReference> tempLocs,
+    public HoldingsItemSummary(
+        @JsonProperty("count")    int itemCount,
+        @JsonProperty("unavail")  List<ItemReference> unavail,
+        @JsonProperty("tempLoc")  List<ItemReference> tempLocs,
         @JsonProperty("returned") List<ItemReference> returned) {
       this.itemCount = itemCount;
       this.unavail = unavail;

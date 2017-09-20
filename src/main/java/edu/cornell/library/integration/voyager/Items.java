@@ -6,10 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -65,10 +65,10 @@ public class Items {
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
       pstmt.setInt(1, mfhd_id);
       try (ResultSet rs = pstmt.executeQuery()) {
-        List<Item> items = new ArrayList<>();
+        TreeSet<Item> items = new TreeSet<>();
         while (rs.next())
           items.add(new Item(voyager,rs, false));
-        Map<Integer,List<Item>> itemList = new HashMap<>();
+        Map<Integer,TreeSet<Item>> itemList = new LinkedHashMap<>();
         itemList.put(mfhd_id, items);
         return new ItemList(itemList);
       }
@@ -85,9 +85,9 @@ public class Items {
       for (int mfhd_id : mfhd_ids) {
         pstmt.setInt(1, mfhd_id);
         try (ResultSet rs = pstmt.executeQuery()) {
-          List<Item> items = new ArrayList<>();
+          TreeSet<Item> items = new TreeSet<>();
           while (rs.next())
-            items.add(new Item(voyager,rs, false));
+            items.add(new Item(voyager,rs,false));
           il.put(mfhd_id, items);
         }
       }
@@ -136,15 +136,15 @@ public class Items {
   }
 
   public static class ItemList {
-    private Map<Integer,List<Item>> items;
+    private Map<Integer,TreeSet<Item>> items;
 
     @JsonValue
-    public Map<Integer,List<Item>> getItems() {
+    public Map<Integer,TreeSet<Item>> getItems() {
       return items;
     }
 
     @JsonCreator
-    public ItemList( Map<Integer,List<Item>> items ) {
+    public ItemList( Map<Integer,TreeSet<Item>> items ) {
       this.items = items;
     }
 
@@ -152,11 +152,11 @@ public class Items {
       this.items = new LinkedHashMap<>();
     }
 
-    public void add( Map<Integer,List<Item>> items ) {
+    public void add( Map<Integer,TreeSet<Item>> items ) {
       this.items.putAll(items);
     }
 
-    public void put( Integer mfhd_id, List<Item> items ) {
+    public void put( Integer mfhd_id, TreeSet<Item> items ) {
       this.items.put(mfhd_id, items);
     }
 
@@ -180,28 +180,28 @@ public class Items {
     }
   }
 
-  public static class Item {
+  public static class Item implements Comparable<Item> {
 
-    @JsonProperty("id")          public final int itemId;
-    @JsonProperty("mfhdId")      public Integer mfhdId;
-    @JsonProperty("copyNum")     private final int copyNumber;
-    @JsonProperty("sequenceNum") private final int sequenceNumber;
-    @JsonProperty("enum")        public final String enumeration;
-    @JsonProperty("caption")     private final String caption;
-    @JsonProperty("holds")       private final Integer holds;
-    @JsonProperty("recalls")     private final Integer recalls;
-    @JsonProperty("onReserve")   private final Boolean onReserve;
-    @JsonProperty("location")    public final Location location;
-    @JsonProperty("type")        private final ItemType type;
-    @JsonProperty("status")      public final ItemStatus status;
-    @JsonProperty("date")        public final Integer date;
+    @JsonProperty("id")        public final int itemId;
+    @JsonProperty("mfhdId")    public Integer mfhdId;
+    @JsonProperty("copy")      private final int copy;
+    @JsonProperty("sequence")  private final int sequence;
+    @JsonProperty("enum")      public final String enumeration;
+    @JsonProperty("caption")   private final String caption;
+    @JsonProperty("holds")     private final Integer holds;
+    @JsonProperty("recalls")   private final Integer recalls;
+    @JsonProperty("onReserve") private final Boolean onReserve;
+    @JsonProperty("location")  public final Location location;
+    @JsonProperty("type")      private final ItemType type;
+    @JsonProperty("status")    public final ItemStatus status;
+    @JsonProperty("date")      public final Integer date;
 
     private Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
       this.mfhdId = (includeMfhdId)?rs.getInt("MFHD_ID"):null;
 
-      this.copyNumber = rs.getInt("COPY_NUMBER");
-      this.sequenceNumber = rs.getInt("ITEM_SEQUENCE_NUMBER");
+      this.copy = rs.getInt("COPY_NUMBER");
+      this.sequence = rs.getInt("ITEM_SEQUENCE_NUMBER");
       this.enumeration = concatEnum(rs.getString("ITEM_ENUM"),rs.getString("CHRON"),rs.getString("YEAR"));;
       this.caption = rs.getString("CAPTION");
       this.holds = (rs.getInt("HOLDS_PLACED") == 0)?null:rs.getInt("HOLDS_PLACED");
@@ -221,24 +221,24 @@ public class Items {
     }
 
     private Item(
-        @JsonProperty("id")          int itemId,
-        @JsonProperty("mfhdId")      Integer mfhdId,
-        @JsonProperty("copyNum")     int copyNumber,
-        @JsonProperty("sequenceNum") int sequenceNumber,
-        @JsonProperty("enum")        String enumeration,
-        @JsonProperty("caption")     String caption,
-        @JsonProperty("holds")       Integer holds,
-        @JsonProperty("recalls")     Integer recalls,
-        @JsonProperty("onReserve")   Boolean onReserve,
-        @JsonProperty("location")    Location location,
-        @JsonProperty("type")        ItemType type,
-        @JsonProperty("status")      ItemStatus status,
-        @JsonProperty("date")        Integer date
+        @JsonProperty("id")        int itemId,
+        @JsonProperty("mfhdId")    Integer mfhdId,
+        @JsonProperty("copy")      int copy,
+        @JsonProperty("sequence")  int sequence,
+        @JsonProperty("enum")      String enumeration,
+        @JsonProperty("caption")   String caption,
+        @JsonProperty("holds")     Integer holds,
+        @JsonProperty("recalls")   Integer recalls,
+        @JsonProperty("onReserve") Boolean onReserve,
+        @JsonProperty("location")  Location location,
+        @JsonProperty("type")      ItemType type,
+        @JsonProperty("status")    ItemStatus status,
+        @JsonProperty("date")      Integer date
         ) {
       this.itemId = itemId;
       this.mfhdId = mfhdId;
-      this.copyNumber = copyNumber;
-      this.sequenceNumber = sequenceNumber;
+      this.copy = copy;
+      this.sequence = sequence;
       this.enumeration = enumeration;
       this.caption = caption;
       this.holds = holds;
@@ -252,6 +252,20 @@ public class Items {
 
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this);
+    }
+
+    @Override
+    public int compareTo( final Item other ) {
+      if (this.sequence == other.sequence) {
+        return Integer.compare(this.itemId, other.itemId);
+      }
+      return Integer.compare(this.sequence, other.sequence);
+    }
+
+    public boolean equals ( final Item other ) {
+      if (other == null) return false;
+      if (other.itemId == this.itemId) return true;
+      return false;
     }
   }
   public static String concatEnum(String enumeration, String chron, String year) {
