@@ -48,8 +48,7 @@
    "items":{"count":13,
             "unavail":[{"id":8609801,
                         "enum":"1990",
-                        "status":{"codes":{"1":"Not Charged","19":"Cataloging Review","12":"Missing"},
-                                  "date":1247590864}}]}}}
+                        "status":{"codes":{"12":"Missing"},"date":1247590864}}]}}}
 
 
 
@@ -219,7 +218,7 @@
    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
    "date":959745600,
    "items":{"count":1,
-            "unavail":[{"id":6294,"status":{"codes":{"1":"Not Charged","12":"Missing"},"date":1355862860}}]}}}
+            "unavail":[{"id":6294,"status":{"codes":{"12":"Missing"},"date":1355862860}}]}}}
 
 
 
@@ -257,7 +256,7 @@
    "items":{"count":292,
             "unavail":[{"id":9724204,
                         "enum":"v.515-516:no.7527-7531 - 2014",
-                        "status":{"codes":{"1":"Not Charged","18":"At Bindery"},"date":1429839935}}]}}}
+                        "status":{"codes":{"18":"At Bindery"},"date":1429839935}}]}}}
 
 
 

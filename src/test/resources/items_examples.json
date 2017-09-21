@@ -53,7 +53,7 @@
    {"id":18847,"copy":1,"sequence":1,"holds":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
     "type":{"id":3,"name":"book"},
-    "status":{"available":false,"codes":{"6":"Hold Request","10":"In Transit On Hold"},"date":1505338180},
+    "status":{"available":false,"codes":{"10":"In Transit On Hold"},"date":1505338180},
     "date":959745600}]}
 
 
@@ -66,7 +66,7 @@
    {"id":8060353,"copy":1,"sequence":1,"recalls":1,
     "location":{"code":"engr,anx","number":21,"name":"Library Annex","library":"Library Annex"},
     "type":{"id":3,"name":"book"},
-    "status":{"available":false,"codes":{"5":"Recall Request","10":"In Transit On Hold"},"date":1505404141},
+    "status":{"available":false,"codes":{"10":"In Transit On Hold"},"date":1505404141},
     "date":1180457898}]}
 
 
@@ -292,7 +292,7 @@
    "sequence":1,
    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
    "type":{"id":3,"name":"book"},
-   "status":{"available":false,"codes":{"1":"Not Charged","12":"Missing"},"date":1355862860},
+   "status":{"available":false,"codes":{"12":"Missing"},"date":1355862860},
    "date":1355862860}]}
 
 
@@ -343,7 +343,7 @@
     "copy":1,"sequence":8,"enum":"1990",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia"},
     "type":{"id":2,"name":"serial"},
-    "status":{"available":false,"codes":{"1":"Not Charged","19":"Cataloging Review","12":"Missing"},"date":1247590864},
+    "status":{"available":false,"codes":{"12":"Missing"},"date":1247590864},
     "date":1247590864},
    {"id":3451914,
     "copy":1,"sequence":9,"enum":"1991",

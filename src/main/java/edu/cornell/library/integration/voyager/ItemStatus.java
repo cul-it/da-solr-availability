@@ -5,12 +5,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import edu.cornell.library.integration.voyager.ItemStatuses.StatusCode;
 
 public class ItemStatus {
   public Boolean available;
@@ -34,15 +39,15 @@ public class ItemStatus {
     String statusQ = "SELECT * FROM item_status WHERE item_id = ?";
     String circQ = "SELECT current_due_date FROM circ_transactions WHERE item_id = ?";
     boolean foundUnavailable = false;
-    Map<Integer,String> statuses = new HashMap<>();
+    Set<StatusCode> statuses = new TreeSet<>();
     Timestamp statusModDate = null;
     try ( PreparedStatement pstmt = voyager.prepareStatement(statusQ)) {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           int status_id = rs.getInt("item_status");
-          String status_desc = ItemStatuses.getStatusNameById(voyager, status_id);
-          statuses.put(status_id, status_desc);
+          StatusCode code = ItemStatuses.getStatusByCode(voyager, status_id);
+          statuses.add(code);
           if (statusModDate == null || statusModDate.before(rs.getTimestamp("item_status_date")))
             statusModDate = rs.getTimestamp("item_status_date");
           if (ItemStatuses.getIsUnavailable(status_id))
@@ -52,11 +57,16 @@ public class ItemStatus {
     }
     if (foundUnavailable)
       this.available = false;
-    else if (statuses.containsKey(1) || statuses.containsKey(11))
+    else if (Arrays.asList(1,11).contains(statuses.iterator().next().id))
       this.available = true;
     else
       this.available = false;
-    this.codes = Collections.unmodifiableMap(statuses);
+    if (! statuses.isEmpty()) {
+      StatusCode c = statuses.iterator().next();
+      this.codes = new HashMap<>();
+      this.codes.put(c.id, c.name);
+    } else
+      this.codes = null;
     Integer dueDate = null;
     try ( PreparedStatement pstmt = voyager.prepareStatement(circQ)) {
       pstmt.setInt(1, item_id);
