@@ -47,7 +47,9 @@ public class ItemStatus {
           int status_id = rs.getInt("item_status");
           StatusCode code = ItemStatuses.getStatusByCode(voyager, status_id);
           statuses.add(code);
-          if (statusModDate == null || statusModDate.before(rs.getTimestamp("item_status_date")))
+          if (statusModDate == null ||
+        		  ( rs.getTimestamp("item_status_date") != null
+        		  && statusModDate.before(rs.getTimestamp("item_status_date"))))
             statusModDate = rs.getTimestamp("item_status_date");
           if (ItemStatuses.getIsUnavailable(status_id))
             foundUnavailable = true;
