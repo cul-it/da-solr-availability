@@ -53,7 +53,7 @@
 
 
 ,"expectedJson1131911":
-
+# One of several holdings records for bib: 927983
 
 {"1131911":{
     "holdings":["v.1-2;"],
@@ -63,6 +63,16 @@
                 "name":"Law Library (Myron Taylor Hall)",
                 "library":"Law Library"},
 	"date":959745600}}
+
+,"expectedJsonWithAvailability1131911":
+
+{"1131911":{
+   "holdings":["v.1-2;"],
+   "supplements":["Fifth suppl.:1982-1988"],
+   "location":{"code":"law","number":63,"name":"Law Library (Myron Taylor Hall)","library":"Law Library"},
+   "date":959745600,
+   "items":{"count":3}}}
+
 
 
 ,"expectedJson413836":
@@ -84,18 +94,6 @@
    "items":{"count":1,
             "unavail":[{"id":10013120,
                         "status":{"codes":{"3":"Renewed"},"due":1506218400,"date":1504965705}}]}}}
-
-
-
-,"expectedJsonWithAvailability1131911":
-
-
-{"1131911":{
-   "holdings":["v.1-2;"],
-   "supplements":["Fifth suppl.:1982-1988"],
-   "location":{"code":"law","number":63,"name":"Law Library (Myron Taylor Hall)","library":"Law Library"},
-   "date":959745600,
-   "items":{"count":3}}}
 
 
 
@@ -158,8 +156,7 @@
    "date":1310147166,
    "items":{"count":1}},
  "7371302":{
-   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)",
-   "library":"ILR Library"},
+   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
    "date":1275074667,
    "items":{"count":1}},
  "7383225":{
