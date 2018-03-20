@@ -41,6 +41,7 @@ public class Holding {
   @JsonProperty("supplements") private final List<String> supplements;
   @JsonProperty("indexes")     private final List<String> indexes;
   @JsonProperty("location")    private Location location;
+  @JsonProperty("call")        public final String call;
   @JsonProperty("date")        public final Integer date;
   @JsonProperty("boundWith")   public final Map<Integer,BoundWith> boundWiths;
   @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
@@ -62,7 +63,7 @@ public class Holding {
     // process data from holdings marc
     final Map<Integer,BoundWith> boundWiths = new HashMap<>();
     Location holdingLocation = null;
-    Collection<String> callnos = new HashSet<>();
+    String call = null;
     List<String> holdings = new ArrayList<>();
     List<String> recent = new ArrayList<>();
     List<String> supplements = new ArrayList<>();
@@ -71,7 +72,6 @@ public class Holding {
     Integer copy = null;
     Collection<DataField> sortedFields = this.record.matchSortAndFlattenDataFields();
     for( DataField f: sortedFields ) {
-      String callno = null;
       switch (f.tag) {
       case "506":
         // restrictions on access note
@@ -107,9 +107,9 @@ public class Holding {
           case 'h':
             // If there is a subfield ‡h, then there is a call number. So we will record
             // a concatenation of all the call number fields. If there are (erroneously)
-            // multiple subfield ‡h entries in one field, the callno will be overwritten
+            // multiple subfield ‡h entries in one field, the call will be overwritten
             // and not duplicated in the call number array.
-            callno = f.concatenateSpecificSubfields("hijklm"); break CODE;
+            call = f.concatenateSpecificSubfields("hijklm"); break CODE;
           case 'z':
             notes.add(sf.value); break CODE;
           case 't':
@@ -133,8 +133,6 @@ public class Holding {
         BoundWith b = BoundWith.from876Field(voyager, f);
         if (b != null) boundWiths.put(b.masterItemId,b);
       }
-      if (callno != null)
-        callnos.add(callno);
     }
     this.copy = copy;
     this.notes = (notes.isEmpty()) ? null : notes;
@@ -143,6 +141,7 @@ public class Holding {
     this.indexes = (indexes.isEmpty()) ? null : indexes;
     this.location = holdingLocation;
     this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
+    this.call = call;
   }
 
   Holding(
@@ -152,6 +151,7 @@ public class Holding {
       @JsonProperty("supplements") List<String> supplements,
       @JsonProperty("indexes")     List<String> indexes,
       @JsonProperty("location")    Location location,
+      @JsonProperty("call")        String call,
       @JsonProperty("date")        Integer date,
       @JsonProperty("boundWith")   Map<Integer,BoundWith> boundWiths,
       @JsonProperty("items")       HoldingsItemSummary itemSummary) {
@@ -163,6 +163,7 @@ public class Holding {
     this.location = location;
     this.date = date;
     this.boundWiths = boundWiths;
+    this.call = call;
     this.itemSummary = itemSummary;
   }
 
