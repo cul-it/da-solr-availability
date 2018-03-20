@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 import javax.xml.stream.XMLStreamException;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -28,7 +29,6 @@ import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.MarcRecord;
 import edu.cornell.library.integration.marc.Subfield;
 import edu.cornell.library.integration.marc.MarcRecord.RecordType;
-import edu.cornell.library.integration.voyager.Holdings.HoldingsItemSummary;
 import edu.cornell.library.integration.voyager.Items.Item;
 import edu.cornell.library.integration.voyager.Locations.Location;
 
@@ -207,8 +207,11 @@ public class Holding {
           
     }
     this.itemSummary = new HoldingsItemSummary(
-        itemCount, (unavails.size() == 0)?null:unavails,
-        tempLocs, (returned.size() == 0)?null:returned);
+        itemCount,
+        (itemCount-unavails.size()==0)?null:itemCount-unavails.size(),
+        (unavails.size() == 0)?null:unavails,
+        tempLocs,
+        (returned.size() == 0)?null:returned);
   }
   /**
    * Any time a comma is followed by a character that is not a space, a
@@ -219,6 +222,28 @@ public class Holding {
     if (commaFollowedByNonSpace == null)
       commaFollowedByNonSpace = Pattern.compile(",([^\\s])");
     return commaFollowedByNonSpace.matcher(s).replaceAll(", $1");
+  }
+
+  public static class HoldingsItemSummary {
+    @JsonProperty("count")    public final int itemCount;
+    @JsonProperty("avail")    public final Integer availItemCount;
+    @JsonProperty("unavail")  public final List<ItemReference> unavail;
+    @JsonProperty("tempLoc")  public final List<ItemReference> tempLocs;
+    @JsonProperty("returned") public final List<ItemReference> returned;
+
+    @JsonCreator
+    public HoldingsItemSummary(
+        @JsonProperty("count")    int itemCount,
+        @JsonProperty("avail")    Integer availItemCount,
+        @JsonProperty("unavail")  List<ItemReference> unavail,
+        @JsonProperty("tempLoc")  List<ItemReference> tempLocs,
+        @JsonProperty("returned") List<ItemReference> returned) {
+      this.itemCount = itemCount;
+      this.availItemCount = availItemCount;
+      this.unavail = unavail;
+      this.tempLocs = tempLocs;
+      this.returned = returned;
+    }
   }
 
 }

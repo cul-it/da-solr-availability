@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -14,7 +13,6 @@ import javax.xml.stream.XMLStreamException;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -107,22 +105,4 @@ public class Holdings {
     }
   }
 
-  public static class HoldingsItemSummary {
-    @JsonProperty("count")    public final int itemCount;
-    @JsonProperty("unavail")  public final List<ItemReference> unavail;
-    @JsonProperty("tempLoc")  public final List<ItemReference> tempLocs;
-    @JsonProperty("returned") public final List<ItemReference> returned;
-
-    @JsonCreator
-    public HoldingsItemSummary(
-        @JsonProperty("count")    int itemCount,
-        @JsonProperty("unavail")  List<ItemReference> unavail,
-        @JsonProperty("tempLoc")  List<ItemReference> tempLocs,
-        @JsonProperty("returned") List<ItemReference> returned) {
-      this.itemCount = itemCount;
-      this.unavail = unavail;
-      this.tempLocs = tempLocs;
-      this.returned = returned;
-    }
-  }
 }
