@@ -48,6 +48,7 @@ public class Items {
       "   AND item_barcode.item_barcode = ?";
   static Locations locations = null;
   static ItemTypes itemTypes = null;
+  static CircPolicyGroups circPolicyGroups = null;
 
   public static void detectChangedItems( Connection voyager ) {
 
@@ -61,6 +62,7 @@ public class Items {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
+      circPolicyGroups = new CircPolicyGroups( voyager );
     }
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
       pstmt.setInt(1, mfhd_id);
@@ -79,6 +81,7 @@ public class Items {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
+      circPolicyGroups = new CircPolicyGroups( voyager );
     }
     ItemList il = new ItemList();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
@@ -100,6 +103,7 @@ public class Items {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
+      circPolicyGroups = new CircPolicyGroups( voyager );
     }
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByItemIdQuery)) {
       pstmt.setInt(1, item_id);
@@ -115,6 +119,7 @@ public class Items {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
+      circPolicyGroups = new CircPolicyGroups( voyager );
     }
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByBarcodeQuery)) {
       pstmt.setString(1, barcode);
@@ -192,6 +197,7 @@ public class Items {
     @JsonProperty("recalls")   private final Integer recalls;
     @JsonProperty("onReserve") private final Boolean onReserve;
     @JsonProperty("location")  public final Location location;
+    @JsonProperty("circGrp")   public final Map<Integer,String> circGrp;
     @JsonProperty("type")      private final ItemType type;
     @JsonProperty("status")    public final ItemStatus status;
     @JsonProperty("date")      public final Integer date;
@@ -211,6 +217,7 @@ public class Items {
       if (0 == locationNumber)
         locationNumber = rs.getInt("PERM_LOCATION");
       this.location = locations.getByNumber(locationNumber);
+      this.circGrp = circPolicyGroups.getByLocId(locationNumber);
       int itemTypeId = rs.getInt("TEMP_ITEM_TYPE_ID");
       if (0 == itemTypeId)
         itemTypeId = rs.getInt("ITEM_TYPE_ID");
@@ -231,6 +238,7 @@ public class Items {
         @JsonProperty("recalls")   Integer recalls,
         @JsonProperty("onReserve") Boolean onReserve,
         @JsonProperty("location")  Location location,
+        @JsonProperty("circGrp")   Map<Integer,String> circGrp,
         @JsonProperty("type")      ItemType type,
         @JsonProperty("status")    ItemStatus status,
         @JsonProperty("date")      Integer date
@@ -245,6 +253,7 @@ public class Items {
       this.recalls = recalls;
       this.onReserve = onReserve;
       this.location = location;
+      this.circGrp = circGrp;
       this.type = type;
       this.status = status;
       this.date = date;

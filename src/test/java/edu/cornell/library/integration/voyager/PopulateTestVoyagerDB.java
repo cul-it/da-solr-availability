@@ -67,6 +67,8 @@ public class PopulateTestVoyagerDB {
       item_status(testDb,voyager,testDbstmt);
       circ_transactions(testDb,voyager,testDbstmt);
       location(testDb,voyager,testDbstmt);
+      circ_policy_group(testDb,voyager,testDbstmt);
+      circ_policy_locs(testDb,voyager,testDbstmt);
 
       if (dumpTestDBToStdout) {
         try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, mfhd_id FROM BIB_MFHD")) {
@@ -466,6 +468,46 @@ public class PopulateTestVoyagerDB {
           writeStmt.setInt(2, rs.getInt(2));
           writeStmt.setString(3, rs.getString(3));
           writeStmt.setString(4, rs.getString(4));
+          writeStmt.addBatch();
+        }
+      }
+      writeStmt.executeBatch();
+    }
+  }
+
+  private static void circ_policy_group(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
+    if (! replaceDBContents) return;
+    testDbstmt.executeUpdate("drop table if exists circ_policy_group");
+    testDbstmt.executeUpdate("create table circ_policy_group ( circ_group_name string, circ_group_id int )");
+    System.out.println("Loading circ_policy_group data.");
+    try (PreparedStatement readStmt = voyager.prepareStatement(
+        "SELECT circ_group_name, circ_group_id FROM circ_policy_group");
+        PreparedStatement writeStmt = testDb.prepareStatement(
+            "INSERT INTO circ_policy_group ( circ_group_name, circ_group_id ) VALUES (?,?)")){
+      try (ResultSet rs = readStmt.executeQuery()) {
+        while (rs.next()) {
+          writeStmt.setString(1, rs.getString(1));
+          writeStmt.setInt(2, rs.getInt(2));
+          writeStmt.addBatch();
+        }
+      }
+      writeStmt.executeBatch();
+    }
+  }
+
+  private static void circ_policy_locs(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
+    if (! replaceDBContents) return;
+    testDbstmt.executeUpdate("drop table if exists circ_policy_locs");
+    testDbstmt.executeUpdate("create table circ_policy_locs ( location_id int, circ_group_id int )");
+    System.out.println("Loading circ_policy_locs data.");
+    try (PreparedStatement readStmt = voyager.prepareStatement(
+        "SELECT location_id, circ_group_id FROM circ_policy_locs");
+        PreparedStatement writeStmt = testDb.prepareStatement(
+            "INSERT INTO circ_policy_locs ( location_id, circ_group_id ) VALUES (?,?)")){
+      try (ResultSet rs = readStmt.executeQuery()) {
+        while (rs.next()) {
+          writeStmt.setInt(1, rs.getInt(1));
+          writeStmt.setInt(2, rs.getInt(2));
           writeStmt.addBatch();
         }
       }
