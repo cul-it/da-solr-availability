@@ -141,7 +141,11 @@ public class Holding {
     this.indexes = (indexes.isEmpty()) ? null : indexes;
     this.location = holdingLocation;
     this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
-    this.call = call;
+    if (call == null || call.equalsIgnoreCase("no call number")
+        || holdingLocation == null || holdingLocation.equals(locations.getByCode("serv,remo")))
+      this.call = null;
+    else
+      this.call = call;
   }
 
   Holding(
