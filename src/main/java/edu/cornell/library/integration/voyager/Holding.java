@@ -189,7 +189,7 @@ public class Holding {
       if (! item.status.available) {
         item.status.available = null;
         unavails.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null));
-      } else if (item.status.codes.values().contains("Discharged")) {
+      } else if (item.status.code.values().contains("Discharged")) {
         returned.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null));
       }
     }

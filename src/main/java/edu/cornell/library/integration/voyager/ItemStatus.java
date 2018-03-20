@@ -18,18 +18,18 @@ import edu.cornell.library.integration.voyager.ItemStatuses.StatusCode;
 
 public class ItemStatus {
   public Boolean available;
-  public final Map<Integer,String> codes;
+  public final Map<Integer,String> code;
   public final Integer due;
   public final Integer date;
 
   @JsonCreator
   public ItemStatus(
       @JsonProperty("available") Boolean available,
-      @JsonProperty("codes")     Map<Integer,String> codes,
+      @JsonProperty("code")      Map<Integer,String> code,
       @JsonProperty("due")       Integer due,
       @JsonProperty("date")      Integer date) {
     this.available = available;
-    this.codes = codes;
+    this.code = code;
     this.due = due;
     this.date = date;
   }
@@ -64,10 +64,10 @@ public class ItemStatus {
       this.available = false;
     if (! statuses.isEmpty()) {
       StatusCode c = statuses.iterator().next();
-      this.codes = new HashMap<>();
-      this.codes.put(c.id, c.name);
+      this.code = new HashMap<>();
+      this.code.put(c.id, c.name);
     } else
-      this.codes = null;
+      this.code = null;
     Integer dueDate = null;
     try ( PreparedStatement pstmt = voyager.prepareStatement(circQ)) {
       pstmt.setInt(1, item_id);

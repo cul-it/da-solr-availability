@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.cornell.library.integration.marc.DataField;
+import edu.cornell.library.integration.voyager.BoundWith;
 
 public class BoundWithTest {
 

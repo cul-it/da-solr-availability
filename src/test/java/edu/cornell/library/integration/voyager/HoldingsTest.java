@@ -21,6 +21,8 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.voyager.Holdings;
+import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
