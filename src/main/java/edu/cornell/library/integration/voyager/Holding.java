@@ -40,7 +40,7 @@ public class Holding {
   @JsonProperty("holdings")    private final List<String> holdings;
   @JsonProperty("supplements") private final List<String> supplements;
   @JsonProperty("indexes")     private final List<String> indexes;
-  @JsonProperty("location")    private Location location;
+  @JsonProperty("location")    public Location location;
   @JsonProperty("call")        public final String call;
   @JsonProperty("date")        public final Integer date;
   @JsonProperty("boundWith")   public final Map<Integer,BoundWith> boundWiths;
@@ -141,7 +141,7 @@ public class Holding {
     this.indexes = (indexes.isEmpty()) ? null : indexes;
     this.location = holdingLocation;
     this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
-    if (call == null || call.equalsIgnoreCase("no call number")
+    if (call == null || call.equalsIgnoreCase("no call number") || call.equalsIgnoreCase("no call number.")
         || holdingLocation == null || holdingLocation.equals(locations.getByCode("serv,remo")))
       this.call = null;
     else

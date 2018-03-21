@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -95,6 +96,9 @@ public class Holdings {
     }
     public Holding get( Integer mfhdId ) {
       return holdings.get(mfhdId);
+    }
+    public Collection<Holding> values() {
+      return this.holdings.values();
     }
 
     public Set<Integer> getMfhdIds( ) {
