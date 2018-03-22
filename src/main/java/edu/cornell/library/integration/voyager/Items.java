@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.ItemTypes.ItemType;
 import edu.cornell.library.integration.voyager.Locations.Location;
 
@@ -77,7 +78,7 @@ public class Items {
     }
   }
 
-  public static ItemList retrieveItemsByHoldingIds( Connection voyager, List<Integer> mfhd_ids ) throws SQLException {
+  public static ItemList retrieveItemsForHoldings(Connection voyager, HoldingSet holdings) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
@@ -85,7 +86,7 @@ public class Items {
     }
     ItemList il = new ItemList();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
-      for (int mfhd_id : mfhd_ids) {
+      for (int mfhd_id : holdings.getMfhdIds()) {
         pstmt.setInt(1, mfhd_id);
         try (ResultSet rs = pstmt.executeQuery()) {
           TreeSet<Item> items = new TreeSet<>();
@@ -97,7 +98,6 @@ public class Items {
     }
     return il;
   }
-
 
   public static Item retrieveItemByItemId( Connection voyager, int item_id ) throws SQLException {
     if (locations == null) {
@@ -208,7 +208,7 @@ public class Items {
 
       this.copy = rs.getInt("COPY_NUMBER");
       this.sequence = rs.getInt("ITEM_SEQUENCE_NUMBER");
-      this.enumeration = concatEnum(rs.getString("ITEM_ENUM"),rs.getString("CHRON"),rs.getString("YEAR"));;
+      this.enumeration = concatEnum(rs.getString("ITEM_ENUM"),rs.getString("CHRON"),rs.getString("YEAR"));
       this.caption = rs.getString("CAPTION");
       this.holds = (rs.getInt("HOLDS_PLACED") == 0)?null:rs.getInt("HOLDS_PLACED");
       this.recalls = (rs.getInt("RECALLS_PLACED") == 0)?null:rs.getInt("RECALLS_PLACED");
@@ -286,4 +286,5 @@ public class Items {
       return null;
     return String.join(" - ", enumchronyear);
   }
+
 }

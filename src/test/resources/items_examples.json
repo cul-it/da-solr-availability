@@ -79,20 +79,20 @@
 # ON RESERVE
 
 
-{"10287643":[
-   {"id":10345845,"copy":2,"sequence":1,"onReserve":true,
-    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
-    "circGrp":{"13":"ILR Circ Group"},
-    "type":{"id":26,"name":"2hrres"},
-    "status":{"available":true,"code":{"11":"Discharged"},"date":1505164520},
-    "date":1502385694}],
- "9957560":[
+{"9957560":[
    {"id":10007450,"copy":1,"sequence":1,"onReserve":true,
     "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":26,"name":"2hrres"},
     "status":{"available":true,"code":{"11":"Discharged"},"date":1505328069},
-    "date":1472147590}]}
+    "date":1472147590}],
+ "10287643":[
+   {"id":10345845,"copy":2,"sequence":1,"onReserve":true,
+    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
+    "circGrp":{"13":"ILR Circ Group"},
+    "type":{"id":26,"name":"2hrres"},
+    "status":{"available":true,"code":{"11":"Discharged"},"date":1505164520},
+    "date":1502385694}]}
 
 
 

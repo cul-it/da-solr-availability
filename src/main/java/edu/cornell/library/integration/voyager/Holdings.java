@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
@@ -16,6 +17,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class Holdings {
 
@@ -104,6 +107,13 @@ public class Holdings {
     public Set<Integer> getMfhdIds( ) {
       return holdings.keySet();
     }
+
+    public void summarizeItemAvailability( ItemList items ) {
+      for ( Entry<Integer, Holding> e : this.holdings.entrySet() )
+        e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey()));
+      
+    }
+
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this.holdings);
     }

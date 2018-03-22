@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 //import java.util.Properties;
+import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -45,14 +46,14 @@ public class HoldingsTest {
   public static void connect() throws SQLException, ClassNotFoundException, IOException {
 
     // Connect to live Voyager database
-/*    Properties prop = new Properties();
+    Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
     Class.forName("oracle.jdbc.driver.OracleDriver");
     voyagerLive = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
-*/
+
     // Connect to test Voyager database
     Class.forName("org.sqlite.JDBC");
     voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
@@ -163,5 +164,30 @@ public class HoldingsTest {
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJson2202712").toJson(),h.toJson());
+  }
+
+  @Test
+  public void testOnSiteUse() throws SQLException, IOException, XMLStreamException {
+    int bib = 867;
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
+    for (int mfhdId : h.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+//    assertEquals(examples.get("asdf").toJson(),h.toJson());
+// current response is wrong. Shows no availability, should reflect "on site only":
+//{"5034":{"location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+    //     "call":"S21 .Z163 Serial KK","date":959745600}}
+  }
+
+  @Test
+  public void testInProcess() throws SQLException, IOException, XMLStreamException {
+    int bib = 9295667;
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
+    for (int mfhdId : h.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    assertEquals(examples.get("expectedInProcess").toJson(),h.toJson());
   }
 }

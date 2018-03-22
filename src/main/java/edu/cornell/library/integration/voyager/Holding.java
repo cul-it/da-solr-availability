@@ -190,7 +190,7 @@ public class Holding {
     for (Item item : treeSet) {
       itemCount++;
       itemLocations.add(item.location);
-      if (! item.status.available) {
+      if (! item.status.available || (this.call != null && this.call.matches(".*In Process.*"))) {
         item.status.available = null;
         unavails.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null));
       } else if (item.status.code.values().contains("Discharged")) {

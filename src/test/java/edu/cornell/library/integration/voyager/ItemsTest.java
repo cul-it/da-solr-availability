@@ -9,11 +9,12 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.xml.stream.XMLStreamException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,7 +23,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.voyager.Holdings;
 import edu.cornell.library.integration.voyager.Items;
+import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items.Item;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
@@ -71,17 +74,6 @@ public class ItemsTest {
   }
 
   @Test
-  public void getItemsWithMultipleHoldingsTest() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingIds(voyagerTest, Arrays.asList(1234567));
-    assertEquals(examples.get("expectedJson2282772").toJson(),items.toJson());
-
-    items = Items.retrieveItemsByHoldingIds(voyagerTest, Arrays.asList(
-        4977210,4977214,5860317,7367226,7371275,7371277,7371279,7371281,7371283,7371284,
-        7371302,7383225,7383631,7383632,7383752,7383755,7383965,7383966,7387210,7391702  ));
-    assertEquals(examples.get("expectedJsonELECTRICSHEEP").toJson(),items.toJson());
-  }
-
-  @Test
   public void onHoldTest() throws SQLException, JsonProcessingException {
     ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 2932);
     assertEquals(examples.get("expectedJson18847").toJson(),items.toJson());
@@ -94,14 +86,15 @@ public class ItemsTest {
   }
 
   @Test
-  public void onReserveTest() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingIds(voyagerTest, Arrays.asList(10287643,9957560));
+  public void onReserveTest() throws SQLException, IOException, XMLStreamException {
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest,9628566);
+    ItemList items = Items.retrieveItemsForHoldings(voyagerTest, holdings);
     assertEquals(examples.get("expectedJsonOnReserve").toJson(),items.toJson());
   }
 
   @Test
   public void multiVolTest() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingIds(voyagerTest, Arrays.asList(4521000));
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 4521000);
     assertEquals(examples.get("expectedJsonMultiVol").toJson(),items.toJson());
   }
 

@@ -387,5 +387,20 @@
    "date":1505847360}}
 
 
+,"expectedInProcess":
+
+
+{"9631041":{
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "call":"In Process",
+   "date":1520460653,
+   "items":{
+     "count":1,
+     "unavail":[{
+        "id":10467211,
+        "status":{"code":{"1":"Not Charged"},"date":1520460691}
+}]}}}
+
+
 
 }
