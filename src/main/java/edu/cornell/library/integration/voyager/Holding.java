@@ -45,6 +45,7 @@ public class Holding {
   @JsonProperty("date")        public final Integer date;
   @JsonProperty("boundWith")   public final Map<Integer,BoundWith> boundWiths;
   @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
+  @JsonProperty("order")       public String openOrderNote = null;
 
   @JsonIgnore public MarcRecord record;
   @JsonIgnore static Locations locations = null;
@@ -158,7 +159,8 @@ public class Holding {
       @JsonProperty("call")        String call,
       @JsonProperty("date")        Integer date,
       @JsonProperty("boundWith")   Map<Integer,BoundWith> boundWiths,
-      @JsonProperty("items")       HoldingsItemSummary itemSummary) {
+      @JsonProperty("items")       HoldingsItemSummary itemSummary,
+      @JsonProperty("order")       String openOrderNote) {
     this.copy = copy;
     this.notes = (notes == null || notes.isEmpty()) ? null : notes;
     this.holdings = (holdings == null || holdings.isEmpty()) ? null : holdings;
@@ -169,6 +171,7 @@ public class Holding {
     this.boundWiths = boundWiths;
     this.call = call;
     this.itemSummary = itemSummary;
+    this.openOrderNote = openOrderNote;
   }
 
   public String toJson() throws JsonProcessingException {
@@ -185,16 +188,17 @@ public class Holding {
       for (Entry<Integer,BoundWith> bw : boundWiths.entrySet()) {
         itemCount++;
         if (! bw.getValue().status.available)
-          unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null));
+          unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null,null,null));
       }
     for (Item item : treeSet) {
       itemCount++;
       itemLocations.add(item.location);
-      if (! item.status.available || (this.call != null && this.call.matches(".*In Process.*"))) {
+      if (! item.status.available // || (this.call != null && this.call.matches(".*In Process.*"))
+          ) {
         item.status.available = null;
-        unavails.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null));
+        unavails.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null,item.holds,item.recalls));
       } else if (item.status.code.values().contains("Discharged")) {
-        returned.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null));
+        returned.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null,null,null));
       }
     }
     if (itemCount == 0)
@@ -207,7 +211,7 @@ public class Holding {
       tempLocs = new ArrayList<>();
       for (Item i : treeSet)
         if (! i.location.equals(this.location))
-          tempLocs.add(new ItemReference(i.itemId,null,i.enumeration,null,i.location));
+          tempLocs.add(new ItemReference(i.itemId,null,i.enumeration,null,i.location,i.holds,i.recalls));
           
     }
     this.itemSummary = new HoldingsItemSummary(

@@ -108,6 +108,20 @@ public class Holdings {
       return holdings.keySet();
     }
 
+    public boolean applyOpenOrderInformation( Connection voyager, Integer bibId ) throws SQLException {
+      int noItemsMfhd = 0;
+      for (Entry<Integer,Holding> e : this.holdings.entrySet())
+        if (e.getValue().itemSummary == null) {
+          noItemsMfhd = e.getKey();
+          break;
+        }
+      if (noItemsMfhd == 0) return false;
+      String onote = OpenOrder.getOrderNote(voyager, bibId);
+      if (onote == null) return false;
+      this.holdings.get(noItemsMfhd).openOrderNote = onote;
+      return true;
+    }
+
     public void summarizeItemAvailability( ItemList items ) {
       for ( Entry<Integer, Holding> e : this.holdings.entrySet() )
         e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey()));

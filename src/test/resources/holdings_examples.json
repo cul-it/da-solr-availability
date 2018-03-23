@@ -396,11 +396,7 @@
    "call":"In Process",
    "date":1520460653,
    "items":{
-     "count":1,
-     "unavail":[{
-        "id":10467211,
-        "status":{"code":{"1":"Not Charged"},"date":1520460691}
-}]}}}
+     "count":1,"avail":1}}}
 
 
 

@@ -193,8 +193,8 @@ public class Items {
     @JsonProperty("sequence")  private final int sequence;
     @JsonProperty("enum")      public final String enumeration;
     @JsonProperty("caption")   private final String caption;
-    @JsonProperty("holds")     private final Integer holds;
-    @JsonProperty("recalls")   private final Integer recalls;
+    @JsonProperty("holds")     public final Integer holds;
+    @JsonProperty("recalls")   public final Integer recalls;
     @JsonProperty("onReserve") private final Boolean onReserve;
     @JsonProperty("location")  public final Location location;
     @JsonProperty("circGrp")   public final Map<Integer,String> circGrp;

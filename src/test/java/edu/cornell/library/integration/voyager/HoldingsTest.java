@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-//import java.util.Properties;
 import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;

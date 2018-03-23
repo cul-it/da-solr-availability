@@ -39,8 +39,12 @@ public class BibliographicSummary {
 
       if (h.itemSummary != null && h.itemSummary.availItemCount != null)
         b.availAt.put(h.location.name, h.call);
-      else
-        b.unavailAt.put(h.location.name, h.call);
+      else {
+        if (h.openOrderNote != null)
+          b.unavailAt.put(h.location.name, h.openOrderNote);
+        else
+          b.unavailAt.put(h.location.name, h.call);
+      }
 
       if ( h.itemSummary != null && h.itemSummary.tempLocs != null ) {
         List<Integer> unavailableItems = new ArrayList<>();
