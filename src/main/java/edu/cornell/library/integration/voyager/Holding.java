@@ -178,8 +178,9 @@ public class Holding {
     return mapper.writeValueAsString(this);
   }
 
-  public void summarizeItemAvailability( TreeSet<Item> treeSet ) {
+  public boolean summarizeItemAvailability( TreeSet<Item> treeSet ) {
     int itemCount = 0;
+    boolean discharged = false;
     List<ItemReference> unavails = new ArrayList<>();
     List<ItemReference> returned = new ArrayList<>();
     List<ItemReference> tempLocs = null;
@@ -198,11 +199,12 @@ public class Holding {
         item.status.available = null;
         unavails.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null,item.holds,item.recalls));
       } else if (item.status.code.values().contains("Discharged")) {
+        discharged = true;
         returned.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null,null,null));
       }
     }
     if (itemCount == 0)
-      return;
+      return false;
     if (itemLocations.size() == 1) {
       Location itemLoc = itemLocations.iterator().next();
       if (! itemLoc.equals(this.location))
@@ -220,6 +222,7 @@ public class Holding {
         (unavails.size() == 0)?null:unavails,
         tempLocs,
         (returned.size() == 0)?null:returned);
+    return discharged;
   }
   /**
    * Any time a comma is followed by a character that is not a space, a

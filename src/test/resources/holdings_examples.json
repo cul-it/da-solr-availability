@@ -289,7 +289,7 @@
 
 
 ,"expectedJsonOnReserve":
-# bib 9628566, both holdings have loc "ilr", but they are overriden because the items have temp loc "ilr,res"
+# bib 9628566, both holdings have loc "ilr", but they are overridden because the items have temp loc "ilr,res"
 
 
 {"9957560":{

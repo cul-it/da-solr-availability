@@ -122,10 +122,12 @@ public class Holdings {
       return true;
     }
 
-    public void summarizeItemAvailability( ItemList items ) {
+    public boolean summarizeItemAvailability( ItemList items ) {
+      boolean discharged = false;
       for ( Entry<Integer, Holding> e : this.holdings.entrySet() )
-        e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey()));
-      
+        if ( e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey())) )
+          discharged = true;
+      return discharged;
     }
 
     public String toJson() throws JsonProcessingException {
