@@ -198,7 +198,7 @@ public class Items {
     @JsonProperty("onReserve") private final Boolean onReserve;
     @JsonProperty("location")  public final Location location;
     @JsonProperty("circGrp")   public final Map<Integer,String> circGrp;
-    @JsonProperty("type")      private final ItemType type;
+    @JsonProperty("type")      public final ItemType type;
     @JsonProperty("status")    public final ItemStatus status;
     @JsonProperty("date")      public final Integer date;
 

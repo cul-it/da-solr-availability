@@ -42,10 +42,13 @@ public class Holding {
   @JsonProperty("indexes")     private final List<String> indexes;
   @JsonProperty("location")    public Location location;
   @JsonProperty("call")        public final String call;
-  @JsonProperty("date")        public final Integer date;
   @JsonProperty("boundWith")   public final Map<Integer,BoundWith> boundWiths;
   @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
   @JsonProperty("order")       public String openOrderNote = null;
+  @JsonProperty("avail")       public Boolean avail = null;
+  @JsonProperty("circ")        public Boolean circ = null;
+  @JsonProperty("online")      public Boolean online = null;
+  @JsonProperty("date")        public final Integer date;
 
   @JsonIgnore public MarcRecord record;
   @JsonIgnore static Locations locations = null;
@@ -140,10 +143,12 @@ public class Holding {
     this.holdings = (holdings.isEmpty()) ? null : holdings;
     this.supplements = (supplements.isEmpty()) ? null : supplements;
     this.indexes = (indexes.isEmpty()) ? null : indexes;
-    this.location = holdingLocation;
+    if (holdingLocation != null && holdingLocation.equals(locations.getByCode("serv,remo")))
+      this.online = true;
+    else
+      this.location = holdingLocation;
     this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
-    if (call == null || call.equalsIgnoreCase("no call number") || call.equalsIgnoreCase("no call number.")
-        || holdingLocation == null || holdingLocation.equals(locations.getByCode("serv,remo")))
+    if ( holdingLocation == null || call == null || call.matches(".*[Nn]o [Cc]all [Nn]umber.*") )
       this.call = null;
     else
       this.call = call;
@@ -157,6 +162,9 @@ public class Holding {
       @JsonProperty("indexes")     List<String> indexes,
       @JsonProperty("location")    Location location,
       @JsonProperty("call")        String call,
+      @JsonProperty("avail")       Boolean avail,
+      @JsonProperty("circ")        Boolean circ,
+      @JsonProperty("online")      Boolean online,
       @JsonProperty("date")        Integer date,
       @JsonProperty("boundWith")   Map<Integer,BoundWith> boundWiths,
       @JsonProperty("items")       HoldingsItemSummary itemSummary,
@@ -172,10 +180,20 @@ public class Holding {
     this.call = call;
     this.itemSummary = itemSummary;
     this.openOrderNote = openOrderNote;
+    this.avail = avail;
+    this.circ = circ;
+    this.online = online;
   }
 
   public String toJson() throws JsonProcessingException {
     return mapper.writeValueAsString(this);
+  }
+
+  public boolean noItemsAvailability() {
+	  if (this.itemSummary != null) return false;
+	  if (this.online != null && this.online) return false;
+	  this.avail = this.openOrderNote == null;
+	  return true;
   }
 
   public boolean summarizeItemAvailability( TreeSet<Item> treeSet ) {
@@ -191,6 +209,7 @@ public class Holding {
         if (! bw.getValue().status.available)
           unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null,null,null));
       }
+    boolean circ = false;
     for (Item item : treeSet) {
       itemCount++;
       itemLocations.add(item.location);
@@ -202,9 +221,12 @@ public class Holding {
         discharged = true;
         returned.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null,null,null));
       }
+      if (item.type != null && ! item.type.name.equals("nocirc"))
+        circ = true;
     }
     if (itemCount == 0)
       return false;
+    this.circ = circ;
     if (itemLocations.size() == 1) {
       Location itemLoc = itemLocations.iterator().next();
       if (! itemLoc.equals(this.location))

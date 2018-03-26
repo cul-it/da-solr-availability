@@ -58,7 +58,7 @@ public class BibliographicSummaryTest {
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(h);
-    System.out.println(b.toJson());
+    System.out.println("Online: "+b.toJson());
   }
 
   @Test

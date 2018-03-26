@@ -33,11 +33,14 @@ public class BibliographicSummary {
 
     BibliographicSummary b = new BibliographicSummary();
     for ( Holding h : holdings.values() ) {
-      if ( h.location == null ) continue;
-      if ( h.location.code.equals("serv,remo") )
+
+      if ( h.online != null && h.online )
       {   b.online = true; continue;   }
 
-      if (h.itemSummary != null && h.itemSummary.availItemCount != null)
+      if ( h.location == null ) continue;
+
+      if ((h.avail != null && h.avail) ||
+          (h.itemSummary != null && h.itemSummary.availItemCount != null))
         b.availAt.put(h.location.name, h.call);
       else {
         if (h.openOrderNote != null)

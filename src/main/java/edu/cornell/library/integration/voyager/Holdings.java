@@ -108,17 +108,23 @@ public class Holdings {
       return holdings.keySet();
     }
 
+    public boolean noItemsAvailability() {
+        boolean noItems = false;
+        for ( Holding h : this.holdings.values() )
+          if ( h.noItemsAvailability() )
+            noItems = true;
+        return noItems;
+    }
+
     public boolean applyOpenOrderInformation( Connection voyager, Integer bibId ) throws SQLException {
-      int noItemsMfhd = 0;
-      for (Entry<Integer,Holding> e : this.holdings.entrySet())
-        if (e.getValue().itemSummary == null) {
-          noItemsMfhd = e.getKey();
-          break;
-        }
-      if (noItemsMfhd == 0) return false;
-      String onote = OpenOrder.getOrderNote(voyager, bibId);
-      if (onote == null) return false;
-      this.holdings.get(noItemsMfhd).openOrderNote = onote;
+      OpenOrder order = new OpenOrder(voyager, bibId);
+      if (order.note == null || order.mfhdId == null) return false;
+      if (! this.holdings.containsKey(order.mfhdId)) {
+        System.out.println( "Order note on bib "+bibId+" associated with holding "+order.mfhdId+
+            ", which is not currently an active holding for this bib." );
+        return false;
+      }
+      this.holdings.get(order.mfhdId).openOrderNote = order.note;
       return true;
     }
 
