@@ -11,11 +11,15 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -67,6 +71,26 @@ public final class Locations {
       return _byNumber.get(number);
     return null;
   }
+
+  public static Set<String> facetValues( final Location l, String call, String holdingNote ) {
+    String lcCall = (call == null)        ? null : call.toLowerCase();
+    String lcNote = (holdingNote == null) ? null : holdingNote.toLowerCase();
+/*    if (l.code.equals("olin,501")) {
+    System.out.println(l+": "+((lcCall == null)? null : lcCall)+": "+((lcNote == null) ? null : lcNote));
+    System.out.println( _facetsByLocation.get(l)); } */
+    if ( _facetsByLocation.containsKey(l) )
+      for (FacetMapRule rule : _facetsByLocation.get(l))
+        if (( rule.callPrefix == null  || (lcCall != null && lcCall.startsWith(rule.callPrefix)) ) &&
+            ( rule.callSuffix == null  || (lcCall != null && lcCall.endsWith(rule.callSuffix  )) ) &&
+            ( rule.holdingNote == null || (lcNote != null && lcNote.contains(rule.holdingNote )) ) ) {
+          if ( ! rule.suppress )
+            return rule.facetValues;
+          return new LinkedHashSet<String>();
+        }
+    System.out.println("Failed to map facet location for: "+l);
+    return new LinkedHashSet<String>();
+  }
+
 
   /**
    * Structure containing values relating to holdings location. <b>Name</b> and <b>library</b>
@@ -133,7 +157,7 @@ public final class Locations {
         @JsonProperty("library") String library) {
       this.code = code;
       this.number = number;
-      this.name = name;
+      this.name = name.trim();
       this.library = library;
     }
   }
@@ -142,6 +166,9 @@ public final class Locations {
 
   private static final Map<String, Location> _byCode = new HashMap<>();
   private static final Map<Integer, Location> _byNumber = new HashMap<>();
+  private static final Map<Location, List<FacetMapRule>> _facetsByLocation = new HashMap<>();
+
+
 
   private static final String getLocationsQuery =
       "SELECT " +
@@ -152,7 +179,8 @@ public final class Locations {
       "FROM LOCATION ";
 
   private static void populateLocationMaps(final Connection voyager) throws SQLException {
-    libraryPatterns = loadPatternMap("library_names.txt");
+    Map<String, String> libraryPatterns = loadPatternMap("library_names.txt");
+    List<FacetMapRule> facetPatterns = loadFacetPatternMap("LocationFacetMapping.txt");
 
     try ( Statement stmt = voyager.createStatement(); ResultSet rs = stmt.executeQuery(getLocationsQuery) ) {
 
@@ -160,14 +188,22 @@ public final class Locations {
         String name = rs.getString(3);
         if (name == null)
           name = rs.getString(4);
-        Location l = new Location(rs.getString(1), rs.getInt(2), name, getLibrary(name));
+        Location l = new Location(rs.getString(1), rs.getInt(2), name, getLibrary(name, libraryPatterns));
         _byCode.put(l.code, l);
         _byNumber.put(l.number, l);
+        List<FacetMapRule> locationFacetRules = new ArrayList<>();
+        for (FacetMapRule rule : facetPatterns)
+          if (rule.displayName.equals(l.name))
+            locationFacetRules.add(rule);
+        System.out.println("*"+l.toString());
+        for (FacetMapRule rule : locationFacetRules)
+          System.out.println("\t"+rule.toString());
+        _facetsByLocation.put(l, locationFacetRules);
       }
     }
   }
 
-  private static String getLibrary(String name) {
+  private static String getLibrary(String name, Map<String, String> libraryPatterns) {
     if (name == null)
       return null;
     String lcName = name.toLowerCase();
@@ -179,8 +215,6 @@ public final class Locations {
     }
     return null;
   }
-
-  private static Map<String, String> libraryPatterns = null;
 
   private static Map<String, String> loadPatternMap(String filename) {
     URL url = ClassLoader.getSystemResource(filename);
@@ -204,4 +238,72 @@ public final class Locations {
     }
     return patternMap;
   }
+
+  private static List<FacetMapRule> loadFacetPatternMap(String filename) {
+    System.out.println(filename);
+    URL url = ClassLoader.getSystemResource(filename);
+    System.out.println(url);
+    List<FacetMapRule> patternMap = new ArrayList<>();
+    try {
+      Path p = Paths.get(url.toURI());
+      List<String> sites = Files.readAllLines(p, StandardCharsets.UTF_8);
+      for (String site : sites) {
+        String[] parts = site.split("\\t", 6);
+        if (parts.length < 6)
+          continue;
+        FacetMapRule rule = new FacetMapRule(
+            parts[0],parts[1].contains("X"),parts[2].toLowerCase(),
+            parts[3].toLowerCase(),parts[4].toLowerCase(),parts[5]);
+        patternMap.add(rule);
+            
+      }
+    } catch (URISyntaxException e) {
+      // This should never happen since the URI syntax is machine generated.
+      e.printStackTrace();
+    } catch (IOException e) {
+      System.out.println("Couldn't read config file for site identifications.");
+      e.printStackTrace();
+      System.exit(1);
+    }
+    return patternMap;
+  }
+
+  private static class FacetMapRule {
+
+    final String displayName;
+    final Boolean suppress;
+    final String callPrefix;
+    final String callSuffix;
+    final String holdingNote;
+    final Set<String> facetValues;
+
+    public String toString() {
+      return String.format("%s (%s:%s:%s) => %s", this.displayName,
+          ((this.callPrefix == null)? "" : this.callPrefix),
+          ((this.callSuffix == null)? "" : this.callSuffix),
+          ((this.holdingNote == null)? "" : this.holdingNote),
+          String.join(" ** ", facetValues)
+          );
+    }
+    public FacetMapRule( String displayName, Boolean suppress, String callPrefix, String callSuffix, String holdingNote, String facetValue) {
+
+      this.displayName = displayName.trim().replaceAll("\"", "");
+      this.suppress    = suppress;
+      this.callPrefix  = (callPrefix.isEmpty()) ? null : callPrefix;
+      this.callSuffix  = (callSuffix.isEmpty()) ? null : callSuffix;
+      this.holdingNote = (holdingNote.isEmpty()) ? null : holdingNote;
+
+      List<String> parts = Arrays.asList(facetValue.replaceAll("\"","").split(" > "));
+      this.facetValues = new LinkedHashSet<>();
+      List<String> partsToJoin = new ArrayList<>();
+      for (int i = 0; i < parts.size(); i++) {
+        partsToJoin.add(parts.get(i));
+        this.facetValues.add( String.join(" > ",partsToJoin));        
+      }
+      if (this.displayName.contains("Law"))
+        System.out.println("501:      "+this);
+    }
+  }
+
+  
 }

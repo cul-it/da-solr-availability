@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -196,6 +197,25 @@ public class Holding {
 	  return true;
   }
 
+  @JsonIgnore
+  public Set<String> getLocationFacetValues() {
+    Set<String> facetValues = new LinkedHashSet<>();
+    if (this.location != null)
+      facetValues.addAll(
+          Locations.facetValues(this.location, this.call, (this.notes == null) ? null : String.join(" ", this.notes)));
+    else return facetValues;
+
+    if (this.itemSummary != null && this.itemSummary.tempLocs != null)
+      for (ItemReference ir : this.itemSummary.tempLocs)
+        if (ir.location != null) {
+          Set<String> tempLocFacetValues = Locations.facetValues(ir.location, this.call,
+              (this.notes == null) ? null : String.join(" ", this.notes));
+          if (tempLocFacetValues != null)
+            facetValues.addAll(tempLocFacetValues);
+        }
+    return facetValues;
+  }
+
   public boolean summarizeItemAvailability( TreeSet<Item> treeSet ) {
     int itemCount = 0;
     boolean discharged = false;
@@ -250,7 +270,7 @@ public class Holding {
    * Any time a comma is followed by a character that is not a space, a
    * space will be inserted.
    */
-  private static Pattern commaFollowedByNonSpace = null;
+  @JsonIgnore private static Pattern commaFollowedByNonSpace = null;
   private static String insertSpaceAfterCommas( String s ) {
     if (commaFollowedByNonSpace == null)
       commaFollowedByNonSpace = Pattern.compile(",([^\\s])");

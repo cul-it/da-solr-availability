@@ -34,8 +34,8 @@ public class OpenOrderTest {
 
   @Test
   public void onOrderTest() throws SQLException {
-    String onote = OpenOrder.getOrderNote(voyagerLive, 10314002);
-    assertEquals("1 Copy Ordered as of 2018-03-14",onote);
+    OpenOrder o = new OpenOrder(voyagerLive, 10314002);
+    assertEquals("1 Copy Ordered as of 2018-03-14",o.note);
   }
 
 }

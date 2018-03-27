@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -115,6 +116,20 @@ public class Holdings {
             noItems = true;
         return noItems;
     }
+
+    public Set<String> getLocationFacetValues() {
+
+      Set<String> facetValues = new LinkedHashSet<>();
+      for (Holding h : this.holdings.values()) {
+        if (h.online != null && h.online)
+          continue;
+        Set<String> holdingFacetValues = h.getLocationFacetValues();
+        if (holdingFacetValues != null)
+          facetValues.addAll(holdingFacetValues);
+      }
+      return facetValues;
+    }
+
 
     public boolean applyOpenOrderInformation( Connection voyager, Integer bibId ) throws SQLException {
       OpenOrder order = new OpenOrder(voyager, bibId);
