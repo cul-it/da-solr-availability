@@ -80,9 +80,9 @@ public final class Locations {
     System.out.println( _facetsByLocation.get(l)); } */
     if ( _facetsByLocation.containsKey(l) )
       for (FacetMapRule rule : _facetsByLocation.get(l))
-        if (( rule.callPrefix == null  || (lcCall != null && lcCall.startsWith(rule.callPrefix)) ) &&
-            ( rule.callSuffix == null  || (lcCall != null && lcCall.endsWith(rule.callSuffix  )) ) &&
-            ( rule.holdingNote == null || (lcNote != null && lcNote.contains(rule.holdingNote )) ) ) {
+        if (( rule.callPrefix == null  || (lcCall != null && lcCall.startsWith(rule.callPrefix )) ) &&
+            ( rule.callSuffix == null  || (lcCall != null && lcCall.endsWith(  rule.callSuffix )) ) &&
+            ( rule.holdingNote == null || (lcNote != null && lcNote.contains(  rule.holdingNote)) ) ) {
           if ( ! rule.suppress )
             return rule.facetValues;
           return new LinkedHashSet<String>();
@@ -115,6 +115,7 @@ public final class Locations {
     public final Integer number;
     public final String name;
     public final String library;
+    public final String hoursCode;
 
     /**
      * @return
@@ -128,6 +129,8 @@ public final class Locations {
       sb.append("; number: ").append(this.number);
       sb.append("; name: ").append(this.name);
       sb.append("; library: ").append(this.library);
+      if (hoursCode != null)
+        sb.append("; hoursCode: ").append(this.hoursCode);
       return sb.toString();
     }
 
@@ -151,14 +154,17 @@ public final class Locations {
 
     @JsonCreator
     private Location(
-        @JsonProperty("code")    String code,
-        @JsonProperty("number")  Integer number,
-        @JsonProperty("name")    String name,
-        @JsonProperty("library") String library) {
+        @JsonProperty("code")      String code,
+        @JsonProperty("number")    Integer number,
+        @JsonProperty("name")      String name,
+        @JsonProperty("library")   String library,
+        @JsonProperty("hoursCode") String hoursCode
+        ) {
       this.code = code;
       this.number = number;
       this.name = name.trim();
       this.library = library;
+      this.hoursCode = hoursCode;
     }
   }
 
@@ -167,8 +173,6 @@ public final class Locations {
   private static final Map<String, Location> _byCode = new HashMap<>();
   private static final Map<Integer, Location> _byNumber = new HashMap<>();
   private static final Map<Location, List<FacetMapRule>> _facetsByLocation = new HashMap<>();
-
-
 
   private static final String getLocationsQuery =
       "SELECT " +
@@ -179,7 +183,7 @@ public final class Locations {
       "FROM LOCATION ";
 
   private static void populateLocationMaps(final Connection voyager) throws SQLException {
-    Map<String, String> libraryPatterns = loadPatternMap("library_names.txt");
+    Map<String,Map<String,String>> libraryPatterns = loadPatternMap("library_names.txt");
     List<FacetMapRule> facetPatterns = loadFacetPatternMap("LocationFacetMapping.txt");
 
     try ( Statement stmt = voyager.createStatement(); ResultSet rs = stmt.executeQuery(getLocationsQuery) ) {
@@ -188,7 +192,10 @@ public final class Locations {
         String name = rs.getString(3);
         if (name == null)
           name = rs.getString(4);
-        Location l = new Location(rs.getString(1), rs.getInt(2), name, getLibrary(name, libraryPatterns));
+        Map<String,String> libraryDetails = getLibrary(name, libraryPatterns);
+        String libraryName = (libraryDetails==null)?null:libraryDetails.keySet().iterator().next();
+        String hoursCode   = (libraryDetails==null)?null:libraryDetails.values().iterator().next();
+        Location l = new Location(rs.getString(1), rs.getInt(2), name, libraryName, hoursCode);
         _byCode.put(l.code, l);
         _byNumber.put(l.number, l);
         List<FacetMapRule> locationFacetRules = new ArrayList<>();
@@ -203,7 +210,7 @@ public final class Locations {
     }
   }
 
-  private static String getLibrary(String name, Map<String, String> libraryPatterns) {
+  private static Map<String,String> getLibrary(String name, Map<String,Map<String,String>> libraryPatterns) {
     if (name == null)
       return null;
     String lcName = name.toLowerCase();
@@ -216,17 +223,19 @@ public final class Locations {
     return null;
   }
 
-  private static Map<String, String> loadPatternMap(String filename) {
+  private static Map<String,Map<String,String>> loadPatternMap(String filename) {
     URL url = ClassLoader.getSystemResource(filename);
-    Map<String, String> patternMap = new LinkedHashMap<>();
+    Map<String,Map<String,String>> patternMap = new LinkedHashMap<>();
     try {
       Path p = Paths.get(url.toURI());
       List<String> sites = Files.readAllLines(p, StandardCharsets.UTF_8);
       for (String site : sites) {
-        String[] parts = site.split("\\t", 2);
+        String[] parts = site.split("\\t", 3);
         if (parts.length < 2)
           continue;
-        patternMap.put(parts[0].toLowerCase(), parts[1]);
+        Map<String,String> l = new HashMap<>();
+        l.put(parts[1],(parts.length == 2)?null:parts[2]);
+        patternMap.put(parts[0].toLowerCase(), l);
       }
     } catch (URISyntaxException e) {
       // This should never happen since the URI syntax is machine generated.

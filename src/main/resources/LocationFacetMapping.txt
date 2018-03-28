@@ -19,6 +19,7 @@ ILR Library Reference (Non-Circulating)			Labor Law		ILR Library > Labor Law Ref
 ILR Library Reference (Non-Circulating)					ILR Library > Reference
 ILR Library Reserve 					ILR Library > Reserve
 ILR Multi-Copy Storage					ILR Library > Main Collection
+ILR Library Kheel Center					ILR Library Kheel Center > Main Collection
 ILR Library Kheel Center (Non-Circulating)					ILR Library Kheel Center > Main Collection
 ILR Library Kheel Center (Request in advance)					ILR Library Kheel Center > Main Collection
 ILR Library Kheel Center Reference 					ILR Library Kheel Center > Reference

@@ -1,28 +1,28 @@
-Annex	Library Annex
-Bailey	Bailey Hortorium
-Kheel	ILR Library Kheel Center
-Manuscripts	Kroch Library Rare & Manuscripts
-Adelson	Adelson Library
-Africana	Africana Library
+Annex	Library Annex	annex
+Bailey	Bailey Hortorium	mann
+Kheel	ILR Library Kheel Center	ilr
+Manuscripts	Kroch Library Rare & Manuscripts	rmc
+Adelson	Adelson Library	ornithology
+Africana	Africana Library	africana
 Biochem	Biochem Reading Room (Biotech)
-CISER	CISER Data Archive
-Engineering	Ag Engineering Library
+CISER	CISER Data Archive	ciser
+Engineering	Ag Engineering Library	engineering
 Entomology	Entomology Library
-Fine	Fine Arts Library
+Fine	Fine Arts Library	finearts
 Food	Food Science Library
-Geneva	Geneva Library
-ILR	ILR Library
-Kroch	Kroch Library Asia
-Law	Law Library
-Legal	Law Library
-Management	Sage Hall Management Library
-Mann	Mann Library
-Mathematics	Mathematics Library
+Geneva	Geneva Library	geneva
+ILR	ILR Library	ilr
+Kroch	Kroch Library Asia	asia
+Law	Law Library	law
+Legal	Law Library	law
+Management	Sage Hall Management Library	jgsm
+Mann	Mann Library	mann
+Mathematics	Mathematics Library	math
 Mountain	Iron Mountain
-Music	Music Library
-Nestle	Nestle Library
-Olin	Olin Library
-Physical	Physical Sciences Library
-Space	Space Sciences Building
-Uris	Uris Library
-Veterinary	Veterinary Library
+Music	Music Library	music
+Nestle	Nestle Library	hotel
+Olin	Olin Library	olin
+Physical	Physical Sciences Library	spif
+Space	Space Sciences Building	spif
+Uris	Uris Library	uris
+Veterinary	Veterinary Library	vet

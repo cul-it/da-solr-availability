@@ -36,7 +36,7 @@ import edu.cornell.library.integration.voyager.Locations.Location;
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Holding {
 
-  @JsonProperty("copy")        private final Integer copy;
+  @JsonProperty("copy")        public final Integer copy;
   @JsonProperty("notes")       private final List<String> notes;
   @JsonProperty("holdings")    private final List<String> holdings;
   @JsonProperty("supplements") private final List<String> supplements;
@@ -118,7 +118,12 @@ public class Holding {
           case 'z':
             notes.add(sf.value); break CODE;
           case 't':
-            copy = Integer.valueOf(sf.value); break CODE;
+            try { 
+              copy = Integer.valueOf(sf.value);
+            } catch ( NumberFormatException e ) {
+              System.out.println("Holdings copy number is invalid. h"+this.record.id+" ("+sf.value+")");
+            }
+            break CODE;
           }
         }
         break;

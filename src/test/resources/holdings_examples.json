@@ -6,7 +6,8 @@
     "location":{"code":"ilr,anx",
                 "number":52,
                 "name":"Library Annex",
-                "library":"Library Annex"},
+                "library":"Library Annex",
+                "hoursCode":"annex"},
     "call":"HC59.7 .B16 1977",
     "date":959745600}}
 
@@ -17,7 +18,7 @@
 
 {"9850688":{
     "holdings":["no.177-182 (2016)"],
-    "location":{"code":"was","number":139,"name":"Kroch Library Asia","library":"Kroch Library Asia"},
+    "location":{"code":"was","number":139,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "call":"Oversize NX583.A1 S52 +",
     "date":1495138879}}
 
@@ -33,7 +34,8 @@
    "location":{"code":"sasa",
                "number":122,
                "name":"Kroch Library Asia",
-               "library":"Kroch Library Asia"},
+               "library":"Kroch Library Asia",
+               "hoursCode":"asia"},
    "call":"Oversize DS488 .S18 ++",
    "circ":true,
    "date":1247590991,
@@ -65,7 +67,8 @@
   	"location":{"code":"law",
                 "number":63,
                 "name":"Law Library (Myron Taylor Hall)",
-                "library":"Law Library"},
+                "library":"Law Library",
+                "hoursCode":"law"},
     "call":"KF3369 .A76 1983",
 	"date":959745600}}
 
@@ -74,7 +77,7 @@
 {"1131911":{
    "holdings":["v.1-2;"],
    "supplements":["Fifth suppl.:1982-1988"],
-   "location":{"code":"law","number":63,"name":"Law Library (Myron Taylor Hall)","library":"Law Library"},
+   "location":{"code":"law","number":63,"name":"Law Library (Myron Taylor Hall)","library":"Law Library","hoursCode":"law"},
    "call":"KF3369 .A76 1983",
    "circ":true,
    "date":959745600,
@@ -87,7 +90,7 @@
 {"413836":{
     "holdings":["1959-1974"],
     "indexes":["1959/1974"],
-    "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex"},
+    "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
     "call":"+ G1 .R33",
     "date":959745600}}
 
@@ -97,7 +100,7 @@
 
 
 {"9975971":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"New & Noteworthy Books AC8.5 .G74 2016",
    "circ":true,
    "date":1473796018,
@@ -111,7 +114,7 @@
 
 
 {"4977210":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6x 1996",
    "circ":true,
    "date":1275657369,
@@ -120,14 +123,14 @@
                         "status":{"code":{"2":"Charged"},"due":1516863600,"date":1504104315}}]}},
  "4977214":{
    "copy":2,
-   "location":{"code":"uris,anx","number":210,"name":"Library Annex","library":"Library Annex"},
+   "location":{"code":"uris,anx","number":210,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
    "call":"PS3554.I3 D6x 1996",
    "circ":true,
    "date":1274884635,
    "items":{"count":1,"avail":1}},
  "5860317":{
    "copy":3,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1278418987,
@@ -136,13 +139,14 @@
    "notes":["Signed by Joanna Cassidy, actress in Blade Runner, the film version of the book."],
    "location":{"code":"rmc","number":87,
                "name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
-               "library":"Kroch Library Rare & Manuscripts"},
+               "library":"Kroch Library Rare & Manuscripts",
+               "hoursCode":"rmc"},
    "call":"Rare Books PS3554.I3 D6 1996",
    "circ":false,
    "date":1274283600,
    "items":{"count":1,"avail":1}},
  "7371275":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1305137497,
@@ -151,28 +155,28 @@
                         "status":{"code":{"2":"Charged"},"due":1517468400,"date":1505317642}}]}},
  "7371277":{
    "copy":2,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1410380685,
    "items":{"count":1,"avail":1}},
  "7371279":{
    "copy":3,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1307478334,
    "items":{"count":1,"avail":1}},
  "7371281":{
    "copy":4,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1309886750,
    "items":{"count":1,"avail":1}},
  "7371283":{
    "copy":5,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1305137472,
@@ -181,19 +185,19 @@
                         "status":{"code":{"2":"Charged"},"due":1512975600,"date":1481401648}}]}},
  "7371284":{
    "copy":6,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1310147166,
    "items":{"count":1,"avail":1}},
  "7371302":{
-   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1275074667,
    "items":{"count":1,"avail":1}},
  "7383225":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1306857113,
@@ -201,7 +205,7 @@
             "unavail":[{"id":8771100,
                         "status":{"code":{"2":"Charged"},"due":1517554800,"date":1505399640}}]}},
  "7383631":{
-   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276784928,
@@ -210,47 +214,47 @@
                         "status":{"code":{"3":"Renewed"},"due":1516856340,"date":1484314092}}]}},
  "7383632":{
    "copy":2,
-   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276784987,
    "items":{"count":1,"avail":1}},
  "7383752":{
    "copy":3,
-   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276790437,
    "items":{"count":1,"avail":1}},
  "7383755":{
    "copy":4,
-   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276790545,
    "items":{"count":1,"avail":1}},
  "7383965":{
-   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276884581,
    "items":{"count":1,"avail":1}},
  "7383966":{
    "copy":2,
-   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276884651,
    "items":{"count":1,"avail":1}},
  "7387210":{
    "copy":5,
-   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1404301940,
    "items":{"count":1,"avail":1}},
  "7391702":{
-   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1278703820,
@@ -263,7 +267,7 @@
 
 {"1055":{
    "holdings":["no.26, 28, 30-36 (1978-1982)"],
-   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"JS39 .M95 Oversize",
    "circ":true,
    "date":959745600,
@@ -291,7 +295,7 @@
               "v.403/408 (2000)",
               "v.415/420 (2002)"],
    "location":{"code":"vet","number":133,"name":"Veterinary Library (Schurman Hall)",
-               "library":"Veterinary Library"},
+               "library":"Veterinary Library","hoursCode":"vet"},
    "circ":true,
    "date":1363963641,
    "items":{"count":17,"avail":17}},
@@ -303,7 +307,7 @@
                "v.502:no.7469-7472 (2013)",
                "v.503-528:no.7474-7583 (2013-2015)"],
    "supplements":["Human Genome Project: CD-ROM: v.409:no.6822 (2001)"],
-   "location":{"code":"phys,anx","number":116,"name":"Library Annex","library":"Library Annex"},
+   "location":{"code":"phys,anx","number":116,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
    "call":"Q1 .N282",
    "circ":true,
    "date":1495197912,
@@ -319,7 +323,7 @@
 
 
 {"9957560":{
-   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
+   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"ilr"},
    "call":"HD31.2 .G95 2017",
    "circ":true,
    "date":1472212100,
@@ -328,7 +332,7 @@
       "returned":[{"id":10007450,"status":{"available":true,"code":{"11":"Discharged"},"date":1505328069}}]}},
  "10287643":{
    "copy":2,
-   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library"},
+   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"ilr"},
    "call":"HD31.2 .G95 2017",
    "circ":true,
    "date":1502385643,
@@ -344,7 +348,7 @@
 {"2083678":{
    "holdings":["Program 1-8"],
    "location":{"code":"afr","number":2,"name":"Africana Library (Africana Center)",
-               "library":"Africana Library"},
+               "library":"Africana Library","hoursCode":"africana"},
    "call":"Video 9",
    "circ":true,
    "date":1108394508,
@@ -353,14 +357,14 @@
       "tempLoc":[
          {"id":3321791,
           "enum":"Programs 1-2",
-          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}},
+          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library","hoursCode":"africana"}},
          {"id":3321793,
           "enum":"Programs 5-6",
-          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}}]}},
+          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library","hoursCode":"africana"}}]}},
  "2083679":{
    "copy":2,
    "holdings":["Program 1-8"],
-   "location":{"code":"afr","number":2,"name":"Africana Library (Africana Center)","library":"Africana Library"},
+   "location":{"code":"afr","number":2,"name":"Africana Library (Africana Center)","library":"Africana Library","hoursCode":"africana"},
    "call":"Video 9",
    "circ":true,
    "date":1108129539,
@@ -369,13 +373,13 @@
       "tempLoc":[
          {"id":3321796,
           "enum":"Programs 3-4",
-          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}},
+          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library","hoursCode":"africana"}},
          {"id":3321798,
           "enum":"Programs 7-8",
-          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library"}}]}},
+          "location":{"code":"afr,res","number":4,"name":"Africana Library Reserve","library":"Africana Library","hoursCode":"africana"}}]}},
  "2456923":{
    "holdings":["Program 1-8"],
-   "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex"},
+   "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
    "call":"Video 1192",
    "circ":true,
    "date":1321365882,
@@ -390,7 +394,7 @@
    "notes":["Latest edition available in Sage Hall Management Library Reference; CD-Rom available at the ILR circulation desk."],
    "holdings":["2002, 2005-2016"],
    "supplements":["CD-Rom: 2002"],
-   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library"},
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"HD9710.A1 W38",
    "circ":true,
    "date":1493048691,
@@ -407,7 +411,8 @@
             "code":"jgsm,ref",
             "number":62,
             "name":"ILR Library Reference (Non-Circulating)",
-            "library":"ILR Library"}}]}}}
+            "library":"ILR Library",
+            "hoursCode":"ilr"}}]}}}
 
 
 
@@ -422,7 +427,7 @@
 
 
 {"9631041":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"In Process",
    "circ":true,
    "date":1520460653,
