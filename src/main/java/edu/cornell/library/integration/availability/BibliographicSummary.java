@@ -19,7 +19,6 @@ public class BibliographicSummary {
 
   @JsonProperty("available") public Boolean available;
   @JsonProperty("online")    public Boolean online = false;
-  @JsonProperty("multiLoc")  public Boolean multiLoc;
   @JsonProperty("availAt")   public Map<String,String> availAt = new LinkedHashMap<>();
   @JsonProperty("unavailAt") public Map<String,String> unavailAt = new LinkedHashMap<>();
 
@@ -71,8 +70,10 @@ public class BibliographicSummary {
         b.available = false;
     } else {
       b.available = true;
-      b.multiLoc = b.availAt.size() > 1;
+      for (String availLoc : b.availAt.keySet())
+        b.unavailAt.remove(availLoc);
     }
+
     if ( ! b.online ) b.online = null;
 
     return b;
@@ -88,13 +89,11 @@ public class BibliographicSummary {
   public BibliographicSummary(
       @JsonProperty("available") Boolean available,
       @JsonProperty("online")    Boolean online,
-      @JsonProperty("multiLoc")  Boolean multiLoc,
       @JsonProperty("availAt")   Map<String,String> availAt,
       @JsonProperty("unavailAt") Map<String,String> unavailAt
       ) {
     this.available = available;
     this.online = online;
-    this.multiLoc = multiLoc;
     this.availAt = availAt;
     this.unavailAt = unavailAt;
   }
