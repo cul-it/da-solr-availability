@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.cornell.library.integration.voyager.ItemStatuses.StatusCode;
+import edu.cornell.library.integration.voyager.ItemTypes.ItemType;
 
 public class ItemStatus {
   public Boolean available;
@@ -36,13 +37,15 @@ public class ItemStatus {
     this.due = due;
     this.date = date;
   }
-  public ItemStatus( Connection voyager, int item_id ) throws SQLException {
+
+  public ItemStatus( Connection voyager, int item_id, ItemType type ) throws SQLException {
     
     String statusQ = "SELECT * FROM item_status WHERE item_id = ?";
     String circQ = "SELECT current_due_date FROM circ_transactions WHERE item_id = ?";
     boolean foundUnavailable = false;
     Set<StatusCode> statuses = new TreeSet<>();
     Timestamp statusModDate = null;
+    Timestamp checkoutDate = null;
     try ( PreparedStatement pstmt = voyager.prepareStatement(statusQ)) {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
@@ -51,9 +54,12 @@ public class ItemStatus {
           StatusCode code = ItemStatuses.getStatusByCode(voyager, status_id);
           statuses.add(code);
           if (statusModDate == null ||
-        		  ( rs.getTimestamp("item_status_date") != null
-        		  && statusModDate.before(rs.getTimestamp("item_status_date"))))
+        		  ( rs.getTimestamp("item_status_date") != null && statusModDate.before(rs.getTimestamp("item_status_date"))))
             statusModDate = rs.getTimestamp("item_status_date");
+          if ((code.name.equals("Charged") || code.name.equals("Renewed")) &&
+              (checkoutDate == null ||
+               ( rs.getTimestamp("item_status_date") != null && checkoutDate.before(rs.getTimestamp("item_status_date")))))
+            checkoutDate = rs.getTimestamp("item_status_date");
           if (ItemStatuses.getIsUnavailable(status_id))
             foundUnavailable = true;
         }
@@ -72,7 +78,7 @@ public class ItemStatus {
     } else
       this.code = null;
     Integer dueDate = null;
-    Boolean shortLoan = null;
+    boolean shortLoan = checkoutDate != null && ItemTypes.isShortLoanType(type);
     try ( PreparedStatement pstmt = voyager.prepareStatement(circQ)) {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
@@ -80,8 +86,8 @@ public class ItemStatus {
           Timestamp tmp = rs.getTimestamp(1);
           if (tmp != null) {
             dueDate = (int) (tmp.getTime() / 1000) ;
-            if (statusModDate != null) {
-              long loanDuration = tmp.getTime() - statusModDate.getTime();
+            if (checkoutDate != null) {
+              long loanDuration = tmp.getTime() - checkoutDate.getTime();
               if (loanDuration < 86_400_000L ) // 24 hours, in milliseconds
                 shortLoan = true;
             }
@@ -95,7 +101,7 @@ public class ItemStatus {
       }
     }
     this.due = dueDate;
-    this.shortLoan = shortLoan;
+    this.shortLoan = (shortLoan)?true:null;
     this.date = (statusModDate == null)?null:(int)(statusModDate.getTime() / 1000);
   }
 

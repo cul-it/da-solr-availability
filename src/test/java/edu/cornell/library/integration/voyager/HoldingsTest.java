@@ -49,9 +49,9 @@ public class HoldingsTest {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    voyagerLive = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+//    Class.forName("oracle.jdbc.driver.OracleDriver");
+//    voyagerLive = DriverManager.getConnection(
+//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
 
     // Connect to test Voyager database
     Class.forName("org.sqlite.JDBC");
@@ -173,10 +173,6 @@ public class HoldingsTest {
       ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
-//    assertEquals(examples.get("asdf").toJson(),h.toJson());
-// current response is wrong. Shows no availability, should reflect "on site only":
-//{"5034":{"location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library"},
-    //     "call":"S21 .Z163 Serial KK","date":959745600}}
   }
 
   @Test
@@ -189,4 +185,28 @@ public class HoldingsTest {
     }
     assertEquals(examples.get("expectedInProcess").toJson(),h.toJson());
   }
+
+  @Test
+  public void lost() throws SQLException, IOException, XMLStreamException {
+    int bib = 4888514;
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
+    for (int mfhdId : h.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    assertEquals(examples.get("expectedLost").toJson(),h.toJson());
+  }
+
+  @Test
+  public void checkedOutReserve() throws SQLException, IOException, XMLStreamException {
+    int bib = 1282748;
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
+    for (int mfhdId : h.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+//    System.out.println(h.toJson());
+    assertEquals(examples.get("expectedCheckedOutReserve").toJson(),h.toJson());
+  }
+
 }

@@ -102,7 +102,19 @@ public class ItemsTest {
   public void missingTest() throws SQLException, JsonProcessingException {
     ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1055);
     assertEquals(examples.get("expectedJsonMissing").toJson(),items.toJson());
+  }
+
+  @Test
+  public void lost() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 5404964);
+    assertEquals(examples.get("expectedLost").toJson(),items.toJson());
+  }
+
+  @Test
+  public void checkedOutReserve() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1144752);
 //    System.out.println(items.toJson());
+    assertEquals(examples.get("expectedCheckedOutReserve").toJson(),items.toJson());
   }
 
   @Test
@@ -126,4 +138,5 @@ public class ItemsTest {
     assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*item1.status.date)).toString());
     assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*item2.status.date)).toString());
   }
+
 }

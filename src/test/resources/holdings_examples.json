@@ -436,4 +436,82 @@
 
 
 
+,"expectedLost":
+# bib 4888514
+
+
+
+{"5404964":{
+  "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
+  "call":"RA652.2.M3 J49x 2004",
+  "circ":true,
+  "date":1070397488,
+  "items":{
+    "count":1,
+    "unavail":[{"id":6969960,"status":{"code":{"14":"Lost--System Applied"},"due":1354683540,"date":1357310288}}]}},
+ "8891608":{
+  "copy":2,
+  "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
+  "call":"RA652.2.M3 J49x 2004",
+  "circ":true,
+  "date":1404846031,
+  "items":{
+    "count":1,
+    "unavail":[{"id":9469276,"status":{"code":{"3":"Renewed"},"due":1531602000,"date":1500075548}}]}}}
+
+
+
+,"expectedCheckedOutReserve":
+# bib 1282748 (Second holdings/item has the circulating reserve item)
+
+{"1144751":{
+  "location":{"code":"ilr,circ","number":167,"name":"ILR Circulation","library":"ILR Library","hoursCode":"ilr"},
+  "call":"E806 .B78 1983",
+  "circ":true,
+  "date":1389364051,
+  "items":{"count":1,"unavail":[{"id":2190221,"status":{"code":{"12":"Missing"},"date":1472486835}}]}},
+"1144752":{
+  "copy":2,
+  "location":{"code":"uris,res","number":132,"name":"Uris Library Reserve","library":"Uris Library","hoursCode":"uris"},
+  "call":"E806 .B78 1983",
+  "circ":true,
+  "date":1213297829,
+  "items":{"count":1,"unavail":[{"id":2190222,"status":{"code":{"2":"Charged"},"due":1522350002,"date":1522342802,"shortLoan":true}}]}},
+"1144753":{
+  "copy":3,
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "call":"E806 .B78 1983",
+  "circ":true,
+  "date":1213297825,
+  "items":{"count":1,"avail":1}},
+"1144754":{
+  "copy":4,
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "call":"E806 .B78 1983",
+  "circ":true,
+  "date":1213297823,
+  "items":{"count":1,"avail":1}},
+"1144755":{
+  "copy":5,
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "call":"E806 .B78 1983",
+  "circ":true,
+  "date":1213297820,
+  "items":{"count":1,"avail":1}},
+"1144756":{
+  "copy":6,
+  "notes":["ILR Multi-copy Storage"],
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "call":"E806 .B78 1983",
+  "circ":true,"date":1213297828,
+  "items":{"count":1,"avail":1}},
+"1144757":{
+  "copy":7,
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "call":"E806 .B78 1983",
+  "circ":true,
+  "date":1213297826,
+  "items":{"count":1,"avail":1}}}
+
+
 }

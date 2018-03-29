@@ -4,13 +4,18 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ItemTypes {
+
+  private static List<String> shortLoanItemTypes =
+      Arrays.asList("1hrloan","1hrres","2hrloan","2hrres","3hrloan","3hrres","4hrloan","4hrres","8hrres","permres","nocirc");
 
   public ItemTypes( final Connection voyager) throws SQLException {
     if (_types.isEmpty())
@@ -33,7 +38,13 @@ public class ItemTypes {
     }
   }
 
-  // PRIVATE RESOURCES
+ public static boolean isShortLoanType( ItemType type ) {
+   if (type == null || type.name == null || type.name.isEmpty())
+     return false;
+   return shortLoanItemTypes.contains(type.name);
+ }
+
+ // PRIVATE RESOURCES
 
   private Map<Integer,ItemType> _types = new HashMap<>();
 

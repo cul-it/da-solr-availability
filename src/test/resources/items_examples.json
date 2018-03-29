@@ -427,7 +427,33 @@
 
 
 
+,"expectedLost":
 
+
+
+
+
+{"5404964":[{
+  "id":6969960,"copy":1,"sequence":1,
+  "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
+  "circGrp":{"16":"Mann Circ Group"},
+  "type":{"id":3,"name":"book"},
+  "status":{"available":false,"code":{"14":"Lost--System Applied"},"due":1354683540,"date":1357310288},
+  "date":1070640277}]}
+
+
+
+,"expectedCheckedOutReserve":
+# bib 1282748
+
+
+{"1144752":[
+  {"id":2190222,"copy":2,"sequence":1,
+  "location":{"code":"uris,res","number":132,"name":"Uris Library Reserve","library":"Uris Library","hoursCode":"uris"},
+  "circGrp":{"19":"Uris Circ Group"},
+  "type":{"id":26,"name":"2hrres"},
+  "status":{"available":false,"code":{"2":"Charged"},"due":1522350002,"date":1522342802,"shortLoan":true},
+  "date":1515517721}]}
 
 
 
