@@ -19,6 +19,7 @@ import edu.cornell.library.integration.voyager.ItemStatuses.StatusCode;
 public class ItemStatus {
   public Boolean available;
   public final Map<Integer,String> code;
+  public final Boolean shortLoan;
   public final Integer due;
   public final Integer date;
 
@@ -27,9 +28,11 @@ public class ItemStatus {
       @JsonProperty("available") Boolean available,
       @JsonProperty("code")      Map<Integer,String> code,
       @JsonProperty("due")       Integer due,
-      @JsonProperty("date")      Integer date) {
+      @JsonProperty("date")      Integer date,
+      @JsonProperty("shortLoan") Boolean shortLoan) {
     this.available = available;
     this.code = code;
+    this.shortLoan = shortLoan;
     this.due = due;
     this.date = date;
   }
@@ -58,7 +61,7 @@ public class ItemStatus {
     }
     if (foundUnavailable)
       this.available = false;
-    else if (Arrays.asList(1,11).contains(statuses.iterator().next().id))
+    else if (! statuses.isEmpty() && Arrays.asList(1,11).contains(statuses.iterator().next().id))
       this.available = true;
     else
       this.available = false;
@@ -69,13 +72,20 @@ public class ItemStatus {
     } else
       this.code = null;
     Integer dueDate = null;
+    Boolean shortLoan = null;
     try ( PreparedStatement pstmt = voyager.prepareStatement(circQ)) {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           Timestamp tmp = rs.getTimestamp(1);
-          if (tmp != null)
+          if (tmp != null) {
             dueDate = (int) (tmp.getTime() / 1000) ;
+            if (statusModDate != null) {
+              long loanDuration = tmp.getTime() - statusModDate.getTime();
+              if (loanDuration < 86_400_000L ) // 24 hours, in milliseconds
+                shortLoan = true;
+            }
+          }
         }
 /*      ResultSetMetaData rsmd = rs.getMetaData();
         for (int i=1; i <= rsmd.getColumnCount() ; i++) {
@@ -85,6 +95,7 @@ public class ItemStatus {
       }
     }
     this.due = dueDate;
+    this.shortLoan = shortLoan;
     this.date = (statusModDate == null)?null:(int)(statusModDate.getTime() / 1000);
   }
 
