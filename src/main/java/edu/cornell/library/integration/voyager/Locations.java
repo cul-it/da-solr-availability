@@ -81,7 +81,7 @@ public final class Locations {
     if ( _facetsByLocation.containsKey(l) )
       for (FacetMapRule rule : _facetsByLocation.get(l))
         if (( rule.callPrefix == null  || (lcCall != null && lcCall.startsWith(rule.callPrefix )) ) &&
-            ( rule.callSuffix == null  || (lcCall != null && lcCall.endsWith(  rule.callSuffix )) ) &&
+            ( rule.callSuffix == null  || (lcCall != null && lcCall.contains(  rule.callSuffix )) ) &&
             ( rule.holdingNote == null || (lcNote != null && lcNote.contains(  rule.holdingNote)) ) ) {
           if ( ! rule.suppress )
             return rule.facetValues;
@@ -202,9 +202,9 @@ public final class Locations {
         for (FacetMapRule rule : facetPatterns)
           if (rule.displayName.equals(l.name))
             locationFacetRules.add(rule);
-        System.out.println("*"+l.toString());
-        for (FacetMapRule rule : locationFacetRules)
-          System.out.println("\t"+rule.toString());
+//        System.out.println("*"+l.toString());
+//        for (FacetMapRule rule : locationFacetRules)
+//          System.out.println("\t"+rule.toString());
         _facetsByLocation.put(l, locationFacetRules);
       }
     }
@@ -309,8 +309,6 @@ public final class Locations {
         partsToJoin.add(parts.get(i));
         this.facetValues.add( String.join(" > ",partsToJoin));        
       }
-      if (this.displayName.contains("Law"))
-        System.out.println("501:      "+this);
     }
   }
 

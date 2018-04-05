@@ -5,7 +5,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -19,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class Holdings {
@@ -35,9 +38,37 @@ public class Holdings {
       "  FROM bib_mfhd, mfhd_master"+
       " WHERE bib_mfhd.mfhd_id = mfhd_master.mfhd_id"+
       "   AND bib_mfhd.mfhd_id = ?";
+  private static final String recentHoldingsChangesQuery =
+      "select bib_id, update_date, create_date, mfhd_master.mfhd_id"+
+      "  from mfhd_master, bib_mfhd "+
+      " where suppress_in_opac = 'N'"+
+      "   and (update_date > ? or create_date > ? )"+
+      "   and bib_mfhd.mfhd_id = mfhd_master.mfhd_id";
 
-  public static void detectChangedHoldings( Connection voyager ) {
+  public static Map<Integer,Set<Change>> detectChangedHoldings(
+      Connection voyager, Timestamp since, Map<Integer,Set<Change>> changedBibs ) throws SQLException {
 
+    try ( PreparedStatement pstmt = voyager.prepareStatement( recentHoldingsChangesQuery )){
+      pstmt.setTimestamp(1, since);
+      pstmt.setTimestamp(2, since);
+      try( ResultSet rs = pstmt.executeQuery() ) {
+        while (rs.next()) {
+          Change c ;
+          if (rs.getTimestamp(2) == null)
+            c = new Change(Change.Type.HOLDING,"New ("+rs.getInt(4)+")",rs.getTimestamp(3),null);
+          else
+            c = new Change(Change.Type.HOLDING,"Update ("+rs.getInt(4)+")",rs.getTimestamp(2),null);
+          if (changedBibs.containsKey(rs.getInt(1)))
+            changedBibs.get(rs.getInt(1)).add(c);
+          else {
+            Set<Change> t = new HashSet<>();
+            t.add(c);
+            changedBibs.put(rs.getInt(1),t);
+          }
+        }
+      }
+    }
+    return changedBibs;
   }
 
   public static void detectChangedOrderStatus( Connection voyager ) {

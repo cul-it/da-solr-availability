@@ -21,15 +21,15 @@ public class ItemStatus {
   public Boolean available;
   public final Map<Integer,String> code;
   public final Boolean shortLoan;
-  public final Integer due;
-  public final Integer date;
+  public final Long due;
+  public final Long date;
 
   @JsonCreator
   public ItemStatus(
       @JsonProperty("available") Boolean available,
       @JsonProperty("code")      Map<Integer,String> code,
-      @JsonProperty("due")       Integer due,
-      @JsonProperty("date")      Integer date,
+      @JsonProperty("due")       Long due,
+      @JsonProperty("date")      Long date,
       @JsonProperty("shortLoan") Boolean shortLoan) {
     this.available = available;
     this.code = code;
@@ -77,7 +77,7 @@ public class ItemStatus {
       this.code.put(c.id, c.name);
     } else
       this.code = null;
-    Integer dueDate = null;
+    Long dueDate = null;
     boolean shortLoan = checkoutDate != null && ItemTypes.isShortLoanType(type);
     try ( PreparedStatement pstmt = voyager.prepareStatement(circQ)) {
       pstmt.setInt(1, item_id);
@@ -85,7 +85,7 @@ public class ItemStatus {
         while (rs.next()) {
           Timestamp tmp = rs.getTimestamp(1);
           if (tmp != null) {
-            dueDate = (int) (tmp.getTime() / 1000) ;
+            dueDate = tmp.getTime() / 1000 ;
             if (checkoutDate != null) {
               long loanDuration = tmp.getTime() - checkoutDate.getTime();
               if (loanDuration < 86_400_000L ) // 24 hours, in milliseconds
@@ -102,7 +102,7 @@ public class ItemStatus {
     }
     this.due = dueDate;
     this.shortLoan = (shortLoan)?true:null;
-    this.date = (statusModDate == null)?null:(int)(statusModDate.getTime() / 1000);
+    this.date = (statusModDate == null)?null:statusModDate.getTime()/1000;
   }
 
 }

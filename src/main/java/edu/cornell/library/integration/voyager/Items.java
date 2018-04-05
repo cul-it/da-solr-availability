@@ -5,10 +5,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -18,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.ItemTypes.ItemType;
 import edu.cornell.library.integration.voyager.Locations.Location;
@@ -47,16 +52,82 @@ public class Items {
       " WHERE mfhd_item.item_id = item.item_id" +
       "   AND item_barcode.item_id = item.item_id "+
       "   AND item_barcode.item_barcode = ?";
+  private static final String recentItemStatusChangesQuery =
+      "SELECT * FROM item_status WHERE item_status_date > ?";
+  private static final String bibIdFromItemIdQuery =
+      "SELECT b.bib_id       "+
+      "  FROM bib_master b,  "+
+      "       bib_mfhd bm,   "+
+      "       mfhd_master m, "+
+      "       mfhd_item mi   "+
+      " WHERE b.suppress_in_opac = 'N'  "+
+      "   AND b.bib_id = bm.bib_id      "+
+      "   AND bm.mfhd_id = m.mfhd_id    "+
+      "   AND m.suppress_in_opac = 'N'  "+
+      "   AND m.mfhd_id = mi.mfhd_id    "+
+      "   AND mi.item_id = ?            ";
+  private static final String recentItemChangesQuery =
+      "select bib_id, item.modify_date from item, mfhd_item, bib_mfhd "+
+      " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
+      "   and mfhd_item.item_id = item.item_id"+
+      "   and item.modify_date > ?";
   static Locations locations = null;
   static ItemTypes itemTypes = null;
   static CircPolicyGroups circPolicyGroups = null;
 
-  public static void detectChangedItems( Connection voyager ) {
+  public static Map<Integer,Set<Change>> detectChangedItems(
+      Connection voyager, Timestamp since, Map<Integer,Set<Change>> changedBibs ) throws SQLException {
+
+    try ( PreparedStatement pstmt = voyager.prepareStatement(recentItemChangesQuery )){
+      pstmt.setTimestamp(1, since);
+      try( ResultSet rs = pstmt.executeQuery() ) {
+        while (rs.next()) {
+          Change c = new Change(Change.Type.ITEM,"",rs.getTimestamp(2),null);
+          if (changedBibs.containsKey(rs.getInt(1)))
+            changedBibs.get(rs.getInt(1)).add(c);
+          else {
+            Set<Change> t = new HashSet<>();
+            t.add(c);
+            changedBibs.put(rs.getInt(1),t);
+          }
+        }
+      }
+    }
+   return changedBibs;
 
   }
 
-  public static void detectChangedItemStatuses( Connection voyager ) {
-    // SELECT * FROM item_STATUS WHERE item_STATUS_DATE > ?
+  public static Map<Integer,Set<Change>> detectChangedItemStatuses( Connection voyager, Timestamp since ) throws SQLException {
+    Map<Integer,Set<Change>> changes = new HashMap<>();
+    try (PreparedStatement pstmt = voyager.prepareStatement(recentItemStatusChangesQuery);
+        PreparedStatement bibStmt = voyager.prepareStatement(bibIdFromItemIdQuery)) {
+
+      pstmt.setTimestamp(1, since);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          Item item = retrieveItemByItemId( voyager, rs.getInt("item_id"));
+          bibStmt.setInt(1, item.itemId);
+          try( ResultSet bibRs = bibStmt.executeQuery() ) {
+            while (bibRs.next()) {
+              Change c = new Change(Change.Type.CIRC,
+                  String.format( "%s %s",((item.enumeration!= null)?item.itemId+" ("+item.enumeration+")":item.itemId),
+                      item.status.code.values().iterator().next()),
+                  new Timestamp(item.status.date*1000),
+                  item.location.name);
+              Integer bibId = bibRs.getInt(1);
+              if (changes.containsKey(bibId))
+                changes.get(bibId).add(c);
+              else {
+                Set<Change> t = new HashSet<>();
+                t.add(c);
+                changes.put(bibId,t);
+              }
+            }
+          }
+        }
+      }
+    }
+    return changes;
   }
 
   public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhd_id ) throws SQLException {

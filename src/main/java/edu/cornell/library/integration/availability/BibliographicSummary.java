@@ -1,9 +1,16 @@
 package edu.cornell.library.integration.availability;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -11,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.ItemReference;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
@@ -27,6 +35,35 @@ public class BibliographicSummary {
     mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
 
+  public static Map<Integer,Set<Change>> detectChangedBibs(
+      Connection voyager, Timestamp since, Map<Integer,Set<Change>> changedBibs ) throws SQLException {
+
+    try ( PreparedStatement pstmt = voyager.prepareStatement(
+        "select bib_id, update_date, create_date"+
+        "  from bib_master"+
+        " where suppress_in_opac = 'N'"+
+        "   and (update_date > ? or create_date > ? )")){
+      pstmt.setTimestamp(1, since);
+      pstmt.setTimestamp(2, since);
+      try( ResultSet rs = pstmt.executeQuery() ) {
+        while (rs.next()) {
+          Change c ;
+          if (rs.getTimestamp(2) == null)
+            c = new Change(Change.Type.BIB,"New",rs.getTimestamp(3),null);
+          else
+            c = new Change(Change.Type.BIB,"Update",rs.getTimestamp(2),null);
+          if (changedBibs.containsKey(rs.getInt(1)))
+            changedBibs.get(rs.getInt(1)).add(c);
+          else {
+            Set<Change> t = new HashSet<>();
+            t.add(c);
+            changedBibs.put(rs.getInt(1),t);
+          }
+        }
+      }
+    }
+    return changedBibs;
+  }
 
   public static BibliographicSummary summarizeHoldingAvailability( HoldingSet holdings ){
 
