@@ -1,12 +1,8 @@
 package edu.cornell.library.integration.voyager;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -224,12 +220,12 @@ public final class Locations {
   }
 
   private static Map<String,Map<String,String>> loadPatternMap(String filename) {
-    URL url = ClassLoader.getSystemResource(filename);
+
     Map<String,Map<String,String>> patternMap = new LinkedHashMap<>();
-    try {
-      Path p = Paths.get(url.toURI());
-      List<String> sites = Files.readAllLines(p, StandardCharsets.UTF_8);
-      for (String site : sites) {
+    try (BufferedReader in = new BufferedReader(new InputStreamReader( 
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)))) {
+      String site;
+      while ((site = in.readLine()) != null) {
         String[] parts = site.split("\\t", 3);
         if (parts.length < 2)
           continue;
@@ -237,9 +233,6 @@ public final class Locations {
         l.put(parts[1],(parts.length == 2)?null:parts[2]);
         patternMap.put(parts[0].toLowerCase(), l);
       }
-    } catch (URISyntaxException e) {
-      // This should never happen since the URI syntax is machine generated.
-      e.printStackTrace();
     } catch (IOException e) {
       System.out.println("Couldn't read config file for site identifications.");
       e.printStackTrace();
@@ -249,14 +242,12 @@ public final class Locations {
   }
 
   private static List<FacetMapRule> loadFacetPatternMap(String filename) {
-    System.out.println(filename);
-    URL url = ClassLoader.getSystemResource(filename);
-    System.out.println(url);
+
     List<FacetMapRule> patternMap = new ArrayList<>();
-    try {
-      Path p = Paths.get(url.toURI());
-      List<String> sites = Files.readAllLines(p, StandardCharsets.UTF_8);
-      for (String site : sites) {
+    try (BufferedReader in = new BufferedReader(new InputStreamReader( 
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)))) {
+      String site;
+      while ((site = in.readLine()) != null) {
         String[] parts = site.split("\\t", 6);
         if (parts.length < 6)
           continue;
@@ -266,9 +257,6 @@ public final class Locations {
         patternMap.add(rule);
             
       }
-    } catch (URISyntaxException e) {
-      // This should never happen since the URI syntax is machine generated.
-      e.printStackTrace();
     } catch (IOException e) {
       System.out.println("Couldn't read config file for site identifications.");
       e.printStackTrace();
