@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -34,7 +35,7 @@ import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class RecordsToSolr {
 
-  public static class Change {
+  public static class Change implements Comparable<Change>{
     public final Type type;
     public final String detail;
     public final Timestamp changeDate;
@@ -51,6 +52,47 @@ public class RecordsToSolr {
     }
     public enum Type { BIB, HOLDING, ITEM, CIRC, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
+
+    @Override
+    public boolean equals( Object o ) {
+      if (this == o) return true;
+      if (o == null) return false;
+      if (this.getClass() != o.getClass()) return false;
+      Change other = (Change) o;
+      return Objects.equals( this.type,       other.type)
+          && Objects.equals( this.changeDate, other.changeDate)
+          && Objects.equals( this.detail,     other.detail)
+          && Objects.equals( this.location,   other.location);
+    }
+
+    @Override
+    public int compareTo(Change o) {
+      if ( ! this.type.equals( o.type ) ) {
+        System.out.println(this.type+":"+o.type);
+        return this.type.compareTo( o.type );
+      }
+      System.out.println("Same type");
+      if ( ! this.changeDate.equals( o.changeDate ) )
+        return this.changeDate.compareTo( o.changeDate );
+      System.out.println("Same timestamp");
+      if ( this.detail == null )
+        return ( o.detail == null ) ? 0 : -1;
+      if ( ! this.detail.equals( o.detail ) )
+        return this.detail.compareTo( o.detail );
+      System.out.println("Same detail");
+      if ( this.location == null )
+        return ( o.location == null ) ? 0 : -1;
+      if ( ! this.location.equals( o.location ) )
+        return this.location.compareTo( o.location );
+      System.out.println("Same location");
+
+      return 0;
+    }
+
+    @Override
+    public int hashCode() {
+      return this.toString().hashCode();
+    }
   }
 
   public static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
