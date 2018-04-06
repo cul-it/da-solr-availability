@@ -26,7 +26,7 @@ import edu.cornell.library.integration.voyager.Items;
 public class MonitorAvailability {
 
   public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException {
-    Timestamp since = Timestamp.valueOf("2018-04-05 17:00:00.0");
+    Timestamp since = Timestamp.valueOf("2018-04-06 09:40:00.0");
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
@@ -70,9 +70,11 @@ public class MonitorAvailability {
     for (Integer newBibId : newChanges.keySet()) {
       if ( ! oldChanges.containsKey(newBibId) )
         continue;
+      List<Change> changesToRemove = new ArrayList<>();
       for ( Change c : newChanges.get(newBibId) )
         if (oldChanges.get(newBibId).contains(c))
-          newChanges.get(newBibId).remove(c);
+          changesToRemove.add(c);
+      newChanges.get(newBibId).removeAll(changesToRemove);
       if (newChanges.get(newBibId).isEmpty())
         bibsToRemove.add(newBibId);
     }
