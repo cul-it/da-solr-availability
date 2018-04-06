@@ -9,11 +9,15 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -166,6 +170,32 @@ public class RecordsToSolr {
       }
     }
 
+  }
+
+  public static Map<Integer,Set<Change>> duplicateMap( Map<Integer,Set<Change>> m1 ) {
+    Map<Integer,Set<Change>> m2 = new HashMap<>();
+    for (Entry<Integer,Set<Change>> e : m1.entrySet())
+      m2.put(e.getKey(), new HashSet<>(e.getValue()));
+    return m2;
+  }
+
+  public static Map<Integer,Set<Change>> eliminateCarryovers( 
+      Map<Integer,Set<Change>> newChanges, Map<Integer,Set<Change>> oldChanges) {
+    List<Integer> bibsToRemove = new ArrayList<>();
+    for (Integer newBibId : newChanges.keySet()) {
+      if ( ! oldChanges.containsKey(newBibId) )
+        continue;
+      List<Change> changesToRemove = new ArrayList<>();
+      for ( Change c : newChanges.get(newBibId) )
+        if (oldChanges.get(newBibId).contains(c))
+          changesToRemove.add(c);
+      newChanges.get(newBibId).removeAll(changesToRemove);
+      if (newChanges.get(newBibId).isEmpty())
+        bibsToRemove.add(newBibId);
+    }
+    for (Integer i : bibsToRemove)
+      newChanges.remove(i);
+    return newChanges;
   }
 
   private static SolrInputDocument xml2SolrInputDocument(String xml) throws XMLStreamException {
