@@ -67,7 +67,8 @@ public class Items {
       "   AND m.mfhd_id = mi.mfhd_id    "+
       "   AND mi.item_id = ?            ";
   private static final String recentItemChangesQuery =
-      "select bib_id, item.modify_date from item, mfhd_item, bib_mfhd "+
+      "select bib_id, item.modify_date, item.item_id"+
+      "  from item, mfhd_item, bib_mfhd "+
       " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
       "   and item.modify_date > ?";
@@ -82,7 +83,7 @@ public class Items {
       pstmt.setTimestamp(1, since);
       try( ResultSet rs = pstmt.executeQuery() ) {
         while (rs.next()) {
-          Change c = new Change(Change.Type.ITEM,"",rs.getTimestamp(2),null);
+          Change c = new Change(Change.Type.ITEM,rs.getInt(3),"",rs.getTimestamp(2),null);
           if (changedBibs.containsKey(rs.getInt(1)))
             changedBibs.get(rs.getInt(1)).add(c);
           else {
@@ -109,7 +110,7 @@ public class Items {
           bibStmt.setInt(1, item.itemId);
           try( ResultSet bibRs = bibStmt.executeQuery() ) {
             while (bibRs.next()) {
-              Change c = new Change(Change.Type.CIRC,
+              Change c = new Change(Change.Type.CIRC,item.itemId,
                   String.format( "%s %s",((item.enumeration!= null)?item.itemId+" ("+item.enumeration+")":item.itemId),
                       item.status.code.values().iterator().next()),
                   new Timestamp(item.status.date*1000),

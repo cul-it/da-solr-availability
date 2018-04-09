@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -23,7 +26,7 @@ import edu.cornell.library.integration.voyager.Items;
 
 public class MonitorRecordChanges {
   public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException {
-    Timestamp since = Timestamp.valueOf("2018-04-05 17:00:00.0");
+    Timestamp since = Timestamp.valueOf("2018-04-09 17:25:00.0");
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
@@ -48,16 +51,33 @@ public class MonitorRecordChanges {
       Holdings.detectChangedHoldings(voyager, time, changedBibs);
       BibliographicSummary.detectChangedBibs(voyager, time, changedBibs);
 
-      Map<Integer,Set<Change>> newlyChangedBibs = RecordsToSolr.eliminateCarryovers(
-          RecordsToSolr.duplicateMap(changedBibs), carryoverChangeBlocks);
+      addCarriedoverExpectedChangesToFoundChanges(changedBibs, carryoverExpectedChanges);
 
-      addCarriedoverExpectedChangesToFoundChanges(newlyChangedBibs, carryoverExpectedChanges);
-
-      carryoverExpectedChanges = setAsideChangesNotAvailableInInventory( inventoryDB, newlyChangedBibs );
-
-      carryoverChangeBlocks = newlyChangedBibs;
-      if ( newlyChangedBibs.size() > 0 )
-        RecordsToSolr.updateBibsInSolr( voyager, inventoryDB , newlyChangedBibs );
+      Map<Integer,Set<Change>> newCarryoverExpectations = new HashMap<>();
+      Map<Integer,Set<Change>> newCarryoverBlocks = new HashMap<>();
+      Map<Integer,Set<Change>> solrUpdates = new HashMap<>();
+      for (Entry<Integer,Set<Change>> e : changedBibs.entrySet()) {
+        Integer bibId = e.getKey();
+        for (Change c : e.getValue()) {
+          boolean blocked = false;
+          boolean metNotBlocked = false;
+          if (carryoverChangeBlocks.containsKey(bibId) &&
+              carryoverChangeBlocks.get(bibId).contains(c))
+            blocked = true;
+          else if (changeIsMet(inventoryDB,c))
+            metNotBlocked = true;
+          if (metNotBlocked)
+            addChangeToSet(solrUpdates,bibId,c);
+          if (metNotBlocked || blocked)
+            addChangeToSet(newCarryoverBlocks,bibId,c);
+          else
+            addChangeToSet(newCarryoverExpectations,bibId,c);
+        }
+      }
+      carryoverExpectedChanges = newCarryoverExpectations;
+      carryoverChangeBlocks = newCarryoverBlocks;
+      if ( ! solrUpdates.isEmpty() )
+        RecordsToSolr.updateBibsInSolr( voyager, inventoryDB , solrUpdates );
       else
         try {
           Thread.sleep(500);
@@ -66,8 +86,19 @@ public class MonitorRecordChanges {
     }
   }
 
+  private static void addChangeToSet(Map<Integer, Set<Change>> changeSet, Integer bibId, Change c) {
+    if (changeSet.containsKey(bibId)) {
+      changeSet.get(bibId).add(c);
+      return;
+    }
+    Set<Change> t = new HashSet<>();
+    t.add(c);
+    changeSet.put(bibId, t);
+  }
+
   private static void addCarriedoverExpectedChangesToFoundChanges(
       Map<Integer, Set<Change>> main, Map<Integer, Set<Change>> adds) {
+    if (adds.isEmpty()) return;
     for (Entry<Integer,Set<Change>> e : adds.entrySet())
       if (main.containsKey(e.getKey()))
         main.get(e.getKey()).addAll(e.getValue());
@@ -75,11 +106,25 @@ public class MonitorRecordChanges {
         main.put(e.getKey(), e.getValue());
   }
 
-  // split changed bibs into those to apply to Solr and expectations to carry over
-  private static Map<Integer, Set<Change>> setAsideChangesNotAvailableInInventory(
-      Connection inventoryDB, Map<Integer, Set<Change>> changedBibs) {
-    // TODO Auto-generated method stub
-    return null;
+  private static Map<Change.Type,String> recordDateQueries = new HashMap<>();
+  static {
+    recordDateQueries.put(Change.Type.BIB, "SELECT record_date FROM bibRecsSolr WHERE bib_id = ?");
+    recordDateQueries.put(Change.Type.HOLDING, "SELECT record_date FROM mfhdRecsSolr WHERE mfhd_id = ?");
+    recordDateQueries.put(Change.Type.ITEM, "SELECT record_date FROM itemRecsSolr WHERE item_id = ?");
+  }
+
+  private static boolean changeIsMet(Connection inventoryDB, Change c) throws SQLException {
+    try ( PreparedStatement pstmt = inventoryDB.prepareStatement(recordDateQueries.get(c.type) )) {
+      pstmt.setInt(1, c.recordId);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          Timestamp t = rs.getTimestamp(1);
+          if ( t == null || t.before(c.changeDate) )
+            return false;
+        }
+        return true;
+      }
+    }
   }
 
 }

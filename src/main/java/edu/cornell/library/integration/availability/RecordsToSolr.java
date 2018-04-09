@@ -41,21 +41,25 @@ public class RecordsToSolr {
 
   public static class Change implements Comparable<Change>{
     public final Type type;
+    public final Integer recordId;
     public final String detail;
     public final Timestamp changeDate;
     public final String location;
 
-    public Change (Type type, String detail, Timestamp changeDate, String location) {
+    public Change (Type type, Integer recordId, String detail, Timestamp changeDate, String location) {
       this.type = type;
+      this.recordId = recordId;
       this.detail = detail;
       this.changeDate = changeDate;
       this.location = location;
     }
     public String toString() {
-      return this.type.name()+" "+this.location+" "+this.detail+" "+this.changeDate.toLocalDateTime().format(formatter);
+      if (this.location != null)
+        return this.type.name()+" "+this.location+" "+this.detail+" "+this.changeDate.toLocalDateTime().format(formatter);
+      return this.type.name()+" "+this.detail+" "+this.changeDate.toLocalDateTime().format(formatter);
     }
     public enum Type { BIB, HOLDING, ITEM, CIRC, OTHER };
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
     public boolean equals( Object o ) {
@@ -181,6 +185,9 @@ public class RecordsToSolr {
 
   public static Map<Integer,Set<Change>> eliminateCarryovers( 
       Map<Integer,Set<Change>> newChanges, Map<Integer,Set<Change>> oldChanges) {
+    if ( oldChanges.isEmpty() )
+      return newChanges;
+    System.out.println("Blocking: "+oldChanges.toString());
     List<Integer> bibsToRemove = new ArrayList<>();
     for (Integer newBibId : newChanges.keySet()) {
       if ( ! oldChanges.containsKey(newBibId) )
@@ -193,8 +200,10 @@ public class RecordsToSolr {
       if (newChanges.get(newBibId).isEmpty())
         bibsToRemove.add(newBibId);
     }
+    System.out.println("bibs eliminated from newChanges: "+bibsToRemove.toString());
     for (Integer i : bibsToRemove)
       newChanges.remove(i);
+    System.out.println("No, really. See?: "+newChanges.toString());
     return newChanges;
   }
 
