@@ -111,63 +111,68 @@ public class RecordsToSolr {
         " WHERE bib_id = ?"+
         "   AND active = 1");
         SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") )) {
-      for (int bibId : changedBibs.keySet()) {
+      BIB: for (int bibId : changedBibs.keySet()) {
         pstmt.setInt(1, bibId);
         try (ResultSet rs = pstmt.executeQuery()) {
           while ( rs.next() ) {
 
-              SolrInputDocument doc = xml2SolrInputDocument(  rs.getString(2) );
-              HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
-              ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
-              if ( holdings.summarizeItemAvailability(items) ) 
-                doc.addField("availability_facet", "Returned");
-              if ( holdings.applyOpenOrderInformation(voyager,bibId) )
-                doc.addField("availability_facet", "On Order");
-              if ( holdings.noItemsAvailability() )
-                doc.addField("availability_facet", "No Items Print");
-              if ( holdings.size() > 0 )
-                doc.addField("holdings_json", holdings.toJson());
-              if ( items.itemCount() > 0 )
-                doc.addField("items_json", items.toJson());
-              for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
-                for ( Item i : itemsForHolding )
-                  if (i.status != null && i.status.shortLoan != null)
-                    doc.addField("availability_facet", "Short Loan");
-              BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdings);
-              doc.addField("availability_json", b.toJson());
-              if ( ! b.availAt.isEmpty() && ! b.unavailAt.isEmpty() )
-                doc.addField("availability_facet", "Avail and Unavail");
-              Set<String> locationFacet = holdings.getLocationFacetValues();
-              if (locationFacet == null)
-                System.out.println("b"+bibId+" location facets are null.");
-              else if (! locationFacet.isEmpty()) {
-                doc.removeField("location");
-                doc.addField("location", locationFacet);
-              }
-              for ( Integer mfhdId : holdings.getMfhdIds()) {
-                Holding h = holdings.get(mfhdId);
-                if (h.call != null && h.call.matches(".*In Process.*"))
-                  doc.addField("availability_facet","In Process");
-                if (h.itemSummary != null && h.itemSummary.unavail != null)
-                  for (ItemReference ir : h.itemSummary.unavail)
-                    if (ir.status != null && ir.status.code != null) {
-                      String status = ir.status.code.values().iterator().next();
-                      doc.addField("availability_facet",status);
-                    }
-              }
-              for (int mfhdId : holdings.getMfhdIds()) {
-                if (holdings.get(mfhdId).itemSummary != null &&
-                    holdings.get(mfhdId).itemSummary.tempLocs != null &&
-                    ! holdings.get(mfhdId).itemSummary.tempLocs.isEmpty())
-                  doc.addField("availability_facet","Partial Temp Locs");
-                if (holdings.get(mfhdId).copy != null)
-                  doc.addField("availability_facet", "Copies");
-              }
-              Set<String> changes = new HashSet<>();
-              for (Change c : changedBibs.get(bibId))  changes.add(c.toString());
-              
-              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ", changes));
-              solr.add( doc );
+            String solrXml = rs.getString(2);
+            if (solrXml == null) {
+              System.out.println("ERROR: Solr Document not found. "+bibId+" ("+rs.getString(3)+"): "+ changedBibs.get(bibId));
+              continue BIB;
+            }
+            SolrInputDocument doc = xml2SolrInputDocument( solrXml );
+            HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
+            ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
+            if ( holdings.summarizeItemAvailability(items) ) 
+              doc.addField("availability_facet", "Returned");
+            if ( holdings.applyOpenOrderInformation(voyager,bibId) )
+              doc.addField("availability_facet", "On Order");
+            if ( holdings.noItemsAvailability() )
+              doc.addField("availability_facet", "No Items Print");
+            if ( holdings.size() > 0 )
+              doc.addField("holdings_json", holdings.toJson());
+            if ( items.itemCount() > 0 )
+              doc.addField("items_json", items.toJson());
+            for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
+              for ( Item i : itemsForHolding )
+                if (i.status != null && i.status.shortLoan != null)
+                  doc.addField("availability_facet", "Short Loan");
+            BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdings);
+            doc.addField("availability_json", b.toJson());
+            if ( ! b.availAt.isEmpty() && ! b.unavailAt.isEmpty() )
+              doc.addField("availability_facet", "Avail and Unavail");
+            Set<String> locationFacet = holdings.getLocationFacetValues();
+            if (locationFacet == null)
+              System.out.println("b"+bibId+" location facets are null.");
+            else if (! locationFacet.isEmpty()) {
+              doc.removeField("location");
+              doc.addField("location", locationFacet);
+            }
+            for ( Integer mfhdId : holdings.getMfhdIds()) {
+              Holding h = holdings.get(mfhdId);
+              if (h.call != null && h.call.matches(".*In Process.*"))
+                doc.addField("availability_facet","In Process");
+              if (h.itemSummary != null && h.itemSummary.unavail != null)
+                for (ItemReference ir : h.itemSummary.unavail)
+                  if (ir.status != null && ir.status.code != null) {
+                    String status = ir.status.code.values().iterator().next();
+                    doc.addField("availability_facet",status);
+                  }
+            }
+            for (int mfhdId : holdings.getMfhdIds()) {
+              if (holdings.get(mfhdId).itemSummary != null &&
+                  holdings.get(mfhdId).itemSummary.tempLocs != null &&
+                  ! holdings.get(mfhdId).itemSummary.tempLocs.isEmpty())
+                doc.addField("availability_facet","Partial Temp Locs");
+              if (holdings.get(mfhdId).copy != null)
+                doc.addField("availability_facet", "Copies");
+            }
+            Set<String> changes = new HashSet<>();
+            for (Change c : changedBibs.get(bibId))  changes.add(c.toString());
+
+            System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ", changes));
+            solr.add( doc );
           }
 
         }

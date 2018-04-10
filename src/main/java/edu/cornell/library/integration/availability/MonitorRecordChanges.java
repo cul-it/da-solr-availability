@@ -26,7 +26,7 @@ import edu.cornell.library.integration.voyager.Items;
 
 public class MonitorRecordChanges {
   public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException {
-    Timestamp since = Timestamp.valueOf("2018-04-09 17:25:00.0");
+    Timestamp since = Timestamp.valueOf("2018-04-10 11:48:10.0");
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
