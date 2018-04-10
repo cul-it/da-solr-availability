@@ -9,11 +9,15 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
@@ -37,21 +41,25 @@ public class RecordsToSolr {
 
   public static class Change implements Comparable<Change>{
     public final Type type;
+    public final Integer recordId;
     public final String detail;
     public final Timestamp changeDate;
     public final String location;
 
-    public Change (Type type, String detail, Timestamp changeDate, String location) {
+    public Change (Type type, Integer recordId, String detail, Timestamp changeDate, String location) {
       this.type = type;
+      this.recordId = recordId;
       this.detail = detail;
       this.changeDate = changeDate;
       this.location = location;
     }
     public String toString() {
-      return this.type.name()+" "+this.location+" "+this.detail+" "+this.changeDate.toLocalDateTime().format(formatter);
+      if (this.location != null)
+        return this.type.name()+" "+this.location+" "+this.detail+" "+this.changeDate.toLocalDateTime().format(formatter);
+      return this.type.name()+" "+this.detail+" "+this.changeDate.toLocalDateTime().format(formatter);
     }
     public enum Type { BIB, HOLDING, ITEM, CIRC, OTHER };
-    private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
+    private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
     public boolean equals( Object o ) {
@@ -166,6 +174,37 @@ public class RecordsToSolr {
       }
     }
 
+  }
+
+  public static Map<Integer,Set<Change>> duplicateMap( Map<Integer,Set<Change>> m1 ) {
+    Map<Integer,Set<Change>> m2 = new HashMap<>();
+    for (Entry<Integer,Set<Change>> e : m1.entrySet())
+      m2.put(e.getKey(), new HashSet<>(e.getValue()));
+    return m2;
+  }
+
+  public static Map<Integer,Set<Change>> eliminateCarryovers( 
+      Map<Integer,Set<Change>> newChanges, Map<Integer,Set<Change>> oldChanges) {
+    if ( oldChanges.isEmpty() )
+      return newChanges;
+    System.out.println("Blocking: "+oldChanges.toString());
+    List<Integer> bibsToRemove = new ArrayList<>();
+    for (Integer newBibId : newChanges.keySet()) {
+      if ( ! oldChanges.containsKey(newBibId) )
+        continue;
+      List<Change> changesToRemove = new ArrayList<>();
+      for ( Change c : newChanges.get(newBibId) )
+        if (oldChanges.get(newBibId).contains(c))
+          changesToRemove.add(c);
+      newChanges.get(newBibId).removeAll(changesToRemove);
+      if (newChanges.get(newBibId).isEmpty())
+        bibsToRemove.add(newBibId);
+    }
+    System.out.println("bibs eliminated from newChanges: "+bibsToRemove.toString());
+    for (Integer i : bibsToRemove)
+      newChanges.remove(i);
+    System.out.println("No, really. See?: "+newChanges.toString());
+    return newChanges;
   }
 
   private static SolrInputDocument xml2SolrInputDocument(String xml) throws XMLStreamException {

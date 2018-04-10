@@ -49,9 +49,9 @@ public class BibliographicSummary {
         while (rs.next()) {
           Change c ;
           if (rs.getTimestamp(2) == null)
-            c = new Change(Change.Type.BIB,"New",rs.getTimestamp(3),null);
+            c = new Change(Change.Type.BIB,rs.getInt(1),"New",rs.getTimestamp(3),null);
           else
-            c = new Change(Change.Type.BIB,"Update",rs.getTimestamp(2),null);
+            c = new Change(Change.Type.BIB,rs.getInt(1),"Update",rs.getTimestamp(2),null);
           if (changedBibs.containsKey(rs.getInt(1)))
             changedBibs.get(rs.getInt(1)).add(c);
           else {
