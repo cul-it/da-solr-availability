@@ -192,7 +192,6 @@ public class RecordsToSolr {
       Map<Integer,Set<Change>> newChanges, Map<Integer,Set<Change>> oldChanges) {
     if ( oldChanges.isEmpty() )
       return newChanges;
-    System.out.println("Blocking: "+oldChanges.toString());
     List<Integer> bibsToRemove = new ArrayList<>();
     for (Integer newBibId : newChanges.keySet()) {
       if ( ! oldChanges.containsKey(newBibId) )
@@ -205,10 +204,8 @@ public class RecordsToSolr {
       if (newChanges.get(newBibId).isEmpty())
         bibsToRemove.add(newBibId);
     }
-    System.out.println("bibs eliminated from newChanges: "+bibsToRemove.toString());
     for (Integer i : bibsToRemove)
       newChanges.remove(i);
-    System.out.println("No, really. See?: "+newChanges.toString());
     return newChanges;
   }
 
