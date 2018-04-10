@@ -1,3 +1,4 @@
+# Project Description
 
 *da-solr-availability* should include the holdings and availability logic imported from
 [cornell-voyager-backend](https://github.com/cul-it/cornell-voyager-backend).
@@ -17,3 +18,26 @@ This last is in-progress, as the original HoldingsAndItems.java is still being d
 
 Jira issue (not public):
  [DISCOVERYACCESS-3550](https://culibrary.atlassian.net/browse/DISCOVERYACCESS-3550)
+
+# Running Project Code
+
+To run project code, three jars included in the repo need to be installed to the local
+Maven store. This is logic should be moved to the `pom.xml`, but in the meantime executing
+these commands from the main project directory is an effective workaround.
+
+```
+mvn install:install-file -DgroupId=com.oracle \
+  -DartifactId=ojdbc7 -Dversion=12.1.0.2 \
+  -Dpackaging=jar -Dfile=lib/ojdbc7-12.1.0.2.jar \
+  -DgeneratePom=true
+
+mvn install:install-file -DgroupId=edu.cornell.library.integration \
+  -DartifactId=da-solr-marc -Dversion=1 \
+  -Dpackaging=jar -Dfile=lib/da-solr-marc.jar \
+  -DgeneratePom=true
+
+mvn install:install-file -DgroupId=org.marc4j \
+  -DartifactId=marc4j -Dversion=2.6.0 \
+  -Dpackaging=jar -Dfile=lib/marc4j-2.6.0.jar \
+  -DgeneratePom=true
+```
