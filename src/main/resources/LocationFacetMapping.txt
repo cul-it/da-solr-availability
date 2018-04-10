@@ -3,6 +3,7 @@ Voyager Display Name	Suppress	call# prefix (852$k)	call# suffix (852$im)	holding
 Adelson Library (Lab of Ornithology)					Adelson Library > Main Collection
 Adelson Library Reference (Lab of Ornithology)					Adelson Library > Reference
 Museum of Vertebrates (Lab of Ornithology) (non-circulating)					Adelson Library > Museum of Vertebrates
+Macaulay Library (Lab of Ornithology) (Non-circulating)					Adelson Library > Macaulay Library
 Africana Library (Africana Center)				new book	Africana Library > New Books Shelf
 Africana Library (Africana Center)					Africana Library > Main Collection
 Africana Library Reference ( Non-Circulating)					Africana Library > Reference
@@ -23,6 +24,7 @@ ILR Library Kheel Center					ILR Library Kheel Center > Main Collection
 ILR Library Kheel Center (Non-Circulating)					ILR Library Kheel Center > Main Collection
 ILR Library Kheel Center (Request in advance)					ILR Library Kheel Center > Main Collection
 ILR Library Kheel Center Reference 					ILR Library Kheel Center > Reference
+ILR Library Kheel Center Reference (Non-Circulating)					ILR Library Kheel Center > Reference
 "Asia Reserve, Severinghouse Reading Rm., Kroch Library"					Kroch Library Asia > Reserve
 Kroch Library Asia					Kroch Library Asia > Main Collection
 Kroch Library Asia Reference (Non-Circulating)					Kroch Library Asia > Reference
@@ -94,3 +96,6 @@ Veterinary Library Core Resource (Non-Circulating)					Veterinary Library > Core
 Veterinary Library Rare Books (Non-Circulating)					Veterinary Library > Rare Books
 Veterinary Library Reference (Non-Circulating)					Veterinary Library > Reference
 Veterinary Library Reserve 					Veterinary Library > Reserve 
+Anatomic Pathology Collection (Departmental use only)	X				Veterinary Library > Anatomic Pathology Collection
+Equine Farm Animal Collection (Departmental use only)	X				Veterinary Library > Equine Farm Animal Collection
+Center for Animal Resources and Education (Dept. use only)	X				XXX
