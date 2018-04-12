@@ -82,6 +82,7 @@ Sage Hall Management Library Reference (Non-Circulating)					Sage Hall Managemen
 Sage Hall Management Library Reserve					Sage Hall Management Library > Reserve
 Spacecraft Planetary Imaging Facility (Non-Circulating)					Space Sciences Building
 Uris Library					Uris Library > Main Collection
+Uris Circulation					Uris Library > Circulation
 Uris Library Asia A/V			(SEA)		Uris Library > Asia A/V > Southeast Asia
 Uris Library Asia A/V			(SA)		Uris Library > Asia A/V > South Asia
 Uris Library Asia A/V			(KOR)		Uris Library > Asia A/V > Korea
@@ -99,3 +100,4 @@ Veterinary Library Reserve 					Veterinary Library > Reserve
 Anatomic Pathology Collection (Departmental use only)	X				Veterinary Library > Anatomic Pathology Collection
 Equine Farm Animal Collection (Departmental use only)	X				Veterinary Library > Equine Farm Animal Collection
 Center for Animal Resources and Education (Dept. use only)	X				XXX
+Companion Animal Hospital Collection (Departmental use only)	X				XXX
