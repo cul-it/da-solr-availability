@@ -54,9 +54,15 @@ public class RecordsToSolr {
       this.location = location;
     }
     public String toString() {
+      StringBuilder sb = new StringBuilder();
+      sb.append(this.type.name());
       if (this.location != null)
-        return this.type.name()+" "+this.location+" "+this.detail+" "+this.changeDate.toLocalDateTime().format(formatter);
-      return this.type.name()+" "+this.detail+" "+this.changeDate.toLocalDateTime().format(formatter);
+        sb.append(" ").append(this.location);
+      if (this.detail != null)
+        sb.append(" ").append(this.detail);
+      if (this.changeDate != null)
+        sb.append(" ").append(this.changeDate.toLocalDateTime().format(formatter));
+      return sb.toString();
     }
     public enum Type { BIB, HOLDING, ITEM, CIRC, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
@@ -143,12 +149,13 @@ public class RecordsToSolr {
             if ( ! b.availAt.isEmpty() && ! b.unavailAt.isEmpty() )
               doc.addField("availability_facet", "Avail and Unavail");
             Set<String> locationFacet = holdings.getLocationFacetValues();
+            if (doc.containsKey("location"))
+              doc.removeField("location");
             if (locationFacet == null)
               System.out.println("b"+bibId+" location facets are null.");
-            else if (! locationFacet.isEmpty()) {
-              doc.removeField("location");
+            else if (! locationFacet.isEmpty())
               doc.addField("location", locationFacet);
-            }
+
             for ( Integer mfhdId : holdings.getMfhdIds()) {
               Holding h = holdings.get(mfhdId);
               if (h.call != null && h.call.matches(".*In Process.*"))
