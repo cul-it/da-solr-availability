@@ -63,7 +63,18 @@ public class ItemStatuses {
       return this.priority.compareTo(o.priority);
     }
 
-    public boolean equals( final StatusCode o) { return this.id == o.id;  }
+    @Override
+    public int hashCode() {
+      return Integer.hashCode( this.id );
+    }
+
+    @Override
+    public boolean equals( final Object o) {
+      if (this == o) return true;
+      if (o == null) return false;
+      if ( ! this.getClass().equals(o.getClass()) ) return false;
+      return this.id == ((StatusCode)o).id;
+      }
   }
 
   /* While the association between status codes used directly by item records and their descriptive labels

@@ -343,10 +343,17 @@ public class Items {
       return Integer.compare(this.sequence, other.sequence);
     }
 
-    public boolean equals ( final Item other ) {
-      if (other == null) return false;
-      if (other.itemId == this.itemId) return true;
-      return false;
+    @Override
+    public int hashCode() {
+      return Integer.hashCode( this.itemId );
+    }
+
+    @Override
+    public boolean equals ( final Object o ) {
+      if (this == o) return true;
+      if (o == null) return false;
+      if ( ! this.getClass().equals(o.getClass()) ) return false;
+      return this.itemId == ((Item)o).itemId;
     }
   }
   public static String concatEnum(String enumeration, String chron, String year) {

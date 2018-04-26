@@ -134,9 +134,15 @@ public final class Locations {
      * @param other
      * @return <b>true</b> if this.number == other.number; else <b>false</b>
      */
-    public boolean equals(final Location other) {
+    @Override
+    public boolean equals( final Object other ) {
       if (other == null) return false;
-      return other.number == this.number;
+      if (! this.getClass().equals(other.getClass())) return false;
+      return (((Location)other).number.equals(this.number));
+    }
+    @Override
+    public int hashCode() {
+      return this.number.hashCode();
     }
 
     /**
