@@ -25,8 +25,12 @@ import edu.cornell.library.integration.voyager.Holdings;
 import edu.cornell.library.integration.voyager.Items;
 
 public class MonitorRecordChanges {
-  public static void main(String[] args) throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException {
-    Timestamp since = Timestamp.valueOf("2018-04-10 11:48:10.0");
+
+  private static final String CURRENT_TO_KEY = "record";
+
+  public static void main(String[] args)
+      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException, InterruptedException {
+    Timestamp since = Timestamp.valueOf("2018-05-01 16:00:00.0");
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
@@ -38,6 +42,8 @@ public class MonitorRecordChanges {
     Class.forName("com.mysql.jdbc.Driver");
     Connection inventoryDB = DriverManager.getConnection(
         prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+
+    since = RecordsToSolr.getCurrentToDate( since, inventoryDB, CURRENT_TO_KEY );
 
     Timestamp time = since;
     System.out.println(time);
@@ -82,8 +88,22 @@ public class MonitorRecordChanges {
         try {
           Thread.sleep(500);
         } catch (InterruptedException e) {  }
-      time = newTime; 
+      Timestamp ctime = minCarryOverTime(carryoverExpectedChanges);
+      time = newTime;
+      if (ctime != null && ctime.before(time))
+        RecordsToSolr.setCurrentToDate( ctime , inventoryDB, CURRENT_TO_KEY );
+      else
+        RecordsToSolr.setCurrentToDate(  time , inventoryDB, CURRENT_TO_KEY );
     }
+  }
+
+  private static Timestamp minCarryOverTime(Map<Integer,Set<Change>> changes) {
+    Timestamp min = null;
+    for (Set<Change> bibChanges : changes.values())
+      for (Change c : bibChanges)
+        if ( min == null || c.changeDate.before(min))
+          min = c.changeDate;
+    return min;
   }
 
   private static void addChangeToSet(Map<Integer, Set<Change>> changeSet, Integer bibId, Change c) {
