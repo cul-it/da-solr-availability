@@ -41,6 +41,7 @@ public class Holding {
   @JsonProperty("holdings")    private final List<String> holdings;
   @JsonProperty("supplements") private final List<String> supplements;
   @JsonProperty("indexes")     private final List<String> indexes;
+  @JsonProperty("recents")     public List<String> recentIssues = null;
   @JsonProperty("location")    public Location location;
   @JsonProperty("call")        public final String call;
   @JsonProperty("boundWith")   public final Map<Integer,BoundWith> boundWiths;
@@ -166,6 +167,7 @@ public class Holding {
       @JsonProperty("holdings")    List<String> holdings,
       @JsonProperty("supplements") List<String> supplements,
       @JsonProperty("indexes")     List<String> indexes,
+      @JsonProperty("recents")     List<String> recentIssues,
       @JsonProperty("location")    Location location,
       @JsonProperty("call")        String call,
       @JsonProperty("avail")       Boolean avail,
@@ -180,6 +182,7 @@ public class Holding {
     this.holdings = (holdings == null || holdings.isEmpty()) ? null : holdings;
     this.supplements = (supplements == null || supplements.isEmpty()) ? null : supplements;
     this.indexes = (indexes == null || indexes.isEmpty()) ? null : indexes;
+    this.recentIssues = recentIssues;
     this.location = location;
     this.date = date;
     this.boundWiths = boundWiths;

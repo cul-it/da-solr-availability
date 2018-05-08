@@ -65,7 +65,7 @@ public class RecordsToSolr {
         sb.append(" ").append(this.changeDate.toLocalDateTime().format(formatter));
       return sb.toString();
     }
-    public enum Type { BIB, HOLDING, ITEM, CIRC, OTHER };
+    public enum Type { BIB, HOLDING, ITEM, CIRC, RECEIPT, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
@@ -113,7 +113,7 @@ public class RecordsToSolr {
   public static Timestamp getCurrentToDate(Timestamp since, Connection inventory, String key ) throws SQLException {
 
     try (PreparedStatement pstmt = inventory.prepareStatement(
-        "sELECT current_to_date FROM updateCursor WHERE cursor_name = ?")) {
+        "SELECT current_to_date FROM updateCursor WHERE cursor_name = ?")) {
       pstmt.setString(1, key);
 
       try (ResultSet rs = pstmt.executeQuery()) {
@@ -158,6 +158,7 @@ public class RecordsToSolr {
               }
               SolrInputDocument doc = xml2SolrInputDocument( solrXml );
               HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
+              holdings.getRecentIssues(voyager, bibId);
               ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
               if ( holdings.summarizeItemAvailability(items) ) 
                 doc.addField("availability_facet", "Returned");
@@ -165,6 +166,8 @@ public class RecordsToSolr {
                 doc.addField("availability_facet", "On Order");
               if ( holdings.noItemsAvailability() )
                 doc.addField("availability_facet", "No Items Print");
+              if ( holdings.hasRecent() )
+                doc.addField("availability_facet", "Recent Issues");
               if ( holdings.size() > 0 )
                 doc.addField("holdings_json", holdings.toJson());
               if ( items.itemCount() > 0 )

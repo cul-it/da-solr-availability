@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -184,6 +185,20 @@ public class Holdings {
 
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this.holdings);
+    }
+
+    public void getRecentIssues(Connection voyager, Integer bibId) throws SQLException {
+      Map<Integer,List<String>> issues = RecentIssues.getByBibId(voyager, bibId);
+      for (Entry<Integer,List<String>> e : issues.entrySet())
+        if (this.holdings.containsKey(e.getKey()))
+          this.holdings.get(e.getKey()).recentIssues = e.getValue();
+    }
+
+    public boolean hasRecent() {
+      for ( Holding h : this.holdings.values() )
+        if ( h.recentIssues != null )
+          return true;
+      return false;
     }
   }
 

@@ -44,11 +44,11 @@ public class HoldingsTest {
   @BeforeClass
   public static void connect() throws SQLException, ClassNotFoundException, IOException {
 
-    // Connect to live Voyager database
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
+    // Connect to live Voyager database
 //    Class.forName("oracle.jdbc.driver.OracleDriver");
 //    voyagerLive = DriverManager.getConnection(
 //        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
@@ -166,7 +166,7 @@ public class HoldingsTest {
   }
 
   @Test
-  public void testOnSiteUse() throws SQLException, IOException, XMLStreamException {
+  public void onSiteUse() throws SQLException, IOException, XMLStreamException {
     int bib = 867;
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
     for (int mfhdId : h.getMfhdIds()) {
@@ -176,7 +176,7 @@ public class HoldingsTest {
   }
 
   @Test
-  public void testInProcess() throws SQLException, IOException, XMLStreamException {
+  public void inProcess() throws SQLException, IOException, XMLStreamException {
     int bib = 9295667;
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
     for (int mfhdId : h.getMfhdIds()) {
@@ -205,8 +205,19 @@ public class HoldingsTest {
       ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
-//    System.out.println(h.toJson());
     assertEquals(examples.get("expectedCheckedOutReserve").toJson(),h.toJson());
+  }
+
+  @Test
+  public void recentIssues() throws SQLException, IOException, XMLStreamException {
+    int bib = 369282;
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
+    h.getRecentIssues(voyagerTest, bib);
+    for (int mfhdId : h.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    assertEquals(examples.get("expectedRecentItems").toJson(),h.toJson());
   }
 
 }

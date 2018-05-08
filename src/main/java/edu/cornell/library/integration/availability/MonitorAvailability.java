@@ -18,6 +18,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.Items;
+import edu.cornell.library.integration.voyager.RecentIssues;
 
 public class MonitorAvailability {
 
@@ -46,7 +47,9 @@ public class MonitorAvailability {
          Map<Integer,Set<Change>> carryoverChanges = new HashMap<>();
          while ( true ) {
            Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
-           Map<Integer,Set<Change>> changedBibs = Items.detectChangedItemStatuses(voyagerLive, time);
+           Map<Integer,Set<Change>> changedBibs =
+               Items.detectChangedItemStatuses(voyagerLive, time, new HashMap<Integer,Set<Change>>());
+           RecentIssues.detectNewReceiptBibs(voyagerLive, since, changedBibs);
            Map<Integer,Set<Change>> newlyChangedBibs = RecordsToSolr.eliminateCarryovers(
                RecordsToSolr.duplicateMap(changedBibs), carryoverChanges);
            carryoverChanges = changedBibs;

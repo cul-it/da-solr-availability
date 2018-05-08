@@ -514,4 +514,50 @@
   "items":{"count":1,"avail":1}}}
 
 
+,"expectedRecentItems":
+# bib 369282 (Second holdings/item has the circulating reserve item)
+
+
+{"449213":{
+  "holdings":["sayi 292-767/768 (1976-2015)"],
+  "recents":["sayi 793 (2018 Ocak)",
+             "sayi 792 (2017 Aralik)",
+             "sayi 791 (2017 Kasim)",
+             "sayi 790 (2017 Ekim)",
+             "sayi 789 (2017 Eylul)",
+             "sayi 788 (2017 Agustos)",
+             "sayi 787 (2017 Temmuz)",
+             "sayi 786 (2017 Haziran)",
+             "sayi 785 (2017 May)",
+             "sayi 784 (2017 Nisan)",
+             "sayi 783 (2017 Mar.)",
+             "sayi 782 (2017 Subat)",
+             "sayi 781 (2017 Ocak)",
+             "sayi 780 (2016 Aralik)",
+             "sayi 779 (2016 Kasim)",
+             "sayi 778 (2016 Ekim)",
+             "sayi 777 (2016 Eylul)",
+             "sayi 776 (2016 Agustos)",
+             "sayi 775 (2016 Temmuz)",
+             "sayi 774 (2016 Haziran)",
+             "sayi 773 (2016 Mayis)",
+             "sayi 772 (2016 Nisan.)",
+             "sayi 771 (2016 Mart.)",
+             "sayi 770 (2016 Subat)",
+             "sayi 769 (2016 Ocak.)"],
+  "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+  "call":"PL101 .T905",
+  "circ":true,
+  "date":1476731692,
+  "items":{"count":76,"avail":76}},
+"449214":{
+  "holdings":["cilt 1-32 (1951/1952-1975)"],
+  "indexes":["cilt 1/10 (1951/1961)","cilt 11/24 (1961/1971)"],
+  "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+  "call":"PL101 .T905",
+  "circ":true,
+  "date":959745600,
+  "items":{"count":34,"avail":34}}}
+
+
 }
