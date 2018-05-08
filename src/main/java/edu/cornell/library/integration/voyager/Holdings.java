@@ -193,6 +193,13 @@ public class Holdings {
         if (this.holdings.containsKey(e.getKey()))
           this.holdings.get(e.getKey()).recentIssues = e.getValue();
     }
+
+    public boolean hasRecent() {
+      for ( Holding h : this.holdings.values() )
+        if ( h.recentIssues != null )
+          return true;
+      return false;
+    }
   }
 
 }

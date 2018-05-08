@@ -7,7 +7,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -98,8 +97,9 @@ public class Items {
 
   }
 
-  public static Map<Integer,Set<Change>> detectChangedItemStatuses( Connection voyager, Timestamp since ) throws SQLException {
-    Map<Integer,Set<Change>> changes = new HashMap<>();
+  public static Map<Integer,Set<Change>> detectChangedItemStatuses(
+      Connection voyager, Timestamp since, Map<Integer,Set<Change>> changes ) throws SQLException {
+
     try (PreparedStatement pstmt = voyager.prepareStatement(recentItemStatusChangesQuery);
         PreparedStatement bibStmt = voyager.prepareStatement(bibIdFromItemIdQuery)) {
 

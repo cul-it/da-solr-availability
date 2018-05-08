@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+
 public class RecentIssues {
 
   private final static String recentByHoldingQuery =
@@ -41,7 +43,7 @@ public class RecentIssues {
       " ORDER BY si.issue_id DESC";
 
   private final static String newReceiptsBibsQuery =
-      "SELECT distinct li.bib_id" +
+      "SELECT distinct li.bib_id, si.enumchron, si.receipt_date" +
       "  FROM line_item li, line_item_copy_status lics, subscription s,"+
       "       component c, issues_received ir, serial_issues si"+
       " WHERE li.line_item_id = s.line_item_id"+
@@ -53,18 +55,27 @@ public class RecentIssues {
       "   AND ir.opac_suppressed = 1"+//note: 0 = true, 1 = false
       "   AND si.receipt_date > ?";
 
-  public static Set<Integer> detectNewReceiptBibs( Connection voyager, Timestamp since ) throws SQLException {
+  public static Map<Integer,Set<Change>> detectNewReceiptBibs(
+      Connection voyager, Timestamp since, Map<Integer,Set<Change>> changes ) throws SQLException {
 
-    Set<Integer> issues = new HashSet<>();
     try (  PreparedStatement pstmt = voyager.prepareStatement(newReceiptsBibsQuery)   ) {
       pstmt.setTimestamp(1,since);
       try (  ResultSet rs = pstmt.executeQuery()  ) {
         while (rs.next()) {
-          issues.add( rs.getInt("bib_id") );
+          Integer bibId = rs.getInt("bib_id");
+          Change c = new Change(Change.Type.RECEIPT,null,rs.getString("enumchron"),
+              rs.getTimestamp("receipt_date"),null);
+          if (changes.containsKey(bibId))
+            changes.get(bibId).add(c);
+          else {
+            Set<Change> t = new HashSet<>();
+            t.add(c);
+            changes.put(bibId,t);
+          }
         }
       }
     }
-    return issues;
+    return changes;
   }
 
   public static List<String> getByHoldingId( Connection voyager, Integer holdingId ) throws SQLException {
