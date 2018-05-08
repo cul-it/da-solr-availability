@@ -7,8 +7,10 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class RecentIssues {
 
@@ -26,7 +28,8 @@ public class RecentIssues {
 
   private final static String recentByBibQuery =
       "SELECT lics.mfhd_id, si.enumchron" +
-      "  FROM line_item li, line_item_copy_status lics, subscription s, component c, issues_received ir, serial_issues si"+
+      "  FROM line_item li, line_item_copy_status lics, subscription s,"+
+      "       component c, issues_received ir, serial_issues si"+
       " WHERE li.bib_id = ?"+
       "   AND li.line_item_id = s.line_item_id"+
       "   AND li.line_item_id = lics.line_item_id"+
@@ -37,9 +40,10 @@ public class RecentIssues {
       "   AND ir.opac_suppressed = 1"+//note: 0 = true, 1 = false
       " ORDER BY si.issue_id DESC";
 
-  private final static String newReceiptsQuery =
-      "SELECT li.bib_id, lics.mfhd_id, si.enumchron, si.receipt_date" +
-      "  FROM line_item li, line_item_copy_status lics, subscription s, component c, issues_received ir, serial_issues si"+
+  private final static String newReceiptsBibsQuery =
+      "SELECT distinct li.bib_id" +
+      "  FROM line_item li, line_item_copy_status lics, subscription s,"+
+      "       component c, issues_received ir, serial_issues si"+
       " WHERE li.line_item_id = s.line_item_id"+
       "   AND li.line_item_id = lics.line_item_id"+
       "   AND s.subscription_id = c.subscription_id"+
@@ -47,20 +51,16 @@ public class RecentIssues {
       "   AND c.component_id = ir.component_id"+
       "   AND ir.issue_id = si.issue_id"+
       "   AND ir.opac_suppressed = 1"+//note: 0 = true, 1 = false
-      "   AND si.receipt_date > ?"+
-      " ORDER BY si.issue_id DESC";
+      "   AND si.receipt_date > ?";
 
-  public static Map<Integer,List<String>> detectNewReceipts( Connection voyager, Timestamp since ) throws SQLException {
+  public static Set<Integer> detectNewReceiptBibs( Connection voyager, Timestamp since ) throws SQLException {
 
-    Map<Integer,List<String>> issues = new HashMap<>();
-    try (  PreparedStatement pstmt = voyager.prepareStatement(newReceiptsQuery)   ) {
+    Set<Integer> issues = new HashSet<>();
+    try (  PreparedStatement pstmt = voyager.prepareStatement(newReceiptsBibsQuery)   ) {
       pstmt.setTimestamp(1,since);
       try (  ResultSet rs = pstmt.executeQuery()  ) {
         while (rs.next()) {
-          Integer bibId = rs.getInt("bib_id");
-          if ( ! issues.containsKey(bibId))
-            issues.put(bibId, new ArrayList<String>());
-          issues.get(bibId).add(rs.getString("enumchron"));
+          issues.add( rs.getInt("bib_id") );
         }
       }
     }

@@ -1,14 +1,15 @@
 package edu.cornell.library.integration.voyager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import org.junit.BeforeClass;
@@ -26,34 +27,27 @@ public class RecentIssuesTest {
     }
     Class.forName("org.sqlite.JDBC");
     voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    voyagerLive = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+//    Class.forName("oracle.jdbc.driver.OracleDriver");
+//    voyagerLive = DriverManager.getConnection(
+//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
   }
 
   @Test
-  public void detectNewReceiptsTest() throws SQLException {
-    Map<Integer,List<String>> issues = RecentIssues.detectNewReceipts(voyagerLive, Timestamp.valueOf("2018-05-04 12:00:00.0"));
-    for (Entry<Integer, List<String>> e : issues.entrySet()) {
-      System.out.println(e.getKey());
-      System.out.println("  "+String.join("\n  ",e.getValue()));
-    }
-  }
-
-//  @Test
   public void getRecentIssuesForHoldingTest() throws SQLException {
-    List<String> issues = RecentIssues.getByHoldingId(voyagerLive, 449213);
-    System.out.println(String.join("\n", issues));
+    List<String> issues = RecentIssues.getByHoldingId(voyagerTest, 449213);
+    assertEquals(25,issues.size());
+    assertEquals("sayi 793 (2018 Ocak)",issues.get(0));
+    assertEquals("sayi 769 (2016 Ocak.)",issues.get(24));
   }
 
-//  @Test
+  @Test
   public void getRecentIssuesForBibTest() throws SQLException {
-//    Map<Integer,List<String>> issues = RecentIssues.getByBibId(voyagerLive, 369282);
-    Map<Integer,List<String>> issues = RecentIssues.getByBibId(voyagerLive, 115983);
-    for (Entry<Integer, List<String>> e : issues.entrySet()) {
-      System.out.println(e.getKey());
-      System.out.println("  "+String.join("\n  ",e.getValue()));
-    }
+    Map<Integer,List<String>> issues = RecentIssues.getByBibId(voyagerTest, 369282);
+    assertEquals(1,issues.size());
+    assertTrue(issues.containsKey(449213));
+    assertEquals(25,issues.get(449213).size());
+    assertEquals("sayi 793 (2018 Ocak)",issues.get(449213).get(0));
+    assertEquals("sayi 778 (2016 Ekim)",issues.get(449213).get(15));
   }
 
 }

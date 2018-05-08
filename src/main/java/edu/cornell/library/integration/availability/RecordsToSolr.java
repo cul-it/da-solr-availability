@@ -113,7 +113,7 @@ public class RecordsToSolr {
   public static Timestamp getCurrentToDate(Timestamp since, Connection inventory, String key ) throws SQLException {
 
     try (PreparedStatement pstmt = inventory.prepareStatement(
-        "sELECT current_to_date FROM updateCursor WHERE cursor_name = ?")) {
+        "SELECT current_to_date FROM updateCursor WHERE cursor_name = ?")) {
       pstmt.setString(1, key);
 
       try (ResultSet rs = pstmt.executeQuery()) {
@@ -158,6 +158,7 @@ public class RecordsToSolr {
               }
               SolrInputDocument doc = xml2SolrInputDocument( solrXml );
               HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
+              holdings.getRecentIssues(voyager, bibId);
               ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
               if ( holdings.summarizeItemAvailability(items) ) 
                 doc.addField("availability_facet", "Returned");
