@@ -139,9 +139,10 @@ public class RecordsToSolr {
   public static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
       throws SQLException, IOException, XMLStreamException, SolrServerException, InterruptedException {
 
+    List<Integer> bibsNotFound = new ArrayList<>();
+
     while (! changedBibs.isEmpty()) {
       List<Integer> completedBibUpdates = new ArrayList<>();
-      List<Integer> bibsNotFound = new ArrayList<>();
 
       try (PreparedStatement pstmt = inventory.prepareStatement(
           "SELECT bib_id, solr_document, title FROM bibRecsSolr"+
@@ -158,7 +159,7 @@ public class RecordsToSolr {
                 System.out.println("ERROR: Solr Document not found. "+bibId+" ("+rs.getString(3)+"): "+ changedBibs.get(bibId));
                 Thread.sleep(100);
                 if (Collections.frequency(bibsNotFound, bibId) > 2)
-                  changedBibs.remove(bibId);
+                  completedBibUpdates.add(bibId); // Not complete, but moving on.
                 bibsNotFound.add(bibId);
                 continue BIB;
               }
