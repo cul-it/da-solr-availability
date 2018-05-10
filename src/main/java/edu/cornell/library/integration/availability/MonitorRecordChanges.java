@@ -30,7 +30,7 @@ public class MonitorRecordChanges {
 
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException, InterruptedException {
-    Timestamp since = Timestamp.valueOf("2018-05-01 16:00:00.0");
+    Timestamp since = Timestamp.valueOf("2018-05-10 08:00:00.0");
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){

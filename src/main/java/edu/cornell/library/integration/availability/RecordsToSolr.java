@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -140,6 +141,7 @@ public class RecordsToSolr {
 
     while (! changedBibs.isEmpty()) {
       List<Integer> completedBibUpdates = new ArrayList<>();
+      List<Integer> bibsNotFound = new ArrayList<>();
 
       try (PreparedStatement pstmt = inventory.prepareStatement(
           "SELECT bib_id, solr_document, title FROM bibRecsSolr"+
@@ -154,6 +156,10 @@ public class RecordsToSolr {
               String solrXml = rs.getString(2);
               if (solrXml == null) {
                 System.out.println("ERROR: Solr Document not found. "+bibId+" ("+rs.getString(3)+"): "+ changedBibs.get(bibId));
+                Thread.sleep(100);
+                if (Collections.frequency(bibsNotFound, bibId) > 2)
+                  changedBibs.remove(bibId);
+                bibsNotFound.add(bibId);
                 continue BIB;
               }
               SolrInputDocument doc = xml2SolrInputDocument( solrXml );
