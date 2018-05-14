@@ -71,14 +71,10 @@ public final class Locations {
   public static Set<String> facetValues( final Location l, String call, String holdingNote ) {
     String lcCall = (call == null)        ? null : call.toLowerCase();
     String lcNote = (holdingNote == null) ? null : holdingNote.toLowerCase();
-/*    if (l.code.equals("olin,501")) {
-    System.out.println(l+": "+((lcCall == null)? null : lcCall)+": "+((lcNote == null) ? null : lcNote));
-    System.out.println( _facetsByLocation.get(l)); } */
     if ( _facetsByLocation.containsKey(l) )
       for (FacetMapRule rule : _facetsByLocation.get(l))
-        if (( rule.callPrefix == null  || (lcCall != null && lcCall.startsWith(rule.callPrefix )) ) &&
-            ( rule.callSuffix == null  || (lcCall != null && lcCall.contains(  rule.callSuffix )) ) &&
-            ( rule.holdingNote == null || (lcNote != null && lcNote.contains(  rule.holdingNote)) ) ) {
+        if (( rule.call == null        || (lcCall != null && lcCall.contains( rule.call )) ) &&
+            ( rule.holdingNote == null || (lcNote != null && lcNote.contains( rule.holdingNote )) ) ) {
           if ( ! rule.suppress )
             return rule.facetValues;
           return new LinkedHashSet<String>();
@@ -254,12 +250,11 @@ public final class Locations {
         Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)))) {
       String site;
       while ((site = in.readLine()) != null) {
-        String[] parts = site.split("\\t", 6);
-        if (parts.length < 6)
+        String[] parts = site.split("\\t", 5);
+        if (parts.length < 5)
           continue;
         FacetMapRule rule = new FacetMapRule(
-            parts[0],parts[1].contains("X"),parts[2].toLowerCase(),
-            parts[3].toLowerCase(),parts[4].toLowerCase(),parts[5]);
+            parts[0],parts[1].contains("X"),parts[2].toLowerCase(),parts[3].toLowerCase(),parts[4]);
         patternMap.add(rule);
             
       }
@@ -275,25 +270,19 @@ public final class Locations {
 
     final String displayName;
     final Boolean suppress;
-    final String callPrefix;
-    final String callSuffix;
+    final String call;
     final String holdingNote;
     final Set<String> facetValues;
 
     public String toString() {
-      return String.format("%s (%s:%s:%s) => %s", this.displayName,
-          ((this.callPrefix == null)? "" : this.callPrefix),
-          ((this.callSuffix == null)? "" : this.callSuffix),
-          ((this.holdingNote == null)? "" : this.holdingNote),
-          String.join(" ** ", facetValues)
-          );
+      return String.format("%s (%s:%s) => %s", this.displayName, ((this.call == null)? "" : this.call),
+          ((this.holdingNote == null)? "" : this.holdingNote),   String.join(" ** ", facetValues) );
     }
-    public FacetMapRule( String displayName, Boolean suppress, String callPrefix, String callSuffix, String holdingNote, String facetValue) {
+    public FacetMapRule( String displayName, Boolean suppress, String call, String holdingNote, String facetValue) {
 
       this.displayName = displayName.trim().replaceAll("\"", "");
       this.suppress    = suppress;
-      this.callPrefix  = (callPrefix.isEmpty()) ? null : callPrefix;
-      this.callSuffix  = (callSuffix.isEmpty()) ? null : callSuffix;
+      this.call  = (call.isEmpty()) ? null : call;
       this.holdingNote = (holdingNote.isEmpty()) ? null : holdingNote;
 
       List<String> parts = Arrays.asList(facetValue.replaceAll("\"","").split(" > "));
