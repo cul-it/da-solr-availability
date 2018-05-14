@@ -111,7 +111,7 @@ public class MonitorRecordChanges {
     if (min != null) {
       long ageInSeconds = Duration.between(min.toInstant(), Instant.now()).getSeconds();
       if (ageInSeconds > 60) {
-        System.out.printf("Slowdown - %s%02d:%02ds",
+        System.out.printf("Slowdown - %s%02d:%02ds\n",
             ((ageInSeconds > 3600)?(ageInSeconds/3600+":"):""),
                 (ageInSeconds % 3600) / 60,ageInSeconds % 60);
       }
