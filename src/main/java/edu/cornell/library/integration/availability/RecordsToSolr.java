@@ -55,15 +55,34 @@ public class RecordsToSolr {
       this.changeDate = changeDate;
       this.location = location;
     }
+
     public String toString() {
+      return this.toString(true);
+    }
+
+    public String toString(boolean showAgeOfChange) {
       StringBuilder sb = new StringBuilder();
       sb.append(this.type.name());
       if (this.location != null)
         sb.append(" ").append(this.location);
       if (this.detail != null)
         sb.append(" ").append(this.detail);
-      if (this.changeDate != null)
+      if (this.changeDate != null) {
         sb.append(" ").append(this.changeDate.toLocalDateTime().format(formatter));
+        if (showAgeOfChange) {
+          long ageInSeconds = java.time.Duration.between(
+              this.changeDate.toInstant(), java.time.Instant.now()).getSeconds();
+          boolean negativeTime = ageInSeconds < 0;
+          sb.append(" (");
+          if (negativeTime) {
+            ageInSeconds = Math.abs(ageInSeconds);
+            sb.append('-');
+          }
+          if (ageInSeconds > 3600) // hours
+            sb.append(ageInSeconds / 3600).append(':');
+          sb.append(String.format("%02d:%02ds)", (ageInSeconds % 3600) / 60, ageInSeconds % 60 ));
+        }
+      }
       return sb.toString();
     }
     public enum Type { BIB, HOLDING, ITEM, CIRC, RECEIPT, OTHER };
@@ -107,7 +126,7 @@ public class RecordsToSolr {
 
     @Override
     public int hashCode() {
-      return this.toString().hashCode();
+      return this.toString(false).hashCode();
     }
   }
 
@@ -216,9 +235,9 @@ public class RecordsToSolr {
               }
               Set<String> changes = new HashSet<>();
               for (Change c : changedBibs.get(bibId))  changes.add(c.toString());
-  
-              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ", changes));
+
               solr.add( doc );
+              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ", changes));
             }
   
           }
