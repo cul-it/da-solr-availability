@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,7 +32,7 @@ public class MonitorRecordChanges {
 
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException, InterruptedException {
-    Timestamp since = Timestamp.valueOf("2018-05-10 08:00:00.0");
+    Timestamp since = Timestamp.valueOf("2018-05-14 10:00:00.0");
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
@@ -76,8 +78,11 @@ public class MonitorRecordChanges {
             addChangeToSet(solrUpdates,bibId,c);
           if (metNotBlocked || blocked)
             addChangeToSet(newCarryoverBlocks,bibId,c);
-          else
+          else {
             addChangeToSet(newCarryoverExpectations,bibId,c);
+            if (Duration.between(c.changeDate.toInstant(), Instant.now()).getSeconds() > 3600)
+              System.out.println("Long-term carry over "+bibId+": "+c);
+          }
         }
       }
       carryoverExpectedChanges = newCarryoverExpectations;
@@ -103,6 +108,14 @@ public class MonitorRecordChanges {
       for (Change c : bibChanges)
         if ( min == null || c.changeDate.before(min))
           min = c.changeDate;
+    if (min != null) {
+      long ageInSeconds = Duration.between(min.toInstant(), Instant.now()).getSeconds();
+      if (ageInSeconds > 60) {
+        System.out.printf("Slowdown - %s%02d:%02ds",
+            ((ageInSeconds > 3600)?(ageInSeconds/3600+":"):""),
+                (ageInSeconds % 3600) / 60,ageInSeconds % 60);
+      }
+    }
     return min;
   }
 
@@ -139,12 +152,19 @@ public class MonitorRecordChanges {
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           Timestamp t = rs.getTimestamp(1);
-          if ( t == null || t.before(c.changeDate) )
+          if ( t == null || t.before(new Timestamp(c.changeDate.getTime()-1000)) )
             return false;
+
+          // If found Solr document is based on a record change only a second older than expected,
+          // accept that update as fulfilling the expected change only after a minute has passed.
+          // TODO This exemption should be removed once record dates are tracked exclusively using
+          // the db table timestamps, as opposed to a mix of these and the dates internal to the
+          // MARC, which can create occasional discrepancies.
+          if ( t.before(new Timestamp(c.changeDate.getTime())) )
+              return Duration.between(t.toInstant(), Instant.now()).getSeconds() > 180;
         }
         return true;
       }
     }
   }
-
 }
