@@ -3,8 +3,11 @@ package edu.cornell.library.integration.voyager;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -37,11 +40,30 @@ public class RecentIssuesTest {
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
   }
 
+//  @Test // Not a test
+  public void getAllLiveBibsWithRecentIssues() throws SQLException, FileNotFoundException, UnsupportedEncodingException {
+    Set<Integer> bibs = RecentIssues.getAllAffectedBibs( voyagerLive );
+    System.out.println("writing");
+    try( PrintWriter writer = new PrintWriter("all-recent-issue-bibs.txt", "UTF-8") ) {
+      for (Integer bib : bibs)
+        writer.println(bib);
+    }
+    System.out.println("written");
+  }
+
+  @Test
+  public void getAllBibsWithRecentIssues() throws SQLException {
+    Set<Integer> bibs = RecentIssues.getAllAffectedBibs( voyagerTest );
+    assertEquals(1,bibs.size());
+    assertTrue(bibs.contains(369282));
+  }
+
   @Test
   public void detectChanges() throws SQLException {
     Map<Integer,Set<Change>> changes = RecentIssues.detectNewReceiptBibs(
-        voyagerLive, Timestamp.valueOf("2018-05-08 08:00:00.0"),  new HashMap<Integer,Set<Change>>());
-    System.out.println(changes.toString());
+        voyagerTest, Timestamp.valueOf("2018-01-01 00:00:00.0"),  new HashMap<Integer,Set<Change>>());
+    assertTrue(changes.containsKey(369282));
+    assertEquals(4,changes.get(369282).size()); // 25 total issues to show, 4 in 2018
   }
 
   @Test
