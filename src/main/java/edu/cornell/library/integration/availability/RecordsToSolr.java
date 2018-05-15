@@ -130,7 +130,7 @@ public class RecordsToSolr {
     }
   }
 
-  public static Timestamp getCurrentToDate(Timestamp since, Connection inventory, String key ) throws SQLException {
+  public static Timestamp getCurrentToDate( Connection inventory, String key ) throws SQLException {
 
     try (PreparedStatement pstmt = inventory.prepareStatement(
         "SELECT current_to_date FROM updateCursor WHERE cursor_name = ?")) {
@@ -142,7 +142,7 @@ public class RecordsToSolr {
       }
       
     }
-    return since;
+    return null;
   }
 
   public static void setCurrentToDate(Timestamp currentTo, Connection inventory, String key ) throws SQLException {

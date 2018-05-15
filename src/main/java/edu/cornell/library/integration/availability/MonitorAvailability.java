@@ -26,7 +26,6 @@ public class MonitorAvailability {
 
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException, InterruptedException {
-    Timestamp since = Timestamp.valueOf("2018-05-01 16:45:00.0");
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
@@ -40,28 +39,31 @@ public class MonitorAvailability {
         Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"))) {
 
-      since = RecordsToSolr.getCurrentToDate( since, inventoryDB, CURRENT_TO_KEY );
-
-      Timestamp time = since;
+      Timestamp time = RecordsToSolr.getCurrentToDate( inventoryDB, CURRENT_TO_KEY );
+      if (time == null) {
+        time = new Timestamp(Calendar.getInstance().getTime().getTime()-(10*60*60*1000));
+        System.out.println("No starting timestamp in DB, defaulting to 10 hours ago.");
+      }
       System.out.println(time);
-         Map<Integer,Set<Change>> carryoverChanges = new HashMap<>();
-         while ( true ) {
-           Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
-           Map<Integer,Set<Change>> changedBibs =
-               Items.detectChangedItemStatuses(voyagerLive, time, new HashMap<Integer,Set<Change>>());
-           RecentIssues.detectNewReceiptBibs(voyagerLive, since, changedBibs);
-           Map<Integer,Set<Change>> newlyChangedBibs = RecordsToSolr.eliminateCarryovers(
-               RecordsToSolr.duplicateMap(changedBibs), carryoverChanges);
-           carryoverChanges = changedBibs;
-           if ( newlyChangedBibs.size() > 0 )
-             RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB , newlyChangedBibs );
-           else
-             try {
-               Thread.sleep(500);
-             } catch (InterruptedException e) {  }
-           time = newTime;
-           RecordsToSolr.setCurrentToDate( time, inventoryDB, CURRENT_TO_KEY );
-         }
+
+      Map<Integer,Set<Change>> carryoverChanges = new HashMap<>();
+      while ( true ) {
+        Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
+        Map<Integer,Set<Change>> changedBibs =
+            Items.detectChangedItemStatuses(voyagerLive, time, new HashMap<Integer,Set<Change>>());
+        RecentIssues.detectNewReceiptBibs(voyagerLive, time, changedBibs);
+        Map<Integer,Set<Change>> newlyChangedBibs = RecordsToSolr.eliminateCarryovers(
+            RecordsToSolr.duplicateMap(changedBibs), carryoverChanges);
+        carryoverChanges = changedBibs;
+        if ( newlyChangedBibs.size() > 0 )
+          RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB , newlyChangedBibs );
+        else
+          try {
+            Thread.sleep(500);
+          } catch (InterruptedException e) {  }
+        time = newTime;
+        RecordsToSolr.setCurrentToDate( time, inventoryDB, CURRENT_TO_KEY );
+      }
     }
   }
 

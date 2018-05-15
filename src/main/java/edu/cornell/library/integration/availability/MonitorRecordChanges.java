@@ -32,73 +32,77 @@ public class MonitorRecordChanges {
 
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException, InterruptedException {
-    Timestamp since = Timestamp.valueOf("2018-05-14 10:00:00.0");
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
     Class.forName("oracle.jdbc.driver.OracleDriver");
-    Connection voyager = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
     Class.forName("com.mysql.jdbc.Driver");
-    Connection inventoryDB = DriverManager.getConnection(
-        prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
 
-    since = RecordsToSolr.getCurrentToDate( since, inventoryDB, CURRENT_TO_KEY );
+    try (Connection voyager = DriverManager.getConnection(
+        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+        Connection inventoryDB = DriverManager.getConnection(
+            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"))) {
 
-    Timestamp time = since;
-    System.out.println(time);
-    Map<Integer,Set<Change>> carryoverChangeBlocks = new HashMap<>();
-    Map<Integer,Set<Change>> carryoverExpectedChanges = new HashMap<>();
-    while ( true ) {
-      Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-120_000);
+      Timestamp time = RecordsToSolr.getCurrentToDate( inventoryDB, CURRENT_TO_KEY );
+      if (time == null) {
+        time = new Timestamp(Calendar.getInstance().getTime().getTime()-(10*60*60*1000));
+        System.out.println("No starting timestamp in DB, defaulting to 10 hours ago.");
+      }
+      System.out.println(time);
 
-      Map<Integer,Set<Change>> changedBibs = 
-          Items.detectChangedItems(voyager, time, new HashMap<Integer,Set<Change>>() );
-      Holdings.detectChangedHoldings(voyager, time, changedBibs);
-      BibliographicSummary.detectChangedBibs(voyager, time, changedBibs);
+      Map<Integer,Set<Change>> carryoverChangeBlocks = new HashMap<>();
+      Map<Integer,Set<Change>> carryoverExpectedChanges = new HashMap<>();
+      while ( true ) {
+        Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-120_000);
 
-      addCarriedoverExpectedChangesToFoundChanges(changedBibs, carryoverExpectedChanges);
+        Map<Integer,Set<Change>> changedBibs = 
+            Items.detectChangedItems(voyager, time, new HashMap<Integer,Set<Change>>() );
+        Holdings.detectChangedHoldings(voyager, time, changedBibs);
+        BibliographicSummary.detectChangedBibs(voyager, time, changedBibs);
 
-      Map<Integer,Set<Change>> newCarryoverExpectations = new HashMap<>();
-      Map<Integer,Set<Change>> newCarryoverBlocks = new HashMap<>();
-      Map<Integer,Set<Change>> solrUpdates = new HashMap<>();
-      for (Entry<Integer,Set<Change>> e : changedBibs.entrySet()) {
-        Integer bibId = e.getKey();
-        for (Change c : e.getValue()) {
-          boolean blocked = false;
-          boolean metNotBlocked = false;
-          if (carryoverChangeBlocks.containsKey(bibId) &&
-              carryoverChangeBlocks.get(bibId).contains(c))
-            blocked = true;
-          else if (changeIsMet(inventoryDB,c))
-            metNotBlocked = true;
-          if (metNotBlocked)
-            addChangeToSet(solrUpdates,bibId,c);
-          if (metNotBlocked || blocked)
-            addChangeToSet(newCarryoverBlocks,bibId,c);
-          else {
-            addChangeToSet(newCarryoverExpectations,bibId,c);
-            if (Duration.between(c.changeDate.toInstant(), Instant.now()).getSeconds() > 3600)
-              System.out.println("Long-term carry over "+bibId+": "+c);
+        addCarriedoverExpectedChangesToFoundChanges(changedBibs, carryoverExpectedChanges);
+
+        Map<Integer,Set<Change>> newCarryoverExpectations = new HashMap<>();
+        Map<Integer,Set<Change>> newCarryoverBlocks = new HashMap<>();
+        Map<Integer,Set<Change>> solrUpdates = new HashMap<>();
+        for (Entry<Integer,Set<Change>> e : changedBibs.entrySet()) {
+          Integer bibId = e.getKey();
+          for (Change c : e.getValue()) {
+            boolean blocked = false;
+            boolean metNotBlocked = false;
+            if (carryoverChangeBlocks.containsKey(bibId) &&
+                carryoverChangeBlocks.get(bibId).contains(c))
+              blocked = true;
+            else if (changeIsMet(inventoryDB,c))
+              metNotBlocked = true;
+            if (metNotBlocked)
+              addChangeToSet(solrUpdates,bibId,c);
+            if (metNotBlocked || blocked)
+              addChangeToSet(newCarryoverBlocks,bibId,c);
+            else {
+              addChangeToSet(newCarryoverExpectations,bibId,c);
+              if (Duration.between(c.changeDate.toInstant(), Instant.now()).getSeconds() > 3600)
+                System.out.println("Long-term carry over "+bibId+": "+c);
+            }
           }
         }
+        carryoverExpectedChanges = newCarryoverExpectations;
+        carryoverChangeBlocks = newCarryoverBlocks;
+        if ( ! solrUpdates.isEmpty() )
+          RecordsToSolr.updateBibsInSolr( voyager, inventoryDB , solrUpdates );
+        else
+          try {
+            Thread.sleep(500);
+          } catch (InterruptedException e) {  }
+        Timestamp ctime = minCarryOverTime(carryoverExpectedChanges);
+        time = newTime;
+        if (ctime != null && ctime.before(time))
+          RecordsToSolr.setCurrentToDate( ctime , inventoryDB, CURRENT_TO_KEY );
+        else
+          RecordsToSolr.setCurrentToDate(  time , inventoryDB, CURRENT_TO_KEY );
       }
-      carryoverExpectedChanges = newCarryoverExpectations;
-      carryoverChangeBlocks = newCarryoverBlocks;
-      if ( ! solrUpdates.isEmpty() )
-        RecordsToSolr.updateBibsInSolr( voyager, inventoryDB , solrUpdates );
-      else
-        try {
-          Thread.sleep(500);
-        } catch (InterruptedException e) {  }
-      Timestamp ctime = minCarryOverTime(carryoverExpectedChanges);
-      time = newTime;
-      if (ctime != null && ctime.before(time))
-        RecordsToSolr.setCurrentToDate( ctime , inventoryDB, CURRENT_TO_KEY );
-      else
-        RecordsToSolr.setCurrentToDate(  time , inventoryDB, CURRENT_TO_KEY );
     }
   }
 
