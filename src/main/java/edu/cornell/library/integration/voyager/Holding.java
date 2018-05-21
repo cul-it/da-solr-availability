@@ -244,10 +244,10 @@ public class Holding {
       if (! item.status.available // || (this.call != null && this.call.matches(".*In Process.*"))
           ) {
         item.status.available = null;
-        unavails.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null,item.holds,item.recalls));
+        unavails.add(new ItemReference(item.itemId,null,item.concatEnum(),item.status,null,item.holds,item.recalls));
       } else if (item.status.code.values().contains("Discharged")) {
         discharged = true;
-        returned.add(new ItemReference(item.itemId,null,item.enumeration,item.status,null,null,null));
+        returned.add(new ItemReference(item.itemId,null,item.concatEnum(),item.status,null,null,null));
       }
       if (item.type != null && ! item.type.name.equals("nocirc"))
         circ = true;
@@ -263,7 +263,7 @@ public class Holding {
       tempLocs = new ArrayList<>();
       for (Item i : treeSet)
         if (! i.location.equals(this.location))
-          tempLocs.add(new ItemReference(i.itemId,null,i.enumeration,null,i.location,i.holds,i.recalls));
+          tempLocs.add(new ItemReference(i.itemId,null,i.concatEnum(),null,i.location,i.holds,i.recalls));
           
     }
     this.itemSummary = new HoldingsItemSummary(
@@ -274,6 +274,7 @@ public class Holding {
         (returned.size() == 0)?null:returned);
     return discharged;
   }
+
   /**
    * Any time a comma is followed by a character that is not a space, a
    * space will be inserted.

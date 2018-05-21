@@ -264,6 +264,8 @@ public class Items {
     @JsonProperty("copy")      private final int copy;
     @JsonProperty("sequence")  private final int sequence;
     @JsonProperty("enum")      public final String enumeration;
+    @JsonProperty("chron")     public final String chron;
+    @JsonProperty("year")      public final String year;
     @JsonProperty("caption")   private final String caption;
     @JsonProperty("holds")     public final Integer holds;
     @JsonProperty("recalls")   public final Integer recalls;
@@ -280,7 +282,10 @@ public class Items {
 
       this.copy = rs.getInt("COPY_NUMBER");
       this.sequence = rs.getInt("ITEM_SEQUENCE_NUMBER");
-      this.enumeration = concatEnum(rs.getString("ITEM_ENUM"),rs.getString("CHRON"),rs.getString("YEAR"));
+//      this.enumeration = concatEnum(rs.getString("ITEM_ENUM"),rs.getString("CHRON"),rs.getString("YEAR"));
+      this.enumeration = rs.getString("ITEM_ENUM");
+      this.chron = rs.getString("CHRON");
+      this.year = rs.getString("YEAR");
       this.caption = rs.getString("CAPTION");
       this.holds = (rs.getInt("HOLDS_PLACED") == 0)?null:rs.getInt("HOLDS_PLACED");
       this.recalls = (rs.getInt("RECALLS_PLACED") == 0)?null:rs.getInt("RECALLS_PLACED");
@@ -305,6 +310,8 @@ public class Items {
         @JsonProperty("copy")      int copy,
         @JsonProperty("sequence")  int sequence,
         @JsonProperty("enum")      String enumeration,
+        @JsonProperty("chron")     String chron,
+        @JsonProperty("year")      String year,
         @JsonProperty("caption")   String caption,
         @JsonProperty("holds")     Integer holds,
         @JsonProperty("recalls")   Integer recalls,
@@ -320,6 +327,8 @@ public class Items {
       this.copy = copy;
       this.sequence = sequence;
       this.enumeration = enumeration;
+      this.chron = chron;
+      this.year = year;
       this.caption = caption;
       this.holds = holds;
       this.recalls = recalls;
@@ -355,15 +364,17 @@ public class Items {
       if ( ! this.getClass().equals(o.getClass()) ) return false;
       return this.itemId == ((Item)o).itemId;
     }
-  }
-  public static String concatEnum(String enumeration, String chron, String year) {
-    List<String> enumchronyear = new ArrayList<>();
-    if (enumeration != null && !enumeration.isEmpty()) enumchronyear.add(enumeration);
-    if (chron != null && !chron.isEmpty()) enumchronyear.add(chron);
-    if (year != null && !year.isEmpty()) enumchronyear.add(year);
-    if (enumchronyear.isEmpty())
-      return null;
-    return String.join(" - ", enumchronyear);
+
+    public String concatEnum() {
+      List<String> enumchronyear = new ArrayList<>();
+      if (this.enumeration != null && !this.enumeration.isEmpty()) enumchronyear.add(this.enumeration);
+      if (this.chron != null && !this.chron.isEmpty()) enumchronyear.add(this.chron);
+      if (this.year != null && !this.year.isEmpty()) enumchronyear.add(this.year);
+      if (enumchronyear.isEmpty())
+        return null;
+      return String.join(" - ", enumchronyear);
+    }
+
   }
 
 }
