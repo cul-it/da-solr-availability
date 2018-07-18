@@ -10,7 +10,9 @@ import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +33,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
 import org.apache.solr.common.SolrInputDocument;
 
+import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
 import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.Holdings;
 import edu.cornell.library.integration.voyager.ItemReference;
@@ -196,8 +199,6 @@ public class RecordsToSolr {
                 doc.addField("availability_facet", "Recent Issues");
               if ( holdings.size() > 0 )
                 doc.addField("holdings_json", holdings.toJson());
-              if ( items.itemCount() > 0 )
-                doc.addField("items_json", items.toJson());
               for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
                 for ( Item i : itemsForHolding )
                   if (i.status != null && i.status.shortLoan != null)
@@ -235,6 +236,22 @@ public class RecordsToSolr {
               }
               Set<String> changes = new HashSet<>();
               for (Change c : changedBibs.get(bibId))  changes.add(c.toString());
+              EnumSet<MultiVolFlag> multiVolFlags = MultivolumeAnalysis.analyze(
+                  (String)doc.getFieldValue("format_main_facet"),
+                  (doc.containsKey("description_display")?join(doc.getFieldValues("description_display")):""),
+                  (doc.containsKey("f300e_b")), holdings, items);
+              if ( items.itemCount() > 0 )
+                doc.addField("items_json", items.toJson());
+              boolean oldMultiVolFlag = Boolean.valueOf((String)doc.getFieldValue("multivol_b"));
+              if ( oldMultiVolFlag != multiVolFlags.contains(MultiVolFlag.MULTIVOL)) {
+                System.out.println("Multivol logic conclusion mismatch b"+bibId);
+              }
+              doc.removeField("multivol_b");
+              for (MultiVolFlag flag : multiVolFlags) {
+                String solrField = flag.getSolrField();
+                if ( doc.containsKey(solrField) ) doc.remove(solrField);
+                doc.addField(solrField, true);
+              }
 
               solr.add( doc );
               System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ", changes));
@@ -253,6 +270,15 @@ public class RecordsToSolr {
           changedBibs.remove(bibId);
       }
     }
+  }
+
+  private static String join(Collection<Object> objects) {
+    StringBuilder sb = new StringBuilder();
+    boolean first = true;
+    for (Object o : objects)
+      if ( first ) { first = false; sb.append((String)o); }
+      else sb.append(" ").append((String)o);
+    return sb.toString();
   }
 
   public static Map<Integer,Set<Change>> duplicateMap( Map<Integer,Set<Change>> m1 ) {

@@ -229,6 +229,10 @@ public class Items {
       this.items = new LinkedHashMap<>();
     }
 
+    public static ItemList extractFromJson( String json ) throws IOException {
+      return mapper.readValue(json, ItemList.class);
+    }
+
     public void add( Map<Integer,TreeSet<Item>> items ) {
       this.items.putAll(items);
     }
@@ -263,7 +267,7 @@ public class Items {
     @JsonProperty("mfhdId")    public Integer mfhdId;
     @JsonProperty("copy")      private final int copy;
     @JsonProperty("sequence")  private final int sequence;
-    @JsonProperty("enum")      public final String enumeration;
+    @JsonProperty("enum")      public String enumeration;
     @JsonProperty("chron")     public final String chron;
     @JsonProperty("year")      public final String year;
     @JsonProperty("caption")   private final String caption;

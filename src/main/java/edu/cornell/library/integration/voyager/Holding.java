@@ -37,10 +37,10 @@ import edu.cornell.library.integration.voyager.Locations.Location;
 public class Holding {
 
   @JsonProperty("copy")        public final Integer copy;
-  @JsonProperty("notes")       private final List<String> notes;
-  @JsonProperty("holdings")    private final List<String> holdings;
-  @JsonProperty("supplements") private final List<String> supplements;
-  @JsonProperty("indexes")     private final List<String> indexes;
+  @JsonProperty("notes")       public final List<String> notes;
+  @JsonProperty("holdings")    public final List<String> holdings;
+  @JsonProperty("supplements") public final List<String> supplements;
+  @JsonProperty("indexes")     public final List<String> indexes;
   @JsonProperty("recents")     public List<String> recentIssues = null;
   @JsonProperty("location")    public Location location;
   @JsonProperty("call")        public final String call;
@@ -224,7 +224,7 @@ public class Holding {
     return facetValues;
   }
 
-  public boolean summarizeItemAvailability( TreeSet<Item> treeSet ) {
+  public boolean summarizeItemAvailability( TreeSet<Item> items ) {
     int itemCount = 0;
     boolean discharged = false;
     List<ItemReference> unavails = new ArrayList<>();
@@ -238,7 +238,7 @@ public class Holding {
           unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null,null,null));
       }
     boolean circ = false;
-    for (Item item : treeSet) {
+    for (Item item : items) {
       itemCount++;
       itemLocations.add(item.location);
       if (! item.status.available // || (this.call != null && this.call.matches(".*In Process.*"))
@@ -261,7 +261,7 @@ public class Holding {
         this.location = itemLoc;
     } else {
       tempLocs = new ArrayList<>();
-      for (Item i : treeSet)
+      for (Item i : items)
         if (! i.location.equals(this.location))
           tempLocs.add(new ItemReference(i.itemId,null,i.concatEnum(),null,i.location,i.holds,i.recalls));
           
