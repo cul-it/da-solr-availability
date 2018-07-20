@@ -170,7 +170,8 @@ public class RecordsToSolr {
           "SELECT bib_id, solr_document, title FROM bibRecsSolr"+
           " WHERE bib_id = ?"+
           "   AND active = 1");
-          SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") )) {
+          SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") );
+          SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )){
         BIB: for (int bibId : changedBibs.keySet()) {
           pstmt.setInt(1, bibId);
           try (ResultSet rs = pstmt.executeQuery()) {
@@ -252,9 +253,15 @@ public class RecordsToSolr {
                 if ( doc.containsKey(solrField) ) doc.remove(solrField);
                 doc.addField(solrField, true);
               }
-
               solr.add( doc );
-              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ", changes));
+              List<SolrInputDocument> callNumberBrowseDocs =
+                  CallNumberBrowse.generateBrowseDocuments(doc);
+
+              for (SolrInputDocument d : callNumberBrowseDocs)
+                callNumberSolr.add( d );
+
+              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ",
+                  changes+"  ["+callNumberBrowseDocs.size()+" call numbers]"));
             }
   
           }
