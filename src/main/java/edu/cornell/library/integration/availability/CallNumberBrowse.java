@@ -46,8 +46,6 @@ public class CallNumberBrowse {
     for ( String field : clonedDocFields )
       if (doc.containsKey(field))
         callNoDoc.put(field, doc.getField(field));
-    callNoDoc.addField("type", "callno");
-    callNoDoc.addField("source", "unk");
 
     String bibId = (String)doc.getFieldValue("id");
     Collection<Object> callNumbers = doc.getFieldValues(callNumberField);
@@ -61,9 +59,10 @@ public class CallNumberBrowse {
       if ( callNoDoc.containsKey("callnum_sort") ) callNoDoc.remove("callnum_sort");
       if ( callNoDoc.containsKey("callnum_display") ) callNoDoc.remove("callnum_display");
 
-      callNoDoc.addField( "id", bibId+"_"+(++i) );
+      String id = bibId+"."+(++i);
+      callNoDoc.addField( "id", id );
       callNoDoc.addField( "bibid_i", bibId );
-      callNoDoc.addField( "callnum_sort" , callNo+" "+bibId );
+      callNoDoc.addField( "callnum_sort" , callNumberSortAnalysis(callNo+" "+id) );
       callNoDoc.addField( "callnum_display" , callNo );
 
       
@@ -71,6 +70,22 @@ public class CallNumberBrowse {
     }
 
     return browseDocs;
+  }
+
+  
+  // Analysis logic matches callNumberSort Solr field query analysis
+  static String callNumberSortAnalysis(String string) {
+    return string
+        .toLowerCase()
+        .replaceAll("\\.([^\\d])", " $1")
+        .replaceAll("([a-z])(\\d)", "$1 $2")
+        .replaceAll("(\\d)([a-z])", "$1 $2")
+        .replaceAll("[^a-z\\d\\.]+", " ")
+        .replaceAll("\\.", "a")
+        .replaceAll("\\b(\\d+)\\b", "$1a0")
+        .replaceAll("\\b(\\d+)a(\\d+)\\b", "00000$1a$200000")
+        .replaceAll("0*(\\d{6})a(\\d{6})0*", "$1.$2")
+        .replaceAll("^\\s*", "")  ;
   }
 
 }
