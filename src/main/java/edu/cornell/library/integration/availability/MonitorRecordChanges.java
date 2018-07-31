@@ -20,8 +20,6 @@ import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
 
-import org.apache.solr.client.solrj.SolrServerException;
-
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.Holdings;
 import edu.cornell.library.integration.voyager.Items;
@@ -31,7 +29,7 @@ public class MonitorRecordChanges {
   private static final String CURRENT_TO_KEY = "record";
 
   public static void main(String[] args)
-      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, SolrServerException, InterruptedException {
+      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, InterruptedException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){

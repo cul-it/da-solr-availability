@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--  
+    For information on how to customize this file, please see
+    http://wiki.apache.org/solr/SolrConfigXml. The page also has a link to 
+    an extensively commented version of this file. 
+-->
+<config>
+
+  <luceneMatchVersion>6.0</luceneMatchVersion>
+  <abortOnConfigurationError>${solr.abortOnConfigurationError:true}</abortOnConfigurationError>
+
+  <schemaFactory class="ClassicIndexSchemaFactory"/>
+
+  <lib dir="/cul/data/solr/instancelibs/bl1/"/>
+
+  <dataDir>${solr.data.dir:}</dataDir>
+
+  <indexConfig>
+
+  </indexConfig>
+
+  <updateHandler class="solr.DirectUpdateHandler2" >
+    <updateLog>
+      <str name="dir">${solr.data.dir:}</str>
+    </updateLog>  
+
+    <autoCommit> 
+      <maxTime>600000</maxTime> <!--  10 minutes -->
+      <openSearcher>false</openSearcher> 
+    </autoCommit>
+
+    <autoSoftCommit> 
+      <maxTime>1000</maxTime> <!-- 1 second -->
+    </autoSoftCommit>
+  </updateHandler>
+
+  <!-- query time configurations -->
+  <query>
+    <maxBooleanClauses>1024</maxBooleanClauses>
+    <filterCache class="solr.FastLRUCache"
+        size="512" initialSize="512" autowarmCount="128"/>
+    <queryResultCache class="solr.LRUCache"
+        size="512" initialSize="512" autowarmCount="32"/>
+    <documentCache class="solr.LRUCache"
+        size="512" initialSize="512" autowarmCount="0"/>
+    <enableLazyFieldLoading>true</enableLazyFieldLoading>
+    <queryResultWindowSize>50</queryResultWindowSize>
+    <queryResultMaxDocsCached>200</queryResultMaxDocsCached>
+    <HashDocSet maxSize="3000" loadFactor="0.75"/>
+
+    <!-- a newSearcher event is fired whenever a new searcher is being prepared
+      and there is a current searcher handling requests (aka registered).
+      It can be used to prime certain caches to prevent long request times for
+      certain requests.
+    -->
+    <!-- QuerySenderListener takes an array of NamedList and executes a
+         local query request for each NamedList in sequence. -->
+    <listener event="newSearcher" class="solr.QuerySenderListener">
+      <arr name="queries">
+        <!-- query for all objects (default query) for home page facets -->
+        <lst>
+          <str name="rows">0</str> 
+          <str name="fl">score</str>
+        </lst>
+        <!-- query for single document to populate filter cache -->
+        <lst>
+          <str name="q">id:00282214</str>
+          <str name="qt">standard</str>
+          <str name="rows">0</str>
+          <str name="fl">score</str>
+        </lst>
+      </arr>
+    </listener>
+
+    <!-- a firstSearcher event is fired whenever a new searcher is being
+         prepared but there is no current registered searcher to handle
+         requests or to gain autowarming data from. -->
+    <listener event="firstSearcher" class="solr.QuerySenderListener">
+      <arr name="queries">
+        <!-- query for all objects (default query) for home page facets -->
+        <lst>
+          <str name="rows">0</str> 
+          <str name="fl">score</str>
+        </lst>
+        <!-- query for single document to populate filter cache -->
+        <lst>
+          <str name="q">id:00282214</str>
+          <str name="qt">standard</str>
+          <str name="rows">0</str>
+          <str name="fl">score</str>
+        </lst>
+      </arr>
+    </listener>
+
+    <useColdSearcher>false</useColdSearcher>
+    <maxWarmingSearchers>2</maxWarmingSearchers>
+  </query>
+
+  <requestDispatcher handleSelect="true" >
+    <requestParsers enableRemoteStreaming="false" multipartUploadLimitInKB="2048" />
+    <httpCaching lastModifiedFrom="openTime" etagSeed="Solr" />
+  </requestDispatcher>
+
+  <requestHandler name="standard" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="echoParams">all</str>
+      <str name="q.op">AND</str>
+    </lst>
+  </requestHandler>
+
+  <requestHandler name="/browse" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="defType">lucene</str>
+      <str name="echoParams">explicit</str>
+      <str name="fl">
+        bibid_i, callnum_display,
+        online, format, author_display, acquired_dt, fulltitle_display,
+        fulltitle_vern_display, pub_date_display, language_display,
+        availability_json, url_access_json, title_uniform_display, edition_display
+      </str>
+      <str name="df">callnum_sort</str>
+      <str name="sort">callnum_sort asc</str>
+      <str name="rows">20</str>
+      <str name="wt">ruby</str>
+      <str name="q">[&quot;$from&quot; TO *]</str>
+      <str name="indent">true</str>
+
+      <str name="facet">true</str>
+      <str name="facet.limit">6</str><!--default-->
+      <str name="facet.mincount">1</str>
+
+      <str name="facet.field">{!ex=mq}online</str>
+      <str name="facet.field">{!ex=mq}format</str>
+      <str name="f.format.facet.limit">11</str>
+      <str name="facet.field">{!ex=mq}author_facet</str>
+      <str name="facet.field">{!ex=mq}pub_date_facet</str><!-- need range queries? -->
+      <str name="facet.field">{!ex=mq}language_facet</str>
+      <str name="facet.field">{!ex=mq}fast_topic_facet</str>
+      <str name="facet.field">{!ex=mq}fast_geo_facet</str>
+      <str name="facet.field">{!ex=mq}fast_era_facet</str>
+      <str name="facet.field">{!ex=mq}fast_genre_facet</str>
+      <str name="facet.field">{!ex=mq}subject_content_facet</str>
+      <str name="facet.field">{!ex=mq}location</str>
+      <str name="f.location.facet.limit">-1</str>
+      <str name="f.location.facet.sort">index</str>
+      <str name="facet.query">{!ex=mq}acquired_dt:[NOW-14DAY TO NOW-7DAY]</str>
+      <str name="facet.query">{!ex=mq}acquired_dt:[NOW-30DAY TO NOW-7DAY]</str>
+      <str name="facet.query">{!ex=mq}acquired_dt:[NOW-1YEAR TO NOW-7DAY]</str>
+    </lst>
+  </requestHandler>
+  <requestHandler name="/reverse" class="solr.SearchHandler">
+    <lst name="defaults">
+      <str name="defType">lucene</str>
+      <str name="echoParams">explicit</str>
+      <str name="fl">
+        bibid_i, callnum_display,
+        online, format, author_display, acquired_dt, fulltitle_display,
+        fulltitle_vern_display, pub_date_display, language_display,
+        availability_json, url_access_json, title_uniform_display, edition_display
+      </str>
+      <str name="df">callnum_sort</str>
+      <str name="sort">callnum_sort desc</str>
+      <str name="rows">20</str>
+      <str name="wt">ruby</str>
+      <str name="q">{!tag=mq}[* TO &quot;$to&quot;}</str>
+      <str name="indent">true</str>
+
+      <str name="facet">true</str>
+      <str name="facet.limit">6</str><!--default-->
+      <str name="facet.mincount">1</str>
+
+      <str name="facet.field">{!ex=mq}online</str>
+      <str name="facet.field">{!ex=mq}format</str>
+      <str name="f.format.facet.limit">11</str>
+      <str name="facet.field">{!ex=mq}author_facet</str>
+      <str name="facet.field">{!ex=mq}pub_date_facet</str><!-- need range queries? -->
+      <str name="facet.field">{!ex=mq}language_facet</str>
+      <str name="facet.field">{!ex=mq}fast_topic_facet</str>
+      <str name="facet.field">{!ex=mq}fast_geo_facet</str>
+      <str name="facet.field">{!ex=mq}fast_era_facet</str>
+      <str name="facet.field">{!ex=mq}fast_genre_facet</str>
+      <str name="facet.field">{!ex=mq}subject_content_facet</str>
+      <str name="facet.field">{!ex=mq}location</str>
+      <str name="f.location.facet.limit">-1</str>
+      <str name="f.location.facet.sort">index</str>
+      <str name="facet.query">{!ex=mq}acquired_dt:[NOW-14DAY TO NOW-7DAY]</str>
+      <str name="facet.query">{!ex=mq}acquired_dt:[NOW-30DAY TO NOW-7DAY]</str>
+      <str name="facet.query">{!ex=mq}acquired_dt:[NOW-1YEAR TO NOW-7DAY]</str>
+    </lst>
+  </requestHandler>
+  
+  <!-- for requests to get a single document; use id=666 instead of q=id:666 -->
+  <requestHandler name="document" class="solr.SearchHandler" >
+    <lst name="defaults">
+      <str name="echoParams">all</str>
+      <str name="fl">*</str>
+      <str name="rows">1</str>
+      <str name="q">{!raw f=id v=$id}</str> <!-- use id=666 instead of q=id:666 -->
+    </lst>
+  </requestHandler>
+
+ <!-- http://stackoverflow.com/questions/24570545/ -->
+  <updateRequestProcessorChain name="skip-empty">
+    <!--  Next two processors affect all fields - default configuration -->
+    <processor class="TrimFieldUpdateProcessorFactory" /> <!--  Get rid of leading/trailing spaces. Also empties all-spaces fields for next filter-->
+    <processor class="RemoveBlankFieldUpdateProcessorFactory" /> <!--  Delete fields with no content. More efficient and allows to query for presence/absence of field -->
+
+    <processor class="solr.LogUpdateProcessorFactory" />
+    <processor class="solr.RunUpdateProcessorFactory" />
+  </updateRequestProcessorChain>
+
+</config>

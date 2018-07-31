@@ -159,7 +159,7 @@ public class RecordsToSolr {
   }
 
   public static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
-      throws SQLException, IOException, XMLStreamException, SolrServerException, InterruptedException {
+      throws SQLException, IOException, XMLStreamException, InterruptedException {
 
     List<Integer> bibsNotFound = new ArrayList<>();
 
@@ -257,6 +257,7 @@ public class RecordsToSolr {
               List<SolrInputDocument> callNumberBrowseDocs =
                   CallNumberBrowse.generateBrowseDocuments(doc);
 
+              callNumberSolr.deleteByQuery("bibid_i:"+bibId);
               for (SolrInputDocument d : callNumberBrowseDocs)
                 callNumberSolr.add( d );
 
@@ -267,11 +268,11 @@ public class RecordsToSolr {
           }
           completedBibUpdates.add(bibId);
         }
-      } catch (RemoteSolrException e) {
+      } catch (SolrServerException | RemoteSolrException e) {
         System.out.printf("Error communicating with Solr server after processing %d of %d bib update batch.",
             completedBibUpdates.size(),changedBibs.size());
         e.printStackTrace();
-        Thread.sleep(500);
+        Thread.sleep(5000);
       } finally {
         for (Integer bibId : completedBibUpdates)
           changedBibs.remove(bibId);

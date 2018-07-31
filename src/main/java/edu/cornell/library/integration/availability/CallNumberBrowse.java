@@ -38,7 +38,7 @@ public class CallNumberBrowse {
   public static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc) {
 
     List<SolrInputDocument> browseDocs = new ArrayList<>();
-    
+
     if ( ! doc.containsKey(callNumberField))
       return browseDocs;
 
@@ -50,42 +50,22 @@ public class CallNumberBrowse {
     String bibId = (String)doc.getFieldValue("id");
     Collection<Object> callNumbers = doc.getFieldValues(callNumberField);
     Collection<String> callNumberStrings = new HashSet<>();
-    for (Object c : callNumbers) callNumberStrings.add((String)c);
+    for (Object o : callNumbers) callNumberStrings.add((String)o);//dedupe
 
     int i = 0;
     for (String callNo : callNumberStrings) {
-      if ( callNoDoc.containsKey("id") ) callNoDoc.remove("id");
-      if ( callNoDoc.containsKey("bibid_i") ) callNoDoc.remove("bibid_i");
-      if ( callNoDoc.containsKey("callnum_sort") ) callNoDoc.remove("callnum_sort");
-      if ( callNoDoc.containsKey("callnum_display") ) callNoDoc.remove("callnum_display");
+      SolrInputDocument browseDoc = callNoDoc.deepCopy();
 
       String id = bibId+"."+(++i);
-      callNoDoc.addField( "id", id );
-      callNoDoc.addField( "bibid_i", bibId );
-      callNoDoc.addField( "callnum_sort" , callNumberSortAnalysis(callNo+" "+id) );
-      callNoDoc.addField( "callnum_display" , callNo );
+      browseDoc.addField( "id", id );
+      browseDoc.addField( "bibid_i", bibId );
+      browseDoc.addField( "callnum_sort" , callNo+" "+id );
+      browseDoc.addField( "callnum_display" , callNo );
 
-      
-      browseDocs.add(callNoDoc.deepCopy());
+      browseDocs.add(browseDoc);
     }
 
     return browseDocs;
-  }
-
-  
-  // Analysis logic matches callNumberSort Solr field query analysis
-  static String callNumberSortAnalysis(String string) {
-    return string
-        .toLowerCase()
-        .replaceAll("\\.([^\\d])", " $1")
-        .replaceAll("([a-z])(\\d)", "$1 $2")
-        .replaceAll("(\\d)([a-z])", "$1 $2")
-        .replaceAll("[^a-z\\d\\.]+", " ")
-        .replaceAll("\\.", "a")
-        .replaceAll("\\b(\\d+)\\b", "$1a0")
-        .replaceAll("\\b(\\d+)a(\\d+)\\b", "00000$1a$200000")
-        .replaceAll("0*(\\d{6})a(\\d{6})0*", "$1.$2")
-        .replaceAll("^\\s*", "")  ;
   }
 
 }
