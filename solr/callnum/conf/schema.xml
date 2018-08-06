@@ -23,7 +23,7 @@
 
     <!-- Call number browse functional fields -->
     <field name="id"              type="string"         indexed="true"   stored="true"  required="true" multiValued="false" />
-    <field name="bibid_i"         type="int"            indexed="true"   stored="true"  required="true" multiValued="false" />
+    <field name="bibid"           type="int"            indexed="true"   stored="true"  required="true" multiValued="false" />
     <field name="callnum_sort"    type="callNumberSort" indexed="true"   stored="false" required="true" multiValued="false" />
     <field name="callnum_display" type="string"         indexed="false"  stored="true"  required="true" multiValued="false" />
 
@@ -38,17 +38,22 @@
     <field name="fast_era_facet"         type="string" docValues="true" stored="false" multiValued="true" />
     <field name="fast_genre_facet"       type="string" docValues="true" stored="false" multiValued="true" />
     <field name="subject_content_facet"  type="string" docValues="true" stored="false" multiValued="true" />
-    <field name="location"               type="string" docValues="true" stored="true"  multiValued="true"/>
     <field name="acquired_dt"            type="date"   docValues="true" stored="true"  multiValued="false"/>
     <field name="fulltitle_display"      type="string" indexed="false"  stored="true"  multiValued="false"/>
     <field name="fulltitle_vern_display" type="string" indexed="false"  stored="true"  multiValued="false"/>
     <field name="author_display"         type="string" indexed="false"  stored="true"  multiValued="false"/>
     <field name="pub_date_display"       type="string" indexed="false"  stored="true"  multiValued="true" />
     <field name="language_display"       type="string" indexed="false"  stored="true"  multiValued="true" />
-    <field name="availability_json"      type="string" indexed="false"  stored="true"  multiValued="false" />
-    <field name="url_access_json"        type="string" indexed="false"  stored="true"  multiValued="true" />
     <field name="title_uniform_display"  type="string" indexed="false"  stored="true"  multiValued="true" />
     <field name="edition_display"        type="string" indexed="false"  stored="true"  multiValued="true" />
+
+	<!-- Fields duplicated from Blacklight index, filtered to particular holdings -->
+    <field name="availability_json"      type="string" indexed="false"  stored="true"  multiValued="false" />
+    <field name="url_access_json"        type="string" indexed="false"  stored="true"  multiValued="true" />
+    <field name="location"               type="string" docValues="true" stored="true"  multiValued="true"/>
+
+    <!-- Debug flag field -->
+    <field name="flag"                   type="string" docValues="true" stored="true"  multiValued="true"/>
 
     <!-- Administrivia -->
     <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>

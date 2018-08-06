@@ -255,9 +255,9 @@ public class RecordsToSolr {
               }
               solr.add( doc );
               List<SolrInputDocument> callNumberBrowseDocs =
-                  CallNumberBrowse.generateBrowseDocuments(doc);
+                  CallNumberBrowse.generateBrowseDocuments(doc,holdings);
 
-              callNumberSolr.deleteByQuery("bibid_i:"+bibId);
+              callNumberSolr.deleteByQuery("bibid:"+bibId);
               for (SolrInputDocument d : callNumberBrowseDocs)
                 callNumberSolr.add( d );
 

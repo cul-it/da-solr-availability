@@ -2,11 +2,18 @@ package edu.cornell.library.integration.availability;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.solr.common.SolrInputDocument;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import edu.cornell.library.integration.voyager.Holding;
+import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 
 public class CallNumberBrowse {
 
@@ -21,51 +28,88 @@ public class CallNumberBrowse {
       "fast_era_facet",
       "fast_genre_facet",
       "subject_content_facet",
-      "location",
       "acquired_dt",
       "fulltitle_display",
       "fulltitle_vern_display",
       "author_display",
       "pub_date_display",
       "language_display",
-      "availability_json",
-      "url_access_json",
       "title_uniform_display",
       "edition_display") ;
 
   private static final String callNumberField = "lc_callnum_full";
+  private static final String urlField = "url_access_json";
 
-  public static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc) {
-
+  public static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc, HoldingSet holdings)
+      throws JsonProcessingException {
     List<SolrInputDocument> browseDocs = new ArrayList<>();
+    if ( holdings.getMfhdIds().isEmpty() ) return browseDocs;
 
-    if ( ! doc.containsKey(callNumberField))
-      return browseDocs;
-
-    SolrInputDocument callNoDoc = new SolrInputDocument();
+    SolrInputDocument callNumDoc = new SolrInputDocument();
     for ( String field : clonedDocFields )
       if (doc.containsKey(field))
-        callNoDoc.put(field, doc.getField(field));
-
+        callNumDoc.put(field, doc.getField(field));
     String bibId = (String)doc.getFieldValue("id");
-    Collection<Object> callNumbers = doc.getFieldValues(callNumberField);
-    Collection<String> callNumberStrings = new HashSet<>();
-    for (Object o : callNumbers) callNumberStrings.add((String)o);//dedupe
+    callNumDoc.addField("bibid", bibId);
+
+
+    Map<String,HoldingSet> holdingsByCallNumber = divideHoldingsByCallNumber( holdings );
 
     int i = 0;
-    for (String callNo : callNumberStrings) {
-      SolrInputDocument browseDoc = callNoDoc.deepCopy();
+    for ( Entry<String,HoldingSet> e : holdingsByCallNumber.entrySet() ) {
+      String callNum = e.getKey();
+      HoldingSet holdingsForCallNum = e.getValue();
 
+      SolrInputDocument browseDoc = callNumDoc.deepCopy();
+
+      // try to pull bibliographic call number for missing call number
+      if ( callNum.equals("No Call Number") ) {
+        String bibCallNumber = (String) doc.getFieldValue(callNumberField);
+        if (bibCallNumber != null && ! bibCallNumber.isEmpty()) {
+          callNum = bibCallNumber;
+          browseDoc.addField("flag", "Bibliographic Call Number");
+        } else {
+          browseDoc.addField("flag", "No Call Number");
+        }
+      }
+
+      // populate per-call number fields
       String id = bibId+"."+(++i);
       browseDoc.addField( "id", id );
-      browseDoc.addField( "bibid_i", bibId );
-      browseDoc.addField( "callnum_sort" , callNo+" "+id );
-      browseDoc.addField( "callnum_display" , callNo );
+      browseDoc.addField( "callnum_sort" , callNum+" 0 "+id );
+      browseDoc.addField( "callnum_display" , callNum );
+
+      BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
+      browseDoc.addField("availability_json", b.toJson());
+
+      if (b.online != null && b.online) {
+        browseDoc.put(urlField, doc.getField(urlField));
+        browseDoc.addField("flag", "Online Holding");
+      }
+
+      Set<String> locations = holdingsForCallNum.getLocationFacetValues();
+      if (locations != null && ! locations.isEmpty()) {
+        browseDoc.addField("location", locations );
+        browseDoc.addField("flag", "Physical Holding");
+      }
 
       browseDocs.add(browseDoc);
     }
-
     return browseDocs;
+  }
+
+  private static Map<String, HoldingSet> divideHoldingsByCallNumber(HoldingSet holdings) {
+    Map<String,HoldingSet> holdingsByCallNumber = new HashMap<>();
+    for (Integer holdingId : holdings.getMfhdIds()) {
+      Holding h = holdings.get(holdingId);
+      String callnum = h.call;
+      if (callnum == null || callnum.isEmpty())
+        callnum = "No Call Number";
+      if ( ! holdingsByCallNumber.containsKey(callnum) )
+        holdingsByCallNumber.put(callnum, new HoldingSet());
+      holdingsByCallNumber.get(callnum).put(holdingId, h);
+    }
+    return holdingsByCallNumber;
   }
 
 }
