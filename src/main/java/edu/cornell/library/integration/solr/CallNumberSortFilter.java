@@ -79,7 +79,7 @@ public final class CallNumberSortFilter extends TokenFilter {
         }
       }
 
-      while (callnum.length() > 0 && -1 < " ,;".indexOf(callnum.charAt(0))) {
+      while (callnum.length() > 0 && -1 < " ,;#+".indexOf(callnum.charAt(0))) {
         callnum = callnum.substring(1);
       }
 

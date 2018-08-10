@@ -50,5 +50,8 @@ public class CallNumberSortTest {
 
     // Failing to match the prefix causes main classification number to sort alphabetically instead of numerically
     assertEquals("rare a 12",CallNumberSortFilter.callNumberSortForm("Rare A12",prefixes));
+
+    assertEquals("bx 000001935 a 23 1959",
+        CallNumberSortFilter.callNumberSortForm("++ Oversize BX1935 .A23 1959",prefixes));
   }
 }
