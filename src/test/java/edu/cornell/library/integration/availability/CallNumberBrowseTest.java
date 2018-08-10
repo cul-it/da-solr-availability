@@ -3,12 +3,10 @@ package edu.cornell.library.integration.availability;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -18,27 +16,29 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.cornell.library.integration.voyager.Holdings;
+import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.Items.ItemList;
-import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 
 public class CallNumberBrowseTest {
 
   static Connection voyagerTest = null;
-  static Connection voyagerLive = null;
+//  static Connection voyagerLive = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, ClassNotFoundException, IOException {
+  public static void connect() throws SQLException, ClassNotFoundException {
     Class.forName("org.sqlite.JDBC");
     voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
-    // Connect to live Voyager database
+
+/*    // Connect to live Voyager database
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
+    prop.load(in);
     }
     Class.forName("oracle.jdbc.driver.OracleDriver");
     voyagerLive = DriverManager.getConnection(
       prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+*/
   }
 
   @Test
@@ -64,6 +64,7 @@ public class CallNumberBrowseTest {
         +    "\"availAt\":{\"Kroch Library Rare &amp; Manuscripts (Non-Circulating)\":\"Rare Books PS3554.I3 D6 1996\"}}</field>"
         + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts</field>"
         + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>"
+        + "<field name=\"online\">At the Library</field>"
         + "<field name=\"flag\">Physical Holding</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
@@ -82,6 +83,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"location\">ILR Library &gt; Main Collection</field>"
         + "<field name=\"location\">Mann Library</field>"
         + "<field name=\"location\">Mann Library &gt; Main Collection</field>"
+        + "<field name=\"online\">At the Library</field>"
         + "<field name=\"flag\">Physical Holding</field></doc>",
         ClientUtils.toXML(docs.get(1)));
     assertEquals(
@@ -96,6 +98,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"location\">Olin Library</field>"
         + "<field name=\"location\">Olin Library &gt; Main Collection</field>"
         + "<field name=\"location\">Library Annex</field>"
+        + "<field name=\"online\">At the Library</field>"
         + "<field name=\"flag\">Physical Holding</field></doc>",
         ClientUtils.toXML(docs.get(2)));
 
@@ -125,6 +128,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"callnum_display\">Q1 .N282</field>"
         + "<field name=\"availability_json\">{\"available\":true,\"availAt\":{\"Library Annex\":\"Q1 .N282\"}}</field>"
         + "<field name=\"location\">Library Annex</field>"
+        + "<field name=\"online\">At the Library</field>"
         + "<field name=\"flag\">Physical Holding</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
@@ -137,22 +141,10 @@ public class CallNumberBrowseTest {
         + "<field name=\"callnum_display\">Q1 .N2</field>"
         + "<field name=\"availability_json\">{\"available\":true,\"availAt\":{\"Veterinary Library (Schurman Hall)\":null}}</field>"
         + "<field name=\"location\">Veterinary Library</field>"
-        + "<field name=\"location\">Veterinary Library &gt; Main Collection</field></doc>",
+        + "<field name=\"location\">Veterinary Library &gt; Main Collection</field>"
+        + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(1)));
 
-  }
-
-
-  @Test
-  public void asdf() throws SQLException, IOException, XMLStreamException {
-    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerLive, 2688691);
-    ItemList i = null;
-    for (int mfhdId : holdings.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerLive, mfhdId);
-      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
-    }
-    System.out.println(i.toJson());
-    System.out.println(holdings.toJson());
   }
 
 }

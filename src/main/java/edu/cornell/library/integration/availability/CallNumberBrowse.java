@@ -18,7 +18,6 @@ import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 public class CallNumberBrowse {
 
   private static final List<String> clonedDocFields = Arrays.asList(
-      "online",
       "format",
       "author_facet",
       "pub_date_facet",
@@ -84,12 +83,14 @@ public class CallNumberBrowse {
 
       if (b.online != null && b.online) {
         browseDoc.put(urlField, doc.getField(urlField));
+        browseDoc.addField("online", "Online");
         browseDoc.addField("flag", "Online Holding");
       }
 
       Set<String> locations = holdingsForCallNum.getLocationFacetValues();
       if (locations != null && ! locations.isEmpty()) {
         browseDoc.addField("location", locations );
+        browseDoc.addField("online", "At the Library");
         browseDoc.addField("flag", "Physical Holding");
       }
 
