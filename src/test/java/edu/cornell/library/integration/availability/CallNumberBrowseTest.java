@@ -65,7 +65,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts</field>"
         + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>"
         + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"flag\">Physical Holding</field></doc>",
+        + "<field name=\"shelfloc\">true</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
         "<doc boost=\"1.0\">"
@@ -84,7 +84,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"location\">Mann Library</field>"
         + "<field name=\"location\">Mann Library &gt; Main Collection</field>"
         + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"flag\">Physical Holding</field></doc>",
+        + "<field name=\"shelfloc\">true</field></doc>",
         ClientUtils.toXML(docs.get(1)));
     assertEquals(
         "<doc boost=\"1.0\">"
@@ -99,7 +99,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"location\">Olin Library &gt; Main Collection</field>"
         + "<field name=\"location\">Library Annex</field>"
         + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"flag\">Physical Holding</field></doc>",
+        + "<field name=\"shelfloc\">true</field></doc>",
         ClientUtils.toXML(docs.get(2)));
 
   }
@@ -129,20 +129,19 @@ public class CallNumberBrowseTest {
         + "<field name=\"availability_json\">{\"available\":true,\"availAt\":{\"Library Annex\":\"Q1 .N282\"}}</field>"
         + "<field name=\"location\">Library Annex</field>"
         + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"flag\">Physical Holding</field></doc>",
+        + "<field name=\"shelfloc\">true</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
         "<doc boost=\"1.0\">"
         + "<field name=\"bibid\">329763</field>"
-        + "<field name=\"flag\">Bibliographic Call Number</field>"
-        + "<field name=\"flag\">Physical Holding</field>"
         + "<field name=\"id\">329763.2</field>"
         + "<field name=\"callnum_sort\">Q1 .N2 0 329763.2</field>"
         + "<field name=\"callnum_display\">Q1 .N2</field>"
         + "<field name=\"availability_json\">{\"available\":true,\"availAt\":{\"Veterinary Library (Schurman Hall)\":null}}</field>"
         + "<field name=\"location\">Veterinary Library</field>"
         + "<field name=\"location\">Veterinary Library &gt; Main Collection</field>"
-        + "<field name=\"online\">At the Library</field></doc>",
+        + "<field name=\"online\">At the Library</field>"
+        + "<field name=\"flag\">Bibliographic Call Number</field></doc>",
         ClientUtils.toXML(docs.get(1)));
 
   }

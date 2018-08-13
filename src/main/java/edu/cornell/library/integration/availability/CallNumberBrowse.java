@@ -60,15 +60,18 @@ public class CallNumberBrowse {
       HoldingSet holdingsForCallNum = e.getValue();
 
       SolrInputDocument browseDoc = callNumDoc.deepCopy();
+      boolean bibliographicCallNum = false;
 
       // try to pull bibliographic call number for missing call number
-      if ( callNum.equals("No Call Number") ) {
+      if ( callNum.equals("No Call Number") || 
+          callNum.equalsIgnoreCase("In Process") || 
+          callNum.equalsIgnoreCase("On Order")) {
         String bibCallNumber = (String) doc.getFieldValue(callNumberField);
         if (bibCallNumber != null && ! bibCallNumber.isEmpty()) {
           callNum = bibCallNumber;
-          browseDoc.addField("flag", "Bibliographic Call Number");
+          bibliographicCallNum = true;
         } else {
-          browseDoc.addField("flag", "No Call Number");
+          continue; // Suppress from callnum browse when no discoverable callnum.
         }
       }
 
@@ -84,15 +87,17 @@ public class CallNumberBrowse {
       if (b.online != null && b.online) {
         browseDoc.put(urlField, doc.getField(urlField));
         browseDoc.addField("online", "Online");
-        browseDoc.addField("flag", "Online Holding");
       }
 
       Set<String> locations = holdingsForCallNum.getLocationFacetValues();
       if (locations != null && ! locations.isEmpty()) {
         browseDoc.addField("location", locations );
         browseDoc.addField("online", "At the Library");
-        browseDoc.addField("flag", "Physical Holding");
+        if ( ! bibliographicCallNum )
+          browseDoc.addField("shelfloc", true);
       }
+      if (bibliographicCallNum)
+        browseDoc.addField("flag", "Bibliographic Call Number");
 
       browseDocs.add(browseDoc);
     }

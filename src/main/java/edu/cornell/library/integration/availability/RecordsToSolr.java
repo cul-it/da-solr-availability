@@ -254,12 +254,12 @@ public class RecordsToSolr {
                 doc.addField(solrField, true);
               }
               solr.add( doc );
+
               List<SolrInputDocument> callNumberBrowseDocs =
                   CallNumberBrowse.generateBrowseDocuments(doc,holdings);
-
               callNumberSolr.deleteByQuery("bibid:"+bibId);
-              for (SolrInputDocument d : callNumberBrowseDocs)
-                callNumberSolr.add( d );
+              if ( ! callNumberBrowseDocs.isEmpty() )
+                callNumberSolr.add(callNumberBrowseDocs);
 
               System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ",
                   changes+"  ["+callNumberBrowseDocs.size()+" call numbers]"));
