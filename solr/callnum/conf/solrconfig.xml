@@ -113,7 +113,7 @@
       <str name="defType">lucene</str>
       <str name="echoParams">explicit</str>
       <str name="fl">
-        bibid, callnum_display,
+        bibid, callnum_display, shelfloc,
         online, format, author_display, acquired_dt, fulltitle_display,
         fulltitle_vern_display, pub_date_display, language_display,
         availability_json, url_access_json, title_uniform_display, edition_display
@@ -153,7 +153,7 @@
       <str name="defType">lucene</str>
       <str name="echoParams">explicit</str>
       <str name="fl">
-        bibid, callnum_display,
+        bibid, callnum_display, shelfloc,
         online, format, author_display, acquired_dt, fulltitle_display,
         fulltitle_vern_display, pub_date_display, language_display,
         availability_json, url_access_json, title_uniform_display, edition_display
