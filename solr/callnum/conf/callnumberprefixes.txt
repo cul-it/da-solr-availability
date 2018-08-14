@@ -3,7 +3,8 @@
 # with the following adjustments:
 # Added "Disk"
 # Added "Popular Reading Area"
-# Added "Temp" "Temp #"
+# Added "Temp"
+# Added "Grout"
 # Replaced "Bennett Coll." with "Bennett Collection"
 A.D. White
 Adelmann
@@ -24,6 +25,7 @@ Ellis
 Field Guides
 Flat
 Fuertes Collection
+Grout
 Hill
 History of Science
 Hollister
@@ -62,7 +64,6 @@ Shaw
 Shelf
 Special Reserve
 Temp
-Temp #
 Thesis
 Trials
 Undersize
