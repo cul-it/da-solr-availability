@@ -121,7 +121,7 @@
       <str name="df">callnum_sort</str>
       <str name="sort">callnum_sort asc</str>
       <str name="rows">20</str>
-      <str name="wt">ruby</str>
+      <str name="wt">json</str>
       <str name="q">[&quot;$from&quot; TO *]</str>
       <str name="indent">true</str>
 
@@ -161,7 +161,7 @@
       <str name="df">callnum_sort</str>
       <str name="sort">callnum_sort desc</str>
       <str name="rows">20</str>
-      <str name="wt">ruby</str>
+      <str name="wt">json</str>
       <str name="q">{!tag=mq}[* TO &quot;$to&quot;}</str>
       <str name="indent">true</str>
 

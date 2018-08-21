@@ -75,19 +75,27 @@ public class CallNumberBrowse {
         }
       }
 
-      // populate per-call number fields
+      BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
+
+      if (b.online != null && b.online) {
+        if ( doc.containsKey(urlField)) {
+          browseDoc.put(urlField, doc.getField(urlField));
+          browseDoc.addField("online", "Online");
+        } else {
+          // no online access without a link
+          System.out.println("Serv,remo holdings, no access link. b"+bibId);
+          if ( b.availAt != null || b.unavailAt != null)
+            b.online = null; // if also print, suppress online from record
+          else
+            continue;        // otherwise, suppress call number from browse entirely
+        }
+      }
+
       String id = bibId+"."+(++i);
       browseDoc.addField( "id", id );
       browseDoc.addField( "callnum_sort" , callNum+" 0 "+id );
       browseDoc.addField( "callnum_display" , callNum );
-
-      BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
-      browseDoc.addField("availability_json", b.toJson());
-
-      if (b.online != null && b.online) {
-        browseDoc.put(urlField, doc.getField(urlField));
-        browseDoc.addField("online", "Online");
-      }
+      browseDoc.addField( "availability_json", b.toJson() );
 
       Set<String> locations = holdingsForCallNum.getLocationFacetValues();
       if (locations != null && ! locations.isEmpty()) {
