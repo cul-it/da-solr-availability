@@ -88,7 +88,7 @@ public class RecordsToSolr {
       }
       return sb.toString();
     }
-    public enum Type { BIB, HOLDING, ITEM, CIRC, RECEIPT, OTHER };
+    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, RECEIPT, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
