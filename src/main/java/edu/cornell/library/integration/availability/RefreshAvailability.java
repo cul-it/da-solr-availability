@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TreeMap;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -21,7 +22,6 @@ import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 
@@ -43,9 +43,23 @@ public class RefreshAvailability {
         Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"))) {
 
+      int rows = 50;
+      SolrQuery q = new SolrQuery().setQuery("*:*").addSort("timestamp", ORDER.asc).setFields("id,timestamp").setRows(rows);
+
+      int page = 0;
+
       while ( true ) {
 
-        Map<Integer,Set<Change>> oldBibs = getOldestSolrDocuments(solr);
+        q.setStart(page * rows);
+        Map<Integer,Set<Change>> oldBibs = new TreeMap<>();
+        for (SolrDocument doc : solr.query(q).getResults()) {
+          Integer bibId = Integer.valueOf((String)doc.getFieldValue("id"));
+          Set<Change> t = new HashSet<>();
+          t.add(new Change(Change.Type.AGE,bibId,"Updating Availability",
+              new Timestamp(((Date)doc.getFieldValue("timestamp")).getTime()),null));
+          oldBibs.put(bibId,t);
+        }
+        page = (page + 1) % 10;
 
         if ( oldBibs.size() > 0 )
           RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB , oldBibs );
@@ -57,23 +71,8 @@ public class RefreshAvailability {
           }
 
       }
-    }
-  }
 
-  private static Map<Integer, Set<Change>> getOldestSolrDocuments(SolrClient solr)
-      throws SolrServerException, IOException {
-    Map<Integer,Set<Change>> oldBibs = new HashMap<>();
-    SolrQuery q = new SolrQuery().setQuery("*:*").addSort("timestamp", ORDER.asc).setFields("id,timestamp").setRows(50);
-    SolrDocumentList r = solr.query(q).getResults();
-    for ( SolrDocument doc : r ) {
-      Integer bibId = Integer.valueOf((String)doc.getFieldValue("id"));
-      Set<Change> t = new HashSet<>();
-      t.add(new Change(Change.Type.AGE,bibId,"Updating Availability",
-          new Timestamp(((Date)doc.getFieldValue("timestamp")).getTime()),null));
-      oldBibs.put(bibId,t);
     }
-    
-    return oldBibs;
   }
 
 }
