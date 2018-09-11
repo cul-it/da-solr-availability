@@ -88,7 +88,8 @@ public class RecordsToSolr {
       }
       return sb.toString();
     }
-    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, RECEIPT, OTHER };
+
+    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, RECEIPT, AGE, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
@@ -159,7 +160,7 @@ public class RecordsToSolr {
   }
 
   public static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
-      throws SQLException, IOException, XMLStreamException, SolrServerException, InterruptedException {
+      throws SQLException, IOException, XMLStreamException, InterruptedException {
 
     List<Integer> bibsNotFound = new ArrayList<>();
 
@@ -170,7 +171,8 @@ public class RecordsToSolr {
           "SELECT bib_id, solr_document, title FROM bibRecsSolr"+
           " WHERE bib_id = ?"+
           "   AND active = 1");
-          SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") )) {
+          SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") );
+          SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )){
         BIB: for (int bibId : changedBibs.keySet()) {
           pstmt.setInt(1, bibId);
           try (ResultSet rs = pstmt.executeQuery()) {
@@ -252,19 +254,26 @@ public class RecordsToSolr {
                 if ( doc.containsKey(solrField) ) doc.remove(solrField);
                 doc.addField(solrField, true);
               }
-
               solr.add( doc );
-              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ", changes));
+
+              List<SolrInputDocument> callNumberBrowseDocs =
+                  CallNumberBrowse.generateBrowseDocuments(doc,holdings);
+              callNumberSolr.deleteByQuery("bibid:"+bibId);
+              if ( ! callNumberBrowseDocs.isEmpty() )
+                callNumberSolr.add(callNumberBrowseDocs);
+
+              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ",
+                  changes+"  ["+callNumberBrowseDocs.size()+" call numbers]"));
             }
   
           }
           completedBibUpdates.add(bibId);
         }
-      } catch (RemoteSolrException e) {
+      } catch (SolrServerException | RemoteSolrException e) {
         System.out.printf("Error communicating with Solr server after processing %d of %d bib update batch.",
             completedBibUpdates.size(),changedBibs.size());
         e.printStackTrace();
-        Thread.sleep(500);
+        Thread.sleep(5000);
       } finally {
         for (Integer bibId : completedBibUpdates)
           changedBibs.remove(bibId);
