@@ -141,10 +141,8 @@ public class Items {
     try (PreparedStatement pstmt = voyager.prepareStatement(recentItemReserveStatusChangesQuery);
         PreparedStatement bibStmt = voyager.prepareStatement(bibIdFromItemIdQuery)) {
 
-//      pstmt.setTimestamp(1,since);
-//      pstmt.setTimestamp(2,since);
-      pstmt.setTimestamp(1, Timestamp.valueOf("2018-08-22 15:45:18.0"));
-      pstmt.setTimestamp(2, Timestamp.valueOf("2018-08-22 15:45:18.0"));
+      pstmt.setTimestamp(1,since);
+      pstmt.setTimestamp(2,since);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           Item item = retrieveItemByItemId( voyager, rs.getInt("item_id"));
