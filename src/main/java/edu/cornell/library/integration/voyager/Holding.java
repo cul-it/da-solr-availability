@@ -52,6 +52,7 @@ public class Holding {
   @JsonProperty("online")      public Boolean online = null;
   @JsonProperty("date")        public final Integer date;
 
+  @JsonIgnore public String callNumberSuffix = null;
   @JsonIgnore public MarcRecord record;
   @JsonIgnore static Locations locations = null;
   @JsonIgnore static ObjectMapper mapper = new ObjectMapper();
@@ -116,6 +117,8 @@ public class Holding {
             // multiple subfield ‡h entries in one field, the call will be overwritten
             // and not duplicated in the call number array.
             call = f.concatenateSpecificSubfields("hijklm"); break CODE;
+          case 'm':
+            this.callNumberSuffix = f.concatenateSpecificSubfields("m"); break CODE;
           case 'z':
             notes.add(sf.value); break CODE;
           case 't':
