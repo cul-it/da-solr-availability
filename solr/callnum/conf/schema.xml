@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="Cornell Call Number Browse Index" version="201807">
+
+  <types>
+
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="date" class="solr.TrieDateField" omitNorms="true" precisionStep="0" positionIncrementGap="0"/>
+
+    <fieldType name="callNumberSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+      <analyzer>
+        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <filter class="edu.cornell.library.integration.solr.CallNumberSortFilterFactory" prefixes="callnumberprefixes.txt"/>
+      </analyzer>
+    </fieldType>
+
+  </types>
+
+
+  <fields>
+
+    <!-- Call number browse functional fields -->
+    <field name="id"              type="string"         indexed="true"   stored="true"  required="true" multiValued="false" />
+    <field name="bibid"           type="int"            indexed="true"   stored="true"  required="true" multiValued="false" />
+    <field name="callnum_sort"    type="callNumberSort" indexed="true"   stored="false" required="true" multiValued="false" />
+    <field name="callnum_display" type="string"         indexed="false"  stored="true"  required="true" multiValued="false" />
+    <field name="shelfloc"        type="boolean"        indexed="true"   stored="true"                  multiValued="false" />
+
+    <!-- Fields duplicated from Blacklight index -->
+    <field name="format"                 type="string" indexed="false"  stored="true"  multiValued="true"/> <!-- display only -->
+    <field name="pub_date_facet"         type="int"    docValues="true" stored="false" multiValued="false"/>
+    <field name="language_facet"         type="string" docValues="true" stored="false" multiValued="true" />
+    <field name="acquired_dt"            type="date"   docValues="true" stored="true"  multiValued="false"/>
+    <field name="fulltitle_display"      type="string" indexed="false"  stored="true"  multiValued="false"/>
+    <field name="fulltitle_vern_display" type="string" indexed="false"  stored="true"  multiValued="false"/>
+
+	<!-- Fields duplicated from Blacklight index, filtered to particular holdings -->
+    <field name="availability_json"      type="string" indexed="false"  stored="true"  multiValued="false" />
+    <field name="location"               type="string" docValues="true" stored="true"  multiValued="true"/>
+    <field name="online"                 type="string" docValues="true" stored="true"  multiValued="true"/>
+
+    <!-- Debug flag field -->
+    <field name="flag"                   type="string" docValues="true" stored="true"  multiValued="true"/>
+
+    <!-- Administrivia -->
+    <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
+    <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
+
+  </fields>
+
+  <uniqueKey>id</uniqueKey>
+  <solrQueryParser defaultOperator="AND"/>
+
+</schema>

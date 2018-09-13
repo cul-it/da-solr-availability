@@ -163,6 +163,7 @@ public class HoldingsTest {
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJson2202712").toJson(),h.toJson());
+    assertEquals("++",h.get(2202712).callNumberSuffix);
   }
 
   @Test

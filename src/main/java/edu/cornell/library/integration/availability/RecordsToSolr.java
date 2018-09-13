@@ -88,7 +88,8 @@ public class RecordsToSolr {
       }
       return sb.toString();
     }
-    public enum Type { BIB, HOLDING, ITEM, CIRC, RECEIPT, OTHER };
+
+    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, RECEIPT, AGE, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
@@ -159,7 +160,7 @@ public class RecordsToSolr {
   }
 
   public static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
-      throws SQLException, IOException, XMLStreamException, SolrServerException, InterruptedException {
+      throws SQLException, IOException, XMLStreamException, InterruptedException {
 
     List<Integer> bibsNotFound = new ArrayList<>();
 
@@ -170,7 +171,8 @@ public class RecordsToSolr {
           "SELECT bib_id, solr_document, title FROM bibRecsSolr"+
           " WHERE bib_id = ?"+
           "   AND active = 1");
-          SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") )) {
+          SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") );
+          SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )){
         BIB: for (int bibId : changedBibs.keySet()) {
           pstmt.setInt(1, bibId);
           try (ResultSet rs = pstmt.executeQuery()) {
@@ -225,13 +227,14 @@ public class RecordsToSolr {
                       String status = ir.status.code.values().iterator().next();
                       doc.addField("availability_facet",status);
                     }
-              }
-              for (int mfhdId : holdings.getMfhdIds()) {
-                if (holdings.get(mfhdId).itemSummary != null &&
-                    holdings.get(mfhdId).itemSummary.tempLocs != null &&
-                    ! holdings.get(mfhdId).itemSummary.tempLocs.isEmpty())
+                if (h.callNumberSuffix != null)
+                  doc.addField("lc_callnum_suffix", h.callNumberSuffix);
+
+                if (h.itemSummary != null &&
+                    h.itemSummary.tempLocs != null &&
+                    ! h.itemSummary.tempLocs.isEmpty())
                   doc.addField("availability_facet","Partial Temp Locs");
-                if (holdings.get(mfhdId).copy != null)
+                if (h.copy != null)
                   doc.addField("availability_facet", "Copies");
               }
               Set<String> changes = new HashSet<>();
@@ -252,19 +255,26 @@ public class RecordsToSolr {
                 if ( doc.containsKey(solrField) ) doc.remove(solrField);
                 doc.addField(solrField, true);
               }
-
               solr.add( doc );
-              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ", changes));
+
+              List<SolrInputDocument> callNumberBrowseDocs =
+                  CallNumberBrowse.generateBrowseDocuments(doc,holdings);
+              callNumberSolr.deleteByQuery("bibid:"+bibId);
+              if ( ! callNumberBrowseDocs.isEmpty() )
+                callNumberSolr.add(callNumberBrowseDocs);
+
+              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ",
+                  changes+"  ["+callNumberBrowseDocs.size()+" call numbers]"));
             }
   
           }
           completedBibUpdates.add(bibId);
         }
-      } catch (RemoteSolrException e) {
+      } catch (SolrServerException | RemoteSolrException e) {
         System.out.printf("Error communicating with Solr server after processing %d of %d bib update batch.",
             completedBibUpdates.size(),changedBibs.size());
         e.printStackTrace();
-        Thread.sleep(500);
+        Thread.sleep(5000);
       } finally {
         for (Integer bibId : completedBibUpdates)
           changedBibs.remove(bibId);
