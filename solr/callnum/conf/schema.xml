@@ -29,27 +29,15 @@
     <field name="shelfloc"        type="boolean"        indexed="true"   stored="true"                  multiValued="false" />
 
     <!-- Fields duplicated from Blacklight index -->
-    <field name="format"                 type="string" docValues="true" stored="true"  multiValued="true"/>
-    <field name="author_facet"           type="string" docValues="true" stored="false" multiValued="true" />
+    <field name="format"                 type="string" indexed="false"  stored="true"  multiValued="true"/> <!-- display only -->
     <field name="pub_date_facet"         type="int"    docValues="true" stored="false" multiValued="false"/>
     <field name="language_facet"         type="string" docValues="true" stored="false" multiValued="true" />
-    <field name="fast_topic_facet"       type="string" docValues="true" stored="false" multiValued="true" />
-    <field name="fast_geo_facet"         type="string" docValues="true" stored="false" multiValued="true" />
-    <field name="fast_era_facet"         type="string" docValues="true" stored="false" multiValued="true" />
-    <field name="fast_genre_facet"       type="string" docValues="true" stored="false" multiValued="true" />
-    <field name="subject_content_facet"  type="string" docValues="true" stored="false" multiValued="true" />
     <field name="acquired_dt"            type="date"   docValues="true" stored="true"  multiValued="false"/>
     <field name="fulltitle_display"      type="string" indexed="false"  stored="true"  multiValued="false"/>
     <field name="fulltitle_vern_display" type="string" indexed="false"  stored="true"  multiValued="false"/>
-    <field name="author_display"         type="string" indexed="false"  stored="true"  multiValued="false"/>
-    <field name="pub_date_display"       type="string" indexed="false"  stored="true"  multiValued="true" />
-    <field name="language_display"       type="string" indexed="false"  stored="true"  multiValued="true" />
-    <field name="title_uniform_display"  type="string" indexed="false"  stored="true"  multiValued="true" />
-    <field name="edition_display"        type="string" indexed="false"  stored="true"  multiValued="true" />
 
 	<!-- Fields duplicated from Blacklight index, filtered to particular holdings -->
     <field name="availability_json"      type="string" indexed="false"  stored="true"  multiValued="false" />
-    <field name="url_access_json"        type="string" indexed="false"  stored="true"  multiValued="true" />
     <field name="location"               type="string" docValues="true" stored="true"  multiValued="true"/>
     <field name="online"                 type="string" docValues="true" stored="true"  multiValued="true"/>
 

@@ -36,7 +36,7 @@
     </autoCommit>
 
     <autoSoftCommit> 
-      <maxTime>1000</maxTime> <!-- 1 second -->
+      <maxTime>10000</maxTime> <!-- 10 seconds -->
     </autoSoftCommit>
   </updateHandler>
 
@@ -119,10 +119,8 @@
       <str name="defType">lucene</str>
       <str name="echoParams">explicit</str>
       <str name="fl">
-        bibid, callnum_display, shelfloc,
-        online, format, author_display, acquired_dt, fulltitle_display,
-        fulltitle_vern_display, pub_date_display, language_display,
-        availability_json, url_access_json, title_uniform_display, edition_display
+        bibid, callnum_display, shelfloc, availability_json,
+        online, format, fulltitle_display, fulltitle_vern_display
       </str>
       <str name="df">callnum_sort</str>
       <str name="sort">callnum_sort asc</str>
@@ -136,16 +134,7 @@
       <str name="facet.mincount">1</str>
 
       <str name="facet.field">{!ex=mq}online</str>
-      <str name="facet.field">{!ex=mq}format</str>
-      <str name="f.format.facet.limit">11</str>
-      <str name="facet.field">{!ex=mq}author_facet</str>
-      <str name="facet.field">{!ex=mq}pub_date_facet</str><!-- need range queries? -->
       <str name="facet.field">{!ex=mq}language_facet</str>
-      <str name="facet.field">{!ex=mq}fast_topic_facet</str>
-      <str name="facet.field">{!ex=mq}fast_geo_facet</str>
-      <str name="facet.field">{!ex=mq}fast_era_facet</str>
-      <str name="facet.field">{!ex=mq}fast_genre_facet</str>
-      <str name="facet.field">{!ex=mq}subject_content_facet</str>
       <str name="facet.field">{!ex=mq}location</str>
       <str name="f.location.facet.limit">-1</str>
       <str name="f.location.facet.sort">index</str>
@@ -159,10 +148,8 @@
       <str name="defType">lucene</str>
       <str name="echoParams">explicit</str>
       <str name="fl">
-        bibid, callnum_display, shelfloc,
-        online, format, author_display, acquired_dt, fulltitle_display,
-        fulltitle_vern_display, pub_date_display, language_display,
-        availability_json, url_access_json, title_uniform_display, edition_display
+        bibid, callnum_display, shelfloc, availability_json,
+        online, format, fulltitle_display, fulltitle_vern_display
       </str>
       <str name="df">callnum_sort</str>
       <str name="sort">callnum_sort desc</str>
@@ -176,16 +163,7 @@
       <str name="facet.mincount">1</str>
 
       <str name="facet.field">{!ex=mq}online</str>
-      <str name="facet.field">{!ex=mq}format</str>
-      <str name="f.format.facet.limit">11</str>
-      <str name="facet.field">{!ex=mq}author_facet</str>
-      <str name="facet.field">{!ex=mq}pub_date_facet</str><!-- need range queries? -->
       <str name="facet.field">{!ex=mq}language_facet</str>
-      <str name="facet.field">{!ex=mq}fast_topic_facet</str>
-      <str name="facet.field">{!ex=mq}fast_geo_facet</str>
-      <str name="facet.field">{!ex=mq}fast_era_facet</str>
-      <str name="facet.field">{!ex=mq}fast_genre_facet</str>
-      <str name="facet.field">{!ex=mq}subject_content_facet</str>
       <str name="facet.field">{!ex=mq}location</str>
       <str name="f.location.facet.limit">-1</str>
       <str name="f.location.facet.sort">index</str>
@@ -205,7 +183,6 @@
     </lst>
   </requestHandler>
 
- <!-- http://stackoverflow.com/questions/24570545/ -->
   <updateRequestProcessorChain name="skip-empty">
     <!--  Next two processors affect all fields - default configuration -->
     <processor class="TrimFieldUpdateProcessorFactory" /> <!--  Get rid of leading/trailing spaces. Also empties all-spaces fields for next filter-->

@@ -227,13 +227,14 @@ public class RecordsToSolr {
                       String status = ir.status.code.values().iterator().next();
                       doc.addField("availability_facet",status);
                     }
-              }
-              for (int mfhdId : holdings.getMfhdIds()) {
-                if (holdings.get(mfhdId).itemSummary != null &&
-                    holdings.get(mfhdId).itemSummary.tempLocs != null &&
-                    ! holdings.get(mfhdId).itemSummary.tempLocs.isEmpty())
+                if (h.callNumberSuffix != null)
+                  doc.addField("lc_callnum_suffix", h.callNumberSuffix);
+
+                if (h.itemSummary != null &&
+                    h.itemSummary.tempLocs != null &&
+                    ! h.itemSummary.tempLocs.isEmpty())
                   doc.addField("availability_facet","Partial Temp Locs");
-                if (holdings.get(mfhdId).copy != null)
+                if (h.copy != null)
                   doc.addField("availability_facet", "Copies");
               }
               Set<String> changes = new HashSet<>();
