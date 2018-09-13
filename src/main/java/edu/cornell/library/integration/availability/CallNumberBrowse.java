@@ -19,22 +19,12 @@ public class CallNumberBrowse {
 
   private static final List<String> clonedDocFields = Arrays.asList(
       "format",
-      "author_facet",
       "pub_date_facet",
       "language_facet",
-      "fast_topic_facet",
-      "fast_geo_facet",
-      "fast_era_facet",
-      "fast_genre_facet",
-      "subject_content_facet",
       "acquired_dt",
       "fulltitle_display",
       "fulltitle_vern_display",
-      "author_display",
-      "pub_date_display",
-      "language_display",
-      "title_uniform_display",
-      "edition_display") ;
+      "language_display") ;
 
   private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";

@@ -59,6 +59,7 @@ public class MonitorRecordChanges {
             Items.detectChangedItems(voyager, time, new HashMap<Integer,Set<Change>>() );
         Holdings.detectChangedHoldings(voyager, time, changedBibs);
         BibliographicSummary.detectChangedBibs(voyager, time, changedBibs);
+        Items.detectItemReserveStatusChanges(voyager, time, changedBibs );
 
         addCarriedoverExpectedChangesToFoundChanges(changedBibs, carryoverExpectedChanges);
 
@@ -149,6 +150,9 @@ public class MonitorRecordChanges {
   }
 
   private static boolean changeIsMet(Connection inventoryDB, Change c) throws SQLException {
+
+    if (c.type.equals(Change.Type.RESERVE)) return true;
+
     try ( PreparedStatement pstmt = inventoryDB.prepareStatement(recordDateQueries.get(c.type) )) {
       pstmt.setInt(1, c.recordId);
       try (ResultSet rs = pstmt.executeQuery()) {
