@@ -23,8 +23,7 @@ public class CallNumberBrowse {
       "language_facet",
       "acquired_dt",
       "fulltitle_display",
-      "fulltitle_vern_display",
-      "language_display") ;
+      "fulltitle_vern_display") ;
 
   private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";
@@ -69,7 +68,6 @@ public class CallNumberBrowse {
 
       if (b.online != null && b.online) {
         if ( doc.containsKey(urlField)) {
-          browseDoc.put(urlField, doc.getField(urlField));
           browseDoc.addField("online", "Online");
         } else {
           // no online access without a link
