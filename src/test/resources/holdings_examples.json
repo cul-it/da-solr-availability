@@ -514,6 +514,27 @@
   "items":{"count":1,"avail":1}}}
 
 
+
+
+,"expectedBib833840":
+
+
+
+
+{"1016218":{
+  "notes":["Bound with: Fifty Oxyrhynchus Papyri."],
+  "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+  "call":"P9 .F5 t.64",
+  "date":1179841345,
+  "boundWith":{"2057898":{"masterItemId":2057898,
+                          "masterBibId":836782,
+                          "masterTitle":"Fifty Oxyrhynchus Papyri : (P. Oxy. Hels.) /",
+                          "masterEnum":"t.63-65",
+                          "thisEnum":"",
+                          "status":{"available":false,"code":{"2":"Charged"},"due":1537477200,"date":1505919354}}}}}
+
+
+
 ,"expectedRecentItems":
 # bib 369282 (Second holdings/item has the circulating reserve item)
 

@@ -105,4 +105,18 @@ public class ItemStatus {
     this.date = (statusModDate == null)?null:statusModDate.getTime()/1000;
   }
 
+  public boolean matches( ItemStatus other ) {
+    if ( this.available != null 
+        && ! this.available.equals( other.available ) ) return false;
+    if ( this.code != null 
+        && ! this.code.equals(other.code) ) return false;
+    if ( this.due != null
+        && ! this.due.equals(other.due) ) return false;
+    return true;
+  }
+
+  public boolean newerThan( ItemStatus other ) {
+    if ( this.date == null || other.date == null ) return false;
+    return ( this.date > other.date );
+  }
 }

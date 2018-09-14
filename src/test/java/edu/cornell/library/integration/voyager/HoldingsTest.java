@@ -91,6 +91,12 @@ public class HoldingsTest {
   }
 
   @Test
+  public void boundWithReference() throws SQLException, IOException, XMLStreamException {
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 833840);
+    assertEquals(examples.get("expectedBib833840").toJson(),holdings.toJson());
+  }
+
+  @Test
   public void roundTripHoldingThroughJson() throws SQLException, IOException, XMLStreamException {
     HoldingSet h1 = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9850688);
     String j1 = h1.toJson();

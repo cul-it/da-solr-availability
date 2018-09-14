@@ -118,6 +118,12 @@ public class ItemsTest {
   }
 
   @Test
+  public void emptyItem() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218);
+    assertEquals(examples.get("expectedBib833840").toJson(),items.toJson());
+  }
+
+  @Test
   public void getItemByItemIdTest() throws SQLException, JsonProcessingException {
     Item item = Items.retrieveItemByItemId(voyagerTest,2236014);
     item.mfhdId = null; // mfhdId is not present in example mode, so remove for comparison

@@ -1,13 +1,20 @@
 package edu.cornell.library.integration.voyager;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.EnumSet;
 import java.util.Properties;
+
+import javax.xml.stream.XMLStreamException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,6 +23,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 
 import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.voyager.BoundWith;
+import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
+import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class BoundWithTest {
 
@@ -49,8 +58,8 @@ public class BoundWithTest {
     Class.forName("org.sqlite.JDBC");
     voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
 //    Class.forName("oracle.jdbc.driver.OracleDriver");
-//  voyagerLive = DriverManager.getConnection(
-//     prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+//    voyagerLive = DriverManager.getConnection(
+//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
   }
 
   @Test
@@ -62,5 +71,27 @@ public class BoundWithTest {
     b = BoundWith.from876Field(voyagerTest, f);
     assertEquals(expectedBoundWithJson1726636,b.toJson());
   }
+
+  @Test
+  public void boundWithDedupe() throws SQLException, IOException, XMLStreamException {
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 833840);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218);
+
+    // before dedupe, boundwith reference in holding block, empty item looks available
+    assertNotNull(holdings.get(1016218).boundWiths);
+    assertTrue( items.getItem(1016218,9621977).status.available );
+
+    EnumSet<BoundWith.Flag> flags = BoundWith.dedupeBoundWithReferences(holdings, items);
+    assertEquals( EnumSet.of(BoundWith.Flag.EMPTY_ITEMS,
+                             BoundWith.Flag.HOLDING_REFS,
+                             BoundWith.Flag.DEDUPED,
+                             BoundWith.Flag.REF_STATUS),
+                  flags);
+
+    // after dedupe, no boundwith reference in holding block, empty item looks unavailable
+    assertNull(holdings.get(1016218).boundWiths);
+    assertFalse( items.getItem(1016218,9621977).status.available );
+  }
+
 }
 // 4690713 2473239 7301315 2098051 2305477 3212523

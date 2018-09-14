@@ -316,7 +316,8 @@ public class Items {
     @JsonProperty("location")  public final Location location;
     @JsonProperty("circGrp")   public final Map<Integer,String> circGrp;
     @JsonProperty("type")      public final ItemType type;
-    @JsonProperty("status")    public final ItemStatus status;
+    @JsonProperty("status")    public ItemStatus status;
+    @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public final Integer date;
 
     private Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
@@ -345,6 +346,7 @@ public class Items {
       this.status = new ItemStatus( voyager, this.itemId, this.type );
       this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
           ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
+      this.empty = (rs.getString("ITEM_BARCODE") == null)?true:null;
     }
 
     private Item(

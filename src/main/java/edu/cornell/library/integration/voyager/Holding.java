@@ -44,7 +44,7 @@ public class Holding {
   @JsonProperty("recents")     public List<String> recentIssues = null;
   @JsonProperty("location")    public Location location;
   @JsonProperty("call")        public final String call;
-  @JsonProperty("boundWith")   public final Map<Integer,BoundWith> boundWiths;
+  @JsonProperty("boundWith")   public Map<Integer,BoundWith> boundWiths;
   @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
   @JsonProperty("order")       public String openOrderNote = null;
   @JsonProperty("avail")       public Boolean avail = null;

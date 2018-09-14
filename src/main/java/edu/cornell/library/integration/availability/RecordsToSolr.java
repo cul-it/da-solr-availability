@@ -34,6 +34,7 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
 import org.apache.solr.common.SolrInputDocument;
 
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
+import edu.cornell.library.integration.voyager.BoundWith;
 import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.Holdings;
 import edu.cornell.library.integration.voyager.ItemReference;
@@ -191,6 +192,11 @@ public class RecordsToSolr {
               HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
               holdings.getRecentIssues(voyager, bibId);
               ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
+
+              EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
+              for (BoundWith.Flag flag : f)
+                doc.addField("availability_facet",flag.getAvailabilityFlag());
+
               if ( holdings.summarizeItemAvailability(items) ) 
                 doc.addField("availability_facet", "Returned");
               if ( holdings.applyOpenOrderInformation(voyager,bibId) )

@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.EnumSet;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -13,7 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.Subfield;
+import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items.Item;
+import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class BoundWith {
 
@@ -59,6 +63,30 @@ public class BoundWith {
         masterItem.enumeration, thisEnum, masterItem.status);
   }
 
+  public static EnumSet<Flag> dedupeBoundWithReferences(HoldingSet holdings, ItemList items) {
+    EnumSet<Flag> flags = EnumSet.noneOf(Flag.class);
+    for (Integer holdingId : holdings.getMfhdIds()) {
+      Holding h = holdings.get(holdingId);
+      Set<Item> i = items.getItems().get(holdingId);
+      int emptyItemCount = countEmptyItems( i );
+      int holdingRefCount = countHoldingReferences( h );
+      if ( emptyItemCount > 0 ) {
+        flags.add(Flag.EMPTY_ITEMS);
+        if ( holdingRefCount > 0 ) {
+          flags.add(Flag.HOLDING_REFS);
+          if ( emptyItemCount != holdingRefCount ) {
+            flags.add(Flag.NOT_DEDUPED);
+          } else {
+            actuallyDedupe(h,i,emptyItemCount,flags);
+            flags.add(Flag.DEDUPED);
+          }
+        }
+      } 
+      else if ( holdingRefCount > 0 ) flags.add(Flag.HOLDING_REFS);
+    }
+    return flags;
+  }
+
   @JsonCreator
   public BoundWith(
       @JsonProperty("masterItemId") int masterItemId,
@@ -75,6 +103,19 @@ public class BoundWith {
     this.status = status;
   }
 
+  public enum Flag{
+    EMPTY_ITEMS ("Bound With: Empty Items"),
+    HOLDING_REFS("Bound With: Holdings Reference"),
+    DEDUPED     ("Bound With: Deduped"),
+    NOT_DEDUPED ("Bound With: Not Deduped"),
+    MULTI_BW    ("Bound With: Multiple, Matching Counts"),
+    REF_STATUS  ("Bound With: Item Status From Holdings Ref");
+
+    private String availFlag;
+    private Flag( String s ) { availFlag = s; }
+    public String getAvailabilityFlag() { return availFlag; }
+
+  }
   public String toJson() throws JsonProcessingException {
     return mapper.writeValueAsString(this);
   }
@@ -84,4 +125,29 @@ public class BoundWith {
     mapper.setSerializationInclusion(Include.NON_NULL);
   }
 
+  private static void actuallyDedupe(Holding holding, Set<Item> items, int count, EnumSet<Flag> flags) {
+    if (count > 1) {
+      flags.add(Flag.MULTI_BW);
+    } else {
+      ItemStatus refStatus = holding.boundWiths.values().iterator().next().status;
+      for (Item i : items)
+        if (i.empty)
+          if ( ! refStatus.matches(i.status) && refStatus.newerThan(i.status) ) {
+            i.status = refStatus;
+            flags.add(Flag.REF_STATUS);
+          }
+    }
+    holding.boundWiths = null;
+  }
+
+  private static int countEmptyItems(Set<Item> items) {
+    int count = 0;
+    for (Item i : items) if (i.empty) count++;
+    return count;
+  }
+
+  private static int countHoldingReferences(Holding h) {
+    if (h.boundWiths == null) return 0;
+    return h.boundWiths.size();
+  }
 }
