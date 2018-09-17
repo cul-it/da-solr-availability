@@ -131,7 +131,7 @@ public class BoundWith {
     } else {
       ItemStatus refStatus = holding.boundWiths.values().iterator().next().status;
       for (Item i : items)
-        if (i.empty)
+        if (i.empty != null && i.empty)
           if ( ! refStatus.matches(i.status) && refStatus.newerThan(i.status) ) {
             i.status = refStatus;
             flags.add(Flag.REF_STATUS);
