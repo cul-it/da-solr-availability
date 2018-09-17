@@ -27,9 +27,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -90,7 +89,7 @@ public class RecordsToSolr {
       return sb.toString();
     }
 
-    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, RECEIPT, AGE, OTHER };
+    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
@@ -172,8 +171,8 @@ public class RecordsToSolr {
           "SELECT bib_id, solr_document, title FROM bibRecsSolr"+
           " WHERE bib_id = ?"+
           "   AND active = 1");
-          SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") );
-          SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )){
+          ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"), 15, 1);
+          ConcurrentUpdateSolrClient callNumberSolr = new ConcurrentUpdateSolrClient( System.getenv("CALLNUMBER_SOLR_URL"), 15, 1 )){
         BIB: for (int bibId : changedBibs.keySet()) {
           pstmt.setInt(1, bibId);
           try (ResultSet rs = pstmt.executeQuery()) {
@@ -190,7 +189,7 @@ public class RecordsToSolr {
               }
               SolrInputDocument doc = xml2SolrInputDocument( solrXml );
               HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
-              holdings.getRecentIssues(voyager, bibId);
+              holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
 
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
@@ -276,6 +275,8 @@ public class RecordsToSolr {
           }
           completedBibUpdates.add(bibId);
         }
+        solr.blockUntilFinished();
+        callNumberSolr.blockUntilFinished();
       } catch (SolrServerException | RemoteSolrException e) {
         System.out.printf("Error communicating with Solr server after processing %d of %d bib update batch.",
             completedBibUpdates.size(),changedBibs.size());

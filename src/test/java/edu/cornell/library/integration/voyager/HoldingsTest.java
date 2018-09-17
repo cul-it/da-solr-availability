@@ -219,7 +219,7 @@ public class HoldingsTest {
   public void recentIssues() throws SQLException, IOException, XMLStreamException {
     int bib = 369282;
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
-    h.getRecentIssues(voyagerTest, bib);
+    h.getRecentIssues(voyagerTest, null, bib);
     for (int mfhdId : h.getMfhdIds()) {
       ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));

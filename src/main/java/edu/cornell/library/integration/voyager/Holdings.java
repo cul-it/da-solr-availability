@@ -187,11 +187,39 @@ public class Holdings {
       return mapper.writeValueAsString(this.holdings);
     }
 
-    public void getRecentIssues(Connection voyager, Integer bibId) throws SQLException {
+    public void getRecentIssues(Connection voyager, Connection inventory, Integer bibId) throws SQLException {
       Map<Integer,List<String>> issues = RecentIssues.getByBibId(voyager, bibId);
       for (Entry<Integer,List<String>> e : issues.entrySet())
         if (this.holdings.containsKey(e.getKey()))
           this.holdings.get(e.getKey()).recentIssues = e.getValue();
+
+      if ( inventory == null ) return;
+
+      if ( issues.isEmpty() ) {
+        try (PreparedStatement delStmt = inventory.prepareStatement("DELETE FROM recentIssues WHERE bib_id = ?")) {
+          delStmt.setInt(1, bibId);
+          delStmt.executeUpdate();
+        }
+        return;
+      }
+
+      String json;
+      try { json = mapper.writeValueAsString(issues);  } catch (JsonProcessingException e) { e.printStackTrace(); return; }
+      String oldJson = null;
+      try (PreparedStatement selStmt = inventory.prepareStatement("SELECT json FROM recentIssues WHERE bib_id = ?")) {
+        selStmt.setInt(1, bibId);
+        try (ResultSet rs = selStmt.executeQuery()) {
+          while (rs.next()) oldJson = rs.getString(1);
+        }
+      }
+
+      if ( json.equals(oldJson) ) return;
+
+      try (PreparedStatement updStmt = inventory.prepareStatement("REPLACE INTO recentIssues (bib_id, json) VALUES (?,?)")) {
+        updStmt.setInt(1, bibId);
+        updStmt.setString(2, json);
+        updStmt.executeUpdate();
+      }
     }
 
     public boolean hasRecent() {
