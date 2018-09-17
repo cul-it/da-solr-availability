@@ -142,7 +142,7 @@ public class BoundWith {
 
   private static int countEmptyItems(Set<Item> items) {
     int count = 0;
-    for (Item i : items) if (i.empty) count++;
+    for (Item i : items) if (i.empty != null && i.empty) count++;
     return count;
   }
 
