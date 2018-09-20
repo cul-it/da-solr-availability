@@ -79,8 +79,8 @@ public class BibliographicSummary {
           (h.itemSummary != null && h.itemSummary.availItemCount != null))
         b.availAt.put(h.location.name, h.call);
       else {
-        if (h.openOrderNote != null)
-          b.unavailAt.put(h.location.name, h.openOrderNote);
+        if (h.orderNote != null)
+          b.unavailAt.put(h.location.name, h.orderNote);
         else
           b.unavailAt.put(h.location.name, h.call);
       }

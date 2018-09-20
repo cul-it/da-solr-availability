@@ -171,8 +171,16 @@ public class Holdings {
             ", which is not currently an active holding for this bib." );
         return false;
       }
-      if (this.holdings.get(order.mfhdId).itemSummary == null)
-        this.holdings.get(order.mfhdId).openOrderNote = order.note;
+      Holding h = this.holdings.get(order.mfhdId);
+
+      // Block order note if:
+      // * There are any items on the mfhd
+      // * The holding call number is "Available for the Library to Purchase"
+      // * The holding call number is "In Process"
+      if (h.itemSummary == null
+          && ! (h.call != null && (h.call.equalsIgnoreCase("Available for the Library to Purchase")
+                                  || h.call.equalsIgnoreCase("In Process"))))
+        h.orderNote = order.note;
       return true;
     }
 

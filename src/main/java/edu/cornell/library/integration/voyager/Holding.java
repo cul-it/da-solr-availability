@@ -43,10 +43,10 @@ public class Holding {
   @JsonProperty("indexes")     public final List<String> indexes;
   @JsonProperty("recents")     public List<String> recentIssues = null;
   @JsonProperty("location")    public Location location;
-  @JsonProperty("call")        public final String call;
+  @JsonProperty("call")        public String call;
   @JsonProperty("boundWith")   public Map<Integer,BoundWith> boundWiths;
   @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
-  @JsonProperty("order")       public String openOrderNote = null;
+  @JsonProperty("order")       public String orderNote = null;
   @JsonProperty("avail")       public Boolean avail = null;
   @JsonProperty("circ")        public Boolean circ = null;
   @JsonProperty("online")      public Boolean online = null;
@@ -191,7 +191,7 @@ public class Holding {
     this.boundWiths = boundWiths;
     this.call = call;
     this.itemSummary = itemSummary;
-    this.openOrderNote = openOrderNote;
+    this.orderNote = openOrderNote;
     this.avail = avail;
     this.circ = circ;
     this.online = online;
@@ -204,7 +204,7 @@ public class Holding {
   public boolean noItemsAvailability() {
 	  if (this.itemSummary != null) return false;
 	  if (this.online != null && this.online) return false;
-	  this.avail = this.openOrderNote == null;
+	  this.avail = this.orderNote == null;
 	  return true;
   }
 

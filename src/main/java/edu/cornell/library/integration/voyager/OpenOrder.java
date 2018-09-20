@@ -28,7 +28,7 @@ public class OpenOrder {
         while (rs.next()) {
           switch (rs.getInt("line_item_status")) {
           case 7:
-            this.note = "Ordered cancelled"; break;
+            this.note = "Order cancelled"; break;
           case 8:
             this.note = rs.getInt("quantity")+" Copy Ordered as of "+rs.getString("po_approve_date").substring(0,10);
           }
