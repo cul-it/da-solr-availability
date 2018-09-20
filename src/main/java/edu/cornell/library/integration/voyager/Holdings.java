@@ -171,7 +171,8 @@ public class Holdings {
             ", which is not currently an active holding for this bib." );
         return false;
       }
-      this.holdings.get(order.mfhdId).openOrderNote = order.note;
+      if (this.holdings.get(order.mfhdId).itemSummary == null)
+        this.holdings.get(order.mfhdId).openOrderNote = order.note;
       return true;
     }
 
