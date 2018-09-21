@@ -1,8 +1,9 @@
 package edu.cornell.library.integration.availability;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,22 +11,20 @@ import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
@@ -36,20 +35,78 @@ import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVol
 import edu.cornell.library.integration.voyager.BoundWith;
 import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.Holdings;
+import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.ItemReference;
 import edu.cornell.library.integration.voyager.Items;
-import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items.Item;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class RecordsToSolr {
 
+  public static void main(String[] args)
+      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, InterruptedException {
+
+    Properties prop = new Properties();
+    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
+      prop.load(in);
+    }
+    Class.forName("oracle.jdbc.driver.OracleDriver");
+    Class.forName("com.mysql.jdbc.Driver");
+
+    try (Connection voyager = DriverManager.getConnection(
+        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+        Connection inventoryDB = DriverManager.getConnection(
+            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+        PreparedStatement pstmt = inventoryDB.prepareStatement
+            ("SELECT bib_id, priority FROM availabilityQueue ORDER BY priority LIMIT 50");
+        PreparedStatement allForBib = inventoryDB.prepareStatement
+            ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
+        PreparedStatement deprioritizeStmt = inventoryDB.prepareStatement
+            ("UPDATE availabilityQueue SET priority = 9 WHERE id = ?");
+        ) {
+
+      do {
+        try (  ResultSet rs = pstmt.executeQuery() ) {
+          Map<Integer,Set<Change>> bibs = new HashMap<>();
+          Integer priority = null;
+          while ( rs.next() ) {
+    
+            // batch only within a single priority level
+            if (priority == null)
+              priority = rs.getInt("priority");
+            else if ( priority < rs.getInt("priority"))
+              break;
+            int bibId = rs.getInt("bib_id");
+    
+            // Get all queue items for selected bib
+            allForBib.setInt(1, bibId);
+            try ( ResultSet rs2 = allForBib.executeQuery() ) {
+              Set<Change> changes = new HashSet<>();
+              while (rs2.next()) {
+                changes.add(new Change(Change.Type.RECORD,null,rs2.getString("cause"),rs2.getTimestamp("record_date"),null));
+                deprioritizeStmt.setInt(1, rs2.getInt("id"));
+                deprioritizeStmt.addBatch();
+              }
+              bibs.put(bibId, changes);
+              deprioritizeStmt.executeBatch();
+            }
+    
+            if ( bibs.isEmpty() )
+              Thread.sleep(3000);
+            else
+              updateBibsInSolr(voyager,inventoryDB,bibs);
+          }
+        }
+      } while ( true );
+    }
+  }
+
   public static class Change implements Comparable<Change>{
-    public final Type type;
-    public final Integer recordId;
-    public final String detail;
-    public final Timestamp changeDate;
-    public final String location;
+    private final Type type;
+    private final Integer recordId;
+    private final String detail;
+    private final Timestamp changeDate;
+    private final String location;
 
     public Change (Type type, Integer recordId, String detail, Timestamp changeDate, String location) {
       this.type = type;
@@ -63,7 +120,7 @@ public class RecordsToSolr {
       return this.toString(true);
     }
 
-    public String toString(boolean showAgeOfChange) {
+    private String toString(boolean showAgeOfChange) {
       StringBuilder sb = new StringBuilder();
       sb.append(this.type.name());
       if (this.location != null)
@@ -89,7 +146,7 @@ public class RecordsToSolr {
       return sb.toString();
     }
 
-    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, OTHER };
+    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
@@ -134,7 +191,7 @@ public class RecordsToSolr {
     }
   }
 
-  public static Timestamp getCurrentToDate( Connection inventory, String key ) throws SQLException {
+  static Timestamp getCurrentToDate( Connection inventory, String key ) throws SQLException {
 
     try (PreparedStatement pstmt = inventory.prepareStatement(
         "SELECT current_to_date FROM updateCursor WHERE cursor_name = ?")) {
@@ -149,7 +206,7 @@ public class RecordsToSolr {
     return null;
   }
 
-  public static void setCurrentToDate(Timestamp currentTo, Connection inventory, String key ) throws SQLException {
+  static void setCurrentToDate(Timestamp currentTo, Connection inventory, String key ) throws SQLException {
     
     try (PreparedStatement pstmt = inventory.prepareStatement(
         "REPLACE INTO updateCursor ( cursor_name, current_to_date ) VALUES (?,?)")) {
@@ -159,35 +216,30 @@ public class RecordsToSolr {
     }
   }
 
-  public static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
+  static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
       throws SQLException, IOException, XMLStreamException, InterruptedException {
-
-    List<Integer> bibsNotFound = new ArrayList<>();
 
     while (! changedBibs.isEmpty()) {
       List<Integer> completedBibUpdates = new ArrayList<>();
 
       try (PreparedStatement pstmt = inventory.prepareStatement(
-          "SELECT bib_id, solr_document, title FROM bibRecsSolr"+
-          " WHERE bib_id = ?"+
-          "   AND active = 1");
+          "SELECT record_dates," + // field list maintained here, and in constructSolrInputDocument() below
+          "       authortitle_solr_fields, title130_solr_fields,    subject_solr_fields,     pubinfo_solr_fields," + 
+          "       format_solr_fields,      factfiction_solr_fields, language_solr_fields,    isbn_solr_fields," + 
+          "       series_solr_fields,      titlechange_solr_fields, toc_solr_fields,         instruments_solr_fields," + 
+          "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields, citationref_solr_fields," + 
+          "       url_solr_fields,         hathilinks_solr_fields,  newbooks_solr_fields,    recordtype_solr_fields," + 
+          "       recordboost_solr_fields, holdings_solr_fields,    otherids_solr_fields" + 
+          "  FROM solrFieldsData"+
+          " WHERE bib_id = ?");
           ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"), 15, 1);
           ConcurrentUpdateSolrClient callNumberSolr = new ConcurrentUpdateSolrClient( System.getenv("CALLNUMBER_SOLR_URL"), 15, 1 )){
-        BIB: for (int bibId : changedBibs.keySet()) {
+        for (int bibId : changedBibs.keySet()) {
           pstmt.setInt(1, bibId);
           try (ResultSet rs = pstmt.executeQuery()) {
             while ( rs.next() ) {
 
-              String solrXml = rs.getString(2);
-              if (solrXml == null) {
-                System.out.println("ERROR: Solr Document not found. "+bibId+" ("+rs.getString(3)+"): "+ changedBibs.get(bibId));
-                Thread.sleep(100);
-                if (Collections.frequency(bibsNotFound, bibId) > 2)
-                  completedBibUpdates.add(bibId); // Not complete, but moving on.
-                bibsNotFound.add(bibId);
-                continue BIB;
-              }
-              SolrInputDocument doc = xml2SolrInputDocument( solrXml );
+              SolrInputDocument doc = constructSolrInputDocument( rs );
               HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
               holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
@@ -268,7 +320,7 @@ public class RecordsToSolr {
               if ( ! callNumberBrowseDocs.isEmpty() )
                 callNumberSolr.add(callNumberBrowseDocs);
 
-              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ",
+              System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
                   changes+"  ["+callNumberBrowseDocs.size()+" call numbers]"));
             }
   
@@ -289,6 +341,36 @@ public class RecordsToSolr {
     }
   }
 
+  private static SolrInputDocument constructSolrInputDocument(ResultSet rs) throws SQLException {
+
+    List<String> fields = Arrays.asList( // field list maintained here, and in SQL query in updateBibsInSolr()
+    "authortitle_solr_fields", "title130_solr_fields",    "subject_solr_fields",     "pubinfo_solr_fields",
+    "format_solr_fields",      "factfiction_solr_fields", "language_solr_fields",    "isbn_solr_fields",
+    "series_solr_fields",      "titlechange_solr_fields", "toc_solr_fields",         "instruments_solr_fields",
+    "marc_solr_fields",        "simpleproc_solr_fields",  "findingaids_solr_fields", "citationref_solr_fields",
+    "url_solr_fields",         "hathilinks_solr_fields",  "newbooks_solr_fields",    "recordtype_solr_fields",
+    "recordboost_solr_fields", "holdings_solr_fields",    "otherids_solr_fields" );
+    SolrInputDocument doc = new SolrInputDocument();
+    String dates = rs.getString("record_dates");
+    if (dates != null)
+      doc.addField("record_dates_display", dates);
+    for (String field : fields) {
+      String data = rs.getString(field);
+      if ( data == null ) continue;
+      String[] values = data.split("\n");
+      for (String value : values) {
+        if (value.isEmpty()) continue;
+        if (value.startsWith("^")) {
+          doc.setDocumentBoost(Float.valueOf(value.substring(1)));
+          continue;
+        }
+        String[] parts = value.split(": ", 2);
+        doc.addField(parts[0], parts[1]);
+      }
+    }
+    return doc;
+  }
+
   private static String join(Collection<Object> objects) {
     StringBuilder sb = new StringBuilder();
     boolean first = true;
@@ -298,14 +380,14 @@ public class RecordsToSolr {
     return sb.toString();
   }
 
-  public static Map<Integer,Set<Change>> duplicateMap( Map<Integer,Set<Change>> m1 ) {
+  static Map<Integer,Set<Change>> duplicateMap( Map<Integer,Set<Change>> m1 ) {
     Map<Integer,Set<Change>> m2 = new HashMap<>();
     for (Entry<Integer,Set<Change>> e : m1.entrySet())
       m2.put(e.getKey(), new HashSet<>(e.getValue()));
     return m2;
   }
 
-  public static Map<Integer,Set<Change>> eliminateCarryovers( 
+  static Map<Integer,Set<Change>> eliminateCarryovers( 
       Map<Integer,Set<Change>> newChanges, Map<Integer,Set<Change>> oldChanges) {
     if ( oldChanges.isEmpty() )
       return newChanges;
@@ -324,35 +406,6 @@ public class RecordsToSolr {
     for (Integer i : bibsToRemove)
       newChanges.remove(i);
     return newChanges;
-  }
-
-  private static SolrInputDocument xml2SolrInputDocument(String xml) throws XMLStreamException {
-    SolrInputDocument doc = new SolrInputDocument();
-    XMLInputFactory input_factory = XMLInputFactory.newInstance();
-    XMLStreamReader r  = 
-        input_factory.createXMLStreamReader(new StringReader(xml));
-    while (r.hasNext()) {
-      if (r.next() == XMLStreamConstants.START_ELEMENT) {
-        if (r.getLocalName().equals("doc")) {
-          for (int i = 0; i < r.getAttributeCount(); i++)
-            if (r.getAttributeLocalName(i).equals("boost"))
-              doc.setDocumentBoost(Float.valueOf(r.getAttributeValue(i)));
-        } else if (r.getLocalName().equals("field")) {
-          String fieldName = null;
-          Float boost = null;
-          for (int i = 0; i < r.getAttributeCount(); i++)
-            if (r.getAttributeLocalName(i).equals("name"))
-              fieldName = r.getAttributeValue(i);
-            else if (r.getAttributeLocalName(i).equals("boost"))
-              boost = Float.valueOf(r.getAttributeValue(i));
-          if (boost != null)
-            doc.addField(fieldName, r.getElementText(), boost);
-          else
-            doc.addField(fieldName, r.getElementText());
-        }
-      }
-    }
-    return doc;
   }
 
 }
