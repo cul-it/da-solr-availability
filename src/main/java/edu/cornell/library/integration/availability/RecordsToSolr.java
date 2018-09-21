@@ -320,6 +320,13 @@ public class RecordsToSolr {
                 if ( doc.containsKey(solrField) ) doc.remove(solrField);
                 doc.addField(solrField, true);
               }
+
+              // Temporary workaround can be removed once all Solr fields in db have SimpleProc v1.2
+              if ( doc.containsKey("f300e_b")) {
+                doc.removeField("f300e_b");
+                doc.addField("f300e_b", true);
+              }
+
               solrDocs.add(doc);
 
               callnumSolrDocs.addAll( CallNumberBrowse.generateBrowseDocuments(doc,holdings) );
