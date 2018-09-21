@@ -15,7 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 
-public class CallNumberBrowse {
+class CallNumberBrowse {
 
   private static final List<String> clonedDocFields = Arrays.asList(
       "format",
@@ -28,7 +28,7 @@ public class CallNumberBrowse {
   private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";
 
-  public static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc, HoldingSet holdings)
+  static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc, HoldingSet holdings)
       throws JsonProcessingException {
     List<SolrInputDocument> browseDocs = new ArrayList<>();
     if ( holdings.getMfhdIds().isEmpty() ) return browseDocs;
@@ -78,6 +78,8 @@ public class CallNumberBrowse {
             continue;        // otherwise, suppress call number from browse entirely
         }
       }
+      if (b.availAt != null)   for (String loc : b.availAt.keySet())     b.availAt.put(loc, "");
+      if (b.unavailAt != null) for (String loc : b.unavailAt.keySet())   b.unavailAt.put(loc, "");
 
       String id = bibId+"."+(++i);
       browseDoc.addField( "id", id );
