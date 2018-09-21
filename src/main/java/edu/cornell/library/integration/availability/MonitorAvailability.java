@@ -14,6 +14,9 @@ import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.RecentIssues;
@@ -35,7 +38,9 @@ public class MonitorAvailability {
     try (Connection voyagerLive = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
         Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"))) {
+            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+        SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
+        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL"))) {
 
       Timestamp time = RecordsToSolr.getCurrentToDate( inventoryDB, CURRENT_TO_KEY );
       if (time == null) {
@@ -54,7 +59,7 @@ public class MonitorAvailability {
             RecordsToSolr.duplicateMap(changedBibs), carryoverChanges);
         carryoverChanges = changedBibs;
         if ( newlyChangedBibs.size() > 0 )
-          RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB , newlyChangedBibs );
+          RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB , solr, callNumberSolr, newlyChangedBibs );
         else
           try {
             Thread.sleep(500);

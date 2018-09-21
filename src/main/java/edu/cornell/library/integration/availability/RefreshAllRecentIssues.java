@@ -14,6 +14,9 @@ import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
+
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.RecentIssues;
 
@@ -32,13 +35,16 @@ public class RefreshAllRecentIssues {
     try (Connection voyager = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
         Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"))) {
+            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+        SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
+        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )) {
 
-      go(voyager,inventoryDB);
+
+      go(voyager,inventoryDB,solr,callNumberSolr);
     }
   }
 
-  private static void go ( Connection voyager, Connection inventory )
+  private static void go ( Connection voyager, Connection inventory, SolrClient solr, SolrClient callNumberSolr )
       throws SQLException, IOException, XMLStreamException, InterruptedException {
 
     // Load previous issues from inventory
@@ -53,7 +59,7 @@ public class RefreshAllRecentIssues {
     Map<Integer,Set<Change>> changes = RecentIssues.detectAllChangedBibs(voyager, prevValues, new HashMap<>());
 
     // Push changes to Solr
-    RecordsToSolr.updateBibsInSolr(voyager, inventory, changes);
+    RecordsToSolr.updateBibsInSolr(voyager, inventory, solr, callNumberSolr, changes);
 
   }
 

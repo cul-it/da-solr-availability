@@ -26,8 +26,9 @@ import java.util.TreeSet;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -58,11 +59,13 @@ public class RecordsToSolr {
         Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
         PreparedStatement pstmt = inventoryDB.prepareStatement
-            ("SELECT bib_id, priority FROM availabilityQueue ORDER BY priority LIMIT 50");
+            ("SELECT bib_id, priority FROM availabilityQueue ORDER BY priority LIMIT 100");
         PreparedStatement allForBib = inventoryDB.prepareStatement
             ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
         PreparedStatement deprioritizeStmt = inventoryDB.prepareStatement
             ("UPDATE availabilityQueue SET priority = 9 WHERE id = ?");
+        SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
+        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
       do {
@@ -94,7 +97,7 @@ public class RecordsToSolr {
             if ( bibs.isEmpty() )
               Thread.sleep(3000);
             else
-              updateBibsInSolr(voyager,inventoryDB,bibs);
+              updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs);
           }
         }
       } while ( true );
@@ -216,7 +219,10 @@ public class RecordsToSolr {
     }
   }
 
-  static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
+  static void updateBibsInSolr(
+      Connection voyager, Connection inventory,
+      SolrClient solr, SolrClient callNumberSolr,
+      Map<Integer,Set<Change>> changedBibs)
       throws SQLException, IOException, XMLStreamException, InterruptedException {
 
     while (! changedBibs.isEmpty()) {
@@ -231,9 +237,11 @@ public class RecordsToSolr {
           "       url_solr_fields,         hathilinks_solr_fields,  newbooks_solr_fields,    recordtype_solr_fields," + 
           "       recordboost_solr_fields, holdings_solr_fields,    otherids_solr_fields" + 
           "  FROM solrFieldsData"+
-          " WHERE bib_id = ?");
-          ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"), 15, 1);
-          ConcurrentUpdateSolrClient callNumberSolr = new ConcurrentUpdateSolrClient( System.getenv("CALLNUMBER_SOLR_URL"), 15, 1 )){
+          " WHERE bib_id = ?")){
+
+        Set<SolrInputDocument> solrDocs = new HashSet<>();
+        Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
+
         for (int bibId : changedBibs.keySet()) {
           pstmt.setInt(1, bibId);
           try (ResultSet rs = pstmt.executeQuery()) {
@@ -312,23 +320,20 @@ public class RecordsToSolr {
                 if ( doc.containsKey(solrField) ) doc.remove(solrField);
                 doc.addField(solrField, true);
               }
-              solr.add( doc );
+              solrDocs.add(doc);
 
-              List<SolrInputDocument> callNumberBrowseDocs =
-                  CallNumberBrowse.generateBrowseDocuments(doc,holdings);
+              callnumSolrDocs.addAll( CallNumberBrowse.generateBrowseDocuments(doc,holdings) );
               callNumberSolr.deleteByQuery("bibid:"+bibId);
-              if ( ! callNumberBrowseDocs.isEmpty() )
-                callNumberSolr.add(callNumberBrowseDocs);
 
               System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
-                  changes+"  ["+callNumberBrowseDocs.size()+" call numbers]"));
+                  changes));
             }
+            solr.add(solrDocs);
+            callNumberSolr.add(callnumSolrDocs);
   
           }
           completedBibUpdates.add(bibId);
         }
-        solr.blockUntilFinished();
-        callNumberSolr.blockUntilFinished();
       } catch (SolrServerException | RemoteSolrException e) {
         System.out.printf("Error communicating with Solr server after processing %d of %d bib update batch.",
             completedBibUpdates.size(),changedBibs.size());
