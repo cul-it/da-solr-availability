@@ -80,7 +80,7 @@ public class RecordsToSolr {
             else if ( priority < rs.getInt("priority"))
               break;
             int bibId = rs.getInt("bib_id");
-    
+
             // Get all queue items for selected bib
             allForBib.setInt(1, bibId);
             try ( ResultSet rs2 = allForBib.executeQuery() ) {
@@ -336,7 +336,8 @@ public class RecordsToSolr {
                   changes));
             }
             solr.add(solrDocs);
-            callNumberSolr.add(callnumSolrDocs);
+            if ( ! callnumSolrDocs.isEmpty() )
+              callNumberSolr.add(callnumSolrDocs);
   
           }
           completedBibUpdates.add(bibId);
