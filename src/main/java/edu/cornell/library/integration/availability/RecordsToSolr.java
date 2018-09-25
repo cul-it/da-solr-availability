@@ -114,7 +114,7 @@ public class RecordsToSolr {
           clearFromQueueStmt.addBatch();
         }
         clearFromQueueStmt.executeBatch();
-      } while ( false );
+      } while ( true );
     }
   }
 
