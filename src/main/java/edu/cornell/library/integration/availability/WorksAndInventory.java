@@ -151,7 +151,7 @@ public class WorksAndInventory {
       try ( ResultSet rs = pstmts.get("selectBRS").executeQuery() ) {
         while (rs.next()) {
           Map<String,Object> json = new HashMap<>();
-          json.put("bibId", bibId);
+          json.put("bibid", bibId);
           String s = rs.getString("title");    if (s != null) json.put("title", s);
                  s = rs.getString("format");   if (s != null) json.put("format", s);
                  s = rs.getString("pub_date"); if (s != null) json.put("pub_date", s);
