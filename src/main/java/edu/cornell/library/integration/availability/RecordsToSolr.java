@@ -109,7 +109,7 @@ public class RecordsToSolr {
           }
           clearFromQueueStmt.executeBatch();
         }
-      } while ( false );
+      } while ( true );
     }
   }
 
