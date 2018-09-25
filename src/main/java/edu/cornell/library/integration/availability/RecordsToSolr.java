@@ -336,6 +336,7 @@ public class RecordsToSolr {
                 doc.addField("f300e_b", true);
               }
 
+              WorksAndInventory.updateInventory( inventory, doc );
               solrDocs.add(doc);
 
               callnumSolrDocs.addAll( CallNumberBrowse.generateBrowseDocuments(doc,holdings) );
@@ -347,7 +348,6 @@ public class RecordsToSolr {
             solr.add(solrDocs);
             if ( ! callnumSolrDocs.isEmpty() )
               callNumberSolr.add(callnumSolrDocs);
-            WorksAndInventory.updateInventory( inventory, solrDocs );
           }
           completedBibUpdates.add(bibId);
         }

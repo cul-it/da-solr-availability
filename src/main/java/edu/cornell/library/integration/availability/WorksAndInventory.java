@@ -46,57 +46,54 @@ public class WorksAndInventory {
   private final static String deleteMRS = "DELETE FROM mfhdRecsSolr bib_id = ? AND mfhd_id = ?";
   private static Map<String,PreparedStatement> pstmts = new HashMap<>();
 
-  public static void updateInventory(Connection inventory, Set<SolrInputDocument> solrDocs)
+  public static void updateInventory(Connection inventory, SolrInputDocument doc)
       throws SQLException, JsonParseException, JsonMappingException, IOException {
 
-    for (SolrInputDocument doc : solrDocs) {
+    int bibId = Integer.valueOf( (String) doc.getFieldValue("id") );
+    Versions recordDates = getRecordDates( doc );
 
-      int bibId = Integer.valueOf( (String) doc.getFieldValue("id") );
-      Versions recordDates = getRecordDates( doc );
+    // Get old and new linking metadata (metadata needed for "other forms" links
+    if (! pstmts.containsKey("selectBRS")) pstmts.put("selectBRS", inventory.prepareStatement(selectBRS));
+    pstmts.get("selectBRS").setInt(1,bibId);
 
-      // Get old and new linking metadata (metadata needed for "other forms" links
-      if (! pstmts.containsKey("selectBRS")) pstmts.put("selectBRS", inventory.prepareStatement(selectBRS));
-      pstmts.get("selectBRS").setInt(1,bibId);
-
-      boolean newBib;
-      LinkingMetadata oldMeta = null;
-      try (ResultSet rs = pstmts.get("selectBRS").executeQuery()) {
-        newBib = ! rs.next();
-        if ( ! newBib )
-          oldMeta = getOldMetadata( rs );
-      }
-
-      LinkingMetadata meta = getCurrentMetadata( doc );
-      boolean linkingUpdate = newBib || ! meta.equals(oldMeta);
-
-
-      // Get old and new OCLC work associations
-      if (! pstmts.containsKey("selectB2W")) pstmts.put("selectB2W", inventory.prepareStatement(selectB2W));
-      pstmts.get("selectB2W").setInt(1,bibId);
-
-      Set<WorkLink> oldWorks = new HashSet<>();
-      try (ResultSet rs = pstmts.get("selectB2W").executeQuery()) {
-        while (rs.next())
-          oldWorks.add(new WorkLink(rs.getLong("oclc_id"),rs.getLong("work_id")));
-      }
-
-      Set<WorkLink> works = getWorks( doc, inventory );
-      boolean worksUpdate = ! works.equals(oldWorks);
-
-
-      // Make necessary updates
-      if (linkingUpdate)
-        pushLinkingUpdate( meta, bibId, recordDates.bib, inventory );
-      else
-        updateIndexDate( bibId, recordDates.bib, inventory );
-
-      if ( worksUpdate )
-        pushWorksChanges( bibId, works, oldWorks, inventory );
-
-      insertWorksFieldstoSolrDoc( bibId, works, doc, inventory );
-      updateHoldingsInInventory( bibId, recordDates, inventory );
-      triggerOtherWorksReindex( bibId, works, oldWorks, linkingUpdate, inventory );
+    boolean newBib;
+    LinkingMetadata oldMeta = null;
+    try (ResultSet rs = pstmts.get("selectBRS").executeQuery()) {
+      newBib = ! rs.next();
+      if ( ! newBib )
+        oldMeta = getOldMetadata( rs );
     }
+
+    LinkingMetadata meta = getCurrentMetadata( doc );
+    boolean linkingUpdate = newBib || ! meta.equals(oldMeta);
+
+
+    // Get old and new OCLC work associations
+    if (! pstmts.containsKey("selectB2W")) pstmts.put("selectB2W", inventory.prepareStatement(selectB2W));
+    pstmts.get("selectB2W").setInt(1,bibId);
+
+    Set<WorkLink> oldWorks = new HashSet<>();
+    try (ResultSet rs = pstmts.get("selectB2W").executeQuery()) {
+      while (rs.next())
+        oldWorks.add(new WorkLink(rs.getLong("oclc_id"),rs.getLong("work_id")));
+    }
+
+    Set<WorkLink> works = getWorks( doc, inventory );
+    boolean worksUpdate = ! works.equals(oldWorks);
+
+
+    // Make necessary updates
+    if (linkingUpdate)
+      pushLinkingUpdate( meta, bibId, recordDates.bib, inventory );
+    else
+      updateIndexDate( bibId, recordDates.bib, inventory );
+
+    if ( worksUpdate )
+      pushWorksChanges( bibId, works, oldWorks, inventory );
+
+    insertWorksFieldstoSolrDoc( bibId, works, doc, inventory );
+    updateHoldingsInInventory( bibId, recordDates, inventory );
+    triggerOtherWorksReindex( bibId, works, oldWorks, linkingUpdate, inventory );
   }
 
   private static void updateHoldingsInInventory(int bibId, Versions recordDates, Connection inventory) throws SQLException {
