@@ -64,6 +64,8 @@ public class RecordsToSolr {
             ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
         PreparedStatement deprioritizeStmt = inventoryDB.prepareStatement
             ("UPDATE availabilityQueue SET priority = 9 WHERE id = ?");
+        PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
+            ("DELETE FROM availabilityQueue WHERE id = ?");
         SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
@@ -72,6 +74,7 @@ public class RecordsToSolr {
         try (  ResultSet rs = pstmt.executeQuery() ) {
           Map<Integer,Set<Change>> bibs = new HashMap<>();
           Integer priority = null;
+          Set<Integer> ids = new HashSet<>();
           while ( rs.next() ) {
     
             // batch only within a single priority level
@@ -87,20 +90,26 @@ public class RecordsToSolr {
               Set<Change> changes = new HashSet<>();
               while (rs2.next()) {
                 changes.add(new Change(Change.Type.RECORD,null,rs2.getString("cause"),rs2.getTimestamp("record_date"),null));
-                deprioritizeStmt.setInt(1, rs2.getInt("id"));
+                int id = rs2.getInt("id");
+                deprioritizeStmt.setInt(1,id);
                 deprioritizeStmt.addBatch();
+                ids.add(id);
               }
               bibs.put(bibId, changes);
               deprioritizeStmt.executeBatch();
             }
-    
             if ( bibs.isEmpty() )
               Thread.sleep(3000);
             else
               updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs);
           }
+          for (int id : ids) {
+            clearFromQueueStmt.setInt(1, id);
+            clearFromQueueStmt.addBatch();
+          }
+          clearFromQueueStmt.executeBatch();
         }
-      } while ( true );
+      } while ( false );
     }
   }
 
@@ -338,7 +347,7 @@ public class RecordsToSolr {
             solr.add(solrDocs);
             if ( ! callnumSolrDocs.isEmpty() )
               callNumberSolr.add(callnumSolrDocs);
-  
+            WorksAndInventory.updateInventory( inventory, solrDocs );
           }
           completedBibUpdates.add(bibId);
         }
