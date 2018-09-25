@@ -29,6 +29,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
 import org.apache.solr.common.SolrInputDocument;
@@ -68,11 +69,11 @@ public class RecordsToSolr {
             ("UPDATE availabilityQueue SET priority = 9 WHERE id = ?");
         PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE id = ?");
-        SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
+        ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
-      do {
+      for (int i = 0; i <= 100; i++){
         Map<Integer,Set<Change>> bibs = new HashMap<>();
         Set<Integer> ids = new HashSet<>();
         stmt.execute("LOCK TABLES availabilityQueue WRITE");
@@ -114,7 +115,9 @@ public class RecordsToSolr {
           clearFromQueueStmt.addBatch();
         }
         clearFromQueueStmt.executeBatch();
-      } while ( true );
+      };
+
+      solr.blockUntilFinished();
     }
   }
 
