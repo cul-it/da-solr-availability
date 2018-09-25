@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -58,6 +59,7 @@ public class RecordsToSolr {
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
         Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+        Statement stmt = inventoryDB.createStatement();
         PreparedStatement pstmt = inventoryDB.prepareStatement
             ("SELECT bib_id, priority FROM availabilityQueue ORDER BY priority LIMIT 100");
         PreparedStatement allForBib = inventoryDB.prepareStatement
@@ -71,10 +73,11 @@ public class RecordsToSolr {
         ) {
 
       do {
+        Map<Integer,Set<Change>> bibs = new HashMap<>();
+        Set<Integer> ids = new HashSet<>();
+        stmt.execute("LOCK TABLES availabilityQueue WRITE");
         try (  ResultSet rs = pstmt.executeQuery() ) {
-          Map<Integer,Set<Change>> bibs = new HashMap<>();
           Integer priority = null;
-          Set<Integer> ids = new HashSet<>();
           while ( rs.next() ) {
     
             // batch only within a single priority level
@@ -98,18 +101,20 @@ public class RecordsToSolr {
               bibs.put(bibId, changes);
               deprioritizeStmt.executeBatch();
             }
-            if ( bibs.isEmpty() )
-              Thread.sleep(3000);
-            else
-              updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs);
           }
-          for (int id : ids) {
-            clearFromQueueStmt.setInt(1, id);
-            clearFromQueueStmt.addBatch();
-          }
-          clearFromQueueStmt.executeBatch();
         }
-      } while ( true );
+        stmt.execute("UNLOCK TABLES");
+
+        if ( bibs.isEmpty() )
+          Thread.sleep(3000);
+        else
+          updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs);
+        for (int id : ids) {
+          clearFromQueueStmt.setInt(1, id);
+          clearFromQueueStmt.addBatch();
+        }
+        clearFromQueueStmt.executeBatch();
+      } while ( false );
     }
   }
 
