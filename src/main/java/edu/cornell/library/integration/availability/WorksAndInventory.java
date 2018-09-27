@@ -39,7 +39,9 @@ public class WorksAndInventory {
   private final static String selectB2W2 = "SELECT bib_id FROM bib2work WHERE work_id = ? AND active = 1";
   private final static String insertB2W = "REPLACE INTO bib2work ( bib_id, oclc_id, work_id) VALUES (?,?,?)";
   private final static String selectW2O = "SELECT oclc_id, work_id from workids.work2oclc WHERE oclc_id = ?";
-  private final static String updateB2W = "Update bib2work SET active = 0 WHERE bib_id = ?, oclc_id = ?, work_id = ?";
+  private final static String updateB2W =
+      "UPDATE bib2work SET active = 0"+
+      " WHERE bib_id = ? AND oclc_id = ? AND work_id = ?";
   private final static String insertAvailQ = "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,?,?,NOW())";
   private final static String selectMRS = "SELECT mfhd_id, record_date FROM mfhdRecsSolr WHERE bib_id = ?";
   private final static String updateMRS = "REPLACE INTO mfhdRecsSolr (bib_id, mfhd_id, record_date) VALUES (?,?,?)";
