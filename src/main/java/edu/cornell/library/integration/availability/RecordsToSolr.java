@@ -62,7 +62,10 @@ public class RecordsToSolr {
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
         Statement stmt = inventoryDB.createStatement();
         PreparedStatement pstmt = inventoryDB.prepareStatement
-            ("SELECT bib_id, priority FROM availabilityQueue ORDER BY priority LIMIT 100");
+            ("SELECT availabilityQueue.bib_id, priority"+
+                " FROM availabilityQueue, solrFieldsData"+
+                " WHERE availabilityQueue.bib_id = solrFieldsData.bib_id"+
+                " ORDER BY priority LIMIT 100");
         PreparedStatement allForBib = inventoryDB.prepareStatement
             ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
         PreparedStatement deprioritizeStmt = inventoryDB.prepareStatement
@@ -76,7 +79,7 @@ public class RecordsToSolr {
       for (int i = 0; i <= 100; i++){
         Map<Integer,Set<Change>> bibs = new HashMap<>();
         Set<Integer> ids = new HashSet<>();
-        stmt.execute("LOCK TABLES availabilityQueue WRITE");
+        stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE");
         try (  ResultSet rs = pstmt.executeQuery() ) {
           Integer priority = null;
           while ( rs.next() ) {
