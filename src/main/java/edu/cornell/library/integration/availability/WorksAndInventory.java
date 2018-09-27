@@ -45,7 +45,7 @@ public class WorksAndInventory {
   private final static String insertAvailQ = "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,?,?,NOW())";
   private final static String selectMRS = "SELECT mfhd_id, record_date FROM mfhdRecsSolr WHERE bib_id = ?";
   private final static String updateMRS = "REPLACE INTO mfhdRecsSolr (bib_id, mfhd_id, record_date) VALUES (?,?,?)";
-  private final static String deleteMRS = "DELETE FROM mfhdRecsSolr bib_id = ? AND mfhd_id = ?";
+  private final static String deleteMRS = "DELETE FROM mfhdRecsSolr WHERE bib_id = ? AND mfhd_id = ?";
   private static Map<String,PreparedStatement> pstmts = new HashMap<>();
 
   public static void updateInventory(Connection inventory, SolrInputDocument doc)
