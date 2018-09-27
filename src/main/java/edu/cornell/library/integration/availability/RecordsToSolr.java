@@ -131,6 +131,8 @@ public class RecordsToSolr {
     private final Timestamp changeDate;
     private final String location;
 
+    public Timestamp date() { return this.changeDate; }
+
     public Change (Type type, Integer recordId, String detail, Timestamp changeDate, String location) {
       this.type = type;
       this.recordId = recordId;

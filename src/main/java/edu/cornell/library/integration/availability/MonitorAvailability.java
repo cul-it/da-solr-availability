@@ -4,18 +4,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
-
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
 
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.Items;
@@ -26,7 +23,7 @@ public class MonitorAvailability {
   private static final String CURRENT_TO_KEY = "avail";
 
   public static void main(String[] args)
-      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, InterruptedException {
+      throws IOException, ClassNotFoundException, SQLException, InterruptedException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
@@ -35,12 +32,12 @@ public class MonitorAvailability {
     Class.forName("oracle.jdbc.driver.OracleDriver");
     Class.forName("com.mysql.jdbc.Driver");
 
-    try (Connection voyagerLive = DriverManager.getConnection(
+    try (Connection voyager = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
         Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
-        SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
-        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL"))) {
+        PreparedStatement queueIndex = inventoryDB.prepareStatement
+            ("INSERT INTO availabilityQueue ( bib_id, priority, cause, record_date ) VALUES (?,1,?,?)")) {
 
       Timestamp time = RecordsToSolr.getCurrentToDate( inventoryDB, CURRENT_TO_KEY );
       if (time == null) {
@@ -53,21 +50,40 @@ public class MonitorAvailability {
       while ( true ) {
         Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
         Map<Integer,Set<Change>> changedBibs =
-            Items.detectChangedItemStatuses(voyagerLive, time, new HashMap<Integer,Set<Change>>());
-        RecentIssues.detectNewReceiptBibs(voyagerLive, time, changedBibs);
+            Items.detectChangedItemStatuses(voyager, time, new HashMap<Integer,Set<Change>>());
+        RecentIssues.detectNewReceiptBibs(voyager, time, changedBibs);
         Map<Integer,Set<Change>> newlyChangedBibs = RecordsToSolr.eliminateCarryovers(
             RecordsToSolr.duplicateMap(changedBibs), carryoverChanges);
         carryoverChanges = changedBibs;
         if ( newlyChangedBibs.size() > 0 )
-          RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB , solr, callNumberSolr, newlyChangedBibs );
-        else
-          try {
-            Thread.sleep(500);
-          } catch (InterruptedException e) {  }
+          queueForIndex( newlyChangedBibs, queueIndex );
+        Thread.sleep(500);
         time = newTime;
         RecordsToSolr.setCurrentToDate( time, inventoryDB, CURRENT_TO_KEY );
       }
     }
+  }
+
+  private static void queueForIndex(Map<Integer, Set<Change>> changedBibs, PreparedStatement q) throws SQLException {
+
+    int i = 0;
+    for (Entry<Integer,Set<Change>> e : changedBibs.entrySet()) {
+      System.out.println(e.getKey());
+      q.setInt(1, e.getKey());
+      q.setString(2, e.getValue().toString());
+      q.setTimestamp(3,getMinChangeDate( e.getValue() ));
+      q.addBatch();
+      if (++i == 100) { q.executeBatch(); i=0; }
+    }
+    q.executeBatch();
+  }
+
+  private static Timestamp getMinChangeDate(Set<Change> changes) {
+    Timestamp d = new Timestamp(System.currentTimeMillis());
+    for (Change c : changes)
+      if ( d.after(c.date()) )
+        d = c.date();
+    return d;
   }
 
 }
