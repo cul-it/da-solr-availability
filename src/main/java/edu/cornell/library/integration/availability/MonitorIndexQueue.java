@@ -44,7 +44,7 @@ public class MonitorIndexQueue {
 
       do {
 
-        Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime());
+        Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-1000);
         pstmt.setTimestamp(1, time);
 
         int i = 0;
