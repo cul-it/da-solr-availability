@@ -104,6 +104,7 @@ class CallNumberBrowse {
   }
 
   private static String getBibCallNumber(Collection<Object> callNumbers) {
+    if (callNumbers == null) return null;
     for (Object call : callNumbers)
       if ( ! isNonCallNumber( (String) call ))
         return (String) call;
