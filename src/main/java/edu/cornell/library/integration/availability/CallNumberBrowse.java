@@ -52,11 +52,12 @@ class CallNumberBrowse {
       boolean bibliographicCallNum = false;
 
       // try to pull bibliographic call number for missing call number
-      if ( callNum.equals("No Call Number") || 
-          callNum.equalsIgnoreCase("In Process") || 
-          callNum.equalsIgnoreCase("On Order")) {
+      String lcCallNum = callNum.toLowerCase();
+      if ( lcCallNum.contains("no call") || 
+          lcCallNum.contains("in proc") || 
+          lcCallNum.contains("on order")) {
         String bibCallNumber = (String) doc.getFieldValue(callNumberField);
-        if (bibCallNumber != null && ! bibCallNumber.isEmpty()) {
+        if (bibCallNumber != null && ! bibCallNumber.isEmpty() && ! callNum.equals(bibCallNumber)) {
           callNum = bibCallNumber;
           bibliographicCallNum = true;
         } else {
