@@ -2,6 +2,7 @@ package edu.cornell.library.integration.availability;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,18 +53,17 @@ class CallNumberBrowse {
       boolean bibliographicCallNum = false;
 
       // try to pull bibliographic call number for missing call number
-      String lcCallNum = callNum.toLowerCase();
-      if ( lcCallNum.contains("no call") || 
-          lcCallNum.contains("in proc") || 
-          lcCallNum.contains("on order")) {
-        String bibCallNumber = (String) doc.getFieldValue(callNumberField);
-        if (bibCallNumber != null && ! bibCallNumber.isEmpty() && ! callNum.contains(bibCallNumber)) {
+      if ( isNonCallNumber(callNum )) {
+        String bibCallNumber = getBibCallNumber( doc.getFieldValues(callNumberField) );
+        System.out.printf("[%s] [%s] => %s\n",callNum,bibCallNumber,callNum.equals(bibCallNumber));
+        if (bibCallNumber != null && ! bibCallNumber.isEmpty()) {
           callNum = bibCallNumber;
           bibliographicCallNum = true;
         } else {
           continue; // Suppress from callnum browse when no discoverable callnum.
         }
       }
+      System.out.printf("[%s]\n",callNum);
 
       BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
 
@@ -101,6 +101,18 @@ class CallNumberBrowse {
       browseDocs.add(browseDoc);
     }
     return browseDocs;
+  }
+
+  private static String getBibCallNumber(Collection<Object> callNumbers) {
+    for (Object call : callNumbers)
+      if ( ! isNonCallNumber( (String) call ))
+        return (String) call;
+    return null;
+  }
+
+  private static boolean isNonCallNumber( String call ) {
+    String lc = call.toLowerCase().replaceAll("\\s+"," ");
+    return lc.contains("no call") || lc.contains("in proc") || lc.contains("on order");
   }
 
   private static Map<String, HoldingSet> divideHoldingsByCallNumber(HoldingSet holdings) {
