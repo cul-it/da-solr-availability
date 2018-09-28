@@ -57,7 +57,7 @@ class CallNumberBrowse {
           lcCallNum.contains("in proc") || 
           lcCallNum.contains("on order")) {
         String bibCallNumber = (String) doc.getFieldValue(callNumberField);
-        if (bibCallNumber != null && ! bibCallNumber.isEmpty() && ! callNum.equals(bibCallNumber)) {
+        if (bibCallNumber != null && ! bibCallNumber.isEmpty() && ! callNum.contains(bibCallNumber)) {
           callNum = bibCallNumber;
           bibliographicCallNum = true;
         } else {
