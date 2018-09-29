@@ -55,7 +55,6 @@ class CallNumberBrowse {
       // try to pull bibliographic call number for missing call number
       if ( isNonCallNumber(callNum )) {
         String bibCallNumber = getBibCallNumber( doc.getFieldValues(callNumberField) );
-        System.out.printf("[%s] [%s] => %s\n",callNum,bibCallNumber,callNum.equals(bibCallNumber));
         if (bibCallNumber != null && ! bibCallNumber.isEmpty()) {
           callNum = bibCallNumber;
           bibliographicCallNum = true;
@@ -63,7 +62,6 @@ class CallNumberBrowse {
           continue; // Suppress from callnum browse when no discoverable callnum.
         }
       }
-      System.out.printf("[%s]\n",callNum);
 
       BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
 
