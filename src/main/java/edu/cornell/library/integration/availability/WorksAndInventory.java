@@ -168,7 +168,7 @@ public class WorksAndInventory {
       }
     }
     for (WorkLink work : works) {
-      doc.addField("workdid_display", work.workId);
+      doc.addField("workid_facet", work.workId);
       doc.addField("workid_display", work.workId);
     }
   }
