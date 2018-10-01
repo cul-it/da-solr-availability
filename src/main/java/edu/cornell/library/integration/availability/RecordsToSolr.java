@@ -65,7 +65,7 @@ public class RecordsToSolr {
             ("SELECT availabilityQueue.bib_id, priority"+
                 " FROM availabilityQueue, solrFieldsData"+
                 " WHERE availabilityQueue.bib_id = solrFieldsData.bib_id"+
-                " ORDER BY priority LIMIT 20");
+                " ORDER BY priority LIMIT 4");
         PreparedStatement allForBib = inventoryDB.prepareStatement
             ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
         PreparedStatement deprioritizeStmt = inventoryDB.prepareStatement
@@ -76,7 +76,7 @@ public class RecordsToSolr {
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
-      for (int i = 0; i <= 500; i++){
+      for (int i = 0; i < 2500; i++){
         Map<Integer,Set<Change>> bibs = new HashMap<>();
         Set<Integer> ids = new HashSet<>();
         stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE");
@@ -112,9 +112,11 @@ public class RecordsToSolr {
         if ( bibs.isEmpty() )
           Thread.sleep(3000);
         else {
+          int bibCount = bibs.size();
           updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
+          System.out.printf("\tbatch %d complete with %d bibs at priority %d.\n",i+1,bibCount,priority);
         }
         for (int id : ids) {
           clearFromQueueStmt.setInt(1, id);
