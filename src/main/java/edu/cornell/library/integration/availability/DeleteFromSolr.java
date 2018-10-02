@@ -110,6 +110,7 @@ class DeleteFromSolr {
         deleteFromBRS.executeBatch();
         deleteFromMRS.executeBatch();
         deleteFromIRS.executeBatch();
+        System.out.println( countFound+" deleted");
       } while ( countFound == 100 );
     } 
   }

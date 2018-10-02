@@ -76,7 +76,7 @@ public class RecordsToSolr {
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
-      for (int i = 0; i < 2500; i++){
+      for (int i = 0; i < 50000; i++){
         Map<Integer,Set<Change>> bibs = new HashMap<>();
         Set<Integer> ids = new HashSet<>();
         stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE");
