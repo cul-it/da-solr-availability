@@ -4,11 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
@@ -22,6 +24,8 @@ import edu.cornell.library.integration.voyager.RecentIssues;
 
 public class RefreshAllRecentIssues {
 
+  private final static String insertAvailQ = "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,4,?,NOW())";
+  
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, SQLException, XMLStreamException, InterruptedException {
 
@@ -35,17 +39,15 @@ public class RefreshAllRecentIssues {
     try (Connection voyager = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
         Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
-        SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
-        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )) {
+            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"))) {
 
 
-      go(voyager,inventoryDB,solr,callNumberSolr);
+      go(voyager,inventoryDB);
     }
   }
 
-  private static void go ( Connection voyager, Connection inventory, SolrClient solr, SolrClient callNumberSolr )
-      throws SQLException, IOException, XMLStreamException, InterruptedException {
+  private static void go ( Connection voyager, Connection inventory )
+      throws SQLException, IOException {
 
     // Load previous issues from inventory
     Map<Integer,String> prevValues = new HashMap<>();
@@ -54,12 +56,24 @@ public class RefreshAllRecentIssues {
       while (rs.next())
       prevValues.put(rs.getInt(1),rs.getString(2));
     }
+    System.out.println("Previous bibs with recent issues: "+prevValues.size());
 
     // Get changes in current Voyager Data
     Map<Integer,Set<Change>> changes = RecentIssues.detectAllChangedBibs(voyager, prevValues, new HashMap<>());
+    System.out.println("Changes: "+changes.size());
+    if ( changes.isEmpty())
+      System.exit(0);
 
     // Push changes to Solr
-    RecordsToSolr.updateBibsInSolr(voyager, inventory, solr, callNumberSolr, changes);
+    try ( PreparedStatement p = inventory.prepareStatement(insertAvailQ) ) {
+      for (Entry<Integer,Set<Change>> e : changes.entrySet()) {
+        p.setInt(1, e.getKey());
+        p.setString(2, e.getValue().toString());
+        p.addBatch();
+        System.out.println(e.toString());
+      }
+      p.executeBatch();
+    }
 
   }
 
