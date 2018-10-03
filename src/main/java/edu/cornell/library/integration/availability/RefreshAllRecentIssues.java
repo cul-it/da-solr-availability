@@ -14,11 +14,6 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.xml.stream.XMLStreamException;
-
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
-
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.RecentIssues;
 
@@ -27,7 +22,7 @@ public class RefreshAllRecentIssues {
   private final static String insertAvailQ = "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,4,?,NOW())";
   
   public static void main(String[] args)
-      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, InterruptedException {
+      throws IOException, ClassNotFoundException, SQLException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){

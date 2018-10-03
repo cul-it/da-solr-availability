@@ -20,17 +20,6 @@ import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 
 public class RecentIssues {
 
-  private final static String recentByHoldingQuery =
-      "SELECT si.enumchron" +
-      "  FROM line_item_copy_status lics, subscription s, component c, issues_received ir, serial_issues si"+
-      " WHERE lics.mfhd_id = ?"+
-      "   AND lics.line_item_id = s.line_item_id"+
-      "   AND s.subscription_id = c.subscription_id"+
-      "   AND c.component_id = si.component_id"+
-      "   AND c.component_id = ir.component_id"+
-      "   AND ir.issue_id = si.issue_id"+
-      "   AND ir.opac_suppressed = 1"+//note: 0 = true, 1 = false
-      " ORDER BY si.issue_id DESC";
 
   private final static String recentByBibQuery =
       "SELECT lics.mfhd_id, si.enumchron" +
@@ -72,7 +61,7 @@ public class RecentIssues {
       "   AND ir.issue_id = si.issue_id"+
       "   AND ir.opac_suppressed = 1";//note: 0 = true, 1 = false
 
-  public static Set<Integer> getAllAffectedBibs( Connection voyager ) throws SQLException {
+  static Set<Integer> getAllAffectedBibs( Connection voyager ) throws SQLException {
 
     Set<Integer> bibIds = new HashSet<>();
     try (  PreparedStatement pstmt = voyager.prepareStatement(allBibsQuery);
@@ -134,21 +123,7 @@ public class RecentIssues {
     return changes;
   }
 
-
-  public static List<String> getByHoldingId( Connection voyager, Integer holdingId ) throws SQLException {
-
-    List<String> issues = new ArrayList<>();
-    try (  PreparedStatement pstmt = voyager.prepareStatement(recentByHoldingQuery)   ) {
-      pstmt.setInt(1, holdingId);
-      try (  ResultSet rs = pstmt.executeQuery()  ) {
-        while(rs.next())
-          issues.add(rs.getString("enumchron"));
-      }
-    }
-    return issues;
-  }
-
-  public static Map<Integer,List<String>> getByBibId( Connection voyager, Integer bibId ) throws SQLException {
+  static Map<Integer,List<String>> getByBibId( Connection voyager, Integer bibId ) throws SQLException {
 
     Map<Integer,List<String>> issues = new HashMap<>();
     try (  PreparedStatement pstmt = voyager.prepareStatement(recentByBibQuery)   ) {
@@ -165,7 +140,7 @@ public class RecentIssues {
     return issues;
   }
 
-  static ObjectMapper mapper = new ObjectMapper();
+  private static ObjectMapper mapper = new ObjectMapper();
   static {
     mapper.setSerializationInclusion(Include.NON_NULL);
   }

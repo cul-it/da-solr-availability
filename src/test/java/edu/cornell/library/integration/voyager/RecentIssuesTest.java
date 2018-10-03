@@ -67,14 +67,6 @@ public class RecentIssuesTest {
   }
 
   @Test
-  public void getRecentIssuesForHoldingTest() throws SQLException {
-    List<String> issues = RecentIssues.getByHoldingId(voyagerTest, 449213);
-    assertEquals(25,issues.size());
-    assertEquals("sayi 793 (2018 Ocak)",issues.get(0));
-    assertEquals("sayi 769 (2016 Ocak.)",issues.get(24));
-  }
-
-  @Test
   public void getRecentIssuesForBibTest() throws SQLException {
     Map<Integer,List<String>> issues = RecentIssues.getByBibId(voyagerTest, 369282);
     assertEquals(1,issues.size());
