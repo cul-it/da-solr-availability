@@ -6,7 +6,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -68,10 +70,15 @@ class DeleteFromSolr {
       int countFound = 0;
       do {
 
+        List<Integer> bibIds = new ArrayList<>();
         countFound = 0;
+
         try ( ResultSet rs = queryQ.executeQuery() ) { while ( rs.next() ) {
-          countFound++;
+
           Integer bibId = rs.getInt(1);
+          bibIds.add(bibId);
+          
+          countFound++;
           String title = null;
           getTitle.setInt(1,bibId);
           try (ResultSet rs1 = getTitle.executeQuery() ) {while (rs1.next()) title = rs1.getString(1);}
@@ -93,7 +100,7 @@ class DeleteFromSolr {
             deleteFromIRS.setInt(1, holdingId);
             deleteFromIRS.addBatch();
           }
-  
+
           // Delete from Delete Queue
           deleteFromQ.setInt(1,bibId);
           deleteFromQ.addBatch();
@@ -104,6 +111,9 @@ class DeleteFromSolr {
           deleteFromAvailQ.setInt(1,bibId);
           deleteFromAvailQ.addBatch();
         }}
+
+        WorksAndInventory.deleteWorkRelationships( inventoryDB, bibIds );
+
         deleteFromQ.executeBatch();
         deleteFromGenQ.executeBatch();
         deleteFromAvailQ.executeBatch();

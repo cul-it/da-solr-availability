@@ -10,6 +10,7 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -96,6 +97,32 @@ public class WorksAndInventory {
     insertWorksFieldstoSolrDoc( bibId, works, doc, inventory );
     updateHoldingsInInventory( bibId, recordDates, inventory );
     triggerOtherWorksReindex( bibId, works, oldWorks, linkingUpdate, inventory );
+  }
+
+  public static void deleteWorkRelationships ( Connection inventory, List<Integer> bibIds ) throws SQLException {
+    try ( PreparedStatement getWorkLinkedBibs = inventory.prepareStatement
+            ("SELECT o.bib_id FROM bib2work as t, bib2work as o"+
+             " WHERE t.bib_id = ?"+
+             "   AND t.work_id = o.work_id"+
+             "   AND t.bib_id != o.bib_id"+
+             "   AND o.active = 1" );
+        PreparedStatement deactiveB2W = inventory.prepareStatement("UPDATE bib2work SET active = 0 WHERE bib_id = ?") ){
+
+      for (Integer bibId : bibIds) {
+        Set<Integer> connectedBibs = new HashSet<>();
+        getWorkLinkedBibs.setInt(1, bibId);
+        try ( ResultSet rs = getWorkLinkedBibs.executeQuery() ) {
+          while ( rs.next() ) {
+            connectedBibs.add( rs.getInt(1) );
+          }
+        }
+        deactiveB2W.setInt(1, bibId);
+        deactiveB2W.addBatch();
+        insertConnectedBibsToAvailQueue( connectedBibs, bibId, inventory );
+      }
+      deactiveB2W.executeBatch();
+    }
+    
   }
 
   private static void updateHoldingsInInventory(int bibId, Versions recordDates, Connection inventory) throws SQLException {
@@ -197,15 +224,19 @@ public class WorksAndInventory {
 
     if (bibs.isEmpty()) return;
 
-    // bibs for selected works to avail queue
+    insertConnectedBibsToAvailQueue( bibs, bibId, inventory );
+  }
+
+  private static void insertConnectedBibsToAvailQueue( Set<Integer> bibIds, int origBib, Connection inventory) throws SQLException {
     if (! pstmts.containsKey("insertAvailQ")) pstmts.put("insertAvailQ", inventory.prepareStatement(insertAvailQ));
     pstmts.get("insertAvailQ").setInt(2, 7);
-    pstmts.get("insertAvailQ").setString(3, "Title Link from b"+bibId);
-    for ( Integer bib : bibs ) {
+    pstmts.get("insertAvailQ").setString(3, "Title Link from b"+origBib);
+    for ( Integer bib : bibIds ) {
       pstmts.get("insertAvailQ").setInt(1, bib);
       pstmts.get("insertAvailQ").addBatch();
     }
     pstmts.get("insertAvailQ").executeBatch();
+
   }
 
   private static Set<Integer> getBibsForWorks(Set<WorkLink> works, Connection inventory) throws SQLException {
