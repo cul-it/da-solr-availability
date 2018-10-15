@@ -75,9 +75,9 @@ public class Items {
       " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
       "   and item.modify_date > ?";
-  static Locations locations = null;
-  static ItemTypes itemTypes = null;
-  static CircPolicyGroups circPolicyGroups = null;
+  private static Locations locations = null;
+  private static ItemTypes itemTypes = null;
+  private static CircPolicyGroups circPolicyGroups = null;
 
   public static Map<Integer,Set<Change>> detectChangedItems(
       Connection voyager, Timestamp since, Map<Integer,Set<Change>> changedBibs ) throws SQLException {
@@ -111,6 +111,10 @@ public class Items {
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           Item item = retrieveItemByItemId( voyager, rs.getInt("item_id"));
+          if ( item == null ) {
+            System.out.printf("It looks like an item (%d) was deleted right after changing status.\n",rs.getInt("item_id"));
+            continue;
+          }
           bibStmt.setInt(1, item.itemId);
           try( ResultSet bibRs = bibStmt.executeQuery() ) {
             while (bibRs.next()) {
@@ -210,7 +214,7 @@ public class Items {
     return il;
   }
 
-  public static Item retrieveItemByItemId( Connection voyager, int item_id ) throws SQLException {
+  static Item retrieveItemByItemId( Connection voyager, int item_id ) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
@@ -226,7 +230,7 @@ public class Items {
     return null;
   }
 
-  public static Item retrieveItemByBarcode( Connection voyager, String barcode) throws SQLException {
+  static Item retrieveItemByBarcode( Connection voyager, String barcode) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
@@ -242,11 +246,11 @@ public class Items {
     return null;
   }
 
-  public static Item extractItemFromJson( String json ) throws IOException {
+  static Item extractItemFromJson( String json ) throws IOException {
     return mapper.readValue(json, Item.class);
   }
 
-  static ObjectMapper mapper = new ObjectMapper();
+  private static ObjectMapper mapper = new ObjectMapper();
   static {
     mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
@@ -260,7 +264,7 @@ public class Items {
     }
 
     @JsonCreator
-    public ItemList( Map<Integer,TreeSet<Item>> items ) {
+    private ItemList( Map<Integer,TreeSet<Item>> items ) {
       this.items = items;
     }
 
@@ -276,7 +280,7 @@ public class Items {
       this.items.putAll(items);
     }
 
-    public void put( Integer mfhd_id, TreeSet<Item> items ) {
+    private void put( Integer mfhd_id, TreeSet<Item> items ) {
       this.items.put(mfhd_id, items);
     }
 
@@ -410,7 +414,7 @@ public class Items {
       return this.itemId == ((Item)o).itemId;
     }
 
-    public String concatEnum() {
+    String concatEnum() {
       List<String> enumchronyear = new ArrayList<>();
       if (this.enumeration != null && !this.enumeration.isEmpty()) enumchronyear.add(this.enumeration);
       if (this.chron != null && !this.chron.isEmpty()) enumchronyear.add(this.chron);
