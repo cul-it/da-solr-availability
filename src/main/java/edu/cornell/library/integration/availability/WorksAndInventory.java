@@ -307,7 +307,7 @@ public class WorksAndInventory {
     if (! pstmts.containsKey("selectW2O")) pstmts.put("selectW2O", inventory.prepareStatement(selectW2O));
     Collection<Object> oclcIds = doc.getFieldValues("oclc_id_display");
     for ( Object oclcIdObject : oclcIds ) {
-      String oclc = ((String)oclcIdObject).replaceAll("[A-Za-z]","");
+      String oclc = ((String)oclcIdObject).replaceAll("[^0-9]","");
       if ( oclc.isEmpty() ) continue;
       Long oclcId = Long.valueOf(oclc);
       pstmts.get("selectW2O").setLong(1,oclcId);
