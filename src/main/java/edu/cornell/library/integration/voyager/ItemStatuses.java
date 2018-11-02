@@ -83,7 +83,12 @@ public class ItemStatuses {
    * in the code where they are applied for the public UI and other tools). As of Voyager 10.0.0, and the
    * version of the manual dated May 2017, this table runs from page 5-20 through 5-22. I've adjusted some
    * of the display names appearing in that documentation table to better match the ones from the Voyager
-   * database table. 
+   * database table.
+   * 
+   * Nov 2018: Based on some erroneously visible withdrawn items, we've modified the priority order to put
+   * Withdrawn just above Discharged in the order. This ensures that when an item's statuses are Withdrawn
+   * and Not Charged, the Withdrawn status will be the higher ranking status and the item will not appear
+   * available. The original ranking had Withdrawn at the very end. (DISCOVERYACCESS-4695)
    */
   private static List<String> _statusPriorities = Arrays.asList(
       "Scheduled",
