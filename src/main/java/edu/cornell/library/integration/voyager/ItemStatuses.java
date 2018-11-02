@@ -104,11 +104,11 @@ public class ItemStatuses {
       "Short Loan Request",
       "Remote Storage Request",
       "Call Slip Request",
+      "Withdrawn",
       "Discharged",
       "Not Charged",
       "Cataloging Review",
       "Circulation Review",
       "Claims Returned",
-      "Damaged",
-      "Withdrawn");
+      "Damaged");
 }
