@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -145,6 +146,7 @@ public class RecordsToSolr {
       this.location = location;
     }
 
+    @Override
     public String toString() {
       return this.toString(true);
     }
@@ -158,21 +160,46 @@ public class RecordsToSolr {
         sb.append(" ").append(this.detail);
       if (this.changeDate != null) {
         sb.append(" ").append(this.changeDate.toLocalDateTime().format(formatter));
-        if (showAgeOfChange) {
-          long ageInSeconds = java.time.Duration.between(
-              this.changeDate.toInstant(), java.time.Instant.now()).getSeconds();
-          boolean negativeTime = ageInSeconds < 0;
-          sb.append(" (");
-          if (negativeTime) {
-            ageInSeconds = Math.abs(ageInSeconds);
-            sb.append('-');
-          }
-          if (ageInSeconds > 3600) // hours
-            sb.append(ageInSeconds / 3600).append(':');
-          sb.append(String.format("%02d:%02ds)", (ageInSeconds % 3600) / 60, ageInSeconds % 60 ));
-        }
+        if (showAgeOfChange)
+          appendElapsedTime( sb, this.changeDate );
       }
       return sb.toString();
+    }
+
+    final static List<TimeUnit> timeUnits = Arrays.asList(
+        TimeUnit.DAYS, TimeUnit.HOURS, TimeUnit.MINUTES, TimeUnit.SECONDS);
+
+    static void appendElapsedTime( StringBuilder sb, Timestamp since ) {
+
+      long seconds = java.time.Duration.between(
+          since.toInstant(), java.time.Instant.now()).getSeconds();
+      if ( seconds == 0 ) return;
+
+      sb.append(" (");
+
+      if (seconds < 0) { seconds = Math.abs(seconds); sb.append('-'); }
+
+      for ( int i = 0; i < timeUnits.size() ; i++ ) {
+
+        TimeUnit t = timeUnits.get(i);
+        long unitCount = t.convert(seconds, TimeUnit.SECONDS);
+        if ( unitCount == 0 ) continue;// the first time we pass this point is the last loop
+
+        // append most significant time units
+        sb.append( unitCount ).append(' ').append( t.toString().toLowerCase() );
+
+        // if the most significant was the last candidate, we're done
+        if ( i+1 == timeUnits.size() ) break;
+
+        // otherwise, consider only the immediate next less significant unit
+        seconds -= TimeUnit.SECONDS.convert( unitCount, t);
+        t = timeUnits.get(i+1);
+        unitCount = t.convert(seconds, TimeUnit.SECONDS);
+        if ( unitCount == 0 ) break;
+        sb.append(", ").append( unitCount ).append(' ').append( t.toString().toLowerCase() );
+        break;
+      }
+      sb.append(')');
     }
 
     public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, OTHER };
@@ -361,6 +388,7 @@ public class RecordsToSolr {
 
               System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
                   changes));
+//              System.out.println(ClientUtils.toXML(doc).replaceAll("(<field)", "\n$1"));
             }
             solr.add(solrDocs);
             if ( ! callnumSolrDocs.isEmpty() )
