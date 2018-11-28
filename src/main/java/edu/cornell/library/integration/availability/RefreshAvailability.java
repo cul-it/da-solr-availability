@@ -62,7 +62,7 @@ public class RefreshAvailability {
         page = (page + 1) % 10;
 
         if ( oldBibs.size() > 0 )
-          RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB ,solr, callNumberSolr, oldBibs );
+          RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB ,solr, callNumberSolr, oldBibs, 8 );
         else
           try {
             Thread.sleep(500);

@@ -113,11 +113,9 @@ public class RecordsToSolr {
         if ( bibs.isEmpty() )
           Thread.sleep(3000);
         else {
-          int bibCount = bibs.size();
-          updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs);
+          updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
-          System.out.printf("\tbatch %d complete with %d bibs at priority %d.\n",i+1,bibCount,priority);
         }
         for (int id : ids) {
           clearFromQueueStmt.setInt(1, id);
@@ -275,7 +273,7 @@ public class RecordsToSolr {
   static void updateBibsInSolr(
       Connection voyager, Connection inventory,
       SolrClient solr, SolrClient callNumberSolr,
-      Map<Integer,Set<Change>> changedBibs)
+      Map<Integer,Set<Change>> changedBibs, Integer priority)
       throws SQLException, IOException, XMLStreamException, InterruptedException {
 
     while (! changedBibs.isEmpty()) {
@@ -387,7 +385,7 @@ public class RecordsToSolr {
               callNumberSolr.deleteByQuery("bibid:"+bibId);
 
               System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
-                  changes));
+                  changes)+" priority:"+priority);
 //              System.out.println(ClientUtils.toXML(doc).replaceAll("(<field)", "\n$1"));
             }
             solr.add(solrDocs);
