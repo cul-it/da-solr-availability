@@ -52,6 +52,8 @@ public class Holding {
   @JsonProperty("online")      public Boolean online = null;
   @JsonProperty("date")        public final Integer date;
 
+
+  @JsonIgnore public List<String> donors = null;
   @JsonIgnore public String callNumberSuffix = null;
   @JsonIgnore public MarcRecord record;
   @JsonIgnore static Locations locations = null;
@@ -83,6 +85,14 @@ public class Holding {
       case "506":
         // restrictions on access note
         notes.add(f.concatenateSpecificSubfields("ancdefu3"));
+        break;
+      case "541":
+        // immediate source of acquisition note
+        if ( f.ind1.equals('1') ) { // 1 - Not private
+          if ( this.donors == null )
+            this.donors = new ArrayList<>();
+          this.donors.add(f.concatenateSpecificSubfields("3a"));
+        }
         break;
       case "561":
         // ownership and custodial history

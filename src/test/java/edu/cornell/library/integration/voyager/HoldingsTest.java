@@ -2,6 +2,7 @@ package edu.cornell.library.integration.voyager;
 
 import static edu.cornell.library.integration.voyager.TestUtil.convertStreamToString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -227,4 +228,15 @@ public class HoldingsTest {
     assertEquals(examples.get("expectedRecentItems").toJson(),h.toJson());
   }
 
+  @Test
+  public void donors() throws SQLException, IOException, XMLStreamException {
+    int bib = 10604045;
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
+    for (int mfhdId : h.getMfhdIds()) {
+      assertNotNull( h.get(mfhdId).donors );
+      assertEquals( 1, h.get(mfhdId).donors.size() );
+      assertEquals(
+          "Professor Ángel Sáenz-Badillos and Professor Judit Targarona Borrás", h.get(mfhdId).donors.get(0));
+    }
+  }
 }

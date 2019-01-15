@@ -335,6 +335,9 @@ public class RecordsToSolr {
 
               for ( Integer mfhdId : holdings.getMfhdIds()) {
                 Holding h = holdings.get(mfhdId);
+                if (h.donors != null)
+                  for (String donor : h.donors)
+                    doc.addField("donor_display", donor);
                 if (h.call != null && h.call.matches(".*In Process.*"))
                   doc.addField("availability_facet","In Process");
                 if (h.itemSummary != null && h.itemSummary.unavail != null)
