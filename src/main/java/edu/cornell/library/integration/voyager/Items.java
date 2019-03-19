@@ -83,13 +83,15 @@ public class Items {
       "   and bmast.suppress_in_opac = 'N'";
   private static final String recentItemChangesQuery =
       "select bib_master.bib_id, item.modify_date, item.create_date, item.item_id"+
-      "  from item, mfhd_item, bib_mfhd, bib_master "+
+      "  from item, mfhd_item, bib_mfhd, bib_master, mfhd_master "+
       " where bib_master.bib_id = bib_mfhd.bib_id"+
       "   and bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
+      "   and mfhd_item.mfhd_id = mfhd_master.mfhd_id"+
       "   and (item.modify_date > ?"+
       "       or item.create_date > ?)"+
-      "   and bib_master.suppress_in_opac = 'N'";
+      "   and bib_master.suppress_in_opac = 'N'"+
+      "   and mfhd_master.suppress_in_opac = 'N'";
   private static Locations locations = null;
   private static ItemTypes itemTypes = null;
   private static CircPolicyGroups circPolicyGroups = null;
