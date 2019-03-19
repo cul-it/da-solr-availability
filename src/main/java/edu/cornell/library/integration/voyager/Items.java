@@ -97,13 +97,12 @@ public class Items {
       try( ResultSet rs = pstmt.executeQuery() ) {
         while (rs.next()) {
           Change c = new Change(Change.Type.ITEM,rs.getInt(3),"",rs.getTimestamp(2),null);
-          if (changedBibs.containsKey(rs.getInt(1)))
-            changedBibs.get(rs.getInt(1)).add(c);
-          else {
+          if ( ! changedBibs.containsKey(rs.getInt(1))) {
             Set<Change> t = new HashSet<>();
             t.add(c);
             changedBibs.put(rs.getInt(1),t);
           }
+        changedBibs.get(rs.getInt(1)).add(c);
         }
       }
     }
@@ -157,19 +156,20 @@ public class Items {
       if (allDueDates.containsKey(bibId)) {
         if (! prevValues.get(bibId).equals(allDueDates.get(bibId))) {
           Set<Change> t = new HashSet<>();
-          t.add(new Change(Change.Type.CIRC,null,"Due Date Modified", null, null));
+          t.add(new Change(Change.Type.CIRC,null,
+              "Due Date Modified "+prevValues.get(bibId)+" ==> "+allDueDates.get(bibId), null, null));
           changes.put(bibId, t);
         }
         allDueDates.remove(bibId);
       } else {
         Set<Change> t = new HashSet<>();
-        t.add(new Change(Change.Type.CIRC,null,"Due Date Disappeared", null, null));
+        t.add(new Change(Change.Type.CIRC,null,"Due Date Disappeared "+prevValues.get(bibId), null, null));
         changes.put(bibId, t);
       }
     }
     for (Integer bibId : allDueDates.keySet()) {
       Set<Change> t = new HashSet<>();
-      t.add(new Change(Change.Type.CIRC,null,"Due Date Appeared",null,null));
+      t.add(new Change(Change.Type.CIRC,null,"Due Date Appeared "+allDueDates.get(bibId),null,null));
       changes.put(bibId,t);
     }
     return changes;
