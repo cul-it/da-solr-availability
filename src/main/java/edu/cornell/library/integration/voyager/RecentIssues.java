@@ -99,7 +99,7 @@ public class RecentIssues {
   public static Map<Integer,Set<Change>> detectAllChangedBibs(
       Connection voyager, Map<Integer,String> prevValues, Map<Integer,Set<Change>> changes )
           throws SQLException, JsonProcessingException {
-    Set<Integer> currentBibs = RecentIssues.getAllAffectedBibs( voyager );
+    Set<Integer> currentBibs = getAllAffectedBibs( voyager );
     for(Integer bibId : prevValues.keySet()) {
       if (currentBibs.contains(bibId)) {
         String updatedJson = mapper.writeValueAsString(getByBibId(voyager,bibId));

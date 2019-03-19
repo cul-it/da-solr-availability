@@ -76,16 +76,20 @@ public class Items {
       "   AND mi.item_id = ?            ";
   private static final String allDueDatesQuery =
       "select bm.bib_id, ct.item_id, ct.current_due_date"+
-      "  from circ_transactions ct, mfhd_item mi, bib_mfhd bm"+
+      "  from circ_transactions ct, mfhd_item mi, bib_mfhd bm, bib_master bmast"+
       " where bm.mfhd_id = mi.mfhd_id"+
-      "   and mi.item_id = ct.item_id";
+      "   and mi.item_id = ct.item_id"+
+      "   and bm.bib_id = bmast.bib_id"+
+      "   and bmast.suppress_in_opac = 'N'";
   private static final String recentItemChangesQuery =
       "select bib_id, item.modify_date, item.create_date, item.item_id"+
-      "  from item, mfhd_item, bib_mfhd "+
-      " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
+      "  from item, mfhd_item, bib_mfhd, bib_master "+
+      " where bib_master.bib_id = bib_mfhd.bib_id"+
+      "   and bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
       "   and (item.modify_date > ?"+
-      "       or item.create_date > ?)";
+      "       or item.create_date > ?)"+
+      "   and bib_master.suppress_in_opac = 'N'";
   private static Locations locations = null;
   private static ItemTypes itemTypes = null;
   private static CircPolicyGroups circPolicyGroups = null;

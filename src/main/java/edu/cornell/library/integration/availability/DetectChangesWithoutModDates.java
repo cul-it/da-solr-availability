@@ -14,12 +14,16 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.RecentIssues;
 
-public class RefreshAllRecentIssues {
+public class DetectChangesWithoutModDates {
 
-  private final static String insertAvailQ = "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,4,?,NOW())";
+  private final static String insertAvailQ =
+      "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,6,?,NOW())";
   
   public static void main(String[] args)
       throws IOException, ClassNotFoundException, SQLException {
@@ -44,6 +48,13 @@ public class RefreshAllRecentIssues {
   private static void go ( Connection voyager, Connection inventory )
       throws SQLException, IOException {
 
+    processRecentIssueChanges( voyager, inventory );
+    processDueDateChanges( voyager, inventory );
+  }
+
+  private static void processRecentIssueChanges(Connection voyager, Connection inventory)
+      throws SQLException, JsonProcessingException {
+
     // Load previous issues from inventory
     Map<Integer,String> prevValues = new HashMap<>();
     try ( Statement stmt = inventory.createStatement();
@@ -57,7 +68,7 @@ public class RefreshAllRecentIssues {
     Map<Integer,Set<Change>> changes = RecentIssues.detectAllChangedBibs(voyager, prevValues, new HashMap<>());
     System.out.println("Changes: "+changes.size());
     if ( changes.isEmpty())
-      System.exit(0);
+      return;
 
     // Push changes to Solr
     try ( PreparedStatement p = inventory.prepareStatement(insertAvailQ) ) {
@@ -65,6 +76,40 @@ public class RefreshAllRecentIssues {
         p.setInt(1, e.getKey());
         p.setString(2, e.getValue().toString());
         p.addBatch();
+        System.out.println(e.toString());
+      }
+      p.executeBatch();
+    }
+  }
+
+  private static void processDueDateChanges(Connection voyager, Connection inventory)
+      throws SQLException, JsonProcessingException {
+
+    // Load previous due dates from inventory
+    Map<Integer,String> prevValues = new HashMap<>();
+    try ( Statement stmt = inventory.createStatement();
+          ResultSet rs = stmt.executeQuery("SELECT bib_id, json FROM itemDueDates")) {
+      while (rs.next())
+      prevValues.put(rs.getInt(1),rs.getString(2));
+    }
+    System.out.println("Previous bibs with checked out items: "+prevValues.size());
+
+    // Get changes in current Voyager Data
+    Map<Integer,Set<Change>> changes = Items.detectChangedItemDueDates(voyager, prevValues, new HashMap<>());
+    System.out.println("Changes: "+changes.size());
+    if ( changes.isEmpty())
+      return;
+
+    // Push changes to Solr
+    try ( PreparedStatement p = inventory.prepareStatement(insertAvailQ) ) {
+      int i = 0;
+      for (Entry<Integer,Set<Change>> e : changes.entrySet()) {
+        p.setInt(1, e.getKey());
+        p.setString(2, e.getValue().toString());
+        p.addBatch();
+        if ( ++i % 1000 == 0 ) { 
+          p.executeBatch();
+        }
         System.out.println(e.toString());
       }
       p.executeBatch();
