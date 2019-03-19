@@ -6,6 +6,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -167,7 +169,7 @@ public class Items {
     }
     for (Integer bibId : allDueDates.keySet()) {
       Set<Change> t = new HashSet<>();
-      t.add(new Change(Change.Type.CIRC,null,"Due Date Disappeared",null,null));
+      t.add(new Change(Change.Type.CIRC,null,"Due Date Appeared",null,null));
       changes.put(bibId,t);
     }
     return changes;
@@ -210,21 +212,22 @@ public class Items {
 
   private static Map<Integer,String> collectAllCurrentDueDates( Connection voyager )
       throws SQLException, JsonProcessingException {
-    Map<Integer,Map<Integer,Timestamp>> t = new HashMap<>();
+    Map<Integer,Map<Integer,String>> t = new HashMap<>();
     try ( PreparedStatement pstmt = voyager.prepareStatement(allDueDatesQuery);
         ResultSet rs = pstmt.executeQuery()) {
       while (rs.next()) {
         Integer bibId = rs.getInt(1);
         if (! t.containsKey(bibId) ) t.put(bibId, new TreeMap<>());
-        t.get(bibId).put(rs.getInt(2), rs.getTimestamp(3));
+        t.get(bibId).put(rs.getInt(2), rs.getTimestamp(3).toLocalDateTime().format(formatter));
       }
     }
     Map<Integer,String> dueDateJsons = new HashMap<>();
-    for (Entry<Integer,Map<Integer,Timestamp>> e : t.entrySet()) {
+    for (Entry<Integer,Map<Integer,String>> e : t.entrySet())
       dueDateJsons.put(e.getKey(), mapper.writeValueAsString(e.getValue()));
-    }
     return dueDateJsons;
   }
+  private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(
+      FormatStyle.SHORT,FormatStyle.SHORT);
 
   public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhd_id ) throws SQLException {
     if (locations == null) {
@@ -253,7 +256,7 @@ public class Items {
       circPolicyGroups = new CircPolicyGroups( voyager );
     }
     ItemList il = new ItemList();
-    Map<Integer,Timestamp> dueDates = new TreeMap<>();
+    Map<Integer,String> dueDates = new TreeMap<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
       for (int mfhd_id : holdings.getMfhdIds()) {
         pstmt.setInt(1, mfhd_id);
@@ -263,21 +266,23 @@ public class Items {
             Item i = new Item(voyager,rs,false);
             items.add(i);
             if ( i.status != null && i.status.due != null )
-              dueDates.put(i.itemId, new Timestamp(i.status.due*1000));
+              dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
           }
           il.put(mfhd_id, items);
         }
       }
     }
-    updateDueDatesInInventory(inventory,bibId,dueDates);
+    if (inventory != null)
+      updateDueDatesInInventory(inventory,bibId,dueDates);
     return il;
   }
 
   private static void updateDueDatesInInventory(
-      Connection inventory, Integer bibId, Map<Integer, Timestamp> dueDates) throws SQLException {
+      Connection inventory, Integer bibId, Map<Integer, String> dueDates) throws SQLException {
 
     if ( dueDates.isEmpty() ) {
-      try (PreparedStatement delStmt = inventory.prepareStatement("DELETE FROM itemDueDates WHERE bib_id = ?")) {
+      try (PreparedStatement delStmt = inventory.prepareStatement(
+          "DELETE FROM itemDueDates WHERE bib_id = ?")) {
         delStmt.setInt(1, bibId);
         delStmt.executeUpdate();
       }
@@ -285,7 +290,8 @@ public class Items {
     }
 
     String oldJson = null;
-    try (PreparedStatement selStmt = inventory.prepareStatement("SELECT json FROM itemDueDates WHERE bib_id = ?")) {
+    try (PreparedStatement selStmt = inventory.prepareStatement(
+        "SELECT json FROM itemDueDates WHERE bib_id = ?")) {
       selStmt.setInt(1, bibId);
       try (ResultSet rs = selStmt.executeQuery()) {
         while (rs.next()) oldJson = rs.getString(1);
@@ -297,7 +303,8 @@ public class Items {
 
     if (json.equals(oldJson)) return;
 
-    try (PreparedStatement updStmt = inventory.prepareStatement("REPLACE INTO itemDueDates (bib_id, json) VALUES (?,?)")) {
+    try (PreparedStatement updStmt = inventory.prepareStatement(
+        "REPLACE INTO itemDueDates (bib_id, json) VALUES (?,?)")) {
       updStmt.setInt(1, bibId);
       updStmt.setString(2, json);
       updStmt.executeUpdate();

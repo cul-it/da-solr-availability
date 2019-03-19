@@ -48,7 +48,7 @@ public class OpenOrderTest {
 
     // Second, we don't pull it into holdings because of the call number
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerLive, bibId);
-    ItemList items = Items.retrieveItemsForHoldings(voyagerLive, holdings);
+    ItemList items = Items.retrieveItemsForHoldings(voyagerLive, null, bibId, holdings);
     holdings.summarizeItemAvailability(items);
     holdings.applyOpenOrderInformation(voyagerLive, bibId);
     assertEquals( "Available for the Library to Purchase", holdings.get(9720246).call );
