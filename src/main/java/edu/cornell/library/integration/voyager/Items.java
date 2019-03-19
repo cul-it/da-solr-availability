@@ -84,7 +84,8 @@ public class Items {
       "  from item, mfhd_item, bib_mfhd "+
       " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
-      "   and item.modify_date > ?";
+      "   and (item.modify_date > ?"+
+      "       or item.create_date > ?)";
   private static Locations locations = null;
   private static ItemTypes itemTypes = null;
   private static CircPolicyGroups circPolicyGroups = null;
@@ -94,19 +95,25 @@ public class Items {
 
     try ( PreparedStatement pstmt = voyager.prepareStatement(recentItemChangesQuery )){
       pstmt.setTimestamp(1, since);
+      pstmt.setTimestamp(2, since);
       try( ResultSet rs = pstmt.executeQuery() ) {
         while (rs.next()) {
-          Change c = new Change(Change.Type.ITEM,rs.getInt(3),"",rs.getTimestamp(2),null);
-          if ( ! changedBibs.containsKey(rs.getInt(1))) {
+          Timestamp modDate = rs.getTimestamp("modify_date");
+          Change c;
+          if (modDate != null)
+            c = new Change(Change.Type.ITEM,rs.getInt("item_id"),"Item modified",modDate,null);
+          else
+            c = new Change(Change.Type.ITEM,rs.getInt("item_id"),"Item created",rs.getTimestamp("create_date"),null);
+          if ( ! changedBibs.containsKey(rs.getInt("bib_id"))) {
             Set<Change> t = new HashSet<>();
             t.add(c);
-            changedBibs.put(rs.getInt(1),t);
+            changedBibs.put(rs.getInt("bib_id"),t);
           }
-        changedBibs.get(rs.getInt(1)).add(c);
+          changedBibs.get(rs.getInt("bib_id")).add(c);
         }
       }
     }
-   return changedBibs;
+    return changedBibs;
 
   }
 
