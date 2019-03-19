@@ -76,11 +76,13 @@ public class Items {
       "   AND mi.item_id = ?            ";
   private static final String allDueDatesQuery =
       "select bm.bib_id, ct.item_id, ct.current_due_date"+
-      "  from circ_transactions ct, mfhd_item mi, bib_mfhd bm, bib_master bmast"+
+      "  from circ_transactions ct, mfhd_item mi, mfhd_master mm, bib_mfhd bm, bib_master bmast"+
       " where bm.mfhd_id = mi.mfhd_id"+
       "   and mi.item_id = ct.item_id"+
       "   and bm.bib_id = bmast.bib_id"+
-      "   and bmast.suppress_in_opac = 'N'";
+      "   and mm.mfhd_id = mi.mfhd_id"+
+      "   and bmast.suppress_in_opac = 'N'"+
+      "   and mm.suppress_in_opac = 'N'";
   private static final String recentItemChangesQuery =
       "select bib_master.bib_id, item.modify_date, item.create_date, item.item_id"+
       "  from item, mfhd_item, bib_mfhd, bib_master, mfhd_master "+
