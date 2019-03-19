@@ -7,11 +7,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -69,6 +72,11 @@ public class Items {
       "   AND m.suppress_in_opac = 'N'  "+
       "   AND m.mfhd_id = mi.mfhd_id    "+
       "   AND mi.item_id = ?            ";
+  private static final String allDueDatesQuery =
+      "select bm.bib_id, ct.item_id, ct.current_due_date"+
+      "  from circ_transactions ct, mfhd_item mi, bib_mfhd bm"+
+      " where bm.mfhd_id = mi.mfhd_id"+
+      "   and mi.item_id = ct.item_id";
   private static final String recentItemChangesQuery =
       "select bib_id, item.modify_date, item.item_id"+
       "  from item, mfhd_item, bib_mfhd "+
@@ -139,6 +147,32 @@ public class Items {
     return changes;
   }
 
+  public static Map<Integer,Set<Change>> detectChangedItemDueDates(
+      Connection voyager, Map<Integer,String> prevValues, Map<Integer,Set<Change>> changes )
+          throws SQLException, JsonProcessingException {
+    Map<Integer,String> allDueDates = collectAllCurrentDueDates( voyager );
+    for (Integer bibId : prevValues.keySet()) {
+      if (allDueDates.containsKey(bibId)) {
+        if (! prevValues.get(bibId).equals(allDueDates.get(bibId))) {
+          Set<Change> t = new HashSet<>();
+          t.add(new Change(Change.Type.CIRC,null,"Due Date Modified", null, null));
+          changes.put(bibId, t);
+        }
+        allDueDates.remove(bibId);
+      } else {
+        Set<Change> t = new HashSet<>();
+        t.add(new Change(Change.Type.CIRC,null,"Due Date Disappeared", null, null));
+        changes.put(bibId, t);
+      }
+    }
+    for (Integer bibId : allDueDates.keySet()) {
+      Set<Change> t = new HashSet<>();
+      t.add(new Change(Change.Type.CIRC,null,"Due Date Disappeared",null,null));
+      changes.put(bibId,t);
+    }
+    return changes;
+  }
+
   public static Map<Integer,Set<Change>> detectChangedItemReserveStatuses(
       Connection voyager, Timestamp since, Map<Integer,Set<Change>> changes ) throws SQLException {
 
@@ -174,6 +208,24 @@ public class Items {
     return changes;
   }
 
+  private static Map<Integer,String> collectAllCurrentDueDates( Connection voyager )
+      throws SQLException, JsonProcessingException {
+    Map<Integer,Map<Integer,Timestamp>> t = new HashMap<>();
+    try ( PreparedStatement pstmt = voyager.prepareStatement(allDueDatesQuery);
+        ResultSet rs = pstmt.executeQuery()) {
+      while (rs.next()) {
+        Integer bibId = rs.getInt(1);
+        if (! t.containsKey(bibId) ) t.put(bibId, new TreeMap<>());
+        t.get(bibId).put(rs.getInt(2), rs.getTimestamp(3));
+      }
+    }
+    Map<Integer,String> dueDateJsons = new HashMap<>();
+    for (Entry<Integer,Map<Integer,Timestamp>> e : t.entrySet()) {
+      dueDateJsons.put(e.getKey(), mapper.writeValueAsString(e.getValue()));
+    }
+    return dueDateJsons;
+  }
+
   public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhd_id ) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
@@ -193,25 +245,64 @@ public class Items {
     }
   }
 
-  public static ItemList retrieveItemsForHoldings(Connection voyager, HoldingSet holdings) throws SQLException {
+  public static ItemList retrieveItemsForHoldings(
+      Connection voyager, Connection inventory, Integer bibId, HoldingSet holdings) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
       circPolicyGroups = new CircPolicyGroups( voyager );
     }
     ItemList il = new ItemList();
+    Map<Integer,Timestamp> dueDates = new TreeMap<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
       for (int mfhd_id : holdings.getMfhdIds()) {
         pstmt.setInt(1, mfhd_id);
         try (ResultSet rs = pstmt.executeQuery()) {
           TreeSet<Item> items = new TreeSet<>();
-          while (rs.next())
-            items.add(new Item(voyager,rs,false));
+          while (rs.next()) {
+            Item i = new Item(voyager,rs,false);
+            items.add(i);
+            if ( i.status != null && i.status.due != null )
+              dueDates.put(i.itemId, new Timestamp(i.status.due*1000));
+          }
           il.put(mfhd_id, items);
         }
       }
     }
+    updateDueDatesInInventory(inventory,bibId,dueDates);
     return il;
+  }
+
+  private static void updateDueDatesInInventory(
+      Connection inventory, Integer bibId, Map<Integer, Timestamp> dueDates) throws SQLException {
+
+    if ( dueDates.isEmpty() ) {
+      try (PreparedStatement delStmt = inventory.prepareStatement("DELETE FROM itemDueDates WHERE bib_id = ?")) {
+        delStmt.setInt(1, bibId);
+        delStmt.executeUpdate();
+      }
+      return;      
+    }
+
+    String oldJson = null;
+    try (PreparedStatement selStmt = inventory.prepareStatement("SELECT json FROM itemDueDates WHERE bib_id = ?")) {
+      selStmt.setInt(1, bibId);
+      try (ResultSet rs = selStmt.executeQuery()) {
+        while (rs.next()) oldJson = rs.getString(1);
+      }
+    }
+    String json;
+    try { json = mapper.writeValueAsString(dueDates);  }
+    catch (JsonProcessingException e) { e.printStackTrace(); return; }
+
+    if (json.equals(oldJson)) return;
+
+    try (PreparedStatement updStmt = inventory.prepareStatement("REPLACE INTO itemDueDates (bib_id, json) VALUES (?,?)")) {
+      updStmt.setInt(1, bibId);
+      updStmt.setString(2, json);
+      updStmt.executeUpdate();
+    }
+
   }
 
   static Item retrieveItemByItemId( Connection voyager, int item_id ) throws SQLException {

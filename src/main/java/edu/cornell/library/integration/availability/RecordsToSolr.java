@@ -301,7 +301,7 @@ public class RecordsToSolr {
               SolrInputDocument doc = constructSolrInputDocument( rs );
               HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
               holdings.getRecentIssues(voyager, inventory, bibId);
-              ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
+              ItemList items = Items.retrieveItemsForHoldings(voyager, inventory, bibId, holdings);
 
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
               for (BoundWith.Flag flag : f)
