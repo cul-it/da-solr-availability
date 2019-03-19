@@ -82,7 +82,7 @@ public class Items {
       "   and bm.bib_id = bmast.bib_id"+
       "   and bmast.suppress_in_opac = 'N'";
   private static final String recentItemChangesQuery =
-      "select bib_id, item.modify_date, item.create_date, item.item_id"+
+      "select bib_master.bib_id, item.modify_date, item.create_date, item.item_id"+
       "  from item, mfhd_item, bib_mfhd, bib_master "+
       " where bib_master.bib_id = bib_mfhd.bib_id"+
       "   and bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
