@@ -80,7 +80,7 @@ public class Items {
       " where bm.mfhd_id = mi.mfhd_id"+
       "   and mi.item_id = ct.item_id";
   private static final String recentItemChangesQuery =
-      "select bib_id, item.modify_date, item.item_id"+
+      "select bib_id, item.modify_date, item.create_date, item.item_id"+
       "  from item, mfhd_item, bib_mfhd "+
       " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
