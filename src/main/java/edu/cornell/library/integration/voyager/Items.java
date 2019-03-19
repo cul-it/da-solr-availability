@@ -139,7 +139,7 @@ public class Items {
     return changes;
   }
 
-  public static Map<Integer,Set<Change>> detectItemReserveStatusChanges(
+  public static Map<Integer,Set<Change>> detectChangedItemReserveStatuses(
       Connection voyager, Timestamp since, Map<Integer,Set<Change>> changes ) throws SQLException {
 
     try (PreparedStatement pstmt = voyager.prepareStatement(recentItemReserveStatusChangesQuery);

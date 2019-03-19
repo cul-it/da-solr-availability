@@ -54,7 +54,8 @@ public class MonitorAvailability {
         Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
         Map<Integer,Set<Change>> changedBibs =
             Items.detectChangedItemStatuses(voyager, time, new HashMap<Integer,Set<Change>>());
-        Items.detectItemReserveStatusChanges(voyager, time, changedBibs);
+        Items.detectChangedItemReserveStatuses(voyager, time, changedBibs);
+        Items.detectChangedItems(voyager, time, changedBibs);
         RecentIssues.detectNewReceiptBibs(voyager, time, changedBibs);
         Map<Integer,Set<Change>> newlyChangedBibs = RecordsToSolr.eliminateCarryovers(
             RecordsToSolr.duplicateMap(changedBibs), carryoverChanges);
