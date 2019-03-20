@@ -5,12 +5,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumSet;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -121,7 +123,7 @@ public class BoundWith {
     return mapper.writeValueAsString(this);
   }
 
-  static ObjectMapper mapper = new ObjectMapper();
+  private static ObjectMapper mapper = new ObjectMapper();
   static {
     mapper.setSerializationInclusion(Include.NON_NULL);
   }
@@ -155,15 +157,15 @@ public class BoundWith {
 
   public static void storeRecordLinksInInventory(Connection inventory, Integer bibId, HoldingSet holdings)
       throws SQLException {
-    Set<Integer> previousLinks = new HashSet<>();
-    Set<Integer> currentLinks  = new HashSet<>();
+    Map<Integer,Integer> previousLinks = new HashMap<>();
+    Map<Integer,Integer> currentLinks  = new HashMap<>();
 
     // Pull previous links from inventory
     try ( PreparedStatement pstmt = inventory.prepareStatement(
-        "SELECT master_bib_id FROM boundWith WHERE bound_with_bib_id = ?")) {
+        "SELECT master_bib_id, master_item_id FROM boundWith WHERE bound_with_bib_id = ?")) {
       pstmt.setInt(1, bibId);
       try ( ResultSet rs = pstmt.executeQuery() ) {
-        while (rs.next()) previousLinks.add(rs.getInt(1));
+        while (rs.next()) previousLinks.put(rs.getInt(2),rs.getInt(1));
       }
     }
 
@@ -172,34 +174,37 @@ public class BoundWith {
       Holding mfhd = holdings.get(mfhdId);
       if ( mfhd.boundWiths != null )
         for ( BoundWith bw : mfhd.boundWiths.values() )
-          currentLinks.add(bw.masterBibId);
+          currentLinks.put(bw.masterItemId, bw.masterBibId);
     }
 
+    // We're done if the two lists match
     if ( currentLinks.size() == previousLinks.size()
-        && currentLinks.containsAll(previousLinks) )
+        && currentLinks.keySet().containsAll(previousLinks.keySet()) )
       return;
 
     // One or more link has been dropped
-    if ( ! currentLinks.containsAll(previousLinks) )
+    if ( ! currentLinks.keySet().containsAll(previousLinks.keySet()) )
       try ( PreparedStatement pstmt = inventory.prepareStatement(
-          "DELETE FROM boundWith WHERE bound_with_bib_id = ? AND master_bib_id = ? ") ) {
+          "DELETE FROM boundWith WHERE bound_with_bib_id = ? AND master_item_id = ? AND master_bib_id = ?") ) {
         pstmt.setInt(1, bibId);
-        for ( Integer masterBibId : previousLinks )
-          if ( ! currentLinks.contains(masterBibId) ) {
-            pstmt.setInt(2, masterBibId);
+        for ( Entry<Integer,Integer> e : previousLinks.entrySet() )
+          if ( ! currentLinks.containsKey(e.getKey()) ) {
+            pstmt.setInt(2, e.getKey());
+            pstmt.setInt(3, e.getValue());
             pstmt.addBatch();
           }
         pstmt.executeBatch();
       }
 
     // One or more link has been added
-    if ( ! previousLinks.containsAll(currentLinks) )
+    if ( ! previousLinks.keySet().containsAll(currentLinks.keySet()) )
       try (PreparedStatement pstmt = inventory.prepareStatement(
-          "INSERT INTO boundWith ( bound_with_bib_id, master_bib_id ) VALUES ( ?, ? )")) {
+          "INSERT INTO boundWith ( bound_with_bib_id, master_item_id, master_bib_id ) VALUES ( ?, ?, ? )")) {
         pstmt.setInt(1, bibId);
-        for ( Integer masterBibId : currentLinks )
-          if ( ! previousLinks.contains(masterBibId) ) {
-            pstmt.setInt(2, masterBibId);
+        for ( Entry<Integer,Integer> e : currentLinks.entrySet() )
+          if ( ! previousLinks.containsKey(e.getKey()) ) {
+            pstmt.setInt(2, e.getKey());
+            pstmt.setInt(3, e.getValue());
             pstmt.addBatch();
           }
         pstmt.executeBatch();
