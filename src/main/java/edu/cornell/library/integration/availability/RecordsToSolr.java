@@ -303,6 +303,7 @@ public class RecordsToSolr {
               holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(voyager, inventory, bibId, holdings);
 
+              BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
               for (BoundWith.Flag flag : f)
                 doc.addField("availability_facet",flag.getAvailabilityFlag());

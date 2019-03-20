@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -149,5 +150,59 @@ public class BoundWith {
   private static int countHoldingReferences(Holding h) {
     if (h.boundWiths == null) return 0;
     return h.boundWiths.size();
+  }
+
+
+  public static void storeRecordLinksInInventory(Connection inventory, Integer bibId, HoldingSet holdings)
+      throws SQLException {
+    Set<Integer> previousLinks = new HashSet<>();
+    Set<Integer> currentLinks  = new HashSet<>();
+
+    // Pull previous links from inventory
+    try ( PreparedStatement pstmt = inventory.prepareStatement(
+        "SELECT master_bib_id FROM boundWith WHERE bound_with_bib_id = ?")) {
+      pstmt.setInt(1, bibId);
+      try ( ResultSet rs = pstmt.executeQuery() ) {
+        while (rs.next()) previousLinks.add(rs.getInt(1));
+      }
+    }
+
+    // Collate current links from holdings
+    for ( Integer mfhdId : holdings.getMfhdIds() ) {
+      Holding mfhd = holdings.get(mfhdId);
+      if ( mfhd.boundWiths != null )
+        for ( BoundWith bw : mfhd.boundWiths.values() )
+          currentLinks.add(bw.masterBibId);
+    }
+
+    if ( currentLinks.size() == previousLinks.size()
+        && currentLinks.containsAll(previousLinks) )
+      return;
+
+    // One or more link has been dropped
+    if ( ! currentLinks.containsAll(previousLinks) )
+      try ( PreparedStatement pstmt = inventory.prepareStatement(
+          "DELETE FROM boundWith WHERE bound_with_bib_id = ? AND master_bib_id = ? ") ) {
+        pstmt.setInt(1, bibId);
+        for ( Integer masterBibId : previousLinks )
+          if ( ! currentLinks.contains(masterBibId) ) {
+            pstmt.setInt(2, masterBibId);
+            pstmt.addBatch();
+          }
+        pstmt.executeBatch();
+      }
+
+    // One or more link has been added
+    if ( ! previousLinks.containsAll(currentLinks) )
+      try (PreparedStatement pstmt = inventory.prepareStatement(
+          "INSERT INTO boundWith ( bound_with_bib_id, master_bib_id ) VALUES ( ?, ? )")) {
+        pstmt.setInt(1, bibId);
+        for ( Integer masterBibId : currentLinks )
+          if ( ! previousLinks.contains(masterBibId) ) {
+            pstmt.setInt(2, masterBibId);
+            pstmt.addBatch();
+          }
+        pstmt.executeBatch();
+      }
   }
 }
