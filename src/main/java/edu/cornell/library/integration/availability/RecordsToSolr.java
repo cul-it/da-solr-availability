@@ -303,10 +303,14 @@ public class RecordsToSolr {
               holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(voyager, inventory, bibId, holdings);
 
-              BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
+              boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
+              if (masterBoundWith)
+                doc.addField("bound_with_master_b", true);
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
               for (BoundWith.Flag flag : f)
                 doc.addField("availability_facet",flag.getAvailabilityFlag());
+              if ( ! f.isEmpty() )
+                doc.addField("bound_with_b", true);
 
               if ( holdings.summarizeItemAvailability(items) ) 
                 doc.addField("availability_facet", "Returned");

@@ -155,8 +155,18 @@ public class BoundWith {
   }
 
 
-  public static void storeRecordLinksInInventory(Connection inventory, Integer bibId, HoldingSet holdings)
+  public static boolean storeRecordLinksInInventory(Connection inventory, Integer bibId, HoldingSet holdings)
       throws SQLException {
+
+    // Determine whether this bib contains master items into which other bibs are bound
+    boolean masterBoundWith = false;
+    try ( PreparedStatement pstmt = inventory.prepareStatement(
+        "SELECT * FROM boundWith WHERE master_bib_id = ? LIMIT 1")) {
+      pstmt.setInt(1, bibId);
+      try ( ResultSet rs = pstmt.executeQuery() ) {
+        if (rs.next()) masterBoundWith = true;
+      }
+    }
     Map<Integer,Integer> previousLinks = new HashMap<>();
     Map<Integer,Integer> currentLinks  = new HashMap<>();
 
@@ -180,7 +190,7 @@ public class BoundWith {
     // We're done if the two lists match
     if ( currentLinks.size() == previousLinks.size()
         && currentLinks.keySet().containsAll(previousLinks.keySet()) )
-      return;
+      return masterBoundWith;
 
     // One or more link has been dropped
     if ( ! currentLinks.keySet().containsAll(previousLinks.keySet()) )
@@ -209,5 +219,7 @@ public class BoundWith {
           }
         pstmt.executeBatch();
       }
+
+    return masterBoundWith;
   }
 }
