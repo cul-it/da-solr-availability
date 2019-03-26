@@ -1,6 +1,7 @@
 package edu.cornell.library.integration.voyager;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,12 +10,29 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ItemStatuses {
 
   private static Set<Integer> unavailableStatuses = 
       new HashSet<>( Arrays.asList(2,3,4,5,6,7,8,9,10,12,13,14,18,21,22,23,24,25));
+
+  private static final String allCallSlipsQuery =
+      "select bmast.bib_id, item_status.item_id, ist.item_status_desc"+
+      "  from item_status, item_status_type ist, mfhd_item mi, mfhd_master mm, bib_mfhd bm, bib_master bmast"+
+      " where item_status.item_status = ist.item_status_type"+
+      "   and ist.item_status_desc = 'Call Slip Request'"+
+      "   and item_status.item_id = mi.item_id"+
+      "   and mi.mfhd_id = mm.mfhd_id"+
+      "   and mm.suppress_in_opac = 'N'"+
+      "   and mi.mfhd_id = bm.mfhd_id"+
+      "   and bm.bib_id = bmast.bib_id"+
+      "   and bmast.suppress_in_opac = 'N'";
 
   public static boolean getIsUnavailable( int id ) {
     return unavailableStatuses.contains(id);
@@ -27,6 +45,29 @@ public class ItemStatuses {
       return _statuses.get(id);
     return null;
   }
+
+  public static Map<Integer,String> collectAllCallSlipRequests( Connection voyager )
+      throws SQLException{
+    Map<Integer,Map<Integer,String>> t = new HashMap<>();
+    System.out.println(allCallSlipsQuery);
+    try ( PreparedStatement pstmt = voyager.prepareStatement(allCallSlipsQuery);
+        ResultSet rs = pstmt.executeQuery()) {
+      while (rs.next()) {
+        Integer bibId = rs.getInt(1);
+        if (! t.containsKey(bibId) ) t.put(bibId, new TreeMap<>());
+        t.get(bibId).put(rs.getInt(2),rs.getString(3));
+      }
+    }
+    Map<Integer,String> callSlipJsons = new HashMap<>();
+    for (Entry<Integer,Map<Integer,String>> e : t.entrySet())
+      try {
+        callSlipJsons.put(e.getKey(), mapper.writeValueAsString(e.getValue()));
+      }
+    catch (JsonProcessingException e1) { e1.printStackTrace(); /* Unreachable? */ }
+    return callSlipJsons;
+  
+  }
+  private static ObjectMapper mapper = new ObjectMapper();
 
   private static void populateStatusMap( Connection voyager ) throws SQLException {
     String q = "SELECT * FROM item_status_type";

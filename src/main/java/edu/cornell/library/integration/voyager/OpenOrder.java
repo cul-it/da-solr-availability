@@ -5,12 +5,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class OpenOrder {
+class OpenOrder {
 
-  public String note = null;
-  public Integer mfhdId = null;
+  String note = null;
+  Integer mfhdId = null;
 
-  public OpenOrder (Connection voyager, Integer bibId) throws SQLException {
+  OpenOrder (Connection voyager, Integer bibId) throws SQLException {
     final String getOrderInfoQuery =
         "SELECT line_item.quantity,"+
         "       purchase_order.po_approve_date,"+

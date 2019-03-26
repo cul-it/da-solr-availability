@@ -163,33 +163,6 @@ public class Items {
     return changes;
   }
 
-  public static Map<Integer,Set<Change>> detectChangedItemDueDates(
-      Connection voyager, Map<Integer,String> prevValues, Map<Integer,Set<Change>> changes )
-          throws SQLException, JsonProcessingException {
-    Map<Integer,String> allDueDates = collectAllCurrentDueDates( voyager );
-    for (Integer bibId : prevValues.keySet()) {
-      if (allDueDates.containsKey(bibId)) {
-        if (! prevValues.get(bibId).equals(allDueDates.get(bibId))) {
-          Set<Change> t = new HashSet<>();
-          t.add(new Change(Change.Type.CIRC,null,
-              "Due Date Modified "+prevValues.get(bibId)+" ==> "+allDueDates.get(bibId), null, null));
-          changes.put(bibId, t);
-        }
-        allDueDates.remove(bibId);
-      } else {
-        Set<Change> t = new HashSet<>();
-        t.add(new Change(Change.Type.CIRC,null,"Due Date Disappeared "+prevValues.get(bibId), null, null));
-        changes.put(bibId, t);
-      }
-    }
-    for (Integer bibId : allDueDates.keySet()) {
-      Set<Change> t = new HashSet<>();
-      t.add(new Change(Change.Type.CIRC,null,"Due Date Appeared "+allDueDates.get(bibId),null,null));
-      changes.put(bibId,t);
-    }
-    return changes;
-  }
-
   public static Map<Integer,Set<Change>> detectChangedItemReserveStatuses(
       Connection voyager, Timestamp since, Map<Integer,Set<Change>> changes ) throws SQLException {
 
@@ -225,7 +198,7 @@ public class Items {
     return changes;
   }
 
-  private static Map<Integer,String> collectAllCurrentDueDates( Connection voyager )
+  public static Map<Integer,String> collectAllCurrentDueDates( Connection voyager )
       throws SQLException, JsonProcessingException {
     Map<Integer,Map<Integer,String>> t = new HashMap<>();
     try ( PreparedStatement pstmt = voyager.prepareStatement(allDueDatesQuery);
@@ -272,6 +245,7 @@ public class Items {
     }
     ItemList il = new ItemList();
     Map<Integer,String> dueDates = new TreeMap<>();
+    Map<Integer,String> callSlips = new TreeMap<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
       for (int mfhd_id : holdings.getMfhdIds()) {
         pstmt.setInt(1, mfhd_id);
@@ -280,24 +254,41 @@ public class Items {
           while (rs.next()) {
             Item i = new Item(voyager,rs,false);
             items.add(i);
-            if ( i.status != null && i.status.due != null )
-              dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
+            if ( i.status != null ) {
+              if ( i.status.due != null )
+                dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
+              if ( i.status.code.containsValue("Call Slip Request") )
+                callSlips.put(i.itemId, "Call Slip Request");
+            }
           }
           il.put(mfhd_id, items);
         }
       }
     }
-    if (inventory != null)
-      updateDueDatesInInventory(inventory,bibId,dueDates);
+    if (inventory != null) {
+      updateInInventory(inventory,bibId,TrackingTable.DUEDATES,dueDates);
+      updateInInventory(inventory,bibId,TrackingTable.CALLSLIPS,callSlips);
+    }
     return il;
   }
 
-  private static void updateDueDatesInInventory(
-      Connection inventory, Integer bibId, Map<Integer, String> dueDates) throws SQLException {
+  private static enum TrackingTable {
+    DUEDATES("itemDueDates"),
+    CALLSLIPS("itemCallSlipRequests");
+    private String tableName;
+    private TrackingTable( String tableName ) {
+      this.tableName = tableName;
+    }
+    @Override
+    public String toString() { return tableName; }
+  }
+  private static void updateInInventory(
+      Connection inventory, Integer bibId,TrackingTable table, Map<Integer, String> dueDates)
+          throws SQLException {
 
     if ( dueDates.isEmpty() ) {
       try (PreparedStatement delStmt = inventory.prepareStatement(
-          "DELETE FROM itemDueDates WHERE bib_id = ?")) {
+          "DELETE FROM "+table+" WHERE bib_id = ?")) {
         delStmt.setInt(1, bibId);
         delStmt.executeUpdate();
       }
@@ -306,7 +297,7 @@ public class Items {
 
     String oldJson = null;
     try (PreparedStatement selStmt = inventory.prepareStatement(
-        "SELECT json FROM itemDueDates WHERE bib_id = ?")) {
+        "SELECT json FROM "+table+" WHERE bib_id = ?")) {
       selStmt.setInt(1, bibId);
       try (ResultSet rs = selStmt.executeQuery()) {
         while (rs.next()) oldJson = rs.getString(1);
@@ -319,7 +310,7 @@ public class Items {
     if (json.equals(oldJson)) return;
 
     try (PreparedStatement updStmt = inventory.prepareStatement(
-        "REPLACE INTO itemDueDates (bib_id, json) VALUES (?,?)")) {
+        "REPLACE INTO "+table+" (bib_id, json) VALUES (?,?)")) {
       updStmt.setInt(1, bibId);
       updStmt.setString(2, json);
       updStmt.executeUpdate();
