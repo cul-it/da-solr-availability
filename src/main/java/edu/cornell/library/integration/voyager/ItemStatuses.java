@@ -49,7 +49,6 @@ public class ItemStatuses {
   public static Map<Integer,String> collectAllCallSlipRequests( Connection voyager )
       throws SQLException{
     Map<Integer,Map<Integer,String>> t = new HashMap<>();
-    System.out.println(allCallSlipsQuery);
     try ( PreparedStatement pstmt = voyager.prepareStatement(allCallSlipsQuery);
         ResultSet rs = pstmt.executeQuery()) {
       while (rs.next()) {
