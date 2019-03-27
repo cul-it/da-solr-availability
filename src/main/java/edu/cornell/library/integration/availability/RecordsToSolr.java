@@ -97,7 +97,8 @@ public class RecordsToSolr {
             try ( ResultSet rs2 = allForBib.executeQuery() ) {
               Set<Change> changes = new HashSet<>();
               while (rs2.next()) {
-                changes.add(new Change(Change.Type.RECORD,null,rs2.getString("cause"),rs2.getTimestamp("record_date"),null));
+                changes.add(new Change(Change.Type.RECORD,null,rs2.getString("cause"),
+                                       rs2.getTimestamp("record_date"),null));
                 int id = rs2.getInt("id");
                 deprioritizeStmt.setInt(1,id);
                 deprioritizeStmt.addBatch();
@@ -304,8 +305,10 @@ public class RecordsToSolr {
               ItemList items = Items.retrieveItemsForHoldings(voyager, inventory, bibId, holdings);
 
               boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
-              if (masterBoundWith)
+              if (masterBoundWith) {
                 doc.addField("bound_with_master_b", true);
+                BoundWith.identifyAndQueueOtherBibsInMasterVolume( inventory, bibId );
+              }
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
               for (BoundWith.Flag flag : f)
                 doc.addField("availability_facet",flag.getAvailabilityFlag());

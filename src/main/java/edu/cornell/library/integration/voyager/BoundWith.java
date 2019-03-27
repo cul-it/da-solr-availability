@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -221,5 +222,27 @@ public class BoundWith {
       }
 
     return masterBoundWith;
+  }
+
+  public static void identifyAndQueueOtherBibsInMasterVolume(Connection inventory, int bibId) throws SQLException {
+    Set<Integer> otherBibs = new HashSet<>();
+    try (PreparedStatement pstmt = inventory.prepareStatement(
+        "SELECT bound_with_bib_id FROM boundWith WHERE master_bib_id = ?")) {
+      pstmt.setInt(1, bibId);
+      try ( ResultSet rs = pstmt.executeQuery() ) {
+        while ( rs.next() )
+          otherBibs.add(rs.getInt(1));
+      }
+    }
+    if ( otherBibs.isEmpty() ) return;
+    try (PreparedStatement pstmt = inventory.prepareStatement(
+        "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,8,?,NOW())")) {
+      pstmt.setString(2, "Bound with update from b"+bibId);
+      for ( Integer bib : otherBibs ) {
+        pstmt.setInt(1, bib);
+        pstmt.addBatch();
+      }
+      pstmt.executeBatch();
+    }
   }
 }
