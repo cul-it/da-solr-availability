@@ -25,6 +25,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -307,7 +308,8 @@ public class RecordsToSolr {
               boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
               if (masterBoundWith) {
                 doc.addField("bound_with_master_b", true);
-                BoundWith.identifyAndQueueOtherBibsInMasterVolume( inventory, bibId );
+                Set<Integer> changedItems = extractChangedItemIds( changedBibs.get(bibId) );
+                BoundWith.identifyAndQueueOtherBibsInMasterVolume( inventory, bibId, changedItems );
               }
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
               for (BoundWith.Flag flag : f)
@@ -483,5 +485,16 @@ public class RecordsToSolr {
       newChanges.remove(i);
     return newChanges;
   }
+
+  private static Set<Integer> extractChangedItemIds(Set<Change> changes) {
+    Set<Integer> items = new HashSet<>();
+    for (Change c : changes)
+      if (c.detail.contains("ITEM") || c.detail.contains("CIRC"))
+        for (String part : c.detail.split("\\s+"))
+          if (number.matcher(part).matches())
+            items.add(Integer.valueOf(part));
+    return items;
+  }
+  private static Pattern number = Pattern.compile("[0-9]+");
 
 }

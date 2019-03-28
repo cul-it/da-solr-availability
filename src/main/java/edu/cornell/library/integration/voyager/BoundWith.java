@@ -224,25 +224,30 @@ public class BoundWith {
     return masterBoundWith;
   }
 
-  public static void identifyAndQueueOtherBibsInMasterVolume(Connection inventory, int bibId) throws SQLException {
-    Set<Integer> otherBibs = new HashSet<>();
+  public static void identifyAndQueueOtherBibsInMasterVolume(
+      Connection inventory, int bibId, Set<Integer> itemIds) throws SQLException {
+    Map<Integer,Set<String>> otherBibs = new HashMap<>();
     try (PreparedStatement pstmt = inventory.prepareStatement(
-        "SELECT bound_with_bib_id FROM boundWith WHERE master_bib_id = ?")) {
+        "SELECT master_item_id, bound_with_bib_id FROM boundWith WHERE master_bib_id = ?")) {
       pstmt.setInt(1, bibId);
       try ( ResultSet rs = pstmt.executeQuery() ) {
         while ( rs.next() ) {
-          int otherBib = rs.getInt(1);
-          if ( otherBib != bibId)
-            otherBibs.add(otherBib);
+          int itemId = rs.getInt(1);
+          int otherBib = rs.getInt(2);
+          if ( itemIds.contains(itemId) && otherBib != bibId) {
+            if ( ! otherBibs.containsKey(otherBib) )
+              otherBibs.put(otherBib, new HashSet<String>() );
+            otherBibs.get(otherBib).add(String.valueOf(itemId));
+          }
         }
       }
     }
     if ( otherBibs.isEmpty() ) return;
     try (PreparedStatement pstmt = inventory.prepareStatement(
         "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,8,?,NOW())")) {
-      pstmt.setString(2, "Bound with update from b"+bibId);
-      for ( Integer bib : otherBibs ) {
-        pstmt.setInt(1, bib);
+      for ( Entry<Integer,Set<String>> e : otherBibs.entrySet() ) {
+        pstmt.setInt(1, e.getKey());
+        pstmt.setString(2, "Bound with update from b"+bibId+" and i"+String.join(", i", e.getValue()));
         pstmt.addBatch();
       }
       pstmt.executeBatch();
