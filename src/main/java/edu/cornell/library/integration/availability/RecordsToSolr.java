@@ -154,6 +154,8 @@ public class RecordsToSolr {
     private String toString(boolean showAgeOfChange) {
       StringBuilder sb = new StringBuilder();
       sb.append(this.type.name());
+      if (this.recordId != null)
+        sb.append(" ").append(this.recordId);
       if (this.location != null)
         sb.append(" ").append(this.location);
       if (this.detail != null)
