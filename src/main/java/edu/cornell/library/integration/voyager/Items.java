@@ -143,7 +143,7 @@ public class Items {
           try( ResultSet bibRs = bibStmt.executeQuery() ) {
             while (bibRs.next()) {
               Change c = new Change(Change.Type.CIRC,item.itemId,
-                  String.format( "%s %s",((item.enumeration!= null)?item.itemId+" ("+item.enumeration+")":item.itemId),
+                  String.join( " ",((item.enumeration!= null)?"("+item.enumeration+")":""),
                       item.status.code.values().iterator().next()),
                   new Timestamp(item.status.date*1000),
                   item.location.name);

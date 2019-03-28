@@ -492,7 +492,7 @@ public class RecordsToSolr {
     Set<Integer> items = new HashSet<>();
     for (Change c : changes)
       if (c.detail.contains("ITEM") || c.detail.contains("CIRC"))
-        for (String part : c.detail.split("\\s+"))
+        for (String part : c.detail.split("[\\s\"]+"))
           if (number.matcher(part).matches())
             items.add(Integer.valueOf(part));
     return items;
