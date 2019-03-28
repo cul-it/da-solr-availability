@@ -230,8 +230,11 @@ public class BoundWith {
         "SELECT bound_with_bib_id FROM boundWith WHERE master_bib_id = ?")) {
       pstmt.setInt(1, bibId);
       try ( ResultSet rs = pstmt.executeQuery() ) {
-        while ( rs.next() )
-          otherBibs.add(rs.getInt(1));
+        while ( rs.next() ) {
+          int otherBib = rs.getInt(1);
+          if ( otherBib != bibId)
+            otherBibs.add(otherBib);
+        }
       }
     }
     if ( otherBibs.isEmpty() ) return;
