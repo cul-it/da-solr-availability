@@ -6,12 +6,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -69,35 +74,54 @@ public class Items {
       "   AND m.suppress_in_opac = 'N'  "+
       "   AND m.mfhd_id = mi.mfhd_id    "+
       "   AND mi.item_id = ?            ";
+  private static final String allDueDatesQuery =
+      "select bm.bib_id, ct.item_id, ct.current_due_date"+
+      "  from circ_transactions ct, mfhd_item mi, mfhd_master mm, bib_mfhd bm, bib_master bmast"+
+      " where bm.mfhd_id = mi.mfhd_id"+
+      "   and mi.item_id = ct.item_id"+
+      "   and bm.bib_id = bmast.bib_id"+
+      "   and mm.mfhd_id = mi.mfhd_id"+
+      "   and bmast.suppress_in_opac = 'N'"+
+      "   and mm.suppress_in_opac = 'N'";
   private static final String recentItemChangesQuery =
-      "select bib_id, item.modify_date, item.item_id"+
-      "  from item, mfhd_item, bib_mfhd "+
-      " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
+      "select bib_master.bib_id, item.modify_date, item.create_date, item.item_id"+
+      "  from item, mfhd_item, bib_mfhd, bib_master, mfhd_master "+
+      " where bib_master.bib_id = bib_mfhd.bib_id"+
+      "   and bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
-      "   and item.modify_date > ?";
-  static Locations locations = null;
-  static ItemTypes itemTypes = null;
-  static CircPolicyGroups circPolicyGroups = null;
+      "   and mfhd_item.mfhd_id = mfhd_master.mfhd_id"+
+      "   and (item.modify_date > ?"+
+      "       or item.create_date > ?)"+
+      "   and bib_master.suppress_in_opac = 'N'"+
+      "   and mfhd_master.suppress_in_opac = 'N'";
+  private static Locations locations = null;
+  private static ItemTypes itemTypes = null;
+  private static CircPolicyGroups circPolicyGroups = null;
 
   public static Map<Integer,Set<Change>> detectChangedItems(
       Connection voyager, Timestamp since, Map<Integer,Set<Change>> changedBibs ) throws SQLException {
 
     try ( PreparedStatement pstmt = voyager.prepareStatement(recentItemChangesQuery )){
       pstmt.setTimestamp(1, since);
+      pstmt.setTimestamp(2, since);
       try( ResultSet rs = pstmt.executeQuery() ) {
         while (rs.next()) {
-          Change c = new Change(Change.Type.ITEM,rs.getInt(3),"",rs.getTimestamp(2),null);
-          if (changedBibs.containsKey(rs.getInt(1)))
-            changedBibs.get(rs.getInt(1)).add(c);
-          else {
+          Timestamp modDate = rs.getTimestamp("modify_date");
+          Change c;
+          if (modDate != null)
+            c = new Change(Change.Type.ITEM,rs.getInt("item_id"),"Item modified",modDate,null);
+          else
+            c = new Change(Change.Type.ITEM,rs.getInt("item_id"),"Item created",rs.getTimestamp("create_date"),null);
+          if ( ! changedBibs.containsKey(rs.getInt("bib_id"))) {
             Set<Change> t = new HashSet<>();
             t.add(c);
-            changedBibs.put(rs.getInt(1),t);
+            changedBibs.put(rs.getInt("bib_id"),t);
           }
+          changedBibs.get(rs.getInt("bib_id")).add(c);
         }
       }
     }
-   return changedBibs;
+    return changedBibs;
 
   }
 
@@ -111,11 +135,15 @@ public class Items {
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
           Item item = retrieveItemByItemId( voyager, rs.getInt("item_id"));
+          if ( item == null ) {
+            System.out.printf("It looks like an item (%d) was deleted right after changing status.\n",rs.getInt("item_id"));
+            continue;
+          }
           bibStmt.setInt(1, item.itemId);
           try( ResultSet bibRs = bibStmt.executeQuery() ) {
             while (bibRs.next()) {
               Change c = new Change(Change.Type.CIRC,item.itemId,
-                  String.format( "%s %s",((item.enumeration!= null)?item.itemId+" ("+item.enumeration+")":item.itemId),
+                  String.join( " ",((item.enumeration!= null)?"("+item.enumeration+")":""),
                       item.status.code.values().iterator().next()),
                   new Timestamp(item.status.date*1000),
                   item.location.name);
@@ -135,7 +163,7 @@ public class Items {
     return changes;
   }
 
-  public static Map<Integer,Set<Change>> detectItemReserveStatusChanges(
+  public static Map<Integer,Set<Change>> detectChangedItemReserveStatuses(
       Connection voyager, Timestamp since, Map<Integer,Set<Change>> changes ) throws SQLException {
 
     try (PreparedStatement pstmt = voyager.prepareStatement(recentItemReserveStatusChangesQuery);
@@ -170,6 +198,25 @@ public class Items {
     return changes;
   }
 
+  public static Map<Integer,String> collectAllCurrentDueDates( Connection voyager )
+      throws SQLException, JsonProcessingException {
+    Map<Integer,Map<Integer,String>> t = new HashMap<>();
+    try ( PreparedStatement pstmt = voyager.prepareStatement(allDueDatesQuery);
+        ResultSet rs = pstmt.executeQuery()) {
+      while (rs.next()) {
+        Integer bibId = rs.getInt(1);
+        if (! t.containsKey(bibId) ) t.put(bibId, new TreeMap<>());
+        t.get(bibId).put(rs.getInt(2), rs.getTimestamp(3).toLocalDateTime().format(formatter));
+      }
+    }
+    Map<Integer,String> dueDateJsons = new HashMap<>();
+    for (Entry<Integer,Map<Integer,String>> e : t.entrySet())
+      dueDateJsons.put(e.getKey(), mapper.writeValueAsString(e.getValue()));
+    return dueDateJsons;
+  }
+  private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(
+      FormatStyle.SHORT,FormatStyle.SHORT);
+
   public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhd_id ) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
@@ -189,28 +236,89 @@ public class Items {
     }
   }
 
-  public static ItemList retrieveItemsForHoldings(Connection voyager, HoldingSet holdings) throws SQLException {
+  public static ItemList retrieveItemsForHoldings(
+      Connection voyager, Connection inventory, Integer bibId, HoldingSet holdings) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
       circPolicyGroups = new CircPolicyGroups( voyager );
     }
     ItemList il = new ItemList();
+    Map<Integer,String> dueDates = new TreeMap<>();
+    Map<Integer,String> callSlips = new TreeMap<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
       for (int mfhd_id : holdings.getMfhdIds()) {
         pstmt.setInt(1, mfhd_id);
         try (ResultSet rs = pstmt.executeQuery()) {
           TreeSet<Item> items = new TreeSet<>();
-          while (rs.next())
-            items.add(new Item(voyager,rs,false));
+          while (rs.next()) {
+            Item i = new Item(voyager,rs,false);
+            items.add(i);
+            if ( i.status != null ) {
+              if ( i.status.due != null )
+                dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
+              if ( i.status.code != null && i.status.code.containsValue("Call Slip Request") )
+                callSlips.put(i.itemId, "Call Slip Request");
+            }
+          }
           il.put(mfhd_id, items);
         }
       }
     }
+    if (inventory != null) {
+      updateInInventory(inventory,bibId,TrackingTable.DUEDATES,dueDates);
+      updateInInventory(inventory,bibId,TrackingTable.CALLSLIPS,callSlips);
+    }
     return il;
   }
 
-  public static Item retrieveItemByItemId( Connection voyager, int item_id ) throws SQLException {
+  private static enum TrackingTable {
+    DUEDATES("itemDueDates"),
+    CALLSLIPS("itemCallSlipRequests");
+    private String tableName;
+    private TrackingTable( String tableName ) {
+      this.tableName = tableName;
+    }
+    @Override
+    public String toString() { return tableName; }
+  }
+  private static void updateInInventory(
+      Connection inventory, Integer bibId,TrackingTable table, Map<Integer, String> dueDates)
+          throws SQLException {
+
+    if ( dueDates.isEmpty() ) {
+      try (PreparedStatement delStmt = inventory.prepareStatement(
+          "DELETE FROM "+table+" WHERE bib_id = ?")) {
+        delStmt.setInt(1, bibId);
+        delStmt.executeUpdate();
+      }
+      return;      
+    }
+
+    String oldJson = null;
+    try (PreparedStatement selStmt = inventory.prepareStatement(
+        "SELECT json FROM "+table+" WHERE bib_id = ?")) {
+      selStmt.setInt(1, bibId);
+      try (ResultSet rs = selStmt.executeQuery()) {
+        while (rs.next()) oldJson = rs.getString(1);
+      }
+    }
+    String json;
+    try { json = mapper.writeValueAsString(dueDates);  }
+    catch (JsonProcessingException e) { e.printStackTrace(); return; }
+
+    if (json.equals(oldJson)) return;
+
+    try (PreparedStatement updStmt = inventory.prepareStatement(
+        "REPLACE INTO "+table+" (bib_id, json) VALUES (?,?)")) {
+      updStmt.setInt(1, bibId);
+      updStmt.setString(2, json);
+      updStmt.executeUpdate();
+    }
+
+  }
+
+  static Item retrieveItemByItemId( Connection voyager, int item_id ) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
@@ -226,7 +334,7 @@ public class Items {
     return null;
   }
 
-  public static Item retrieveItemByBarcode( Connection voyager, String barcode) throws SQLException {
+  static Item retrieveItemByBarcode( Connection voyager, String barcode) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
@@ -242,11 +350,11 @@ public class Items {
     return null;
   }
 
-  public static Item extractItemFromJson( String json ) throws IOException {
+  static Item extractItemFromJson( String json ) throws IOException {
     return mapper.readValue(json, Item.class);
   }
 
-  static ObjectMapper mapper = new ObjectMapper();
+  private static ObjectMapper mapper = new ObjectMapper();
   static {
     mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
@@ -260,7 +368,7 @@ public class Items {
     }
 
     @JsonCreator
-    public ItemList( Map<Integer,TreeSet<Item>> items ) {
+    private ItemList( Map<Integer,TreeSet<Item>> items ) {
       this.items = items;
     }
 
@@ -276,7 +384,7 @@ public class Items {
       this.items.putAll(items);
     }
 
-    public void put( Integer mfhd_id, TreeSet<Item> items ) {
+    private void put( Integer mfhd_id, TreeSet<Item> items ) {
       this.items.put(mfhd_id, items);
     }
 
@@ -316,7 +424,8 @@ public class Items {
     @JsonProperty("location")  public final Location location;
     @JsonProperty("circGrp")   public final Map<Integer,String> circGrp;
     @JsonProperty("type")      public final ItemType type;
-    @JsonProperty("status")    public final ItemStatus status;
+    @JsonProperty("status")    public ItemStatus status;
+    @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public final Integer date;
 
     private Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
@@ -345,6 +454,7 @@ public class Items {
       this.status = new ItemStatus( voyager, this.itemId, this.type );
       this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
           ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
+      this.empty = (rs.getString("ITEM_BARCODE") == null)?true:null;
     }
 
     private Item(
@@ -408,7 +518,7 @@ public class Items {
       return this.itemId == ((Item)o).itemId;
     }
 
-    public String concatEnum() {
+    String concatEnum() {
       List<String> enumchronyear = new ArrayList<>();
       if (this.enumeration != null && !this.enumeration.isEmpty()) enumchronyear.add(this.enumeration);
       if (this.chron != null && !this.chron.isEmpty()) enumchronyear.add(this.chron);

@@ -2,6 +2,7 @@ package edu.cornell.library.integration.voyager;
 
 import static edu.cornell.library.integration.voyager.TestUtil.convertStreamToString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -88,6 +89,12 @@ public class HoldingsTest {
     assertEquals(1,holdings.size());
     assertEquals(examples.get("expectedJson1184953").toJson(),holdings.toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holdings.get(1184953).date)).toString());
+  }
+
+  @Test
+  public void boundWithReference() throws SQLException, IOException, XMLStreamException {
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 833840);
+    assertEquals(examples.get("expectedBib833840").toJson(),holdings.toJson());
   }
 
   @Test
@@ -213,7 +220,7 @@ public class HoldingsTest {
   public void recentIssues() throws SQLException, IOException, XMLStreamException {
     int bib = 369282;
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
-    h.getRecentIssues(voyagerTest, bib);
+    h.getRecentIssues(voyagerTest, null, bib);
     for (int mfhdId : h.getMfhdIds()) {
       ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
@@ -221,4 +228,15 @@ public class HoldingsTest {
     assertEquals(examples.get("expectedRecentItems").toJson(),h.toJson());
   }
 
+  @Test
+  public void donors() throws SQLException, IOException, XMLStreamException {
+    int bib = 10604045;
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
+    for (int mfhdId : h.getMfhdIds()) {
+      assertNotNull( h.get(mfhdId).donors );
+      assertEquals( 1, h.get(mfhdId).donors.size() );
+      assertEquals(
+          "Professor Ángel Sáenz-Badillos and Professor Judit Targarona Borrás", h.get(mfhdId).donors.get(0));
+    }
+  }
 }

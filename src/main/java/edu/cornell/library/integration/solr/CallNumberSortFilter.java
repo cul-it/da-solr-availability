@@ -33,13 +33,13 @@ public final class CallNumberSortFilter extends TokenFilter {
 
     if (!input.incrementToken()) return false;
 
-    String outputValue = callNumberSortForm(termAttr,prefixes);
+    String outputValue = sortForm(termAttr,prefixes);
     termAttr.setEmpty();
     termAttr.append(outputValue);
     return true;
   }
 
-  public static String callNumberSortForm( CharSequence callNumber, List<String> prefixes ) {
+  public static String sortForm( CharSequence callNumber, List<String> prefixes ) {
 
     String lc = Normalizer.normalize(callNumber, Normalizer.Form.NFD)
         .toLowerCase().trim()

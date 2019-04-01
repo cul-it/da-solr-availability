@@ -2,6 +2,7 @@ package edu.cornell.library.integration.voyager;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -31,12 +32,12 @@ public class PopulateTestVoyagerDB {
 
   public static boolean replaceDBContents = false; // if false, will add specified bibs to existing tables
   public static String testDbConnectionString = "jdbc:sqlite:src/test/resources/voyagerTest.db";
-  private static List<Integer> testBibs = Arrays.asList(369282);
+  private static List<Integer> testBibs = Arrays.asList(10604045);
 
   // Bibs in "jdbc:sqlite:src/test/resources/voyagerTest.db"
   // 330581,3212531,2248567,576519,3827392,1016847,969430,1799377,2095674,1575369,9520154,927983,
   // 342724,4442869,784908,6047653,9628566,3956404,9647384,306998,329763,2026746,4546769,10023626
-  // 867,9295667,1282748,4888514,369282
+  // 867,9295667,1282748,4888514,369282,833840,836782,9386182,10604045
 
   private static boolean dumpTestDBToStdout = false;
   private static Set<Integer> testMfhds = new HashSet<>();
@@ -44,6 +45,7 @@ public class PopulateTestVoyagerDB {
   private static Set<Integer> testLineItems = new HashSet<>();
   private static Set<Integer> subscriptions = new HashSet<>();
   private static Set<Integer> components = new HashSet<>();
+  private static Set<Integer> purchaseOrders = new HashSet<>();
 
 
   public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
@@ -81,6 +83,7 @@ public class PopulateTestVoyagerDB {
       component(testDb,voyager,testDbstmt);
       issues_received(testDb,voyager,testDbstmt);
       serial_issues(testDb,voyager,testDbstmt);
+      purchase_order(testDb,voyager,testDbstmt);
 
       if (dumpTestDBToStdout) {
         try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, mfhd_id FROM BIB_MFHD")) {
@@ -215,7 +218,7 @@ public class PopulateTestVoyagerDB {
         readStmt.setInt(1, bib);
         try (ResultSet rs = readStmt.executeQuery()) {
           while (rs.next()) {
-            writeStmt.setString(1, rs.getString(1));
+            writeStmt.setString(1, new String(rs.getBytes(1),StandardCharsets.UTF_8));
             writeStmt.setInt(2, rs.getInt(2));
             writeStmt.setInt(3, bib);
             writeStmt.addBatch();
@@ -240,7 +243,7 @@ public class PopulateTestVoyagerDB {
         readStmt.setInt(1, mfhd);
         try (ResultSet rs = readStmt.executeQuery()) {
           while (rs.next()) {
-            writeStmt.setString(1, rs.getString(1));
+            writeStmt.setString(1, new String(rs.getBytes(1),StandardCharsets.UTF_8));
             writeStmt.setInt(2, rs.getInt(2));
             writeStmt.setInt(3, mfhd);
             writeStmt.addBatch();
@@ -528,23 +531,26 @@ public class PopulateTestVoyagerDB {
   }
 
   private static void line_item(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
-//    if (replaceDBContents) {
+    if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists line_item");
-      testDbstmt.executeUpdate("create table line_item ( line_item_id int, bib_id int )");
- //   }
+      testDbstmt.executeUpdate("create table line_item ( line_item_id int, bib_id int, quantity int, po_id int )");
+    }
     System.out.println("Loading line_item data for "+testBibs.size()+" bibs.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
-        "SELECT line_item_id FROM line_item WHERE bib_id = ?");
+        "SELECT line_item_id, quantity, po_id FROM line_item WHERE bib_id = ?");
         PreparedStatement writeStmt = testDb.prepareStatement(
-            "INSERT INTO line_item ( line_item_id, bib_id ) VALUES (?,?)")){
+            "INSERT INTO line_item ( line_item_id, bib_id, quantity, po_id ) VALUES (?,?,?,?)")){
       for (int bib : testBibs) {
         readStmt.setInt(1, bib);
         try (ResultSet rs = readStmt.executeQuery()) {
           while (rs.next()) {
             writeStmt.setInt(1, rs.getInt(1));
             writeStmt.setInt(2, bib);
+            writeStmt.setInt(3, rs.getInt(2));
+            writeStmt.setInt(4, rs.getInt(3));
             writeStmt.addBatch();
             testLineItems.add(rs.getInt(1));
+            purchaseOrders.add(rs.getInt(3));
           }
         }
       }
@@ -553,10 +559,10 @@ public class PopulateTestVoyagerDB {
   }
 
   private static void line_item_copy_status(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
-//    if (replaceDBContents) {
+    if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists line_item_copy_status");
       testDbstmt.executeUpdate("create table line_item_copy_status ( line_item_id int, mfhd_id int )");
-//    }
+    }
     System.out.println("Loading line_item_copy_status data for "+testMfhds.size()+" mfhds.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
         "SELECT line_item_id FROM line_item_copy_status WHERE mfhd_id = ?");
@@ -578,10 +584,10 @@ public class PopulateTestVoyagerDB {
   }
 
   private static void subscriptionAndIssues(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
-//    if (replaceDBContents) {
+    if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists subscription");
       testDbstmt.executeUpdate("create table subscription ( line_item_id int, subscription_id int )");
-//    }
+    }
     System.out.println("Loading subscription data for "+testLineItems.size()+" line_item_ids.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
         "SELECT subscription_id FROM subscription WHERE line_item_id = ?");
@@ -604,10 +610,10 @@ public class PopulateTestVoyagerDB {
   
   private static void component(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
 
-//    if (replaceDBContents) {
+    if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists component");
       testDbstmt.executeUpdate("create table component ( component_id int, subscription_id int )");
-//    }
+    }
     System.out.println("Loading component data for "+subscriptions.size()+" subscriptions.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
         "SELECT component_id FROM component WHERE subscription_id = ?");
@@ -631,10 +637,10 @@ public class PopulateTestVoyagerDB {
 
   private static void issues_received(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
 
-//    if (replaceDBContents) {
+    if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists issues_received");
       testDbstmt.executeUpdate("create table issues_received ( component_id int, issue_id int, opac_suppressed int )");
-//    }
+    }
     System.out.println("Loading issues_received data for "+components.size()+" components.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
         "SELECT issue_id, opac_suppressed FROM issues_received WHERE component_id = ?");
@@ -657,10 +663,10 @@ public class PopulateTestVoyagerDB {
 
   private static void serial_issues(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
 
-//    if (replaceDBContents) {
+    if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists serial_issues");
       testDbstmt.executeUpdate("create table serial_issues ( component_id int, issue_id int, enumchron string, receipt_date date )");
-//    }
+    }
     System.out.println("Loading serial_issues data for "+components.size()+" components.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
         "SELECT issue_id, enumchron, receipt_date FROM serial_issues WHERE component_id = ?");
@@ -682,4 +688,35 @@ public class PopulateTestVoyagerDB {
     }
   }
 
+  private static void purchase_order(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
+
+    if (replaceDBContents) {
+      testDbstmt.executeUpdate("drop table if exists purchase_order");
+      testDbstmt.executeUpdate("create table purchase_order ( po_approve_date date, po_id int, po_type int )");
+    }
+    System.out.println("Loading purchase_order data for "+purchaseOrders.size()+" purchase orders.");
+    try (PreparedStatement readStmt = voyager.prepareStatement(
+        "SELECT po_approve_date, po_type FROM purchase_order WHERE po_id = ?");
+        PreparedStatement writeStmt = testDb.prepareStatement(
+            "INSERT INTO purchase_order (po_approve_date, po_id, po_type) VALUES (?,?,?)")){
+      for (int po : purchaseOrders) {
+        readStmt.setInt(1, po);
+        try (ResultSet rs = readStmt.executeQuery()) {
+          while (rs.next()) {
+            writeStmt.setTimestamp(1,rs.getTimestamp(1));
+            writeStmt.setInt(2, po);
+            writeStmt.setInt(3, rs.getInt(2));
+            writeStmt.addBatch();
+          }
+        }
+      }
+      writeStmt.executeBatch();
+    }
+  }
+/*
+drop table line_item;
+CREATE TABLE line_item ( line_item_id int, bib_id int, quantity int, po_id int);
+INSERT INTO line_item VALUES(17081,369282,NULL,NULL);
+.quit
+ */
 }

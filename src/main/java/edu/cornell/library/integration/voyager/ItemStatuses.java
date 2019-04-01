@@ -1,6 +1,7 @@
 package edu.cornell.library.integration.voyager;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -9,12 +10,29 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ItemStatuses {
 
   private static Set<Integer> unavailableStatuses = 
       new HashSet<>( Arrays.asList(2,3,4,5,6,7,8,9,10,12,13,14,18,21,22,23,24,25));
+
+  private static final String allCallSlipsQuery =
+      "select bmast.bib_id, item_status.item_id, ist.item_status_desc"+
+      "  from item_status, item_status_type ist, mfhd_item mi, mfhd_master mm, bib_mfhd bm, bib_master bmast"+
+      " where item_status.item_status = ist.item_status_type"+
+      "   and ist.item_status_desc = 'Call Slip Request'"+
+      "   and item_status.item_id = mi.item_id"+
+      "   and mi.mfhd_id = mm.mfhd_id"+
+      "   and mm.suppress_in_opac = 'N'"+
+      "   and mi.mfhd_id = bm.mfhd_id"+
+      "   and bm.bib_id = bmast.bib_id"+
+      "   and bmast.suppress_in_opac = 'N'";
 
   public static boolean getIsUnavailable( int id ) {
     return unavailableStatuses.contains(id);
@@ -27,6 +45,28 @@ public class ItemStatuses {
       return _statuses.get(id);
     return null;
   }
+
+  public static Map<Integer,String> collectAllCallSlipRequests( Connection voyager )
+      throws SQLException{
+    Map<Integer,Map<Integer,String>> t = new HashMap<>();
+    try ( PreparedStatement pstmt = voyager.prepareStatement(allCallSlipsQuery);
+        ResultSet rs = pstmt.executeQuery()) {
+      while (rs.next()) {
+        Integer bibId = rs.getInt(1);
+        if (! t.containsKey(bibId) ) t.put(bibId, new TreeMap<>());
+        t.get(bibId).put(rs.getInt(2),rs.getString(3));
+      }
+    }
+    Map<Integer,String> callSlipJsons = new HashMap<>();
+    for (Entry<Integer,Map<Integer,String>> e : t.entrySet())
+      try {
+        callSlipJsons.put(e.getKey(), mapper.writeValueAsString(e.getValue()));
+      }
+    catch (JsonProcessingException e1) { e1.printStackTrace(); /* Unreachable? */ }
+    return callSlipJsons;
+  
+  }
+  private static ObjectMapper mapper = new ObjectMapper();
 
   private static void populateStatusMap( Connection voyager ) throws SQLException {
     String q = "SELECT * FROM item_status_type";
@@ -83,7 +123,12 @@ public class ItemStatuses {
    * in the code where they are applied for the public UI and other tools). As of Voyager 10.0.0, and the
    * version of the manual dated May 2017, this table runs from page 5-20 through 5-22. I've adjusted some
    * of the display names appearing in that documentation table to better match the ones from the Voyager
-   * database table. 
+   * database table.
+   * 
+   * Nov 2018: Based on some erroneously visible withdrawn items, we've modified the priority order to put
+   * Withdrawn just above Discharged in the order. This ensures that when an item's statuses are Withdrawn
+   * and Not Charged, the Withdrawn status will be the higher ranking status and the item will not appear
+   * available. The original ranking had Withdrawn at the very end. (DISCOVERYACCESS-4695)
    */
   private static List<String> _statusPriorities = Arrays.asList(
       "Scheduled",
@@ -104,11 +149,11 @@ public class ItemStatuses {
       "Short Loan Request",
       "Remote Storage Request",
       "Call Slip Request",
+      "Withdrawn",
       "Discharged",
       "Not Charged",
       "Cataloging Review",
       "Circulation Review",
       "Claims Returned",
-      "Damaged",
-      "Withdrawn");
+      "Damaged");
 }

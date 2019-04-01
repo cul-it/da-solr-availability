@@ -1,55 +1,142 @@
 package edu.cornell.library.integration.availability;
 
 import java.io.IOException;
-import java.io.StringReader;
+import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
 import org.apache.solr.common.SolrInputDocument;
 
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
+import edu.cornell.library.integration.voyager.BoundWith;
 import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.Holdings;
+import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.ItemReference;
 import edu.cornell.library.integration.voyager.Items;
-import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items.Item;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class RecordsToSolr {
 
+  public static void main(String[] args)
+      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, InterruptedException {
+
+    Properties prop = new Properties();
+    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
+      prop.load(in);
+    }
+    Class.forName("oracle.jdbc.driver.OracleDriver");
+    Class.forName("com.mysql.jdbc.Driver");
+
+    try (Connection voyager = DriverManager.getConnection(
+        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+        Connection inventoryDB = DriverManager.getConnection(
+            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+        Statement stmt = inventoryDB.createStatement();
+        PreparedStatement pstmt = inventoryDB.prepareStatement
+            ("SELECT availabilityQueue.bib_id, priority"+
+                " FROM availabilityQueue, solrFieldsData"+
+                " WHERE availabilityQueue.bib_id = solrFieldsData.bib_id"+
+                " ORDER BY priority LIMIT 4");
+        PreparedStatement allForBib = inventoryDB.prepareStatement
+            ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
+        PreparedStatement deprioritizeStmt = inventoryDB.prepareStatement
+            ("UPDATE availabilityQueue SET priority = 9 WHERE id = ?");
+        PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
+            ("DELETE FROM availabilityQueue WHERE id = ?");
+        ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
+        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
+        ) {
+
+      for (int i = 0; i < 50000; i++){
+        Map<Integer,Set<Change>> bibs = new HashMap<>();
+        Set<Integer> ids = new HashSet<>();
+        stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE");
+        Integer priority = null;
+        try (  ResultSet rs = pstmt.executeQuery() ) {
+          while ( rs.next() ) {
+    
+            // batch only within a single priority level
+            if (priority == null)
+              priority = rs.getInt("priority");
+            else if ( priority < rs.getInt("priority"))
+              break;
+            int bibId = rs.getInt("bib_id");
+
+            // Get all queue items for selected bib
+            allForBib.setInt(1, bibId);
+            try ( ResultSet rs2 = allForBib.executeQuery() ) {
+              Set<Change> changes = new HashSet<>();
+              while (rs2.next()) {
+                changes.add(new Change(Change.Type.RECORD,null,rs2.getString("cause"),
+                                       rs2.getTimestamp("record_date"),null));
+                int id = rs2.getInt("id");
+                deprioritizeStmt.setInt(1,id);
+                deprioritizeStmt.addBatch();
+                ids.add(id);
+              }
+              bibs.put(bibId, changes);
+              deprioritizeStmt.executeBatch();
+            }
+          }
+        }
+        stmt.execute("UNLOCK TABLES");
+
+        if ( bibs.isEmpty() )
+          Thread.sleep(3000);
+        else {
+          updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs, priority);
+          if (priority != null && priority <= 5)
+            solr.blockUntilFinished();
+        }
+        for (int id : ids) {
+          clearFromQueueStmt.setInt(1, id);
+          clearFromQueueStmt.addBatch();
+        }
+        clearFromQueueStmt.executeBatch();
+      };
+      solr.blockUntilFinished();
+    }
+  }
+
   public static class Change implements Comparable<Change>{
-    public final Type type;
-    public final Integer recordId;
-    public final String detail;
-    public final Timestamp changeDate;
-    public final String location;
+    private final Type type;
+    private final Integer recordId;
+    private final String detail;
+    private final Timestamp changeDate;
+    private final String location;
+
+    public Timestamp date() { return this.changeDate; }
 
     public Change (Type type, Integer recordId, String detail, Timestamp changeDate, String location) {
       this.type = type;
@@ -59,37 +146,65 @@ public class RecordsToSolr {
       this.location = location;
     }
 
+    @Override
     public String toString() {
       return this.toString(true);
     }
 
-    public String toString(boolean showAgeOfChange) {
+    private String toString(boolean showAgeOfChange) {
       StringBuilder sb = new StringBuilder();
       sb.append(this.type.name());
+      if (this.recordId != null)
+        sb.append(" ").append(this.recordId);
       if (this.location != null)
         sb.append(" ").append(this.location);
       if (this.detail != null)
         sb.append(" ").append(this.detail);
       if (this.changeDate != null) {
         sb.append(" ").append(this.changeDate.toLocalDateTime().format(formatter));
-        if (showAgeOfChange) {
-          long ageInSeconds = java.time.Duration.between(
-              this.changeDate.toInstant(), java.time.Instant.now()).getSeconds();
-          boolean negativeTime = ageInSeconds < 0;
-          sb.append(" (");
-          if (negativeTime) {
-            ageInSeconds = Math.abs(ageInSeconds);
-            sb.append('-');
-          }
-          if (ageInSeconds > 3600) // hours
-            sb.append(ageInSeconds / 3600).append(':');
-          sb.append(String.format("%02d:%02ds)", (ageInSeconds % 3600) / 60, ageInSeconds % 60 ));
-        }
+        if (showAgeOfChange)
+          appendElapsedTime( sb, this.changeDate );
       }
       return sb.toString();
     }
 
-    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, RECEIPT, AGE, OTHER };
+    final static List<TimeUnit> timeUnits = Arrays.asList(
+        TimeUnit.DAYS, TimeUnit.HOURS, TimeUnit.MINUTES, TimeUnit.SECONDS);
+
+    static void appendElapsedTime( StringBuilder sb, Timestamp since ) {
+
+      long seconds = java.time.Duration.between(
+          since.toInstant(), java.time.Instant.now()).getSeconds();
+      if ( seconds == 0 ) return;
+
+      sb.append(" (");
+
+      if (seconds < 0) { seconds = Math.abs(seconds); sb.append('-'); }
+
+      for ( int i = 0; i < timeUnits.size() ; i++ ) {
+
+        TimeUnit t = timeUnits.get(i);
+        long unitCount = t.convert(seconds, TimeUnit.SECONDS);
+        if ( unitCount == 0 ) continue;// the first time we pass this point is the last loop
+
+        // append most significant time units
+        sb.append( unitCount ).append(' ').append( t.toString().toLowerCase() );
+
+        // if the most significant was the last candidate, we're done
+        if ( i+1 == timeUnits.size() ) break;
+
+        // otherwise, consider only the immediate next less significant unit
+        seconds -= TimeUnit.SECONDS.convert( unitCount, t);
+        t = timeUnits.get(i+1);
+        unitCount = t.convert(seconds, TimeUnit.SECONDS);
+        if ( unitCount == 0 ) break;
+        sb.append(", ").append( unitCount ).append(' ').append( t.toString().toLowerCase() );
+        break;
+      }
+      sb.append(')');
+    }
+
+    public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, OTHER };
     private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
     @Override
@@ -134,7 +249,7 @@ public class RecordsToSolr {
     }
   }
 
-  public static Timestamp getCurrentToDate( Connection inventory, String key ) throws SQLException {
+  static Timestamp getCurrentToDate( Connection inventory, String key ) throws SQLException {
 
     try (PreparedStatement pstmt = inventory.prepareStatement(
         "SELECT current_to_date FROM updateCursor WHERE cursor_name = ?")) {
@@ -149,7 +264,7 @@ public class RecordsToSolr {
     return null;
   }
 
-  public static void setCurrentToDate(Timestamp currentTo, Connection inventory, String key ) throws SQLException {
+  static void setCurrentToDate(Timestamp currentTo, Connection inventory, String key ) throws SQLException {
     
     try (PreparedStatement pstmt = inventory.prepareStatement(
         "REPLACE INTO updateCursor ( cursor_name, current_to_date ) VALUES (?,?)")) {
@@ -159,38 +274,51 @@ public class RecordsToSolr {
     }
   }
 
-  public static void updateBibsInSolr(Connection voyager, Connection inventory, Map<Integer,Set<Change>> changedBibs)
+  static void updateBibsInSolr(
+      Connection voyager, Connection inventory,
+      SolrClient solr, SolrClient callNumberSolr,
+      Map<Integer,Set<Change>> changedBibs, Integer priority)
       throws SQLException, IOException, XMLStreamException, InterruptedException {
-
-    List<Integer> bibsNotFound = new ArrayList<>();
 
     while (! changedBibs.isEmpty()) {
       List<Integer> completedBibUpdates = new ArrayList<>();
 
       try (PreparedStatement pstmt = inventory.prepareStatement(
-          "SELECT bib_id, solr_document, title FROM bibRecsSolr"+
-          " WHERE bib_id = ?"+
-          "   AND active = 1");
-          SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") );
-          SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )){
-        BIB: for (int bibId : changedBibs.keySet()) {
+          "SELECT record_dates," + // field list maintained here, and in constructSolrInputDocument() below
+          "       authortitle_solr_fields, title130_solr_fields,    subject_solr_fields,     pubinfo_solr_fields," + 
+          "       format_solr_fields,      factfiction_solr_fields, language_solr_fields,    isbn_solr_fields," + 
+          "       series_solr_fields,      titlechange_solr_fields, toc_solr_fields,         instruments_solr_fields," + 
+          "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields, citationref_solr_fields," + 
+          "       url_solr_fields,         hathilinks_solr_fields,  newbooks_solr_fields,    recordtype_solr_fields," + 
+          "       recordboost_solr_fields, holdings_solr_fields,    otherids_solr_fields" + 
+          "  FROM solrFieldsData"+
+          " WHERE bib_id = ?")){
+
+        Set<SolrInputDocument> solrDocs = new HashSet<>();
+        Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
+
+        for (int bibId : changedBibs.keySet()) {
           pstmt.setInt(1, bibId);
           try (ResultSet rs = pstmt.executeQuery()) {
             while ( rs.next() ) {
 
-              String solrXml = rs.getString(2);
-              if (solrXml == null) {
-                System.out.println("ERROR: Solr Document not found. "+bibId+" ("+rs.getString(3)+"): "+ changedBibs.get(bibId));
-                Thread.sleep(100);
-                if (Collections.frequency(bibsNotFound, bibId) > 2)
-                  completedBibUpdates.add(bibId); // Not complete, but moving on.
-                bibsNotFound.add(bibId);
-                continue BIB;
-              }
-              SolrInputDocument doc = xml2SolrInputDocument( solrXml );
+              SolrInputDocument doc = constructSolrInputDocument( rs );
               HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
-              holdings.getRecentIssues(voyager, bibId);
-              ItemList items = Items.retrieveItemsForHoldings(voyager,holdings);
+              holdings.getRecentIssues(voyager, inventory, bibId);
+              ItemList items = Items.retrieveItemsForHoldings(voyager, inventory, bibId, holdings);
+
+              boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
+              if (masterBoundWith) {
+                doc.addField("bound_with_master_b", true);
+                Set<Integer> changedItems = extractChangedItemIds( changedBibs.get(bibId) );
+                BoundWith.identifyAndQueueOtherBibsInMasterVolume( inventory, bibId, changedItems );
+              }
+              EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
+              for (BoundWith.Flag flag : f)
+                doc.addField("availability_facet",flag.getAvailabilityFlag());
+              if ( ! f.isEmpty() )
+                doc.addField("bound_with_b", true);
+
               if ( holdings.summarizeItemAvailability(items) ) 
                 doc.addField("availability_facet", "Returned");
               if ( holdings.applyOpenOrderInformation(voyager,bibId) )
@@ -219,6 +347,9 @@ public class RecordsToSolr {
 
               for ( Integer mfhdId : holdings.getMfhdIds()) {
                 Holding h = holdings.get(mfhdId);
+                if (h.donors != null)
+                  for (String donor : h.donors)
+                    doc.addField("donor_display", donor);
                 if (h.call != null && h.call.matches(".*In Process.*"))
                   doc.addField("availability_facet","In Process");
                 if (h.itemSummary != null && h.itemSummary.unavail != null)
@@ -255,18 +386,26 @@ public class RecordsToSolr {
                 if ( doc.containsKey(solrField) ) doc.remove(solrField);
                 doc.addField(solrField, true);
               }
-              solr.add( doc );
 
-              List<SolrInputDocument> callNumberBrowseDocs =
-                  CallNumberBrowse.generateBrowseDocuments(doc,holdings);
+              // Temporary workaround can be removed once all Solr fields in db have SimpleProc v1.2
+              if ( doc.containsKey("f300e_b")) {
+                doc.removeField("f300e_b");
+                doc.addField("f300e_b", true);
+              }
+
+              WorksAndInventory.updateInventory( inventory, doc );
+              solrDocs.add(doc);
+
+              callnumSolrDocs.addAll( CallNumberBrowse.generateBrowseDocuments(doc,holdings) );
               callNumberSolr.deleteByQuery("bibid:"+bibId);
-              if ( ! callNumberBrowseDocs.isEmpty() )
-                callNumberSolr.add(callNumberBrowseDocs);
 
-              System.out.println(bibId+" ("+rs.getString(3)+"): "+String.join("; ",
-                  changes+"  ["+callNumberBrowseDocs.size()+" call numbers]"));
+              System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
+                  changes)+" priority:"+priority);
+//              System.out.println(ClientUtils.toXML(doc).replaceAll("(<field)", "\n$1"));
             }
-  
+            solr.add(solrDocs);
+            if ( ! callnumSolrDocs.isEmpty() )
+              callNumberSolr.add(callnumSolrDocs);
           }
           completedBibUpdates.add(bibId);
         }
@@ -282,6 +421,36 @@ public class RecordsToSolr {
     }
   }
 
+  private static SolrInputDocument constructSolrInputDocument(ResultSet rs) throws SQLException {
+
+    List<String> fields = Arrays.asList( // field list maintained here, and in SQL query in updateBibsInSolr()
+    "authortitle_solr_fields", "title130_solr_fields",    "subject_solr_fields",     "pubinfo_solr_fields",
+    "format_solr_fields",      "factfiction_solr_fields", "language_solr_fields",    "isbn_solr_fields",
+    "series_solr_fields",      "titlechange_solr_fields", "toc_solr_fields",         "instruments_solr_fields",
+    "marc_solr_fields",        "simpleproc_solr_fields",  "findingaids_solr_fields", "citationref_solr_fields",
+    "url_solr_fields",         "hathilinks_solr_fields",  "newbooks_solr_fields",    "recordtype_solr_fields",
+    "recordboost_solr_fields", "holdings_solr_fields",    "otherids_solr_fields" );
+    SolrInputDocument doc = new SolrInputDocument();
+    String dates = rs.getString("record_dates");
+    if (dates != null)
+      doc.addField("record_dates_display", dates);
+    for (String field : fields) {
+      String data = rs.getString(field);
+      if ( data == null ) continue;
+      String[] values = data.split("\n");
+      for (String value : values) {
+        if (value.isEmpty()) continue;
+        if (value.startsWith("^")) {
+          doc.setDocumentBoost(Float.valueOf(value.substring(1)));
+          continue;
+        }
+        String[] parts = value.split(": ", 2);
+        doc.addField(parts[0], parts[1]);
+      }
+    }
+    return doc;
+  }
+
   private static String join(Collection<Object> objects) {
     StringBuilder sb = new StringBuilder();
     boolean first = true;
@@ -291,14 +460,14 @@ public class RecordsToSolr {
     return sb.toString();
   }
 
-  public static Map<Integer,Set<Change>> duplicateMap( Map<Integer,Set<Change>> m1 ) {
+  static Map<Integer,Set<Change>> duplicateMap( Map<Integer,Set<Change>> m1 ) {
     Map<Integer,Set<Change>> m2 = new HashMap<>();
     for (Entry<Integer,Set<Change>> e : m1.entrySet())
       m2.put(e.getKey(), new HashSet<>(e.getValue()));
     return m2;
   }
 
-  public static Map<Integer,Set<Change>> eliminateCarryovers( 
+  static Map<Integer,Set<Change>> eliminateCarryovers( 
       Map<Integer,Set<Change>> newChanges, Map<Integer,Set<Change>> oldChanges) {
     if ( oldChanges.isEmpty() )
       return newChanges;
@@ -319,33 +488,15 @@ public class RecordsToSolr {
     return newChanges;
   }
 
-  private static SolrInputDocument xml2SolrInputDocument(String xml) throws XMLStreamException {
-    SolrInputDocument doc = new SolrInputDocument();
-    XMLInputFactory input_factory = XMLInputFactory.newInstance();
-    XMLStreamReader r  = 
-        input_factory.createXMLStreamReader(new StringReader(xml));
-    while (r.hasNext()) {
-      if (r.next() == XMLStreamConstants.START_ELEMENT) {
-        if (r.getLocalName().equals("doc")) {
-          for (int i = 0; i < r.getAttributeCount(); i++)
-            if (r.getAttributeLocalName(i).equals("boost"))
-              doc.setDocumentBoost(Float.valueOf(r.getAttributeValue(i)));
-        } else if (r.getLocalName().equals("field")) {
-          String fieldName = null;
-          Float boost = null;
-          for (int i = 0; i < r.getAttributeCount(); i++)
-            if (r.getAttributeLocalName(i).equals("name"))
-              fieldName = r.getAttributeValue(i);
-            else if (r.getAttributeLocalName(i).equals("boost"))
-              boost = Float.valueOf(r.getAttributeValue(i));
-          if (boost != null)
-            doc.addField(fieldName, r.getElementText(), boost);
-          else
-            doc.addField(fieldName, r.getElementText());
-        }
-      }
-    }
-    return doc;
+  private static Set<Integer> extractChangedItemIds(Set<Change> changes) {
+    Set<Integer> items = new HashSet<>();
+    for (Change c : changes)
+      if (c.detail.contains("ITEM") || c.detail.contains("CIRC"))
+        for (String part : c.detail.split("[\\s\"]+"))
+          if (number.matcher(part).matches())
+            items.add(Integer.valueOf(part));
+    return items;
   }
+  private static Pattern number = Pattern.compile("[0-9]+");
 
 }

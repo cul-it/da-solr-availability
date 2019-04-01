@@ -43,15 +43,17 @@ public class Holding {
   @JsonProperty("indexes")     public final List<String> indexes;
   @JsonProperty("recents")     public List<String> recentIssues = null;
   @JsonProperty("location")    public Location location;
-  @JsonProperty("call")        public final String call;
-  @JsonProperty("boundWith")   public final Map<Integer,BoundWith> boundWiths;
+  @JsonProperty("call")        public String call;
+  @JsonProperty("boundWith")   public Map<Integer,BoundWith> boundWiths;
   @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
-  @JsonProperty("order")       public String openOrderNote = null;
+  @JsonProperty("order")       public String orderNote = null;
   @JsonProperty("avail")       public Boolean avail = null;
   @JsonProperty("circ")        public Boolean circ = null;
   @JsonProperty("online")      public Boolean online = null;
   @JsonProperty("date")        public final Integer date;
 
+
+  @JsonIgnore public List<String> donors = null;
   @JsonIgnore public String callNumberSuffix = null;
   @JsonIgnore public MarcRecord record;
   @JsonIgnore static Locations locations = null;
@@ -83,6 +85,14 @@ public class Holding {
       case "506":
         // restrictions on access note
         notes.add(f.concatenateSpecificSubfields("ancdefu3"));
+        break;
+      case "541":
+        // immediate source of acquisition note
+        if ( f.ind1.equals('1') ) { // 1 - Not private
+          if ( this.donors == null )
+            this.donors = new ArrayList<>();
+          this.donors.add(f.concatenateSpecificSubfields("3a"));
+        }
         break;
       case "561":
         // ownership and custodial history
@@ -191,7 +201,7 @@ public class Holding {
     this.boundWiths = boundWiths;
     this.call = call;
     this.itemSummary = itemSummary;
-    this.openOrderNote = openOrderNote;
+    this.orderNote = openOrderNote;
     this.avail = avail;
     this.circ = circ;
     this.online = online;
@@ -204,7 +214,7 @@ public class Holding {
   public boolean noItemsAvailability() {
 	  if (this.itemSummary != null) return false;
 	  if (this.online != null && this.online) return false;
-	  this.avail = this.openOrderNote == null;
+	  this.avail = this.orderNote == null;
 	  return true;
   }
 

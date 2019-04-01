@@ -12,21 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 
 public class RecentIssues {
 
-  private final static String recentByHoldingQuery =
-      "SELECT si.enumchron" +
-      "  FROM line_item_copy_status lics, subscription s, component c, issues_received ir, serial_issues si"+
-      " WHERE lics.mfhd_id = ?"+
-      "   AND lics.line_item_id = s.line_item_id"+
-      "   AND s.subscription_id = c.subscription_id"+
-      "   AND c.component_id = si.component_id"+
-      "   AND c.component_id = ir.component_id"+
-      "   AND ir.issue_id = si.issue_id"+
-      "   AND ir.opac_suppressed = 1"+//note: 0 = true, 1 = false
-      " ORDER BY si.issue_id DESC";
 
   private final static String recentByBibQuery =
       "SELECT lics.mfhd_id, si.enumchron" +
@@ -57,17 +50,18 @@ public class RecentIssues {
 
   private final static String allBibsQuery =
       "SELECT distinct li.bib_id" +
-      "  FROM line_item li, line_item_copy_status lics, subscription s,"+
+      "  FROM bib_master bm, line_item li, subscription s,"+
       "       component c, issues_received ir, serial_issues si"+
-      " WHERE li.line_item_id = s.line_item_id"+
-      "   AND li.line_item_id = lics.line_item_id"+
+      " WHERE bm.bib_id = li.bib_id"+
+      "   AND bm.suppress_in_opac = 'N'"+
+      "   AND li.line_item_id = s.line_item_id"+
       "   AND s.subscription_id = c.subscription_id"+
       "   AND c.component_id = si.component_id"+
       "   AND c.component_id = ir.component_id"+
       "   AND ir.issue_id = si.issue_id"+
       "   AND ir.opac_suppressed = 1";//note: 0 = true, 1 = false
 
-  public static Set<Integer> getAllAffectedBibs( Connection voyager ) throws SQLException {
+  static Set<Integer> getAllAffectedBibs( Connection voyager ) throws SQLException {
 
     Set<Integer> bibIds = new HashSet<>();
     try (  PreparedStatement pstmt = voyager.prepareStatement(allBibsQuery);
@@ -87,7 +81,7 @@ public class RecentIssues {
       try (  ResultSet rs = pstmt.executeQuery()  ) {
         while (rs.next()) {
           Integer bibId = rs.getInt("bib_id");
-          Change c = new Change(Change.Type.RECEIPT,null,rs.getString("enumchron"),
+          Change c = new Change(Change.Type.SERIALISSUES,null,rs.getString("enumchron"),
               rs.getTimestamp("receipt_date"),null);
           if (changes.containsKey(bibId))
             changes.get(bibId).add(c);
@@ -102,20 +96,34 @@ public class RecentIssues {
     return changes;
   }
 
-  public static List<String> getByHoldingId( Connection voyager, Integer holdingId ) throws SQLException {
-
-    List<String> issues = new ArrayList<>();
-    try (  PreparedStatement pstmt = voyager.prepareStatement(recentByHoldingQuery)   ) {
-      pstmt.setInt(1, holdingId);
-      try (  ResultSet rs = pstmt.executeQuery()  ) {
-        while(rs.next())
-          issues.add(rs.getString("enumchron"));
+  public static Map<Integer,Set<Change>> detectAllChangedBibs(
+      Connection voyager, Map<Integer,String> prevValues, Map<Integer,Set<Change>> changes )
+          throws SQLException, JsonProcessingException {
+    Set<Integer> currentBibs = getAllAffectedBibs( voyager );
+    for(Integer bibId : prevValues.keySet()) {
+      if (currentBibs.contains(bibId)) {
+        String updatedJson = mapper.writeValueAsString(getByBibId(voyager,bibId));
+        if ( ! updatedJson.equals(prevValues.get(bibId))) {
+          Set<Change> t = new HashSet<>();
+          t.add(new Change(Change.Type.SERIALISSUES,null,"Recent Issues Updated",null,null));
+          changes.put(bibId,t);
+        }
+        currentBibs.remove(bibId);
+      } else {
+        Set<Change> t = new HashSet<>();
+        t.add(new Change(Change.Type.SERIALISSUES,null,"Recent Issues Suppressed",null,null));
+        changes.put(bibId,t);
       }
     }
-    return issues;
+    for (Integer bibId : currentBibs) {
+      Set<Change> t = new HashSet<>();
+      t.add(new Change(Change.Type.SERIALISSUES,null,"Recent Issues Added",null,null));
+      changes.put(bibId,t);
+    }
+    return changes;
   }
 
-  public static Map<Integer,List<String>> getByBibId( Connection voyager, Integer bibId ) throws SQLException {
+  static Map<Integer,List<String>> getByBibId( Connection voyager, Integer bibId ) throws SQLException {
 
     Map<Integer,List<String>> issues = new HashMap<>();
     try (  PreparedStatement pstmt = voyager.prepareStatement(recentByBibQuery)   ) {
@@ -132,5 +140,9 @@ public class RecentIssues {
     return issues;
   }
 
+  private static ObjectMapper mapper = new ObjectMapper();
+  static {
+    mapper.setSerializationInclusion(Include.NON_NULL);
+  }
 
 }

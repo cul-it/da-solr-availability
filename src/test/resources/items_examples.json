@@ -393,6 +393,7 @@
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
     "status":{"available":false,"code":{"12":"Missing"},"date":1247590864},
+    "empty":true,
     "date":1247590864},
    {"id":3451914,
     "copy":1,"sequence":9,"chron":"1991",
@@ -456,5 +457,19 @@
   "date":1515517721}]}
 
 
+
+,"expectedBib833840":
+
+
+
+{"1016218":[
+  {"id":9621977,"copy":1,"sequence":1,
+  "enum":"Bound with",
+  "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+  "circGrp":{"5":"Annex Circ Group"},
+  "type":{"id":3,"name":"book"},
+  "status":{"available":true,"code":{"1":"Not Charged"},"date":1418677111},
+  "date":1418677111,
+  "empty":true}]}
 
 }

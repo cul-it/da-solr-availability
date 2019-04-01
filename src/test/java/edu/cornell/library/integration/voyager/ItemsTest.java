@@ -88,7 +88,7 @@ public class ItemsTest {
   @Test
   public void onReserveTest() throws SQLException, IOException, XMLStreamException {
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest,9628566);
-    ItemList items = Items.retrieveItemsForHoldings(voyagerTest, holdings);
+    ItemList items = Items.retrieveItemsForHoldings(voyagerTest,null,9628566,holdings);
     assertEquals(examples.get("expectedJsonOnReserve").toJson(),items.toJson());
   }
 
@@ -115,6 +115,12 @@ public class ItemsTest {
     ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1144752);
 //    System.out.println(items.toJson());
     assertEquals(examples.get("expectedCheckedOutReserve").toJson(),items.toJson());
+  }
+
+  @Test
+  public void emptyItem() throws SQLException, JsonProcessingException {
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218);
+    assertEquals(examples.get("expectedBib833840").toJson(),items.toJson());
   }
 
   @Test

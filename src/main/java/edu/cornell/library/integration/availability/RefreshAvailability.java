@@ -7,7 +7,6 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -37,11 +36,12 @@ public class RefreshAvailability {
     Class.forName("com.mysql.jdbc.Driver");
 
     try (
-        SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL") );
         Connection voyagerLive = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
         Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"))) {
+            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+        SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
+        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL"))) {
 
       int rows = 50;
       SolrQuery q = new SolrQuery().setQuery("*:*").addSort("timestamp", ORDER.asc).setFields("id,timestamp").setRows(rows);
@@ -62,7 +62,7 @@ public class RefreshAvailability {
         page = (page + 1) % 10;
 
         if ( oldBibs.size() > 0 )
-          RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB , oldBibs );
+          RecordsToSolr.updateBibsInSolr( voyagerLive, inventoryDB ,solr, callNumberSolr, oldBibs, 8 );
         else
           try {
             Thread.sleep(500);

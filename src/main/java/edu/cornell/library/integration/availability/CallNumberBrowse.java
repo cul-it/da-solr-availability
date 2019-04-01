@@ -2,6 +2,7 @@ package edu.cornell.library.integration.availability;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 
-public class CallNumberBrowse {
+class CallNumberBrowse {
 
   private static final List<String> clonedDocFields = Arrays.asList(
       "format",
@@ -28,7 +29,7 @@ public class CallNumberBrowse {
   private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";
 
-  public static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc, HoldingSet holdings)
+  static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc, HoldingSet holdings)
       throws JsonProcessingException {
     List<SolrInputDocument> browseDocs = new ArrayList<>();
     if ( holdings.getMfhdIds().isEmpty() ) return browseDocs;
@@ -52,10 +53,8 @@ public class CallNumberBrowse {
       boolean bibliographicCallNum = false;
 
       // try to pull bibliographic call number for missing call number
-      if ( callNum.equals("No Call Number") || 
-          callNum.equalsIgnoreCase("In Process") || 
-          callNum.equalsIgnoreCase("On Order")) {
-        String bibCallNumber = (String) doc.getFieldValue(callNumberField);
+      if ( isNonCallNumber(callNum )) {
+        String bibCallNumber = getBibCallNumber( doc.getFieldValues(callNumberField) );
         if (bibCallNumber != null && ! bibCallNumber.isEmpty()) {
           callNum = bibCallNumber;
           bibliographicCallNum = true;
@@ -78,6 +77,8 @@ public class CallNumberBrowse {
             continue;        // otherwise, suppress call number from browse entirely
         }
       }
+      if (b.availAt != null)   for (String loc : b.availAt.keySet())     b.availAt.put(loc, "");
+      if (b.unavailAt != null) for (String loc : b.unavailAt.keySet())   b.unavailAt.put(loc, "");
 
       String id = bibId+"."+(++i);
       browseDoc.addField( "id", id );
@@ -98,6 +99,19 @@ public class CallNumberBrowse {
       browseDocs.add(browseDoc);
     }
     return browseDocs;
+  }
+
+  private static String getBibCallNumber(Collection<Object> callNumbers) {
+    if (callNumbers == null) return null;
+    for (Object call : callNumbers)
+      if ( ! isNonCallNumber( (String) call ))
+        return (String) call;
+    return null;
+  }
+
+  private static boolean isNonCallNumber( String call ) {
+    String lc = call.toLowerCase().replaceAll("\\s+"," ");
+    return lc.contains("no call") || lc.contains("in proc") || lc.contains("on order");
   }
 
   private static Map<String, HoldingSet> divideHoldingsByCallNumber(HoldingSet holdings) {
