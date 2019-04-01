@@ -257,7 +257,7 @@ public class Items {
             if ( i.status != null ) {
               if ( i.status.due != null )
                 dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
-              if ( i.status.code.containsValue("Call Slip Request") )
+              if ( i.status.code != null && i.status.code.containsValue("Call Slip Request") )
                 callSlips.put(i.itemId, "Call Slip Request");
             }
           }
