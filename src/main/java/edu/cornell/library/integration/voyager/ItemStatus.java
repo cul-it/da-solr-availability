@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,13 +17,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.cornell.library.integration.voyager.ItemStatuses.StatusCode;
 import edu.cornell.library.integration.voyager.ItemTypes.ItemType;
+import edu.cornell.library.integration.voyager.Locations.Location;
 
 public class ItemStatus {
   public Boolean available;
-  public final Map<Integer,String> code;
+  public Map<Integer,String> code;
   public final Boolean shortLoan;
   public final Long due;
-  public final Long date;
+  public Long date;
 
   @JsonCreator
   public ItemStatus(
@@ -38,7 +40,7 @@ public class ItemStatus {
     this.date = date;
   }
 
-  public ItemStatus( Connection voyager, int item_id, ItemType type ) throws SQLException {
+  public ItemStatus( Connection voyager, int item_id, ItemType type, Location location ) throws SQLException {
     
     String statusQ = "SELECT * FROM item_status WHERE item_id = ?";
     String circQ = "SELECT current_due_date FROM circ_transactions WHERE item_id = ?";
@@ -71,12 +73,22 @@ public class ItemStatus {
       this.available = true;
     else
       this.available = false;
+
     if (! statuses.isEmpty()) {
       StatusCode c = statuses.iterator().next();
       this.code = new HashMap<>();
       this.code.put(c.id, c.name);
+
+      // nocirc items at the annex are unavailable regardless of the item status
+      // DISCOVERYACCESS-4881/DISCOVERYACCESS-4917
+      if (this.available && type.name.equals("nocirc") && location.name.equals("Library Annex")) {
+        this.available = false;
+        this.code = FAKE_UNAVAIL_STATUS;
+      }
+
     } else
       this.code = null;
+
     Long dueDate = null;
     boolean shortLoan = checkoutDate != null && ItemTypes.isShortLoanType(type);
     try ( PreparedStatement pstmt = voyager.prepareStatement(circQ)) {
@@ -102,7 +114,8 @@ public class ItemStatus {
     }
     this.due = dueDate;
     this.shortLoan = (shortLoan)?true:null;
-    this.date = (statusModDate == null)?null:statusModDate.getTime()/1000;
+    this.date = (statusModDate == null || this.code == null || this.code.containsKey(FAKE_UNAVAIL_STATUS_CODE))?
+        null:statusModDate.getTime()/1000;
   }
 
   public boolean matches( ItemStatus other ) {
@@ -118,5 +131,13 @@ public class ItemStatus {
   public boolean newerThan( ItemStatus other ) {
     if ( this.date == null || other.date == null ) return false;
     return ( this.date > other.date );
+  }
+
+  private static final Map<Integer,String> FAKE_UNAVAIL_STATUS;
+  private static final int FAKE_UNAVAIL_STATUS_CODE = 31;
+  static {
+    Map<Integer,String> t = new HashMap<>();
+    t.put(FAKE_UNAVAIL_STATUS_CODE, "Unavailable");
+    FAKE_UNAVAIL_STATUS = Collections.unmodifiableMap(t);
   }
 }

@@ -451,7 +451,7 @@ public class Items {
       if (0 == itemTypeId)
         itemTypeId = rs.getInt("ITEM_TYPE_ID");
       this.type = itemTypes.getById(itemTypeId);
-      this.status = new ItemStatus( voyager, this.itemId, this.type );
+      this.status = new ItemStatus( voyager, this.itemId, this.type, this.location );
       this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
           ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
       this.empty = (rs.getString("ITEM_BARCODE") == null)?true:null;
