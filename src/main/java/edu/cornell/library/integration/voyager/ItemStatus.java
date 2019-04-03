@@ -114,7 +114,7 @@ public class ItemStatus {
     }
     this.due = dueDate;
     this.shortLoan = (shortLoan)?true:null;
-    this.date = (statusModDate == null )?//|| this.code == null || this.code.containsKey(FAKE_UNAVAIL_STATUS_CODE))?
+    this.date = (statusModDate == null || this.code == null || this.code.containsKey(FAKE_UNAVAIL_STATUS_CODE))?
         null:statusModDate.getTime()/1000;
   }
 
