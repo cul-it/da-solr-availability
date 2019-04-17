@@ -145,7 +145,7 @@ public class Items {
               Change c = new Change(Change.Type.CIRC,item.itemId,
                   String.join( " ",((item.enumeration!= null)?"("+item.enumeration+")":""),
                       item.status.code.values().iterator().next()),
-                  new Timestamp(item.status.date*1000),
+                  new Timestamp((item.status.date != null)?item.status.date*1000:System.currentTimeMillis()),
                   item.location.name);
               Integer bibId = bibRs.getInt(1);
               if (changes.containsKey(bibId))
