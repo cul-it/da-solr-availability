@@ -6,8 +6,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-class OpenOrder {
+import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+
+public class OpenOrder {
 
   String note = null;
   Integer mfhdId = null;
@@ -49,4 +56,42 @@ class OpenOrder {
   }
 
   private SimpleDateFormat format = new SimpleDateFormat("M/d/yy");
+
+  public static void detectOrderStatusChanges(
+      Connection voyager, Timestamp since, Map<Integer, Set<Change>> changes) throws SQLException {
+
+    final String getRecentOrderStatusChanges =
+        "SELECT li.bib_id, lics.line_item_id, lics.status_date, lics.mfhd_id, lics.line_item_status" + 
+        "  FROM line_item li, line_item_copy_status lics, bib_master bm, mfhd_master mm" + 
+        "  WHERE li.line_item_id = lics.line_item_id" + 
+        "    AND lics.status_date > ?" + 
+        "    AND li.bib_id = bm.bib_id" + 
+        "    AND bm.suppress_in_opac = 'N'" + 
+        "    AND lics.mfhd_id = mm.mfhd_id" + 
+        "    AND mm.suppress_in_opac = 'N'";
+
+    try (  PreparedStatement pstmt = voyager.prepareStatement(getRecentOrderStatusChanges)   ) {
+      pstmt.setTimestamp(1,since);
+      try (  ResultSet rs = pstmt.executeQuery()  ) {
+        while (rs.next()) {
+          Integer bibId = rs.getInt("bib_id");
+          Change c = new Change(Change.Type.ORDER,rs.getInt("line_item_id"),
+              String.format("Order status update on h%d: %s",
+                  rs.getInt("mfhd_id"), orderStatuses.get(rs.getInt("line_item_status"))),
+              rs.getTimestamp("status_date"),null);
+          if (changes.containsKey(bibId))
+            changes.get(bibId).add(c);
+          else {
+            Set<Change> t = new HashSet<>();
+            t.add(c);
+            changes.put(bibId,t);
+          }
+        }
+      }
+    }
+  }
+
+  private static List<String> orderStatuses = Arrays.asList(
+      "Pending","Received Complete","Backordered","Returned","Claimed",
+      "Invoice Pending","Invoiced","Canceled","Approved","Received Partial","Rolled Over");
 }
