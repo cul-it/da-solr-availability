@@ -31,25 +31,30 @@ public class OpenOrder {
         "   AND line_item.line_item_id = line_item_copy_status.line_item_id"+
         "   AND line_item_copy_status.line_item_status IN (0, 7, 8)"+ // i.e. (pending, cancelled, approved), not received
         "   AND line_item.po_id = purchase_order.po_id"+
-        "   AND purchase_order.po_type = 1"; // firm order (not ongoing)
+        "   AND purchase_order.po_type = 1"+ // firm order (not ongoing)
+        " ORDER BY line_item_copy_status.status_date DESC"+
+        " FETCH FIRST 1 ROWS ONLY";
     try (PreparedStatement pstmt = voyager.prepareStatement(getOrderInfoQuery)) {
       pstmt.setInt(1, bibId);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
+          this.mfhdId = rs.getInt("mfhd_id");
           switch (rs.getInt("line_item_status")) {
           case 0:
             this.note = "In pre-order processing";
             Timestamp statusDate = rs.getTimestamp("status_date");
             if ( statusDate != null )
-              note += " as of "+format.format(statusDate); break;
+              note += " as of "+format.format(statusDate);
+            break;
           case 7:
             this.note = "Order cancelled"; break;
           case 8:
             int quantity = rs.getInt("quantity");
             this.note = String.format("%d cop%s ordered as of %s",
                 quantity,(quantity==1)?"y":"ies",format.format(rs.getTimestamp("po_approve_date")));
+            break;
           }
-          this.mfhdId = rs.getInt("mfhd_id");
+          System.out.println(this.note);
         }
       }
     }
@@ -71,7 +76,7 @@ public class OpenOrder {
         "    AND mm.suppress_in_opac = 'N'";
 
     try (  PreparedStatement pstmt = voyager.prepareStatement(getRecentOrderStatusChanges)   ) {
-      pstmt.setTimestamp(1,since);
+      pstmt.setTimestamp(1,Timestamp.valueOf("2019-04-01 00:00:00"));
       try (  ResultSet rs = pstmt.executeQuery()  ) {
         while (rs.next()) {
           Integer bibId = rs.getInt("bib_id");
