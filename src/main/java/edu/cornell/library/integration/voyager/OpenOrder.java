@@ -54,7 +54,6 @@ public class OpenOrder {
                 quantity,(quantity==1)?"y":"ies",format.format(rs.getTimestamp("po_approve_date")));
             break;
           }
-          System.out.println(this.note);
         }
       }
     }
