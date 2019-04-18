@@ -62,6 +62,7 @@ public class PopulateTestVoyagerDB {
         Connection voyager = DriverManager.getConnection(
             prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"))) {
 
+      bib_master(testDb,voyager,testDbstmt);
       bib_mfhd(testDb,voyager,testDbstmt);
       bib_text(testDb,voyager,testDbstmt);
       bib_data(testDb,voyager,testDbstmt);
@@ -86,6 +87,10 @@ public class PopulateTestVoyagerDB {
       purchase_order(testDb,voyager,testDbstmt);
 
       if (dumpTestDBToStdout) {
+        try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, suppress_in_opac FROM bib_master")) {
+          while (rs.next())
+            System.out.println("bib_id "+rs.getInt(1)+"; suppress_in_opac "+rs.getString(2));
+        }
         try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, mfhd_id FROM BIB_MFHD")) {
           while (rs.next())
             System.out.println("bib_id "+rs.getInt(1)+"; mfhd_id "+rs.getInt(2));
@@ -152,6 +157,30 @@ public class PopulateTestVoyagerDB {
             +"; location_name "+rs.getString("location_name"));
         }
       }
+    }
+  }
+
+  private static void bib_master(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
+    if (replaceDBContents) {
+      testDbstmt.executeUpdate("drop table if exists bib_master");
+      testDbstmt.executeUpdate("create table bib_master ( bib_id int, suppress_in_opac string )");
+    }
+    System.out.println("Loading bib_master data for "+testBibs.size()+" bibs.");
+    try (PreparedStatement readStmt = voyager.prepareStatement(
+        "SELECT suppress_in_opac FROM bib_master WHERE bib_id = ?");
+        PreparedStatement writeStmt = testDb.prepareStatement(
+            "INSERT INTO bib_master (bib_id, suppress_in_opac) VALUES (?,?)")){
+      for (int bib : testBibs) {
+        readStmt.setInt(1, bib);
+        try (ResultSet rs = readStmt.executeQuery()) {
+          while (rs.next()) {
+            writeStmt.setInt(1, bib);
+            writeStmt.setString(2, rs.getString(1));
+            writeStmt.addBatch();
+          }
+        }
+      }
+      writeStmt.executeBatch();
     }
   }
 

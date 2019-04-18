@@ -17,6 +17,7 @@ import java.util.Set;
 
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 import edu.cornell.library.integration.voyager.Items;
+import edu.cornell.library.integration.voyager.OpenOrder;
 import edu.cornell.library.integration.voyager.RecentIssues;
 
 public class MonitorAvailability {
@@ -57,6 +58,7 @@ public class MonitorAvailability {
         Items.detectChangedItemReserveStatuses(voyager, time, changedBibs);
         Items.detectChangedItems(voyager, time, changedBibs);
         RecentIssues.detectNewReceiptBibs(voyager, time, changedBibs);
+        OpenOrder.detectOrderStatusChanges(voyager, time, changedBibs);
         Map<Integer,Set<Change>> newlyChangedBibs = RecordsToSolr.eliminateCarryovers(
             RecordsToSolr.duplicateMap(changedBibs), carryoverChanges);
         carryoverChanges = changedBibs;
