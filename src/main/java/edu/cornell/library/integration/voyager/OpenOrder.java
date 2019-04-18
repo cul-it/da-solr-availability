@@ -75,7 +75,7 @@ public class OpenOrder {
         "    AND mm.suppress_in_opac = 'N'";
 
     try (  PreparedStatement pstmt = voyager.prepareStatement(getRecentOrderStatusChanges)   ) {
-      pstmt.setTimestamp(1,Timestamp.valueOf("2019-04-01 00:00:00"));
+      pstmt.setTimestamp(1,since);
       try (  ResultSet rs = pstmt.executeQuery()  ) {
         while (rs.next()) {
           Integer bibId = rs.getInt("bib_id");
