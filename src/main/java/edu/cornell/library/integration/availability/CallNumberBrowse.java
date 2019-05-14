@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -140,6 +141,15 @@ class CallNumberBrowse {
       holdingsByCallNumber.get(callnum).put(holdingId, h);
     }
     return holdingsByCallNumber;
+  }
+
+
+
+  public static Set<String> collateCallNumberList(List<SolrInputDocument> callNumberDocs) {
+    Set<String> callNums = new HashSet<>();
+    for (SolrInputDocument doc : callNumberDocs)
+      callNums.add( (String) doc.getFieldValue("callnum_display") );
+    return callNums;
   }
 
 }
