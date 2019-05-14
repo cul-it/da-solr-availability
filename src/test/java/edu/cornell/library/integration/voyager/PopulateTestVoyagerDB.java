@@ -31,15 +31,17 @@ import java.util.Set;
 public class PopulateTestVoyagerDB {
 
   public static boolean replaceDBContents = false; // if false, will add specified bibs to existing tables
+  public static boolean dumpTestDBToStdout = false;
+
   public static String testDbConnectionString = "jdbc:sqlite:src/test/resources/voyagerTest.db";
-  private static List<Integer> testBibs = Arrays.asList(9386182,10797688);
+  private static List<Integer> testBibs = Arrays.asList(10005850);
 
   // Bibs in "jdbc:sqlite:src/test/resources/voyagerTest.db"
   // 330581,3212531,2248567,576519,3827392,1016847,969430,1799377,2095674,1575369,9520154,927983,
   // 342724,4442869,784908,6047653,9628566,3956404,9647384,306998,329763,2026746,4546769,10023626
   // 867,9295667,1282748,4888514,369282,833840,836782,9386182,10604045,10797795,10797341,10797688
+  // 10796664,10005850
 
-  private static boolean dumpTestDBToStdout = false;
   private static Set<Integer> testMfhds = new HashSet<>();
   private static Set<Integer> testItems = new HashSet<>();
   private static Set<Integer> testLineItems = new HashSet<>();

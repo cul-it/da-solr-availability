@@ -30,10 +30,10 @@ public class CallNumberBrowseTest {
     Class.forName("org.sqlite.JDBC");
     voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
 
-/*    // Connect to live Voyager database
+ /*   // Connect to live Voyager database
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-    prop.load(in);
+      prop.load(in);
     }
     Class.forName("oracle.jdbc.driver.OracleDriver");
     voyagerLive = DriverManager.getConnection(
@@ -145,5 +145,34 @@ public class CallNumberBrowseTest {
         ClientUtils.toXML(docs.get(1)));
 
   }
+
+
+  @Test
+  public void availableToPurchase() throws SQLException, IOException, XMLStreamException {
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 10005850);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+
+    SolrInputDocument mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "10005850");
+    mainDoc.addField("lc_callnum_full", "TL4030 .P454 2017");
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings);
+    String expected =
+    "<doc boost=\"1.0\">"
+    + "<field name=\"bibid\">10005850</field>"
+    + "<field name=\"id\">10005850.1</field>"
+    + "<field name=\"callnum_sort\">TL4030 .P454 2017 0 10005850.1</field>"
+    + "<field name=\"callnum_display\">TL4030 .P454 2017</field>"
+    + "<field name=\"availability_json\">{\"online\":false,"
+    +                                    "\"availAt\":{\"Available for the Library to Purchase\":\"\"}}</field>"
+    + "<field name=\"flag\">Bibliographic Call Number</field></doc>";
+    assertEquals(1,docs.size());
+    assertEquals(expected,ClientUtils.toXML(docs.get(0)));
+
+  }
+
 
 }

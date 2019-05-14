@@ -29,6 +29,14 @@ class CallNumberBrowse {
   private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";
 
+  private static BibliographicSummary availableSummary;
+  static {
+    availableSummary = new BibliographicSummary();
+    Map<String,String> availAt = new HashMap<>();
+    availAt.put("Available for the Library to Purchase" , null);
+    availableSummary.availAt = availAt;
+  }
+
   static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc, HoldingSet holdings)
       throws JsonProcessingException {
     List<SolrInputDocument> browseDocs = new ArrayList<>();
@@ -51,6 +59,7 @@ class CallNumberBrowse {
 
       SolrInputDocument browseDoc = callNumDoc.deepCopy();
       boolean bibliographicCallNum = false;
+      boolean availableCallNum = callNum.equals("Available for the Library to Purchase");
 
       // try to pull bibliographic call number for missing call number
       if ( isNonCallNumber(callNum )) {
@@ -63,7 +72,11 @@ class CallNumberBrowse {
         }
       }
 
-      BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
+      BibliographicSummary b ;
+      if ( availableCallNum )
+        b = availableSummary;
+      else
+        b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
 
       if (b.online != null && b.online) {
         if ( doc.containsKey(urlField)) {
@@ -111,7 +124,8 @@ class CallNumberBrowse {
 
   private static boolean isNonCallNumber( String call ) {
     String lc = call.toLowerCase().replaceAll("\\s+"," ");
-    return lc.contains("no call") || lc.contains("in proc") || lc.contains("on order");
+    return lc.contains("no call") || lc.contains("in proc")
+        || lc.contains("on order") || lc.startsWith("available ");
   }
 
   private static Map<String, HoldingSet> divideHoldingsByCallNumber(HoldingSet holdings) {
