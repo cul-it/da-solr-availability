@@ -358,8 +358,8 @@ public class RecordsToSolr {
                       String status = ir.status.code.values().iterator().next();
                       doc.addField("availability_facet",status);
                     }
-                if (h.callNumberSuffix != null)
-                  doc.addField("lc_callnum_suffix", h.callNumberSuffix);
+//                if (h.callNumberSuffix != null)
+//                  doc.addField("lc_callnum_suffix", h.callNumberSuffix);
 
                 if (h.itemSummary != null &&
                     h.itemSummary.tempLocs != null &&
