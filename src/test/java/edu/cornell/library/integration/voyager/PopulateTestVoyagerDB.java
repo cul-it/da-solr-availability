@@ -32,12 +32,13 @@ public class PopulateTestVoyagerDB {
 
   public static boolean replaceDBContents = false; // if false, will add specified bibs to existing tables
   public static String testDbConnectionString = "jdbc:sqlite:src/test/resources/voyagerTest.db";
-  private static List<Integer> testBibs = Arrays.asList(9386182,10797688);
+  private static List<Integer> testBibs = Arrays.asList(10663989);
 
   // Bibs in "jdbc:sqlite:src/test/resources/voyagerTest.db"
   // 330581,3212531,2248567,576519,3827392,1016847,969430,1799377,2095674,1575369,9520154,927983,
   // 342724,4442869,784908,6047653,9628566,3956404,9647384,306998,329763,2026746,4546769,10023626
   // 867,9295667,1282748,4888514,369282,833840,836782,9386182,10604045,10797795,10797341,10797688
+  // 10705932,10757225,10825496,10663989
 
   private static boolean dumpTestDBToStdout = false;
   private static Set<Integer> testMfhds = new HashSet<>();
@@ -587,27 +588,33 @@ public class PopulateTestVoyagerDB {
     }
   }
 
-  private static void line_item_copy_status(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
+  private static void line_item_copy_status(Connection testDb, Connection voyager, Statement testDbstmt)
+      throws SQLException {
     if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists line_item_copy_status");
       testDbstmt.executeUpdate(
-          "create table line_item_copy_status ( line_item_id int, mfhd_id int, line_item_status int, status_date date )");
+          "create table line_item_copy_status ("
+          + " line_item_id int, mfhd_id int, location_id int, line_item_status int, status_date date )");
     }
     System.out.println("Loading line_item_copy_status data for "+testMfhds.size()+" mfhds.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
-        "SELECT line_item_id, line_item_status, status_date FROM line_item_copy_status WHERE mfhd_id = ?");
+        "SELECT line_item_id, location_id, line_item_status, status_date"
+        + " FROM line_item_copy_status WHERE mfhd_id = ?");
         PreparedStatement writeStmt = testDb.prepareStatement(
-            "INSERT INTO line_item_copy_status ( line_item_id, mfhd_id, line_item_status, status_date ) VALUES (?,?,?,?)")){
+            "INSERT INTO line_item_copy_status"
+            + " ( line_item_id, mfhd_id, location_id, line_item_status, status_date )"
+            + " VALUES (?,?,?,?,?)")){
       for (int mfhd : testMfhds) {
         readStmt.setInt(1, mfhd);
         try (ResultSet rs = readStmt.executeQuery()) {
           while (rs.next()) {
             writeStmt.setInt(1, rs.getInt("line_item_id"));
             writeStmt.setInt(2, mfhd);
-            writeStmt.setInt(3, rs.getInt("line_item_status"));
-            writeStmt.setTimestamp(4, rs.getTimestamp("status_date"));
+            writeStmt.setInt(3, rs.getInt("location_id"));
+            writeStmt.setInt(4, rs.getInt("line_item_status"));
+            writeStmt.setTimestamp(5, rs.getTimestamp("status_date"));
             writeStmt.addBatch();
-            testLineItems.add(rs.getInt(1));
+            testLineItems.add(rs.getInt("line_item_id"));
           }
         }
       }

@@ -165,23 +165,50 @@ public class Holdings {
 
     public boolean applyOpenOrderInformation( Connection voyager, Integer bibId ) throws SQLException {
       OpenOrder order = new OpenOrder(voyager, bibId);
-      if (order.note == null || order.mfhdId == null) return false;
-      if (! this.holdings.containsKey(order.mfhdId)) {
-        System.out.println( "Order note on bib "+bibId+" associated with holding "+order.mfhdId+
-            ", which is not currently an active holding for this bib." );
-        return false;
-      }
-      Holding h = this.holdings.get(order.mfhdId);
+      if (order.notes.isEmpty()) return false;
 
-      // Block order note if:
-      // * There are any items on the mfhd
-      // * The holding call number is "Available for the Library to Purchase"
-      // * The holding call number is "In Process"
-      if (h.itemSummary == null
-          && ! (h.call != null && (h.call.equalsIgnoreCase("Available for the Library to Purchase")
-                                  || h.call.equalsIgnoreCase("In Process"))))
-        h.orderNote = order.note;
-      return true;
+      boolean onOrder = false;
+
+      for ( Entry<Integer,String> e : order.notes.entrySet() ) {
+        int mfhdId = e.getKey();
+        String note = e.getValue();
+
+        if (! this.holdings.containsKey(mfhdId)) {
+          System.out.println( "Order note on bib "+bibId+" associated with holding "+mfhdId+
+              ", which is not currently an active holding for this bib." );
+          continue;
+        }
+
+        Holding h = this.holdings.get(mfhdId);
+        // Block order note if:
+        // * There are any items on the mfhd
+        // * The holding call number is "Available for the Library to Purchase"
+        // * The holding call number is "In Process"
+        if (h.itemSummary == null
+            && ! (h.call != null && (h.call.equalsIgnoreCase("Available for the Library to Purchase")
+                                    || h.call.equalsIgnoreCase("In Process")))) {
+          h.orderNote = note;
+          onOrder = true;
+        }
+
+      }
+
+      if ( ! onOrder ) return onOrder;
+
+      // Add secondary order notes for multi-copy orders
+      for ( Holding h : this.holdings.values() )
+        if ( h.orderNote != null
+            && ( h.orderNote.contains("copies ordered") || h.orderNote.startsWith("On order as of")) ) {
+          for ( Holding h2 : this.holdings.values() )
+            if ( h2.orderNote == null && h2.itemSummary == null
+                && h.location.equals(h2.location)
+                && ! (h2.call != null && (h2.call.equalsIgnoreCase("Available for the Library to Purchase")
+                    || h2.call.equalsIgnoreCase("In Process")))) {
+              h2.orderNote = "On order";
+            }
+        }
+
+      return onOrder;
     }
 
     public boolean summarizeItemAvailability( ItemList items ) {
