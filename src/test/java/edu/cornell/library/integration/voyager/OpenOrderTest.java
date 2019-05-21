@@ -4,39 +4,35 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items.ItemList;
-import edu.cornell.library.integration.voyager.OpenOrder;
 
 public class OpenOrderTest {
 
+  static VoyagerDBConnection testDB = null;
   static Connection voyagerTest = null;
-//  static Connection voyagerLive = null;
+  static Connection voyagerLive = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, ClassNotFoundException, IOException {
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
-    Class.forName("org.sqlite.JDBC");
-    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
-//    Class.forName("oracle.jdbc.driver.OracleDriver");
-//    voyagerLive = DriverManager.getConnection(
-//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+  public static void connect() throws SQLException, IOException {
+    testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
+    voyagerTest = testDB.connection;
+//    voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
   }
 
+  @AfterClass
+  public static void cleanUp() throws SQLException {
+    testDB.close();
+  }
 
   @Test
   public void onOrder() throws SQLException {

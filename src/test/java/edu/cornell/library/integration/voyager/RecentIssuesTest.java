@@ -5,39 +5,39 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 
 public class RecentIssuesTest {
+
+  static VoyagerDBConnection testDB = null;
   static Connection voyagerTest = null;
   static Connection voyagerLive = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, ClassNotFoundException, IOException {
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
-    Class.forName("org.sqlite.JDBC");
-    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    voyagerLive = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+  public static void connect() throws SQLException, IOException {
+
+    testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
+    voyagerTest = testDB.connection;
+//  voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
+  }
+
+  @AfterClass
+  public static void cleanUp() throws SQLException {
+    testDB.close();
   }
 
 //  @Test // Not a test

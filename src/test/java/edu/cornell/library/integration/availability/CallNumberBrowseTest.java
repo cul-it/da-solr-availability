@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -12,6 +11,7 @@ import javax.xml.stream.XMLStreamException;
 
 import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,26 +19,25 @@ import edu.cornell.library.integration.voyager.Holdings;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.Items.ItemList;
+import edu.cornell.library.integration.voyager.VoyagerDBConnection;
 
 public class CallNumberBrowseTest {
 
+  static VoyagerDBConnection testDB = null;
   static Connection voyagerTest = null;
 //  static Connection voyagerLive = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, ClassNotFoundException {
-    Class.forName("org.sqlite.JDBC");
-    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
+  public static void connect() throws SQLException, IOException {
 
-/*    // Connect to live Voyager database
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-    prop.load(in);
-    }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    voyagerLive = DriverManager.getConnection(
-      prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
-*/
+    testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
+    voyagerTest = testDB.connection;
+//  voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
+  }
+
+  @AfterClass
+  public static void cleanUp() throws SQLException {
+    testDB.close();
   }
 
   @Test

@@ -7,23 +7,20 @@ import static org.junit.Assert.assertNotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.cornell.library.integration.voyager.Holdings;
-import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
@@ -38,25 +35,17 @@ public class HoldingsTest {
   "014 0  ‡9 001182083\n"+
   "852 00 ‡b ilr,anx ‡h HC59.7 ‡i .B16 1977 ‡x os=y\n";
 
+  static VoyagerDBConnection testDB = null;
   static Connection voyagerTest = null;
   static Connection voyagerLive = null;
   static Map<String,HoldingSet> examples;
 
   @BeforeClass
-  public static void connect() throws SQLException, ClassNotFoundException, IOException {
+  public static void connect() throws SQLException, IOException {
 
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
-    // Connect to live Voyager database
-//    Class.forName("oracle.jdbc.driver.OracleDriver");
-//    voyagerLive = DriverManager.getConnection(
-//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
-
-    // Connect to test Voyager database
-    Class.forName("org.sqlite.JDBC");
-    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
+    testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
+    voyagerTest = testDB.connection;
+//  voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
 
     // Load expected result JSON for tests
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("holdings_examples.json")){
@@ -64,6 +53,11 @@ public class HoldingsTest {
       examples = mapper.readValue(convertStreamToString(in).replaceAll("(?m)^#.*$" , ""),
           new TypeReference<HashMap<String,HoldingSet>>() {});
     }
+  }
+
+  @AfterClass
+  public static void cleanUp() throws SQLException {
+    testDB.close();
   }
 
   @Test
