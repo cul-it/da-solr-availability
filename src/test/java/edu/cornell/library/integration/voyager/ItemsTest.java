@@ -7,15 +7,14 @@ import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -23,35 +22,34 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.cornell.library.integration.voyager.Holdings;
-import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items.Item;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class ItemsTest {
 
+  static VoyagerDBConnection testDB = null;
   static Connection voyagerTest = null;
   static Connection voyagerLive = null;
   static Map<String,ItemList> examples ;
 
   @BeforeClass
-  public static void connect() throws SQLException, ClassNotFoundException, IOException {
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
-    Class.forName("org.sqlite.JDBC");
-    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
-//    Class.forName("oracle.jdbc.driver.OracleDriver");
-//    voyagerLive = DriverManager.getConnection(
-//        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+  public static void connect() throws SQLException, IOException {
+
+    testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
+    voyagerTest = testDB.connection;
+//  voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
+
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("items_examples.json")){
       ObjectMapper mapper = new ObjectMapper();
       examples = mapper.readValue(convertStreamToString(in).replaceAll("(?m)^#.*$" , ""),
           new TypeReference<HashMap<String,ItemList>>() {});
     }
+  }
 
+  @AfterClass
+  public static void cleanUp() throws SQLException {
+    testDB.close();
   }
 
   @Test

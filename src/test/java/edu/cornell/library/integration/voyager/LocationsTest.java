@@ -4,30 +4,31 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Properties;
 import java.util.Set;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class LocationsTest {
 
-  static Locations locations = null;
+  static VoyagerDBConnection testDB = null;
   static Connection voyagerTest = null;
+  static Locations locations = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, ClassNotFoundException, IOException {
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
-    Class.forName("org.sqlite.JDBC");
-    voyagerTest = DriverManager.getConnection("jdbc:sqlite:src/test/resources/voyagerTest.db");
+  public static void connect() throws SQLException, IOException {
+
+    testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
+    voyagerTest = testDB.connection;
     locations = new Locations(voyagerTest);
+  }
+
+  @AfterClass
+  public static void cleanUp() throws SQLException {
+    testDB.close();
   }
 
   @Test

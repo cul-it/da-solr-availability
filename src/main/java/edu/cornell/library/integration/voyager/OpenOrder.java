@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,12 +17,12 @@ import edu.cornell.library.integration.availability.RecordsToSolr.Change;
 
 public class OpenOrder {
 
-  String note = null;
-  Integer mfhdId = null;
+  Map<Integer,String> notes = new HashMap<>();
 
   OpenOrder (Connection voyager, Integer bibId) throws SQLException {
     final String getOrderInfoQuery =
-        "SELECT line_item.quantity,"+
+        "SELECT DISTINCT "+
+        "       line_item.quantity,"+
         "       purchase_order.po_approve_date,"+
         "       line_item_copy_status.mfhd_id,"+
         "       line_item_copy_status.line_item_status,"+
@@ -32,28 +33,37 @@ public class OpenOrder {
         "   AND line_item_copy_status.line_item_status IN (0, 7, 8)"+ // i.e. (pending, cancelled, approved), not received
         "   AND line_item.po_id = purchase_order.po_id"+
         "   AND purchase_order.po_type = 1"+ // firm order (not ongoing)
-        " ORDER BY line_item_copy_status.status_date DESC"+
-        " FETCH FIRST 1 ROWS ONLY";
+        " ORDER BY line_item_copy_status.status_date DESC";
     try (PreparedStatement pstmt = voyager.prepareStatement(getOrderInfoQuery)) {
       pstmt.setInt(1, bibId);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next()) {
-          this.mfhdId = rs.getInt("mfhd_id");
+          int mfhdId = rs.getInt("mfhd_id");
+          String note = null;
           switch (rs.getInt("line_item_status")) {
           case 0:
-            this.note = "In pre-order processing";
+            note = "In pre-order processing";
             Timestamp statusDate = rs.getTimestamp("status_date");
             if ( statusDate != null )
               note += " as of "+format.format(statusDate);
             break;
           case 7:
-            this.note = "Order cancelled"; break;
+            if ( notes.containsKey(mfhdId) ) continue;
+            note = "Order cancelled"; break;
           case 8:
             int quantity = rs.getInt("quantity");
-            this.note = String.format("%d cop%s ordered as of %s",
-                quantity,(quantity==1)?"y":"ies",format.format(rs.getTimestamp("po_approve_date")));
+            if ( quantity == 1 )
+              note = String.format("On order as of %s", format.format(rs.getTimestamp("po_approve_date")));
+            else
+              note = String.format("%d copies ordered as of %s",
+                  quantity, format.format(rs.getTimestamp("po_approve_date")));
             break;
           }
+          if (note != null)
+            if ( notes.containsKey(mfhdId) )
+              notes.put( mfhdId, note+", "+notes.get(mfhdId) );
+            else
+              notes.put( mfhdId, note);
         }
       }
     }

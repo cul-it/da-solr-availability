@@ -394,9 +394,12 @@ public class RecordsToSolr {
               }
 
               WorksAndInventory.updateInventory( inventory, doc );
-              solrDocs.add(doc);
 
-              callnumSolrDocs.addAll( CallNumberBrowse.generateBrowseDocuments(doc,holdings) );
+              List<SolrInputDocument> thisDocsCallNumberDocs = CallNumberBrowse.generateBrowseDocuments(doc,holdings);
+              callnumSolrDocs.addAll( thisDocsCallNumberDocs );
+              doc.addField("callnumber_display", CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs));
+
+              solrDocs.add(doc);
               callNumberSolr.deleteByQuery("bibid:"+bibId);
 
               System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",

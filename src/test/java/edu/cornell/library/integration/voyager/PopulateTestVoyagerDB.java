@@ -1,10 +1,8 @@
 package edu.cornell.library.integration.voyager;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,7 +10,6 @@ import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -20,26 +17,43 @@ import java.util.Set;
  * it's only intended to be invoked while adding to or updating the suite of JUnit tests, it isn't
  * polished to the point of accepting outside config or arguments. Instead, variables in the code need
  * to be tweaked before executing.<br/><br/>
+ * 
  * When creating new tests, they should be run against a live Voyager Oracle instance until debugged. Then,
  * related records can be added to an existing voyagerTest database by listing the bibs in the testBibs
  * array below and running with replaceDBContents = false. Alternatively, and likely a better idea for
  * non-Cornell records that might conflict with the Cornell location table etc., would be to change
  * the connection string to a new database file name and run the script with replaceDBContents = true.
  * Then the new test db can be used for new tests without the risk of breaking tests using the old test
- * database.
+ * database.<br/><br/>
+ * 
+ * NOTE: This will create a sqlite DB file out of the SQL file provided in testDbSQLFile. The DB file will
+ * have the same name but with the .db extension instead of .sql. Because I wasn't able to export the
+ * database back to sql in the application, this needs to be done manually, and <i>must</i> be done before
+ * running this program to insert any more bibs' records, and the database file created must be removed.
+ * To do this on the command line, these commands will do the job: <br/>
+ * <pre>
+ * $ sqlite3 temp.db
+ * SQLite version 3.21.0 2017-10-24 18:55:49
+ * Enter ".help" for usage hints.
+ * sqlite> .output temp.sql
+ * sqlite> .dump
+ * sqlite> .quit
+ * $ diff temp.sql real.sql
+ * $ mv temp.sql real.sql
+ * $ rm temp.db</pre>
  */
 public class PopulateTestVoyagerDB {
 
   public static boolean replaceDBContents = false; // if false, will add specified bibs to existing tables
-  public static String testDbConnectionString = "jdbc:sqlite:src/test/resources/voyagerTest.db";
-  private static List<Integer> testBibs = Arrays.asList(9386182,10797688);
+  public static String testDbSQLFile = "src/test/resources/voyagerTest.sql";
+  private static List<Integer> testBibs = Arrays.asList(10005850);
 
   // Bibs in "jdbc:sqlite:src/test/resources/voyagerTest.db"
   // 330581,3212531,2248567,576519,3827392,1016847,969430,1799377,2095674,1575369,9520154,927983,
   // 342724,4442869,784908,6047653,9628566,3956404,9647384,306998,329763,2026746,4546769,10023626
   // 867,9295667,1282748,4888514,369282,833840,836782,9386182,10604045,10797795,10797341,10797688
+  // 10705932,10757225,10825496,10663989,10005850
 
-  private static boolean dumpTestDBToStdout = false;
   private static Set<Integer> testMfhds = new HashSet<>();
   private static Set<Integer> testItems = new HashSet<>();
   private static Set<Integer> testLineItems = new HashSet<>();
@@ -48,19 +62,14 @@ public class PopulateTestVoyagerDB {
   private static Set<Integer> purchaseOrders = new HashSet<>();
 
 
-  public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
+  public static void main(String[] args) throws SQLException, IOException {
 
-    Class.forName("org.sqlite.JDBC");
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
-    try (Connection testDb = DriverManager.getConnection(testDbConnectionString);
-        Statement testDbstmt = testDb.createStatement();
-        Connection voyager = DriverManager.getConnection(
-            prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"))) {
+    try (
+        VoyagerDBConnection testDB = new VoyagerDBConnection(testDbSQLFile,true);
+        Statement testDbstmt = testDB.connection.createStatement();
+        Connection voyager = VoyagerDBConnection.getLiveConnection("database.properties")
+        ) {
+      Connection testDb = testDB.connection;
 
       bib_master(testDb,voyager,testDbstmt);
       bib_mfhd(testDb,voyager,testDbstmt);
@@ -86,77 +95,6 @@ public class PopulateTestVoyagerDB {
       serial_issues(testDb,voyager,testDbstmt);
       purchase_order(testDb,voyager,testDbstmt);
 
-      if (dumpTestDBToStdout) {
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, suppress_in_opac FROM bib_master")) {
-          while (rs.next())
-            System.out.println("bib_id "+rs.getInt(1)+"; suppress_in_opac "+rs.getString(2));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, mfhd_id FROM BIB_MFHD")) {
-          while (rs.next())
-            System.out.println("bib_id "+rs.getInt(1)+"; mfhd_id "+rs.getInt(2));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, title_brief FROM bib_text")) {
-          while (rs.next())
-            System.out.println("bib_id "+rs.getInt(1)+"; title_brief "+rs.getString(2));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT bib_id, seqnum, RECORD_SEGMENT FROM bib_data")) {
-          while (rs.next())
-            System.out.println("bib_id "+rs.getInt(1)+"; seq_num "+rs.getInt(2)+"; RECORD_SEGMENT "+rs.getString(3));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT mfhd_id, seqnum, RECORD_SEGMENT FROM mfhd_data")) {
-          while (rs.next())
-            System.out.println("mfhd_id "+rs.getInt(1)+"; seq_num "+rs.getInt(2)+"; RECORD_SEGMENT "+rs.getString(3));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT mfhd_id, item_id, item_enum, chron, year, caption FROM MFHD_ITEM")) {
-          while (rs.next())
-            System.out.println("mfhd_id "+rs.getInt(1)+"; item_id "+rs.getInt(2)+"; item_enum "+rs.getString(3)
-            +"; chron "+rs.getString(4)+"; year "+rs.getString(5)+"; caption "+rs.getString(6));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT mfhd_id, create_date, update_date FROM MFHD_MASTER")) {
-          while (rs.next())
-            System.out.println("mfhd_id "+rs.getInt(1)+"; create_date "+rs.getTimestamp(2)
-            +"; update_date "+rs.getTimestamp(3));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT ITEM_ID, COPY_NUMBER, ITEM_SEQUENCE_NUMBER, "
-        +     " HOLDS_PLACED, RECALLS_PLACED, ON_RESERVE, TEMP_LOCATION, PERM_LOCATION,"
-        +     " TEMP_ITEM_TYPE_ID, ITEM_TYPE_ID, MODIFY_DATE, CREATE_DATE FROM ITEM")) {
-          while (rs.next())
-            System.out.println("item_id "+rs.getInt(1)+"; copy_number "+rs.getInt(2)
-            +"; item_sequence_number "+rs.getInt(3)+"; holds_placed "+rs.getInt(4)+"; recalls_placed "+rs.getInt(5)
-            +"; on_reserve "+rs.getString(6)+"; temp_location "+rs.getInt(7)+"; perm_location "+rs.getInt(8)
-            +"; temp_item_type_id "+rs.getInt(9)+"; item_type_id "+rs.getInt(10)
-            +"; modify_date "+rs.getTimestamp(11)+"; create_date "+rs.getTimestamp(12));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT item_id, item_barcode, barcode_status FROM item_barcode")) {
-          while (rs.next())
-            System.out.println("item_id "+rs.getInt(1)+"; item_barcode "+rs.getString(2)
-            +"; barcode_status "+rs.getString(3));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT item_status_type, item_status_desc FROM item_status_type")) {
-          while (rs.next())
-            System.out.println("item_status_type "+rs.getInt(1)+"; item_status_desc "+rs.getString(2));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT item_type_id, item_type_name FROM item_type")) {
-          while (rs.next())
-            System.out.println("item_type_id "+rs.getInt(1)+"; item_type_name "+rs.getString(2));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT item_id, item_status, item_status_date FROM item_status")) {
-          while (rs.next())
-            System.out.println("item_id "+rs.getInt(1)+"; item_status "+rs.getInt(2)
-            +"; item_status_date "+rs.getTimestamp(3));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT item_id, current_due_date FROM circ_transactions")) {
-          while (rs.next())
-            System.out.println("item_id "+rs.getInt(1)+"; current_due_date "+rs.getTimestamp(2));
-        }
-        try (ResultSet rs = testDbstmt.executeQuery("SELECT * FROM location")) {
-          while (rs.next())
-            System.out.println("location_id "+rs.getInt("location_id")
-            +"; location_code "+rs.getString("location_code")
-            +"; location_display_name "+rs.getString("location_display_name")
-            +"; location_name "+rs.getString("location_name"));
-        }
-      }
     }
   }
 
@@ -587,27 +525,33 @@ public class PopulateTestVoyagerDB {
     }
   }
 
-  private static void line_item_copy_status(Connection testDb, Connection voyager, Statement testDbstmt) throws SQLException {
+  private static void line_item_copy_status(Connection testDb, Connection voyager, Statement testDbstmt)
+      throws SQLException {
     if (replaceDBContents) {
       testDbstmt.executeUpdate("drop table if exists line_item_copy_status");
       testDbstmt.executeUpdate(
-          "create table line_item_copy_status ( line_item_id int, mfhd_id int, line_item_status int, status_date date )");
+          "create table line_item_copy_status ("
+          + " line_item_id int, mfhd_id int, location_id int, line_item_status int, status_date date )");
     }
     System.out.println("Loading line_item_copy_status data for "+testMfhds.size()+" mfhds.");
     try (PreparedStatement readStmt = voyager.prepareStatement(
-        "SELECT line_item_id, line_item_status, status_date FROM line_item_copy_status WHERE mfhd_id = ?");
+        "SELECT line_item_id, location_id, line_item_status, status_date"
+        + " FROM line_item_copy_status WHERE mfhd_id = ?");
         PreparedStatement writeStmt = testDb.prepareStatement(
-            "INSERT INTO line_item_copy_status ( line_item_id, mfhd_id, line_item_status, status_date ) VALUES (?,?,?,?)")){
+            "INSERT INTO line_item_copy_status"
+            + " ( line_item_id, mfhd_id, location_id, line_item_status, status_date )"
+            + " VALUES (?,?,?,?,?)")){
       for (int mfhd : testMfhds) {
         readStmt.setInt(1, mfhd);
         try (ResultSet rs = readStmt.executeQuery()) {
           while (rs.next()) {
             writeStmt.setInt(1, rs.getInt("line_item_id"));
             writeStmt.setInt(2, mfhd);
-            writeStmt.setInt(3, rs.getInt("line_item_status"));
-            writeStmt.setTimestamp(4, rs.getTimestamp("status_date"));
+            writeStmt.setInt(3, rs.getInt("location_id"));
+            writeStmt.setInt(4, rs.getInt("line_item_status"));
+            writeStmt.setTimestamp(5, rs.getTimestamp("status_date"));
             writeStmt.addBatch();
-            testLineItems.add(rs.getInt(1));
+            testLineItems.add(rs.getInt("line_item_id"));
           }
         }
       }
