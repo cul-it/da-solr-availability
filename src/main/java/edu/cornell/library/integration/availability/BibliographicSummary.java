@@ -32,7 +32,7 @@ public class BibliographicSummary {
 
   @JsonIgnore static ObjectMapper mapper = new ObjectMapper();
   static {
-    mapper.setSerializationInclusion(Include.NON_EMPTY);
+    mapper.setSerializationInclusion(Include.NON_NULL);
   }
 
   public static Map<Integer,Set<Change>> detectChangedBibs(
@@ -105,11 +105,14 @@ public class BibliographicSummary {
         b.available = null;
       else
         b.available = false;
+      b.availAt = null;
     } else {
       b.available = true;
       for (String availLoc : b.availAt.keySet())
         b.unavailAt.remove(availLoc);
     }
+    if (b.unavailAt.isEmpty())
+      b.unavailAt = null;
 
     if ( ! b.online ) b.online = null;
 
