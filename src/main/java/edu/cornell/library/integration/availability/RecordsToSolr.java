@@ -335,7 +335,7 @@ public class RecordsToSolr {
                     doc.addField("availability_facet", "Short Loan");
               BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdings);
               doc.addField("availability_json", b.toJson());
-              if ( ! b.availAt.isEmpty() && ! b.unavailAt.isEmpty() )
+              if ( b.availAt != null && b.unavailAt != null )
                 doc.addField("availability_facet", "Avail and Unavail");
               Set<String> locationFacet = holdings.getLocationFacetValues();
               if (doc.containsKey("location"))
