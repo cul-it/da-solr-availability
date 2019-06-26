@@ -211,6 +211,6 @@ public class MultivolumeAnalysisTest {
         items);
 
     assertEquals(EnumSet.noneOf(MultiVolFlag.class), flags);
-    assertEquals("{\"10169681\":[]}",items.toJson());
+    assertEquals("{}",items.toJson());
   }
 }

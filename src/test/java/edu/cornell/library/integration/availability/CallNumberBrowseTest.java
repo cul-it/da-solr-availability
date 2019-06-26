@@ -165,8 +165,7 @@ public class CallNumberBrowseTest {
     + "<field name=\"id\">10005850.1</field>"
     + "<field name=\"callnum_sort\">TL4030 .P454 2017 0 10005850.1</field>"
     + "<field name=\"callnum_display\">TL4030 .P454 2017</field>"
-    + "<field name=\"availability_json\">{\"online\":false,"
-    +                                    "\"availAt\":{\"Available for the Library to Purchase\":\"\"}}</field>"
+    + "<field name=\"availability_json\">{\"availAt\":{\"Available for the Library to Purchase\":\"\"}}</field>"
     + "<field name=\"flag\">Bibliographic Call Number</field></doc>";
     assertEquals(1,docs.size());
     assertEquals(expected,ClientUtils.toXML(docs.get(0)));

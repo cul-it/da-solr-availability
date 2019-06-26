@@ -34,7 +34,7 @@ class CallNumberBrowse {
   static {
     Map<String,String> availAt = new HashMap<>();
     availAt.put("Available for the Library to Purchase" , null);
-    availableSummary = new BibliographicSummary(true,false,availAt,null);
+    availableSummary = new BibliographicSummary(null,null,availAt,null);
   }
 
   static List<SolrInputDocument> generateBrowseDocuments(SolrInputDocument doc, HoldingSet holdings)
