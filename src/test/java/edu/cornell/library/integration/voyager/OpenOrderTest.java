@@ -124,4 +124,20 @@ public class OpenOrderTest {
     assertEquals( "On order" ,       holdings.get(11121178).orderNote );
 
   }
+
+  @Test
+  // line_item_copy_status.line_item_status = 4 (Claimed) should be displayed exactly as approved order
+  public void claimedOrder() throws SQLException, IOException, XMLStreamException {
+
+    int bibId = 10602676;
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, bibId);
+    ItemList items = Items.retrieveItemsForHoldings(voyagerTest, null, bibId, holdings);
+    holdings.summarizeItemAvailability(items);
+    holdings.applyOpenOrderInformation(voyagerTest, bibId);
+
+    assertEquals( "On order as of 1/7/19", holdings.get(10900194).orderNote );
+    System.out.println(holdings.toJson());
+  }
+
 }
