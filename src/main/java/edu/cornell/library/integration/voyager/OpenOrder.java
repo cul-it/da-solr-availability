@@ -30,7 +30,7 @@ public class OpenOrder {
         "  FROM line_item, line_item_copy_status, purchase_order"+
         " WHERE line_item.bib_id = ?"+
         "   AND line_item.line_item_id = line_item_copy_status.line_item_id"+
-        "   AND line_item_copy_status.line_item_status IN (0, 7, 8)"+ // i.e. (pending, cancelled, approved), not received
+        "   AND line_item_copy_status.line_item_status IN (0, 4, 7, 8)"+ // i.e. (pending, claimed, cancelled, approved), not received
         "   AND line_item.po_id = purchase_order.po_id"+
         "   AND purchase_order.po_type = 1"+ // firm order (not ongoing)
         " ORDER BY line_item_copy_status.status_date DESC";
@@ -50,7 +50,7 @@ public class OpenOrder {
           case 7:
             if ( notes.containsKey(mfhdId) ) continue;
             note = "Order cancelled"; break;
-          case 8:
+          case 8: case 4:
             int quantity = rs.getInt("quantity");
             if ( quantity == 1 )
               note = String.format("On order as of %s", format.format(rs.getTimestamp("po_approve_date")));

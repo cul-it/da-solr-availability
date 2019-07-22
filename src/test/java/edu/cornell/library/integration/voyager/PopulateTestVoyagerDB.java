@@ -30,29 +30,29 @@ import java.util.Set;
  * have the same name but with the .db extension instead of .sql. Because I wasn't able to export the
  * database back to sql in the application, this needs to be done manually, and <i>must</i> be done before
  * running this program to insert any more bibs' records, and the database file created must be removed.
- * To do this on the command line, these commands will do the job: <br/>
+ * To do this on the command line, these commands executed in the <code>src/test/resources</code> directory
+ * will do the job: <br/>
  * <pre>
- * $ sqlite3 temp.db
- * SQLite version 3.21.0 2017-10-24 18:55:49
+ * $ sqlite3 voyagerTest.db
+ * SQLite version 3.x.x yyyy-mm-dd hh:mm:ss
  * Enter ".help" for usage hints.
  * sqlite> .output temp.sql
  * sqlite> .dump
  * sqlite> .quit
- * $ diff temp.sql real.sql
- * $ mv temp.sql real.sql
- * $ rm temp.db</pre>
+ * $ mv temp.sql voyagerTest.sql
+ * $ rm voyagerTest.db</pre>
  */
 public class PopulateTestVoyagerDB {
 
   public static boolean replaceDBContents = false; // if false, will add specified bibs to existing tables
   public static String testDbSQLFile = "src/test/resources/voyagerTest.sql";
-  private static List<Integer> testBibs = Arrays.asList(10005850);
+  private static List<Integer> testBibs = Arrays.asList(10602676);
 
   // Bibs in "jdbc:sqlite:src/test/resources/voyagerTest.db"
   // 330581,3212531,2248567,576519,3827392,1016847,969430,1799377,2095674,1575369,9520154,927983,
   // 342724,4442869,784908,6047653,9628566,3956404,9647384,306998,329763,2026746,4546769,10023626
   // 867,9295667,1282748,4888514,369282,833840,836782,9386182,10604045,10797795,10797341,10797688
-  // 10705932,10757225,10825496,10663989,10005850
+  // 10705932,10757225,10825496,10663989,10005850,10602676
 
   private static Set<Integer> testMfhds = new HashSet<>();
   private static Set<Integer> testItems = new HashSet<>();
