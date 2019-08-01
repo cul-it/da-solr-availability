@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -47,6 +48,8 @@ class DeleteFromSolr {
         prop.getProperty("inventoryDBPass"));
         PreparedStatement queryQ = inventoryDB.prepareStatement
             ("SELECT bib_id FROM deleteQueue ORDER BY priority LIMIT 100");
+        PreparedStatement voyagerCheckQ = inventoryDB.prepareStatement
+            ("SELECT active FROM bibRecsVoyager WHERE bib_id = ?");
         PreparedStatement deleteFromQ = inventoryDB.prepareStatement
             ("DELETE FROM deleteQueue WHERE bib_id = ?");
         PreparedStatement deleteFromGenQ = inventoryDB.prepareStatement
@@ -76,18 +79,27 @@ class DeleteFromSolr {
         try ( ResultSet rs = queryQ.executeQuery() ) { while ( rs.next() ) {
 
           Integer bibId = rs.getInt(1);
-          bibIds.add(bibId);
-          
-          countFound++;
+
           String title = null;
           getTitle.setInt(1,bibId);
           try (ResultSet rs1 = getTitle.executeQuery() ) {while (rs1.next()) title = rs1.getString(1);}
+
+          if ( checkActiveInVoyager( voyagerCheckQ, bibId ) ) {
+            System.out.printf("Marked for deletion, but now active. Dequeuing %d: (%s)\n",bibId,title);
+            deleteFromQ.setInt(1,bibId);
+            deleteFromQ.addBatch();
+            continue;
+          }
+          bibIds.add(bibId);
+
+          countFound++;
+
           System.out.println(bibId+" ("+title+")");
-  
+
           // Delete from Solr
           solr.deleteById(bibId.toString());
           callNumberSolr.deleteByQuery("bibid:"+bibId);
-  
+
           // Delete from Inventory tables
           deleteFromBRS.setInt(1, bibId);
           deleteFromBRS.addBatch();
@@ -122,7 +134,21 @@ class DeleteFromSolr {
         deleteFromIRS.executeBatch();
         System.out.println( countFound+" deleted");
       } while ( countFound == 100 );
-    } 
+      deleteFromQ.executeBatch();
+      deleteFromGenQ.executeBatch();
+      deleteFromAvailQ.executeBatch();
+      deleteFromBRS.executeBatch();
+      deleteFromMRS.executeBatch();
+      deleteFromIRS.executeBatch();
+    }
+  }
+
+  private static boolean checkActiveInVoyager(PreparedStatement voyagerCheckQ, Integer bibId) throws SQLException {
+    voyagerCheckQ.setInt(1, bibId);
+    try ( ResultSet rs = voyagerCheckQ.executeQuery() ) {
+      while ( rs.next() ) return rs.getBoolean(1);
+    }
+    return false;
   }
 
 }
