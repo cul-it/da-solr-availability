@@ -85,7 +85,7 @@ public class RecordsToSolr {
         Integer priority = null;
         try (  ResultSet rs = pstmt.executeQuery() ) {
           while ( rs.next() ) {
-    
+
             // batch only within a single priority level
             if (priority == null)
               priority = rs.getInt("priority");
@@ -174,7 +174,8 @@ public class RecordsToSolr {
     static void appendElapsedTime( StringBuilder sb, Timestamp since ) {
 
       long seconds = java.time.Duration.between(
-          since.toInstant(), java.time.Instant.now()).getSeconds();
+          since.toInstant(), java.time.ZonedDateTime.now().toInstant()).getSeconds();
+          //java.time.Instant.now()).getSeconds();
       if ( seconds == 0 ) return;
 
       sb.append(" (");
@@ -274,6 +275,16 @@ public class RecordsToSolr {
     }
   }
 
+  final static String solrFieldsDataQuery =
+      "SELECT record_dates," + // field list maintained here, and in constructSolrInputDocument() below
+      "       authortitle_solr_fields, title130_solr_fields,    subject_solr_fields,     pubinfo_solr_fields," + 
+      "       format_solr_fields,      factfiction_solr_fields, language_solr_fields,    isbn_solr_fields," + 
+      "       series_solr_fields,      titlechange_solr_fields, toc_solr_fields,         instruments_solr_fields," + 
+      "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields, citationref_solr_fields," + 
+      "       url_solr_fields,         hathilinks_solr_fields,  newbooks_solr_fields,    recordtype_solr_fields," + 
+      "       recordboost_solr_fields, holdings_solr_fields,    otherids_solr_fields" + 
+      "  FROM solrFieldsData"+
+      " WHERE bib_id = ?";
   static void updateBibsInSolr(
       Connection voyager, Connection inventory,
       SolrClient solr, SolrClient callNumberSolr,
@@ -283,16 +294,7 @@ public class RecordsToSolr {
     while (! changedBibs.isEmpty()) {
       List<Integer> completedBibUpdates = new ArrayList<>();
 
-      try (PreparedStatement pstmt = inventory.prepareStatement(
-          "SELECT record_dates," + // field list maintained here, and in constructSolrInputDocument() below
-          "       authortitle_solr_fields, title130_solr_fields,    subject_solr_fields,     pubinfo_solr_fields," + 
-          "       format_solr_fields,      factfiction_solr_fields, language_solr_fields,    isbn_solr_fields," + 
-          "       series_solr_fields,      titlechange_solr_fields, toc_solr_fields,         instruments_solr_fields," + 
-          "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields, citationref_solr_fields," + 
-          "       url_solr_fields,         hathilinks_solr_fields,  newbooks_solr_fields,    recordtype_solr_fields," + 
-          "       recordboost_solr_fields, holdings_solr_fields,    otherids_solr_fields" + 
-          "  FROM solrFieldsData"+
-          " WHERE bib_id = ?")){
+      try (PreparedStatement pstmt = inventory.prepareStatement(solrFieldsDataQuery)){
 
         Set<SolrInputDocument> solrDocs = new HashSet<>();
         Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
