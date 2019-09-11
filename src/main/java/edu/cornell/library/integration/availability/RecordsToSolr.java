@@ -329,6 +329,8 @@ public class RecordsToSolr {
                 doc.addField("availability_facet", "No Items Print");
               if ( holdings.hasRecent() )
                 doc.addField("availability_facet", "Recent Issues");
+              if ( doc.containsKey("url_access_json") )
+                Holdings.mergeAccessLinksIntoHoldings( holdings,doc.getFieldValues("url_access_json"));
               if ( holdings.size() > 0 )
                 doc.addField("holdings_json", holdings.toJson());
               for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
@@ -360,8 +362,8 @@ public class RecordsToSolr {
                       String status = ir.status.code.values().iterator().next();
                       doc.addField("availability_facet",status);
                     }
-//                if (h.callNumberSuffix != null)
-//                  doc.addField("lc_callnum_suffix", h.callNumberSuffix);
+                if (h.callNumberSuffix != null)
+                  doc.addField("lc_callnum_suffix", h.callNumberSuffix);
 
                 if (h.itemSummary != null &&
                     h.itemSummary.tempLocs != null &&

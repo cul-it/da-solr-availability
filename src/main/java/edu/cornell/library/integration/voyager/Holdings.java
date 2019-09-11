@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.voyager.Holding.Link;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class Holdings {
@@ -265,5 +267,33 @@ public class Holdings {
       return false;
     }
   }
+
+  public static void mergeAccessLinksIntoHoldings(HoldingSet holdings, Collection<Object> linkJsons)
+      throws IOException {
+
+    Holding onlineHolding = null;
+    Holding hathiHolding = null;
+
+    for ( Holding h : holdings.values() )
+      if ( h.online != null && h.online )
+        onlineHolding = h;
+    for ( Object linkJson : linkJsons ) {
+      Link l = Link.fromJson((String)linkJson);
+      if (l.desc != null && (l.desc.startsWith("HathiTrust"))) {
+        if (hathiHolding == null) {
+          hathiHolding = new Holding(
+              null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null);
+          hathiHolding.links = new ArrayList<>();
+          holdings.put(0, hathiHolding);
+        }
+        hathiHolding.links.add(l);
+      } else if ( onlineHolding != null ) {
+        if ( onlineHolding.links == null )
+          onlineHolding.links = new ArrayList<>();
+        onlineHolding.links.add(l);
+      }
+    }
+
+   }
 
 }
