@@ -416,11 +416,6 @@
 
 
 
-,"expectedJsonOnline":
-
-
-{"10336455":{ "online":true, "date":1505847360 }}
-
 
 ,"expectedInProcess":
 # bib 9295667
@@ -579,6 +574,101 @@
   "circ":true,
   "date":959745600,
   "items":{"count":34,"avail":34}}}
+
+
+
+
+
+,"expectedJsonOnline":
+# bib 10023626
+
+{"10336455":{ "online":true, "date":1505847360 }}
+
+,"expectedJsonOnlineWithLinks":
+# bib 10023626
+
+
+{"10336455":{
+  "online":true,
+  "date":1505847360,
+  "links":[
+      {"url":"http://proxy.library.cornell.edu/login?url=https://link.springer.com/openurl?genre=book&isbn=978-3-319-63492-0",
+       "description":"Full text available from SpringerLink ebooks - Earth and Environmental Science (Contemporary) Connect to text.",
+       "ssid":"ssj0001846622",
+       "dbcode":"0D8",
+       "providercode":"PRVAVX"},
+      {"url":"http://proxy.library.cornell.edu/login?url=https://link.springer.com/10.1007/978-3-319-63492-0",
+       "description":"Full text available from SpringerLINK ebooks - STM (2018) Connect to text.",
+       "ssid":"ssj0001846622",
+       "dbcode":"FOYMO",
+       "providercode":"PRVAVX"}]}}
+
+
+,"expectedJsonPrintWithFakeHathiHolding":
+# bib 4345125
+
+
+{"4887898":{
+    "location":{"code":"mann,hort",
+                "number":77,
+                "name":"Bailey Hortorium (ask at Mann Library Circulation)",
+                "library":"Bailey Hortorium",
+                "hoursCode":"mann"},
+    "call":"QK545.I4 D59 1914",
+    "circ":true,
+    "date":1029770131,
+    "items":{"count":1,"avail":1}},
+ "0":{
+    "online":true,
+    "links":[{"url":"http://hdl.handle.net/2027/coo.31924089590891","description":"HathiTrust"}]}}
+
+
+
+
+,"interestingOnlineHolding":
+# bib 7187316
+
+
+{"7620352":{
+  "holdings":["v.1-15"],
+  "indexes":["Index/digest (v.1/12)"],
+  "call":"KF567.4 .L39 1895",
+  "online":true,
+  "date":1303926958,
+  "links":[{
+     "url":"http://proxy.library.cornell.edu/login?url=https://www.heinonline.org/HOL/Index?index=beal/lreapcc&collection=bealL_beal",
+     "description":"HeinOnline Legal Classics Library Connect to full text. Access limited to authorized subscribers."}]}}
+
+
+
+
+,"bothVoyagerAccessLinkAndHathiLink":
+# bib 2813334
+
+
+{"3333481":{
+   "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+   "call":"F118 .N56",
+   "circ":true,
+   "date":959745600,
+   "items":{"count":1,"avail":1}},
+ "3333483":{
+   "notes":["Reproduction from digital master. Ithaca, N.Y. : Cornell University Library, 1995. 23 cm."],
+   "location":{"code":"olin","number":99,"name":"Olin Library",
+   "library":"Olin Library","hoursCode":"olin"},
+   "call":"F118 .N56 1860a",
+   "circ":true,
+   "date":959745600,
+   "items":{"count":1,"avail":1}},
+ "3333484":{
+   "notes":["Computer file. Ithaca, N.Y. : Cornell University Library, 1995. [492] image files.",
+   "Files for the images of individual pages are encoded in Aldus/Microsoft TIFF Version 5.0 using facsimile-compatible CCITT Group 4 compression."],
+   "online":true,
+   "date":959745600,
+   "links":[{"url":"http://resolver.library.cornell.edu/moap/anw1478"}]},
+ "0":{
+   "online":true,
+   "links":[{"url":"http://catalog.hathitrust.org/Record/009586797","description":"HathiTrust (multiple volumes)"}]}}
 
 
 }

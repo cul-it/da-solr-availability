@@ -10,7 +10,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -166,6 +168,74 @@ public class HoldingsTest {
     assertEquals(examples.get("expectedJson2202712").toJson(),h.toJson());
     assertEquals("++",h.get(2202712).callNumberSuffix);
   }
+
+
+  @Test
+  public void urlInsertIntoHoldings() throws SQLException, IOException, XMLStreamException {
+    Set<Object> urlJsons = new HashSet<>();
+    urlJsons.add("{\"providercode\":\"PRVAVX\",\"dbcode\":\"0D8\","+
+       "\"description\":\"Full text available from SpringerLink ebooks"
+       + " - Earth and Environmental Science (Contemporary) Connect to text.\","+
+       "\"ssid\":\"ssj0001846622\","+
+       "\"url\":\"http://proxy.library.cornell.edu/login?url=https://link.springer.com/openurl"
+       + "?genre=book&isbn=978-3-319-63492-0\"}");
+    urlJsons.add("{\"providercode\":\"PRVAVX\",\"dbcode\":\"FOYMO\","+
+       "\"description\":\"Full text available from SpringerLINK ebooks - STM (2018) Connect to text.\","+
+       "\"ssid\":\"ssj0001846622\","+
+       "\"url\":\"http://proxy.library.cornell.edu/login?url=https://link.springer.com/10.1007/978-3-319-63492-0\"}");
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 10023626);
+    Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
+    assertEquals(examples.get("expectedJsonOnlineWithLinks").toJson(),h.toJson());
+  }
+
+
+  @Test
+  public void hathiLinkProducesFakeHoldings() throws SQLException, IOException, XMLStreamException {
+    Set<Object> urlJsons = new HashSet<>();
+    urlJsons.add("{\"description\":\"HathiTrust\",\"url\":\"http://hdl.handle.net/2027/coo.31924089590891\"}");
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4345125);
+    for (int mfhdId : h.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
+    assertEquals(examples.get("expectedJsonPrintWithFakeHathiHolding").toJson(),h.toJson());
+  }
+
+  @Test
+  public void linkWithInterestingHoldingRecord() throws SQLException, IOException, XMLStreamException {
+    Set<Object> urlJsons = new HashSet<>();
+    urlJsons.add(
+        "{\"description\":\"HeinOnline Legal Classics Library Connect to full text. Access limited to authorized"
+        + " subscribers.\","+
+        "\"url\":\"http://proxy.library.cornell.edu/login?url=https://www.heinonline.org/HOL/Index"
+        + "?index=beal/lreapcc&collection=bealL_beal\"}");
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 7187316);
+    for (int mfhdId : h.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
+    assertEquals(examples.get("interestingOnlineHolding").toJson(),h.toJson());
+  }
+
+
+  @Test
+  public void bothVoyagerAccessLinkAndHathiLink() throws SQLException, IOException, XMLStreamException {
+    Set<Object> urlJsons = new HashSet<>();
+    urlJsons.add("{\"url\":\"http://resolver.library.cornell.edu/moap/anw1478\"}");
+    urlJsons.add("{\"description\":\"HathiTrust (multiple volumes)\","
+                + "\"url\":\"http://catalog.hathitrust.org/Record/009586797\"}");
+    HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 2813334);
+    for (int mfhdId : h.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
+    System.out.println(h.toJson());
+    assertEquals(examples.get("bothVoyagerAccessLinkAndHathiLink").toJson(),h.toJson());
+  }
+
 
   @Test
   public void onSiteUse() throws SQLException, IOException, XMLStreamException {

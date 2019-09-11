@@ -23,7 +23,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.marc.DataField;
@@ -51,12 +53,13 @@ public class Holding {
   @JsonProperty("circ")        public Boolean circ = null;
   @JsonProperty("online")      public Boolean online = null;
   @JsonProperty("date")        public final Integer date;
+  @JsonProperty("links")       public List<Link> links = null;
 
 
   @JsonIgnore public List<String> donors = null;
   @JsonIgnore public String callNumberSuffix = null;
   @JsonIgnore public MarcRecord record;
-  @JsonIgnore static Locations locations = null;
+  @JsonIgnore public static Locations locations = null;
   @JsonIgnore static ObjectMapper mapper = new ObjectMapper();
 
 
@@ -321,4 +324,28 @@ public class Holding {
     }
   }
 
+  public static class Link {
+    @JsonProperty("url")          public final String url;
+    @JsonProperty("description")  public final String desc;
+    @JsonProperty("ssid")         public final String ssid;
+    @JsonProperty("dbcode")       public final String dbcode;
+    @JsonProperty("providercode") public final String providercode;
+
+    public Link (
+        @JsonProperty("url")          String url,
+        @JsonProperty("description")  String desc,
+        @JsonProperty("ssid")         String ssid,
+        @JsonProperty("dbcode")       String dbcode,
+        @JsonProperty("providercode") String providercode ) {
+      this.url  = url;
+      this.desc = desc;
+      this.ssid = ssid;
+      this.dbcode = dbcode;
+      this.providercode = providercode;
+    }
+
+    public static Link fromJson( String json ) throws IOException {
+      return mapper.readValue(json, Link.class);
+    }
+  }
 }
