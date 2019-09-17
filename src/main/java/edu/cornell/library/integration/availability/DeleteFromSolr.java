@@ -133,7 +133,7 @@ class DeleteFromSolr {
         deleteFromMRS.executeBatch();
         deleteFromIRS.executeBatch();
         System.out.println( countFound+" deleted");
-      } while ( countFound == 100 );
+      } while ( countFound > 0 );
       deleteFromQ.executeBatch();
       deleteFromGenQ.executeBatch();
       deleteFromAvailQ.executeBatch();
