@@ -17,6 +17,7 @@
           <target>1.8</target>
           <includes>
             <include>**/availability/*.java</include>
+            <include>**/changes/*.java</include>
             <include>**/voyager/*.java</include>
           </includes>
         </configuration>
@@ -72,6 +73,11 @@
       <artifactId>marc4j</artifactId>
       <version>2.6.0</version>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+    	<groupId>com.mchange</groupId>
+    	<artifactId>c3p0</artifactId>
+    	<version>0.9.5.4</version>
     </dependency>
   </dependencies>
   <properties>

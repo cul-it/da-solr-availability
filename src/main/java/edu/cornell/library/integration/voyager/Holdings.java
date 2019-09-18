@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.voyager.Holding.Link;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 

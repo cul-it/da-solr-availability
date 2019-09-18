@@ -6,7 +6,7 @@ import java.sql.Timestamp;
 
 import org.junit.Test;
 
-import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.changes.Change;
 
 public class RecordsToSolrTest {
 

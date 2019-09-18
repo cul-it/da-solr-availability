@@ -10,7 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +18,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.changes.Change;
 
 public class RecentIssuesTest {
 
@@ -60,8 +59,8 @@ public class RecentIssuesTest {
 
   @Test
   public void detectChanges() throws SQLException {
-    Map<Integer,Set<Change>> changes = RecentIssues.detectNewReceiptBibs(
-        voyagerTest, Timestamp.valueOf("2018-01-01 00:00:00.0"),  new HashMap<Integer,Set<Change>>());
+    RecentIssues ri = new RecentIssues();
+    Map<Integer,Set<Change>> changes = ri.detectChanges(voyagerTest, Timestamp.valueOf("2018-01-01 00:00:00.0"));
     assertTrue(changes.containsKey(369282));
     assertEquals(4,changes.get(369282).size()); // 25 total issues to show, 4 in 2018
   }

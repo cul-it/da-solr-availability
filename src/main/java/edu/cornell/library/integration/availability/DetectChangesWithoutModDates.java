@@ -17,7 +17,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
-import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.voyager.ItemStatuses;
 import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.RecentIssues;

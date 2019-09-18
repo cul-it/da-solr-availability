@@ -1,4 +1,4 @@
-package edu.cornell.library.integration.availability;
+package edu.cornell.library.integration.changes;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +35,7 @@ public class MonitorIndexQueue {
         PreparedStatement availabilityQueue = inventoryDB.prepareStatement
             ("INSERT INTO availabilityQueue (bib_id, cause, record_date, priority) VALUES (?,?,NOW(),?)")){
 
-      Timestamp time = RecordsToSolr.getCurrentToDate( inventoryDB, CURRENT_TO_KEY );
+      Timestamp time = Change.getCurrentToDate( inventoryDB, CURRENT_TO_KEY );
       if (time == null) {
         time = new Timestamp(Calendar.getInstance().getTime().getTime()-(10*60*60*1000));
         System.out.println("No starting timestamp in DB, defaulting to 10 hours ago.");
@@ -91,7 +91,7 @@ public class MonitorIndexQueue {
         Thread.sleep(500);
 
         time = newTime;
-        RecordsToSolr.setCurrentToDate( time, inventoryDB, CURRENT_TO_KEY );
+        Change.setCurrentToDate( time, inventoryDB, CURRENT_TO_KEY );
       } while(true);
     }
   }

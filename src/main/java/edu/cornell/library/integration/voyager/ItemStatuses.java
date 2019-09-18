@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +18,11 @@ import java.util.TreeMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class ItemStatuses {
+import edu.cornell.library.integration.changes.Change;
+import edu.cornell.library.integration.changes.ChangeDetector;
+import edu.cornell.library.integration.voyager.Items.Item;
+
+public class ItemStatuses implements ChangeDetector {
 
   private static Set<Integer> unavailableStatuses = 
       new HashSet<>( Arrays.asList(2,3,4,5,6,7,8,9,10,12,13,14,18,21,22,23,24,25));
@@ -33,6 +38,60 @@ public class ItemStatuses {
       "   and mi.mfhd_id = bm.mfhd_id"+
       "   and bm.bib_id = bmast.bib_id"+
       "   and bmast.suppress_in_opac = 'N'";
+  private static final String recentItemStatusChangesQuery =
+      "SELECT * FROM item_status WHERE item_status_date > ?";
+  private static final String bibIdFromItemIdQuery =
+      "SELECT b.bib_id       "+
+      "  FROM bib_master b,  "+
+      "       bib_mfhd bm,   "+
+      "       mfhd_master m, "+
+      "       mfhd_item mi   "+
+      " WHERE b.suppress_in_opac = 'N'  "+
+      "   AND b.bib_id = bm.bib_id      "+
+      "   AND bm.mfhd_id = m.mfhd_id    "+
+      "   AND m.suppress_in_opac = 'N'  "+
+      "   AND m.mfhd_id = mi.mfhd_id    "+
+      "   AND mi.item_id = ?            ";
+
+  @Override
+  public Map<Integer, Set<Change>> detectChanges(Connection voyager, Timestamp since) throws SQLException {
+
+    Map<Integer,Set<Change>> changes = new HashMap<>();
+
+    try (PreparedStatement pstmt = voyager.prepareStatement(recentItemStatusChangesQuery);
+        PreparedStatement bibStmt = voyager.prepareStatement(bibIdFromItemIdQuery)) {
+
+      pstmt.setTimestamp(1, since);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next()) {
+          Item item = Items.retrieveItemByItemId( voyager, rs.getInt("item_id"));
+          if ( item == null ) {
+            System.out.printf("It looks like an item (%d) was deleted right after changing status.\n",rs.getInt("item_id"));
+            continue;
+          }
+          bibStmt.setInt(1, item.itemId);
+          try( ResultSet bibRs = bibStmt.executeQuery() ) {
+            while (bibRs.next()) {
+              Change c = new Change(Change.Type.CIRC,item.itemId,
+                  String.join( " ",((item.enumeration!= null)?"("+item.enumeration+")":""),
+                      item.status.code.values().iterator().next()),
+                  new Timestamp((item.status.date != null)?item.status.date*1000:System.currentTimeMillis()),
+                  item.location.name);
+              Integer bibId = bibRs.getInt(1);
+              if (changes.containsKey(bibId))
+                changes.get(bibId).add(c);
+              else {
+                Set<Change> t = new HashSet<>();
+                t.add(c);
+                changes.put(bibId,t);
+              }
+            }
+          }
+        }
+      }
+    }
+    return changes;
+  }
 
   public static boolean getIsUnavailable( int id ) {
     return unavailableStatuses.contains(id);
@@ -156,4 +215,6 @@ public class ItemStatuses {
       "Circulation Review",
       "Claims Returned",
       "Damaged");
+
+
 }
