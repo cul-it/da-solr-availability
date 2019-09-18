@@ -22,7 +22,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrDocument;
 
-import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.changes.Change;
 
 public class RefreshAvailability {
   public static void main(String[] args)
@@ -67,6 +67,7 @@ public class RefreshAvailability {
           try {
             Thread.sleep(500);
           } catch (InterruptedException e) {
+            e.printStackTrace();
             System.exit(0);
           }
 

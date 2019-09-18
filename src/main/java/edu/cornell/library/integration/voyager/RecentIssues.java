@@ -16,9 +16,10 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.changes.Change;
+import edu.cornell.library.integration.changes.ChangeDetector;
 
-public class RecentIssues {
+public class RecentIssues implements ChangeDetector {
 
 
   private final static String recentByBibQuery =
@@ -72,9 +73,11 @@ public class RecentIssues {
     return bibIds;
   }
 
+  @Override
+  public Map<Integer,Set<Change>> detectChanges( // specifically new receipts
+      Connection voyager, Timestamp since ) throws SQLException {
 
-  public static Map<Integer,Set<Change>> detectNewReceiptBibs(
-      Connection voyager, Timestamp since, Map<Integer,Set<Change>> changes ) throws SQLException {
+    Map<Integer,Set<Change>> changes = new HashMap<>();
 
     try (  PreparedStatement pstmt = voyager.prepareStatement(newReceiptsBibsQuery)   ) {
       pstmt.setTimestamp(1,since);

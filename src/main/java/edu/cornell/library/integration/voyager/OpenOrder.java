@@ -13,9 +13,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import edu.cornell.library.integration.availability.RecordsToSolr.Change;
+import edu.cornell.library.integration.changes.Change;
+import edu.cornell.library.integration.changes.ChangeDetector;
 
-public class OpenOrder {
+public class OpenOrder implements ChangeDetector {
 
   Map<Integer,String> notes = new HashMap<>();
 
@@ -71,8 +72,16 @@ public class OpenOrder {
 
   private SimpleDateFormat format = new SimpleDateFormat("M/d/yy");
 
-  public static void detectOrderStatusChanges(
-      Connection voyager, Timestamp since, Map<Integer, Set<Change>> changes) throws SQLException {
+  /* Object instantiation without arguments is intended only for detectChanges()
+   * which, as an override method can't be defined as static, although that would be
+   * preferrable.
+   */
+  public OpenOrder() {}
+  @Override
+  public Map<Integer, Set<Change>> detectChanges(
+      Connection voyager, Timestamp since) throws SQLException {
+
+    Map<Integer,Set<Change>> changes = new HashMap<>();
 
     final String getRecentOrderStatusChanges =
         "SELECT li.bib_id, lics.line_item_id, lics.status_date, lics.mfhd_id, lics.line_item_status" + 
@@ -103,6 +112,8 @@ public class OpenOrder {
         }
       }
     }
+    return changes;
+
   }
 
   private static List<String> orderStatuses = Arrays.asList(
