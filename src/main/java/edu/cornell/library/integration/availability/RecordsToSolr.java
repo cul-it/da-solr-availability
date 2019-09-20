@@ -43,15 +43,12 @@ import edu.cornell.library.integration.voyager.Items.ItemList;
 
 public class RecordsToSolr {
 
-  public static void main(String[] args)
-      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, InterruptedException {
+  public static void main(String[] args) throws IOException, SQLException, XMLStreamException, InterruptedException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    Class.forName("com.mysql.jdbc.Driver");
 
     try (Connection voyager = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));

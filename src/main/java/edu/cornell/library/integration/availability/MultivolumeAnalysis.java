@@ -4,8 +4,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -42,7 +40,6 @@ public class MultivolumeAnalysis {
    * returning a multi-volume boolean. In the case of a multi-volume record, the provided
    * items may be modified to supply an enumeration for all items not already having an
    * enumeration, chronology, or year value.
-   * @throws JsonProcessingException 
    */
   public static EnumSet<MultiVolFlag> analyze(
       String format, String description, boolean hasDescriptionE, HoldingSet holdings, ItemList items) {

@@ -135,7 +135,7 @@ public class Holding {
           case 't':
             try { 
               copy = Integer.valueOf(sf.value);
-            } catch ( NumberFormatException e ) {
+            } catch ( @SuppressWarnings("unused") NumberFormatException e ) {
               System.out.println("Holdings copy number is invalid. h"+this.record.id+" ("+sf.value+")");
             }
             break CODE;

@@ -77,10 +77,10 @@ public final class Locations {
             ( rule.holdingNote == null || (lcNote != null && lcNote.contains( rule.holdingNote )) ) ) {
           if ( ! rule.suppress )
             return rule.facetValues;
-          return new LinkedHashSet<String>();
+          return new LinkedHashSet<>();
         }
     System.out.println("Failed to map facet location for: "+l);
-    return new LinkedHashSet<String>();
+    return new LinkedHashSet<>();
   }
 
 
@@ -274,6 +274,7 @@ public final class Locations {
     final String holdingNote;
     final Set<String> facetValues;
 
+    @Override
     public String toString() {
       return String.format("%s (%s:%s) => %s", this.displayName, ((this.call == null)? "" : this.call),
           ((this.holdingNote == null)? "" : this.holdingNote),   String.join(" ** ", facetValues) );

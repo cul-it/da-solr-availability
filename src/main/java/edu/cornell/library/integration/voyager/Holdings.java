@@ -74,10 +74,6 @@ public class Holdings {
     return changedBibs;
   }
 
-  public static void detectChangedOrderStatus( Connection voyager ) {
-
-  }
-
   public static HoldingSet retrieveHoldingsByBibId( Connection voyager, int bib_id )
       throws SQLException, IOException, XMLStreamException {
     HoldingSet holdings = new HoldingSet();

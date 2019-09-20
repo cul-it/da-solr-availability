@@ -410,8 +410,8 @@ public class WorksAndInventory {
     String pubDate = null;
     String language = null;
     String edition = null;
-    Boolean online = false;
-    Boolean print = false;
+    boolean online = false;
+    boolean print = false;
 
     @Override
     public boolean equals ( final Object o ) {
@@ -427,6 +427,13 @@ public class WorksAndInventory {
           && Objects.equals(this.online, other.online)
           && Objects.equals(this.print, other.print);
     }
+
+    @Override
+    public int hashCode() {
+      return String.format("t%s f%s d%s l%s e%s o%b p%b",
+          title,format,pubDate,language,edition,online,print).hashCode();
+    }
+
   }
 
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)

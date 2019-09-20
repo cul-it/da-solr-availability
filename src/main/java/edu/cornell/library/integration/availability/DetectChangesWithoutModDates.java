@@ -27,15 +27,12 @@ public class DetectChangesWithoutModDates {
   private final static String insertAvailQ =
       "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,6,?,NOW())";
   
-  public static void main(String[] args)
-      throws IOException, ClassNotFoundException, SQLException {
+  public static void main(String[] args) throws IOException, SQLException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    Class.forName("com.mysql.jdbc.Driver");
 
     try (Connection voyager = DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));

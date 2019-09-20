@@ -33,15 +33,12 @@ public class MonitorAvailability {
 
   private static final String CURRENT_TO_KEY = "avail";
 
-  public static void main(String[] args)
-      throws IOException, ClassNotFoundException, SQLException, InterruptedException {
+  public static void main(String[] args) throws IOException, SQLException, InterruptedException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    Class.forName("com.mysql.jdbc.Driver");
 
     ComboPooledDataSource cpds = new ComboPooledDataSource();
     try { cpds.setDriverClass("oracle.jdbc.driver.OracleDriver"); }

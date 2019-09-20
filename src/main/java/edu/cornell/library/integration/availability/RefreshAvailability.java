@@ -26,14 +26,12 @@ import edu.cornell.library.integration.changes.Change;
 
 public class RefreshAvailability {
   public static void main(String[] args)
-      throws IOException, ClassNotFoundException, SQLException, XMLStreamException, InterruptedException, SolrServerException {
+      throws IOException, SQLException, XMLStreamException, InterruptedException, SolrServerException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("oracle.jdbc.driver.OracleDriver");
-    Class.forName("com.mysql.jdbc.Driver");
 
     try (
         Connection voyagerLive = DriverManager.getConnection(
@@ -44,7 +42,8 @@ public class RefreshAvailability {
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL"))) {
 
       int rows = 50;
-      SolrQuery q = new SolrQuery().setQuery("*:*").addSort("timestamp", ORDER.asc).setFields("id,timestamp").setRows(rows);
+      SolrQuery q = new SolrQuery().setQuery("*:*").addSort("timestamp", ORDER.asc)
+          .setFields("id,timestamp").setRows(rows);
 
       int page = 0;
 
