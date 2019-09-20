@@ -20,6 +20,7 @@
             <include>**/changes/*.java</include>
             <include>**/voyager/*.java</include>
           </includes>
+          <cleanupDaemonThreads>false</cleanupDaemonThreads>
         </configuration>
       </plugin>
     </plugins>
