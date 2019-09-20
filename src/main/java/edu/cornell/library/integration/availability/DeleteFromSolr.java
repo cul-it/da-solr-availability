@@ -64,8 +64,12 @@ class DeleteFromSolr {
             ("DELETE FROM mfhdRecsSolr WHERE mfhd_id = ?");
         PreparedStatement deleteFromIRS = inventoryDB.prepareStatement
             ("DELETE FROM itemRecsSolr WHERE mfhd_id = ?");
+        PreparedStatement deleteFromSFD = inventoryDB.prepareStatement
+            ("DELETE FROM solrFieldsData WHERE mfhd_id = ?");
         PreparedStatement getHoldingIds = inventoryDB.prepareStatement
             ("SELECT mfhd_id FROM mfhdRecsSolr WHERE bib_id = ?");
+        PreparedStatement queueHeadingsUpdate = inventoryDB.prepareStatement
+            ("INSERT INTO headingsQueue (bib_id,priority,cause,record_date ) VALUES (?,5,'Delete all',now())");
         Statement stmt = inventoryDB.createStatement();
         HttpSolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL")) ){
@@ -113,6 +117,10 @@ class DeleteFromSolr {
             deleteFromIRS.addBatch();
           }
 
+          // Delete solr Fields Data
+          deleteFromSFD.setInt(1, bibId);
+          deleteFromSFD.addBatch();
+
           // Delete from Delete Queue
           deleteFromQ.setInt(1,bibId);
           deleteFromQ.addBatch();
@@ -122,6 +130,10 @@ class DeleteFromSolr {
           deleteFromGenQ.addBatch();
           deleteFromAvailQ.setInt(1,bibId);
           deleteFromAvailQ.addBatch();
+
+          // Queue headings counts update
+          queueHeadingsUpdate.setInt(1, bibId);
+          queueHeadingsUpdate.addBatch();
         }}
 
         WorksAndInventory.deleteWorkRelationships( inventoryDB, bibIds );
@@ -132,14 +144,11 @@ class DeleteFromSolr {
         deleteFromBRS.executeBatch();
         deleteFromMRS.executeBatch();
         deleteFromIRS.executeBatch();
+        deleteFromSFD.executeBatch();
+        queueHeadingsUpdate.executeBatch();
         System.out.println( countFound+" deleted");
       } while ( countFound > 0 );
-      deleteFromQ.executeBatch();
-      deleteFromGenQ.executeBatch();
-      deleteFromAvailQ.executeBatch();
-      deleteFromBRS.executeBatch();
-      deleteFromMRS.executeBatch();
-      deleteFromIRS.executeBatch();
+
     }
   }
 
