@@ -65,7 +65,7 @@ class DeleteFromSolr {
         PreparedStatement deleteFromIRS = inventoryDB.prepareStatement
             ("DELETE FROM itemRecsSolr WHERE mfhd_id = ?");
         PreparedStatement deleteFromSFD = inventoryDB.prepareStatement
-            ("DELETE FROM solrFieldsData WHERE mfhd_id = ?");
+            ("DELETE FROM solrFieldsData WHERE bib_id = ?");
         PreparedStatement getHoldingIds = inventoryDB.prepareStatement
             ("SELECT mfhd_id FROM mfhdRecsSolr WHERE bib_id = ?");
         PreparedStatement queueHeadingsUpdate = inventoryDB.prepareStatement
