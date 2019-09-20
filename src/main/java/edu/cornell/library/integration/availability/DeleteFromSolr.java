@@ -41,7 +41,7 @@ class DeleteFromSolr {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("com.mysql.jdbc.Driver");
+
     try ( Connection inventoryDB = DriverManager.getConnection(
         prop.getProperty("inventoryDBUrl"),
         prop.getProperty("inventoryDBUser"),
