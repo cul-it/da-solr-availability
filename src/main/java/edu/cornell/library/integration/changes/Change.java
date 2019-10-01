@@ -83,8 +83,8 @@ public class Change implements Comparable<Change>{
   public static void appendElapsedTime( StringBuilder sb, Timestamp since ) {
 
     long seconds = java.time.Duration.between(
-        since.toInstant(), java.time.ZonedDateTime.now().toInstant()).getSeconds();
-    //java.time.Instant.now()).getSeconds();
+        since.toInstant(), java.time.Instant.now()).getSeconds();
+    //java.time.ZonedDateTime.now().toInstant()).getSeconds();
     if ( seconds == 0 ) return;
 
     sb.append(" (");
@@ -115,7 +115,8 @@ public class Change implements Comparable<Change>{
   }
 
   public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, ORDER };
-  private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
+  private static DateTimeFormatter formatter =
+      DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
 
   @Override
   public boolean equals( Object o ) {
