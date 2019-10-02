@@ -57,9 +57,13 @@ public class RecordsToSolr {
         Statement stmt = inventoryDB.createStatement();
         PreparedStatement pstmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.bib_id, priority"+
-                " FROM availabilityQueue, solrFieldsData"+
-                " WHERE availabilityQueue.bib_id = solrFieldsData.bib_id"+
-                " ORDER BY priority LIMIT 4");
+             "  FROM availabilityQueue, solrFieldsData"+
+             " WHERE availabilityQueue.bib_id = solrFieldsData.bib_id"+
+             " ORDER BY priority LIMIT 4");
+        PreparedStatement deqStmt = inventoryDB.prepareStatement
+            ("DELETE FROM availabilityQueue WHERE bib_id = ?");
+        PreparedStatement bibActiveStmt = inventoryDB.prepareStatement
+            ("SELECT active FROM bibRecsVoyager WHERE bib_id = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
             ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
         PreparedStatement deprioritizeStmt = inventoryDB.prepareStatement
@@ -76,7 +80,7 @@ public class RecordsToSolr {
         stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE");
         Integer priority = null;
         try (  ResultSet rs = pstmt.executeQuery() ) {
-          while ( rs.next() ) {
+          BIB: while ( rs.next() ) {
 
             // batch only within a single priority level
             if (priority == null)
@@ -84,6 +88,17 @@ public class RecordsToSolr {
             else if ( priority < rs.getInt("priority"))
               break;
             int bibId = rs.getInt("bib_id");
+
+            // Confirm bib is active
+            boolean active = false;
+            bibActiveStmt.setInt(1, bibId);
+            try (ResultSet rs2 = bibActiveStmt.executeQuery())
+            { while (rs2.next()) if (rs2.getBoolean(1)) active = true; }
+            if ( ! active ) {
+              deqStmt.setInt(1,bibId);
+              deqStmt.executeUpdate();
+              continue BIB;
+            }
 
             // Get all queue items for selected bib
             allForBib.setInt(1, bibId);
@@ -120,7 +135,6 @@ public class RecordsToSolr {
       solr.blockUntilFinished();
     }
   }
-
 
   final static String solrFieldsDataQuery =
       "SELECT record_dates," + // field list maintained here, and in constructSolrInputDocument() below
