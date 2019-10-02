@@ -107,6 +107,8 @@ class DeleteFromSolr {
           // Delete from Inventory tables
           deleteFromBRS.setInt(1, bibId);
           deleteFromBRS.addBatch();
+          deleteFromSFD.setInt(1, bibId);
+          deleteFromSFD.addBatch();
           Set<Integer> holdingIds = new HashSet<>();
           getHoldingIds.setInt(1,bibId);
           try (ResultSet rs1 = getHoldingIds.executeQuery()) {while (rs1.next()) holdingIds.add(rs1.getInt(1));}
@@ -142,13 +144,13 @@ class DeleteFromSolr {
         deleteFromGenQ.executeBatch();
         deleteFromAvailQ.executeBatch();
         deleteFromBRS.executeBatch();
+        deleteFromSFD.executeBatch();
         deleteFromMRS.executeBatch();
         deleteFromIRS.executeBatch();
         deleteFromSFD.executeBatch();
         queueHeadingsUpdate.executeBatch();
         System.out.println( countFound+" deleted");
       } while ( countFound > 0 );
-
     }
   }
 
