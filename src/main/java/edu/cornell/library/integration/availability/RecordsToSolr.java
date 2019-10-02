@@ -80,7 +80,7 @@ public class RecordsToSolr {
       for (int i = 0; i < 50000; i++){
         Map<Integer,Set<Change>> bibs = new HashMap<>();
         Set<Integer> ids = new HashSet<>();
-        stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE");
+        stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE, bibRecsVoyager READ");
         Integer priority = null;
         try (  ResultSet rs = pstmt.executeQuery() ) {
           BIB: while ( rs.next() ) {
