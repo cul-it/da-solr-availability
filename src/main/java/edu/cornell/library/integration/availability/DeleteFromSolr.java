@@ -64,6 +64,8 @@ class DeleteFromSolr {
             ("DELETE FROM mfhdRecsSolr WHERE mfhd_id = ?");
         PreparedStatement deleteFromIRS = inventoryDB.prepareStatement
             ("DELETE FROM itemRecsSolr WHERE mfhd_id = ?");
+        PreparedStatement deleteFromSFD = inventoryDB.prepareStatement
+            ("DELETE FROM solrFieldsData WHERE bib_id = ?");
         PreparedStatement getHoldingIds = inventoryDB.prepareStatement
             ("SELECT mfhd_id FROM mfhdRecsSolr WHERE bib_id = ?");
         Statement stmt = inventoryDB.createStatement();
@@ -103,6 +105,8 @@ class DeleteFromSolr {
           // Delete from Inventory tables
           deleteFromBRS.setInt(1, bibId);
           deleteFromBRS.addBatch();
+          deleteFromSFD.setInt(1, bibId);
+          deleteFromSFD.addBatch();
           Set<Integer> holdingIds = new HashSet<>();
           getHoldingIds.setInt(1,bibId);
           try (ResultSet rs1 = getHoldingIds.executeQuery()) {while (rs1.next()) holdingIds.add(rs1.getInt(1));}
@@ -130,6 +134,7 @@ class DeleteFromSolr {
         deleteFromGenQ.executeBatch();
         deleteFromAvailQ.executeBatch();
         deleteFromBRS.executeBatch();
+        deleteFromSFD.executeBatch();
         deleteFromMRS.executeBatch();
         deleteFromIRS.executeBatch();
         System.out.println( countFound+" deleted");
@@ -138,6 +143,7 @@ class DeleteFromSolr {
       deleteFromGenQ.executeBatch();
       deleteFromAvailQ.executeBatch();
       deleteFromBRS.executeBatch();
+      deleteFromSFD.executeBatch();
       deleteFromMRS.executeBatch();
       deleteFromIRS.executeBatch();
     }
