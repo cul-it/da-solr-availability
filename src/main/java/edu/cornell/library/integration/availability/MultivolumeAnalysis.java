@@ -206,11 +206,11 @@ public class MultivolumeAnalysis {
     MISSINGHOLDINGSDESC("multivolMissingDesc_b");
 
     private String solrField;
-    private MultiVolFlag( String s ) { solrField = s; }
-    public String getSolrField() { return solrField; }
+    private MultiVolFlag( String s ) { this.solrField = s; }
+    public String getSolrField() { return this.solrField; }
   }
 
-  private static class LocationEnumStats {
+  protected static class LocationEnumStats {
     public String aFoundEnum = null;
     public Boolean blankEnumFound = false;
     public Boolean diverseEnumFound = false;

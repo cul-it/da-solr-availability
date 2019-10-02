@@ -137,12 +137,12 @@ public class ItemStatuses implements ChangeDetector {
   }
   private static Map<Integer,StatusCode> _statuses = new HashMap<>();
 
-  public static class StatusCode implements Comparable<StatusCode> {
+  static class StatusCode implements Comparable<StatusCode> {
     final int id;
     final String name;
     final Integer priority;
 
-    private StatusCode (int id, String name) {
+    StatusCode (int id, String name) {
       this.id = id;
       this.name = name;
       if (_statusPriorities.contains(name))
@@ -189,7 +189,7 @@ public class ItemStatuses implements ChangeDetector {
    * and Not Charged, the Withdrawn status will be the higher ranking status and the item will not appear
    * available. The original ranking had Withdrawn at the very end. (DISCOVERYACCESS-4695)
    */
-  private static List<String> _statusPriorities = Arrays.asList(
+  static List<String> _statusPriorities = Arrays.asList(
       "Scheduled",
       "In Process",
       "Lost--System Applied",

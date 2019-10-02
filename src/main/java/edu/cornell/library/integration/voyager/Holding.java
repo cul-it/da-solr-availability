@@ -245,8 +245,8 @@ public class Holding {
     List<ItemReference> returned = new ArrayList<>();
     List<ItemReference> tempLocs = null;
     Set<Location> itemLocations = new HashSet<>();
-    if (boundWiths != null)
-      for (Entry<Integer,BoundWith> bw : boundWiths.entrySet()) {
+    if (this.boundWiths != null)
+      for (Entry<Integer,BoundWith> bw : this.boundWiths.entrySet()) {
         itemCount++;
         if (! bw.getValue().status.available)
           unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null,null,null));

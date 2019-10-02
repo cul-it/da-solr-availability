@@ -77,9 +77,9 @@ public class Items implements ChangeDetector {
       "       or item.create_date > ?)"+
       "   and bib_master.suppress_in_opac = 'N'"+
       "   and mfhd_master.suppress_in_opac = 'N'";
-  private static Locations locations = null;
-  private static ItemTypes itemTypes = null;
-  private static CircPolicyGroups circPolicyGroups = null;
+  static Locations locations = null;
+  static ItemTypes itemTypes = null;
+  static CircPolicyGroups circPolicyGroups = null;
 
   @Override
   public Map<Integer,Set<Change>> detectChanges(
@@ -193,7 +193,7 @@ public class Items implements ChangeDetector {
       this.tableName = tableName;
     }
     @Override
-    public String toString() { return tableName; }
+    public String toString() { return this.tableName; }
   }
   private static void updateInInventory(
       Connection inventory, Integer bibId,TrackingTable table, Map<Integer, String> dueDates)
@@ -267,7 +267,7 @@ public class Items implements ChangeDetector {
     return mapper.readValue(json, Item.class);
   }
 
-  private static ObjectMapper mapper = new ObjectMapper();
+  static ObjectMapper mapper = new ObjectMapper();
   static {
     mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
@@ -277,11 +277,11 @@ public class Items implements ChangeDetector {
 
     @JsonValue
     public Map<Integer,TreeSet<Item>> getItems() {
-      return items;
+      return this.items;
     }
 
     @JsonCreator
-    private ItemList( Map<Integer,TreeSet<Item>> items ) {
+    ItemList( Map<Integer,TreeSet<Item>> items ) {
       this.items = items;
     }
 
@@ -293,12 +293,12 @@ public class Items implements ChangeDetector {
       return mapper.readValue(json, ItemList.class);
     }
 
-    public void add( Map<Integer,TreeSet<Item>> items ) {
-      this.items.putAll(items);
+    public void add( Map<Integer,TreeSet<Item>> itemSet ) {
+      this.items.putAll(itemSet);
     }
 
-    private void put( Integer mfhd_id, TreeSet<Item> items ) {
-      this.items.put(mfhd_id, items);
+    void put( Integer mfhd_id, TreeSet<Item> itemSet ) {
+      this.items.put(mfhd_id, itemSet);
     }
 
     public String toJson() throws JsonProcessingException {
@@ -306,15 +306,15 @@ public class Items implements ChangeDetector {
     }
 
     public int mfhdCount() {
-      return items.size();
+      return this.items.size();
     }
     public int itemCount() {
-      return items.values().stream().mapToInt(p -> p.size()).sum();
+      return this.items.values().stream().mapToInt(p -> p.size()).sum();
     }
 
     public Item getItem (int mfhd_id, int item_id) {
-      if (items.containsKey(mfhd_id))
-        for (Item i : items.get(mfhd_id))
+      if (this.items.containsKey(mfhd_id))
+        for (Item i : this.items.get(mfhd_id))
           if (i.itemId == item_id)
             return i;
       return null;
@@ -341,7 +341,7 @@ public class Items implements ChangeDetector {
     @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public final Integer date;
 
-    private Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
+    Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
       this.mfhdId = (includeMfhdId)?rs.getInt("MFHD_ID"):null;
 
@@ -370,7 +370,7 @@ public class Items implements ChangeDetector {
       this.empty = (rs.getString("ITEM_BARCODE") == null)?true:null;
     }
 
-    private Item(
+    Item(
         @JsonProperty("id")        int itemId,
         @JsonProperty("mfhdId")    Integer mfhdId,
         @JsonProperty("copy")      int copy,

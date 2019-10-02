@@ -63,10 +63,10 @@ public class BoundWithTest {
   public void boundWithMainConstructor() throws SQLException, JsonProcessingException {
     DataField f = new DataField(6,"876",' ',' ',"‡3 fiche 3/5 ‡p 31924064096195");
     BoundWith b = BoundWith.from876Field(voyagerTest, f);
-    assertEquals(expectedBoundWithJson4102195,b.toJson());
+    assertEquals(this.expectedBoundWithJson4102195,b.toJson());
     f = new DataField(6,"876",' ',' ',"‡3 v.14 ‡p 31924004546812");
     b = BoundWith.from876Field(voyagerTest, f);
-    assertEquals(expectedBoundWithJson1726636,b.toJson());
+    assertEquals(this.expectedBoundWithJson1726636,b.toJson());
   }
 
   @Test

@@ -112,7 +112,7 @@ public class Change implements Comparable<Change>{
     sb.append(')');
   }
 
-  public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, ORDER };
+  public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, ORDER }
 
   @Override
   public boolean equals( Object o ) {

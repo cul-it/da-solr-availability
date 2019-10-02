@@ -25,15 +25,15 @@ public class VoyagerDBConnection implements AutoCloseable {
 
     if ( keepDBFile ) {
       String dbFile = sqlFile.substring(0, sqlFile.length()-3)+"db";
-      connection = DriverManager.getConnection("jdbc:sqlite:"+dbFile);
-      tempDB = null;
+      this.connection = DriverManager.getConnection("jdbc:sqlite:"+dbFile);
+      this.tempDB = null;
     } else {
-      tempDB = File.createTempFile("da-solr-availability-", "-test.db");
-      tempDB.deleteOnExit();
-      connection = DriverManager.getConnection("jdbc:sqlite:"+tempDB.getPath());
+      this.tempDB = File.createTempFile("da-solr-availability-", "-test.db");
+      this.tempDB.deleteOnExit();
+      this.connection = DriverManager.getConnection("jdbc:sqlite:"+this.tempDB.getPath());
     }
 
-    try (Statement stmt = connection.createStatement();
+    try (Statement stmt = this.connection.createStatement();
         BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(sqlFile),"UTF-8"))) {
       String line;
       while ((line = br.readLine()) != null)
@@ -54,9 +54,6 @@ public class VoyagerDBConnection implements AutoCloseable {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(propsFile)){
       prop.load(in);
     }
-
-    try { Class.forName("oracle.jdbc.driver.OracleDriver"); }
-    catch (@SuppressWarnings("unused") ClassNotFoundException e) {}
 
     return DriverManager.getConnection(
         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));

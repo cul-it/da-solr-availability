@@ -116,8 +116,8 @@ public class BoundWith {
     REF_STATUS  ("Bound With: Item Status From Holdings Ref");
 
     private String availFlag;
-    private Flag( String s ) { availFlag = s; }
-    public String getAvailabilityFlag() { return availFlag; }
+    private Flag( String s ) { this.availFlag = s; }
+    public String getAvailabilityFlag() { return this.availFlag; }
 
   }
   public String toJson() throws JsonProcessingException {

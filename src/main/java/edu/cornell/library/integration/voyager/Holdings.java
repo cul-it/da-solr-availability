@@ -123,20 +123,20 @@ public class Holdings {
       this.holdings.put(mfhdId, holding);
     }
     public void put(Integer mfhdId, Holding holding) {
-      holdings.put(mfhdId, holding);
+      this.holdings.put(mfhdId, holding);
     }
     public int size() {
-      return holdings.size();
+      return this.holdings.size();
     }
     public Holding get( Integer mfhdId ) {
-      return holdings.get(mfhdId);
+      return this.holdings.get(mfhdId);
     }
     public Collection<Holding> values() {
       return this.holdings.values();
     }
 
     public Set<Integer> getMfhdIds( ) {
-      return holdings.keySet();
+      return this.holdings.keySet();
     }
 
     public boolean noItemsAvailability() {

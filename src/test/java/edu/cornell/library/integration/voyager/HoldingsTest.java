@@ -67,7 +67,7 @@ public class HoldingsTest {
     HoldingSet holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1184953);
     assertEquals(examples.get("expectedJson1184953").toJson(),holding.toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holding.get(1184953).date)).toString());
-    assertEquals(expectedMarc1184953,holding.get(1184953).record.toString());
+    assertEquals(this.expectedMarc1184953,holding.get(1184953).record.toString());
 
     holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9850688);
     assertEquals(examples.get("expectedJson9850688").toJson(),holding.toJson());

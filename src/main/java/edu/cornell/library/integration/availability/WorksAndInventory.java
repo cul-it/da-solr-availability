@@ -404,7 +404,7 @@ public class WorksAndInventory {
     }
   }
 
-  private static class LinkingMetadata {
+  protected static class LinkingMetadata {
     String title = null;
     String format = null;
     String pubDate = null;
@@ -431,7 +431,7 @@ public class WorksAndInventory {
     @Override
     public int hashCode() {
       return String.format("t%s f%s d%s l%s e%s o%b p%b",
-          title,format,pubDate,language,edition,online,print).hashCode();
+          this.title,this.format,this.pubDate,this.language,this.edition,this.online,this.print).hashCode();
     }
 
   }
