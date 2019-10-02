@@ -51,12 +51,14 @@ Mann Library New Book Shelf				Mann Library > New Book Shelf
 Mann Library Reference (Non-Circulating)				Mann Library > Reference
 Mann Library Reserve				Mann Library > Reserve
 Mann Library Special Collections (Non-Circulating)				Mann Library > Special Collections
+Mann Special Collections (Request in advance)				Mann Library > Special Collections
 Mann Serials				Mann Library > Serials
 Mathematics Library (Circulation Desk)				Mathematics Library > Circulation Desk
 Mathematics Library (Malott Hall)				Mathematics Library > Main Collection
 Mathematics Library Locked Press				Mathematics Library > Locked Press
 Mathematics Library Reference (Non-Circulating)				Mathematics Library > Reference
 Mathematics Library Reserve				Mathematics Library > Reserve
+Music Library (Lincoln Hall)				Music Library > Main Collection
 Cox Library of Music (Lincoln Hall)				Music Library > Main Collection
 Music Circulation				Music Library > Circulation
 Music Library A/V (Non-Circulating)				Music Library > A/V
