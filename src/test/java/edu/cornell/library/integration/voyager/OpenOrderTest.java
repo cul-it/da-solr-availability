@@ -137,7 +137,23 @@ public class OpenOrderTest {
     holdings.applyOpenOrderInformation(voyagerTest, bibId);
 
     assertEquals( "On order as of 1/7/19", holdings.get(10900194).orderNote );
-    System.out.println(holdings.toJson());
   }
 
+  @Test // test added because of NPE exception. This situation shouldn't happen.
+  public void orderOnOnlineHoldings() throws SQLException, IOException, XMLStreamException {
+
+    int bibId = 11062722;
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, bibId);
+    ItemList items = Items.retrieveItemsForHoldings(voyagerTest, null, bibId, holdings);
+    holdings.summarizeItemAvailability(items);
+    holdings.applyOpenOrderInformation(voyagerTest, bibId);
+
+    assertEquals(
+    "{\"11342192\":{\"location\":{\"code\":\"ech\",\"number\":13,\"name\":\"Kroch Library Asia\","
+                 + "\"library\":\"Kroch Library Asia\",\"hoursCode\":\"asia\"},\"date\":1571423403},"+
+     "\"11342193\":{\"online\":true,\"date\":1571423479,\"order\":\"On order as of 10/21/19\"}}",
+     holdings.toJson() );
+
+  }
 }

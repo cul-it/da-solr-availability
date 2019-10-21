@@ -110,6 +110,8 @@ INSERT INTO BIB_MFHD VALUES(2813334,3333482);
 INSERT INTO BIB_MFHD VALUES(2813334,3333483);
 INSERT INTO BIB_MFHD VALUES(2813334,3333484);
 INSERT INTO BIB_MFHD VALUES(7187316,7620352);
+INSERT INTO BIB_MFHD VALUES(11062722,11342192);
+INSERT INTO BIB_MFHD VALUES(11062722,11342193);
 CREATE TABLE BIB_TEXT ( BIB_ID int, TITLE_BRIEF text );
 INSERT INTO BIB_TEXT VALUES(330581,'Journal of applied physics. ');
 INSERT INTO BIB_TEXT VALUES(3212531,'White side of a black subject a vindication of the Afro-American race : from the landing of slaves at St. Augustine, Florida, in 1565, to the present ');
@@ -158,6 +160,7 @@ INSERT INTO BIB_TEXT VALUES(10602676,'CASE STUDIES IN LEGAL RESEARCH METHODOLOGI
 INSERT INTO BIB_TEXT VALUES(4345125,'(1) Report on the mosses of the Abor Expedition, 1911-12, ');
 INSERT INTO BIB_TEXT VALUES(2813334,'Names of persons for whom marriage licenses were issued by the secretary of the province of New York, previous to 1784. ');
 INSERT INTO BIB_TEXT VALUES(7187316,'Law of real property : being a complete compendium of real estate law, embracing all current case law, carefully selected, thoroughly annotated, and a');
+INSERT INTO BIB_TEXT VALUES(11062722,'Panduan operasional overview SPAD ');
 CREATE TABLE BIB_DATA ( RECORD_SEGMENT blob, BIB_ID int, SEQNUM int );
 INSERT INTO BIB_DATA VALUES('02962cas a2200649 a 450000100070000000500170000700800410002401000220006502200140008703000110010103500250011203500220013703500110015903500190017004000330018904200130022205000140023508200100024921000200025922200310027924500320031024700760034226000530041826500750047130000300054631000160057636200250059251000340061751000400065151000410069151000490073251000500078151000410083152003660087253000920123855003470133055500570167765000260173465000380176065500420179871000350184071000310187571000310190678000350193785300420197285300420201485500230205686300230207986300240210286500240212686500240215086500240217486500240219890500210222294800320224394800370227533058120141106201817.0840709c19319999pausr1p       0   a1eng    a   33023425//r39   a0021-8979  aJAPIAU  a(CStRLIN)NYCX84S3828  a(NIC)notisABK8232  a330581  a(OCoLC)1782306  aDLCcDLCdDLCdDLCdPPTdNIC  alcansdp 4aQC1b.J83  a530.50 aJ. appl. physi.00aJournal of applied physics00aJournal of applied physics.',330581,1);
 INSERT INTO BIB_DATA VALUES('10aPhysics;ba journal of general and applied physicsfJuly 1931-Dec. 1936  a[New York, etc.]bAmerican Institute of Physics.  aSubscription Fulfillment Division, 335 E. 45th St., New York, NY 10017  av.bill., diagrs.c27 cm.  aSemimonthly0 av. 1-   ; July 1931-0 aChemical abstractsx0009-22580 aEngineering index annualx0360-85570 aEngineering index monthlyx0013-79600 aInternational aerospace abstractsx0020-58420 aSelected water resources abstractsx0037-136X0 aNuclear science abstractsx0029-5612  aEmphasizes significant new results in applied physics. Experimental and theoretical physics applied to all aspects of materials including semiconductors, superconductors, metals and alloys, amorphous materials, and oxides. Other topics include electrical, optical, and magnetic devices; optics and lasers; nonlinear optics; electrical discharges; and acoustics.  aRecent issues also available full text on the World Wide Web; abstracts available 1975- ',330581,2);
@@ -268,6 +271,7 @@ INSERT INTO BIB_DATA VALUES('rary bulletin; history, no. 1. 0aMarriage license
 INSERT INTO BIB_DATA VALUES('02665cam a2200517 i 4500001000800000005001700008006001900025007001500044008004100059035001600100035001200116035002100128040003200149043001200181050002300193245039100216264005100607264007500658300003600733336002100769337002300790338003200813500002200845500002200867500008900889500023700978500006201215500009501277588004701372650004301419655002201462700003701484700004501521700005001566740005201616776003101668856022501699899001801924906000701942948003601949948004701985948003302032948003702065948003602102995000902138718731620180613204804.0m     o  d        cr bn nnnauuuu110313m18951914ilu     ov    001 0 eng d  accn00330257  a7187316  a(OCoLC)711837891  aCASSDbengerdacCASSDdNIC  an-us--- 4aKF567.4b.L39 189504aThe law of real property :bbeing a complete compendium of real estate law, embracing all current case law, carefully selected, thoroughly annotated, and accurately epitomized; comparative statutory construction of the laws of the several states; and ex',7187316,1);
 INSERT INTO BIB_DATA VALUES('haustive treatises upon the most important branches of the law of real property /cedited by Tilghman E. Ballard, Emerson E. Ballard. 1aChicago, Ill. :bT.H. Flood & Co.,c1895-1914. 2a[Buffalo, New York] :bWilliam S. Hein & Co.,c[between 2009 and 2013]  a1 online resource (16 volumes).  atext2rdacontent  acomputer2rdamedia  aonline resource2rdacarrier  aIncludes indexes.  aVol. 1 is 4th ed.  aVol. 16 has title: An index-digest of Ballard''s Law of real property, volumes I-XII.  aVols. 13-15 have subtitle: being a complete analytical epitome of all current decisions of the courts of last resort of the several states ... which involve any right of interest in, or instrument or procedure affecting real estate.  aVols. 3-5 published by Ballard Pub. Co., Logansport, Ind.  aVols. 6-10, 13-16 edited by Emerson E. Ballard; vols. 11-12 edited by Arthur W. Blakemore.  aDescription based on print version record.10aReal propertyzUnited StatesvDigests. ',7187316,2);
 INSERT INTO BIB_DATA VALUES('0aElectronic books.1 aBallard, Emerson E.,d1865-1935.1 aBallard, T. E.q(Tilghman Ethan),d1850-1 aBlakemore, Arthur W.q(Arthur Walker),d1875-02aIndex-digest of Ballard''s Law of real property.08cOriginalw(DLC)   79116023403HeinOnline Legal Classics Libraryuhttp://proxy.library.cornell.edu/login?url=https://www.heinonline.org/HOL/Index?index=beal/lreapcc&collection=bealL_bealzConnect to full text. Access limited to authorized subscribers.  aHeinOnlineLCL  ags2 a20180613bmdbatchelawxupdate3 a20110427hHeinOnlineLCLiCOR HEIN-LCL9.mrc1 a20110427bsdbatcheltsfebk2 a20150101bmdbatcheltsxaddfast2 a20170526bmdbatchelawxupdate  aNoEx',7187316,3);
+INSERT INTO BIB_DATA VALUES('00472cam a22001455i 45000010009000000050017000090080041000260400023000672450038000902640089001283000040002173360021002573370025002783380023003031106272220191021074040.0191018s        io a     b    001 0 eng d  aNICbengcNICerda10aPanduan operasional overview SPAD 1a[s.l]bKementerian Pendidikan dan Kebudayaan. Sekretariat Jenderal. Biro Umum.c2017  a124 pages :billustrations ;c23 cm  atext2rdacontent  aunmediated2rdamedia  avolume2rdacarrier',11062722,1);
 CREATE TABLE MFHD_DATA ( RECORD_SEGMENT blob, MFHD_ID int, SEQNUM int );
 INSERT INTO MFHD_DATA VALUES('00543dy  a22001813  450000100070000000400070000700500170001400800330003101400170006401400140008185201030009586600260019886700290022486800270025386800270028086800270030786800270033439986033058120090916165548.09301235u    8   2   uu          1 aABK8232CU0010 900039713201bengrhQC1i.J86zSub',399860,1);
 INSERT INTO MFHD_DATA VALUES('scription cancelled effective with end of 2000xwithdrawn (deselected) 8/10/09 180av.1-88 (1931-2000)4180av.33:no.1 (1962:Jan.) 180av.48/52 (1977/1981) 180av.53/60 (1982/1986) 180av.61/70 (1987/1991)4180av.71/80 (1992/1996)',399860,2);
@@ -414,6 +418,8 @@ INSERT INTO MFHD_DATA VALUES('.01bolinhF118i.N56 1860axl016',3333483,2);
 INSERT INTO MFHD_DATA VALUES('00203nx  a2200097z  4500001000800000004000800008008003300016014001700049014001400066852002500080333348128133340005182u    8   4001uu   00000001 aANW1478CU0010 900333257700bolin,anxhF118i.N56',3333481,1);
 INSERT INTO MFHD_DATA VALUES('00472nx  a22001214  450000100080000000400080000800700070001600800330002301400170005601400140007384300910008785201720017833334842813334cr|an 9704182u    8   4   uu          1 aANW1478CU0040 9003332580  aComputer file.bIthaca, N.Y. :cCornell University Library,d1995.e[492] image files. ',3333484,1);
 INSERT INTO MFHD_DATA VALUES('1bserv,remokONLINExl016zFiles for the images of individual pages are encoded in Aldus/Microsoft TIFF Version 5.0 using facsimile-compatible CCITT Group 4 compression.',3333484,2);
+INSERT INTO MFHD_DATA VALUES('00168nx  a22000854  4500001000900000004000900009005001700018008003300035852001400068113421931106272220191018143119.01910180p    8   1001uu   00000000 bserv,remo',11342193,1);
+INSERT INTO MFHD_DATA VALUES('00162nx  a22000854  4500001000900000004000900009005001700018008003300035852000800068113421921106272220191018143003.01910182p    8   4001uu   090112880bech',11342192,1);
 CREATE TABLE MFHD_ITEM ( MFHD_ID int, ITEM_ID int, ITEM_ENUM text, CHRON text, YEAR text, CAPTION text );
 INSERT INTO MFHD_ITEM VALUES(399861,812658,'v.77','1995:Jan.',NULL,NULL);
 INSERT INTO MFHD_ITEM VALUES(399861,812659,'v.77','1995:Feb.',NULL,NULL);
@@ -10424,6 +10430,8 @@ INSERT INTO MFHD_MASTER VALUES(3333482,959745600000,NULL,'Y');
 INSERT INTO MFHD_MASTER VALUES(3333483,959745600000,NULL,'N');
 INSERT INTO MFHD_MASTER VALUES(3333481,959745600000,NULL,'N');
 INSERT INTO MFHD_MASTER VALUES(3333484,959745600000,NULL,'N');
+INSERT INTO MFHD_MASTER VALUES(11342193,1571423479000,NULL,'N');
+INSERT INTO MFHD_MASTER VALUES(11342192,1571423403000,NULL,'N');
 CREATE TABLE circ_policy_group ( circ_group_name string, circ_group_id int );
 INSERT INTO circ_policy_group VALUES('Main Circ Group',1);
 INSERT INTO circ_policy_group VALUES('Entomology Circ Group',8);
@@ -11158,6 +11166,7 @@ INSERT INTO line_item VALUES(822807,10825496,2,274729);
 INSERT INTO line_item VALUES(817417,10663989,1,273214);
 INSERT INTO line_item VALUES(817295,10663989,1,273158);
 INSERT INTO line_item VALUES(814585,10602676,1,272316);
+INSERT INTO line_item VALUES(831311,11062722,1,277422);
 CREATE TABLE purchase_order ( po_approve_date date, po_id int, po_type int );
 INSERT INTO purchase_order VALUES(1458923057000,251803,1);
 INSERT INTO purchase_order VALUES(NULL,274374,1);
@@ -11171,6 +11180,7 @@ INSERT INTO purchase_order VALUES(1557159907000,274729,1);
 INSERT INTO purchase_order VALUES(1550593014000,273158,1);
 INSERT INTO purchase_order VALUES(1550858885000,273214,1);
 INSERT INTO purchase_order VALUES(1546886263000,272316,1);
+INSERT INTO purchase_order VALUES(1571658013000,277422,1);
 CREATE TABLE bib_master ( bib_id int, suppress_in_opac string );
 INSERT INTO bib_master VALUES(330581,'N');
 INSERT INTO bib_master VALUES(3212531,'N');
@@ -11218,6 +11228,7 @@ INSERT INTO bib_master VALUES(10602676,'N');
 INSERT INTO bib_master VALUES(4345125,'N');
 INSERT INTO bib_master VALUES(2813334,'N');
 INSERT INTO bib_master VALUES(7187316,'N');
+INSERT INTO bib_master VALUES(11062722,'N');
 CREATE TABLE line_item_copy_status( line_item_id int, mfhd_id int, location_id int, line_item_status int, status_date date );
 INSERT INTO line_item_copy_status VALUES(17081,449213,NULL,NULL,NULL);
 INSERT INTO line_item_copy_status VALUES(735025,9720246,NULL,NULL,NULL);
@@ -11233,4 +11244,5 @@ INSERT INTO line_item_copy_status VALUES(822807,11121177,31,8,1557159907000);
 INSERT INTO line_item_copy_status VALUES(817417,10961068,133,8,1550858885000);
 INSERT INTO line_item_copy_status VALUES(817295,10961068,133,8,1550593014000);
 INSERT INTO line_item_copy_status VALUES(814585,10900194,63,4,1562698102000);
+INSERT INTO line_item_copy_status VALUES(831311,11342193,128,8,1571658013000);
 COMMIT;
