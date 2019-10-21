@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
@@ -199,7 +200,7 @@ public class Holdings {
             && ( h.orderNote.contains("copies ordered") || h.orderNote.startsWith("On order as of")) ) {
           for ( Holding h2 : this.holdings.values() )
             if ( h2.orderNote == null && h2.itemSummary == null
-                && h.location.equals(h2.location)
+                && Objects.equals( h.location, h2.location )
                 && ! (h2.call != null && (h2.call.equalsIgnoreCase("Available for the Library to Purchase")
                     || h2.call.equalsIgnoreCase("In Process")))) {
               h2.orderNote = "On order";
