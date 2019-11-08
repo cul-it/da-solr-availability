@@ -16,6 +16,8 @@ Fine Arts Circulation 				Fine Arts Library > Circulation
 Fine Arts Library (Rand Hall)				Fine Arts Library > Main Collection
 Fine Arts Library Reference (Non-Circulating)		Artist		Fine Arts Library > Artists' Books
 Fine Arts Library Reference (Non-Circulating)				Fine Arts Library > Reference
+Fine Arts Library Permanent Reserve				Fine Arts Library > Reserve
+Fine Arts Course Reserve (Ask at Circulation)				Fine Arts Library > Reserve
 Fine Arts Library Reserve				Fine Arts Library > Reserve
 ILR Library (Ives Hall)				ILR Library > Main Collection
 ILR Library Reference (Non-Circulating)		Labor Law		ILR Library > Labor Law Reference
