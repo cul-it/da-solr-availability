@@ -41,7 +41,7 @@ import edu.cornell.library.integration.voyager.Items;
 import edu.cornell.library.integration.voyager.Items.Item;
 import edu.cornell.library.integration.voyager.Items.ItemList;
 
-public class RecordsToSolr {
+public class ProcessAvailabilityQueue {
 
   public static void main(String[] args) throws IOException, SQLException, XMLStreamException, InterruptedException {
 
