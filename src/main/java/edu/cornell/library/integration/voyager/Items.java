@@ -160,6 +160,7 @@ public class Items implements ChangeDetector {
     Map<Integer,String> dueDates = new TreeMap<>();
     Map<Integer,String> callSlips = new TreeMap<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
+      pstmt.setFetchSize(10_000);
       for (int mfhd_id : holdings.getMfhdIds()) {
         pstmt.setInt(1, mfhd_id);
         try (ResultSet rs = pstmt.executeQuery()) {
