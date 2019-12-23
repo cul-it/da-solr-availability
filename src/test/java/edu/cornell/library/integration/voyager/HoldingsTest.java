@@ -169,7 +169,6 @@ public class HoldingsTest {
     assertEquals("++",h.get(2202712).callNumberSuffix);
   }
 
-
   @Test
   public void urlInsertIntoHoldings() throws SQLException, IOException, XMLStreamException {
     Set<Object> urlJsons = new HashSet<>();
@@ -187,7 +186,6 @@ public class HoldingsTest {
     Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
     assertEquals(examples.get("expectedJsonOnlineWithLinks").toJson(),h.toJson());
   }
-
 
   @Test
   public void hathiLinkProducesFakeHoldings() throws SQLException, IOException, XMLStreamException {
@@ -219,7 +217,6 @@ public class HoldingsTest {
     assertEquals(examples.get("interestingOnlineHolding").toJson(),h.toJson());
   }
 
-
   @Test
   public void bothVoyagerAccessLinkAndHathiLink() throws SQLException, IOException, XMLStreamException {
     Set<Object> urlJsons = new HashSet<>();
@@ -232,10 +229,8 @@ public class HoldingsTest {
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
-    System.out.println(h.toJson());
     assertEquals(examples.get("bothVoyagerAccessLinkAndHathiLink").toJson(),h.toJson());
   }
-
 
   @Test
   public void onSiteUse() throws SQLException, IOException, XMLStreamException {
@@ -303,4 +298,13 @@ public class HoldingsTest {
           "Professor Ángel Sáenz-Badillos and Professor Judit Targarona Borrás", h.get(mfhdId).donors.get(0));
     }
   }
+
+  @Test
+  public void noCallNumberWithPrefix() throws SQLException, IOException, XMLStreamException {
+    // 852 81 ‡b olin ‡k Newspapers ‡h No call number ‡z Subscription cancelled after 1996.
+    HoldingSet holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 2354298);
+    System.out.println(holding.toJson());
+    assertEquals("Newspapers",holding.get(2354298).call);
+  }
+
 }

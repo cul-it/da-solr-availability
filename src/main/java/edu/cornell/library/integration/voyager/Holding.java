@@ -169,7 +169,9 @@ public class Holding {
     else
       this.location = holdingLocation;
     this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
-    if ( holdingLocation == null || call == null || call.matches(".*[Nn]o [Cc]all [Nn]umber.*") )
+    if ( call != null )
+      call =  call.replaceAll("[Nn]o [Cc]all [Nn]umber\\.*", "").trim();
+    if ( holdingLocation == null || call == null || call.isEmpty() )
       this.call = null;
     else
       this.call = call;
