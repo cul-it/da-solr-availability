@@ -49,7 +49,7 @@ public class DetectChangesWithoutModDates {
 
     processRecentIssueChanges( voyager, inventory );
     processDueDateChanges( voyager, inventory );
-    processCallSlipChanges( voyager, inventory );
+    processRequestChanges( voyager, inventory );
   }
 
   private static void processRecentIssueChanges(Connection voyager, Connection inventory)
@@ -105,20 +105,20 @@ public class DetectChangesWithoutModDates {
 
   }
 
-  private static void processCallSlipChanges(Connection voyager, Connection inventory)
+  private static void processRequestChanges(Connection voyager, Connection inventory)
       throws SQLException {
 
-    // Load previous call slips from inventory
+    // Load previous requests from inventory
     Map<Integer,String> prevValues = new HashMap<>();
     try ( Statement stmt = inventory.createStatement();
-          ResultSet rs = stmt.executeQuery("SELECT bib_id, json FROM itemCallSlipRequests")) {
+          ResultSet rs = stmt.executeQuery("SELECT bib_id, json FROM itemRequests")) {
       while (rs.next())
       prevValues.put(rs.getInt(1),rs.getString(2));
     }
-    System.out.println("Previous bibs with call slips: "+prevValues.size());
+    System.out.println("Previous bibs with requests: "+prevValues.size());
 
     // Get changes in current Voyager Data
-    Map<Integer,Set<Change>> changes = detectChangedCallSlipRequests(voyager, prevValues, new HashMap<>());
+    Map<Integer,Set<Change>> changes = detectRequests(voyager, prevValues, new HashMap<>());
     System.out.println("Changes: "+changes.size());
     if ( changes.isEmpty())
       return;
@@ -128,28 +128,28 @@ public class DetectChangesWithoutModDates {
 
   }
 
-  private static Map<Integer,Set<Change>> detectChangedCallSlipRequests(
+  private static Map<Integer,Set<Change>> detectRequests(
       Connection voyager, Map<Integer,String> prevValues, Map<Integer,Set<Change>> changes )
           throws SQLException{
-    Map<Integer,String> allCallSlips = ItemStatuses.collectAllCallSlipRequests(voyager);
+    Map<Integer,String> allRequests = ItemStatuses.collectAllRequests(voyager);
     for (Integer bibId : prevValues.keySet()) {
-      if (allCallSlips.containsKey(bibId)) {
-        if (! prevValues.get(bibId).equals(allCallSlips.get(bibId))) {
+      if (allRequests.containsKey(bibId)) {
+        if (! prevValues.get(bibId).equals(allRequests.get(bibId))) {
           Set<Change> t = new HashSet<>();
           t.add(new Change(Change.Type.CIRC,null,
-              "Call Slip Modified "+prevValues.get(bibId)+" ==> "+allCallSlips.get(bibId), null, null));
+              "Request Modified "+prevValues.get(bibId)+" ==> "+allRequests.get(bibId), null, null));
           changes.put(bibId, t);
         }
-        allCallSlips.remove(bibId);
+        allRequests.remove(bibId);
       } else {
         Set<Change> t = new HashSet<>();
-        t.add(new Change(Change.Type.CIRC,null,"Call Slip Disappeared "+prevValues.get(bibId), null, null));
+        t.add(new Change(Change.Type.CIRC,null,"Request Disappeared "+prevValues.get(bibId), null, null));
         changes.put(bibId, t);
       }
     }
-    for (Integer bibId : allCallSlips.keySet()) {
+    for (Integer bibId : allRequests.keySet()) {
       Set<Change> t = new HashSet<>();
-      t.add(new Change(Change.Type.CIRC,null,"Call Slip Appeared "+allCallSlips.get(bibId),null,null));
+      t.add(new Change(Change.Type.CIRC,null,"Request Appeared "+allRequests.get(bibId),null,null));
       changes.put(bibId,t);
     }
     return changes;

@@ -27,11 +27,11 @@ public class ItemStatuses implements ChangeDetector {
   private static Set<Integer> unavailableStatuses = 
       new HashSet<>( Arrays.asList(2,3,4,5,6,7,8,9,10,12,13,14,18,21,22,23,24,25));
 
-  private static final String allCallSlipsQuery =
+  private static final String allRequestsQuery =
       "select bmast.bib_id, item_status.item_id, ist.item_status_desc"+
       "  from item_status, item_status_type ist, mfhd_item mi, mfhd_master mm, bib_mfhd bm, bib_master bmast"+
       " where item_status.item_status = ist.item_status_type"+
-      "   and ist.item_status_desc = 'Call Slip Request'"+
+      "   and ist.item_status_desc like '%Request'"+
       "   and item_status.item_id = mi.item_id"+
       "   and mi.mfhd_id = mm.mfhd_id"+
       "   and mm.suppress_in_opac = 'N'"+
@@ -105,10 +105,10 @@ public class ItemStatuses implements ChangeDetector {
     return null;
   }
 
-  public static Map<Integer,String> collectAllCallSlipRequests( Connection voyager )
+  public static Map<Integer,String> collectAllRequests( Connection voyager )
       throws SQLException{
     Map<Integer,Map<Integer,String>> t = new HashMap<>();
-    try ( PreparedStatement pstmt = voyager.prepareStatement(allCallSlipsQuery);
+    try ( PreparedStatement pstmt = voyager.prepareStatement(allRequestsQuery);
         ResultSet rs = pstmt.executeQuery()) {
       while (rs.next()) {
         Integer bibId = rs.getInt(1);
@@ -116,13 +116,13 @@ public class ItemStatuses implements ChangeDetector {
         t.get(bibId).put(rs.getInt(2),rs.getString(3));
       }
     }
-    Map<Integer,String> callSlipJsons = new HashMap<>();
+    Map<Integer,String> requestJsons = new HashMap<>();
     for (Entry<Integer,Map<Integer,String>> e : t.entrySet())
       try {
-        callSlipJsons.put(e.getKey(), mapper.writeValueAsString(e.getValue()));
+        requestJsons.put(e.getKey(), mapper.writeValueAsString(e.getValue()));
       }
     catch (JsonProcessingException e1) { e1.printStackTrace(); /* Unreachable? */ }
-    return callSlipJsons;
+    return requestJsons;
   
   }
   private static ObjectMapper mapper = new ObjectMapper();

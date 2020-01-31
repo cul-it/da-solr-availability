@@ -158,7 +158,7 @@ public class Items implements ChangeDetector {
     }
     ItemList il = new ItemList();
     Map<Integer,String> dueDates = new TreeMap<>();
-    Map<Integer,String> callSlips = new TreeMap<>();
+    Map<Integer,String> requests = new TreeMap<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
       pstmt.setFetchSize(10_000);
       for (int mfhd_id : holdings.getMfhdIds()) {
@@ -171,8 +171,8 @@ public class Items implements ChangeDetector {
             if ( i.status != null ) {
               if ( i.status.due != null )
                 dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
-              if ( i.status.code != null && i.status.code.containsValue("Call Slip Request") )
-                callSlips.put(i.itemId, "Call Slip Request");
+              for ( String statusValue : i.status.code.values() ) if ( statusValue.contains("Request") )
+                requests.put(i.itemId, statusValue);
             }
           }
           il.put(mfhd_id, items);
@@ -181,14 +181,14 @@ public class Items implements ChangeDetector {
     }
     if (inventory != null) {
       updateInInventory(inventory,bibId,TrackingTable.DUEDATES,dueDates);
-      updateInInventory(inventory,bibId,TrackingTable.CALLSLIPS,callSlips);
+      updateInInventory(inventory,bibId,TrackingTable.REQUESTS,requests);
     }
     return il;
   }
 
   private static enum TrackingTable {
     DUEDATES("itemDueDates"),
-    CALLSLIPS("itemCallSlipRequests");
+    REQUESTS("itemRequests");
     private String tableName;
     private TrackingTable( String tableName ) {
       this.tableName = tableName;
@@ -197,10 +197,10 @@ public class Items implements ChangeDetector {
     public String toString() { return this.tableName; }
   }
   private static void updateInInventory(
-      Connection inventory, Integer bibId,TrackingTable table, Map<Integer, String> dueDates)
+      Connection inventory, Integer bibId,TrackingTable table, Map<Integer, String> details)
           throws SQLException {
 
-    if ( dueDates.isEmpty() ) {
+    if ( details.isEmpty() ) {
       try (PreparedStatement delStmt = inventory.prepareStatement(
           "DELETE FROM "+table+" WHERE bib_id = ?")) {
         delStmt.setInt(1, bibId);
@@ -218,7 +218,7 @@ public class Items implements ChangeDetector {
       }
     }
     String json;
-    try { json = mapper.writeValueAsString(dueDates);  }
+    try { json = mapper.writeValueAsString(details);  }
     catch (JsonProcessingException e) { e.printStackTrace(); return; }
 
     if (json.equals(oldJson)) return;
