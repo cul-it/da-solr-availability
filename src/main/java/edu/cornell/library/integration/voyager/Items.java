@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.changes.ChangeDetector;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
+import edu.cornell.library.integration.voyager.ItemStatuses.StatusCode;
 import edu.cornell.library.integration.voyager.ItemTypes.ItemType;
 import edu.cornell.library.integration.voyager.Locations.Location;
 
@@ -171,8 +172,8 @@ public class Items implements ChangeDetector {
             if ( i.status != null ) {
               if ( i.status.due != null )
                 dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
-              for ( String statusValue : i.status.code.values() ) if ( statusValue.contains("Request") )
-                requests.put(i.itemId, statusValue);
+              for ( StatusCode c : i.status.statuses ) if ( c.name.contains("Request") )
+                requests.put(i.itemId, c.name);
             }
           }
           il.put(mfhd_id, items);
