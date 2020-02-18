@@ -342,6 +342,7 @@ public class Items implements ChangeDetector {
     @JsonProperty("status")    public ItemStatus status;
     @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public final Integer date;
+    @JsonProperty("active")    public boolean active = true;
 
     Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
@@ -388,7 +389,8 @@ public class Items implements ChangeDetector {
         @JsonProperty("circGrp")   Map<Integer,String> circGrp,
         @JsonProperty("type")      ItemType type,
         @JsonProperty("status")    ItemStatus status,
-        @JsonProperty("date")      Integer date
+        @JsonProperty("date")      Integer date,
+        @JsonProperty("active")    boolean active
         ) {
       this.itemId = itemId;
       this.mfhdId = mfhdId;
@@ -406,6 +408,7 @@ public class Items implements ChangeDetector {
       this.type = type;
       this.status = status;
       this.date = date;
+      this.active = active;
     }
 
     public String toJson() throws JsonProcessingException {
