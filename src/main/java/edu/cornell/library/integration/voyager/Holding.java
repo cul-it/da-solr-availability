@@ -52,6 +52,7 @@ public class Holding {
   @JsonProperty("online")      public Boolean online = null;
   @JsonProperty("date")        public final Integer date;
   @JsonProperty("links")       public List<Link> links = null;
+  @JsonProperty("active")      public boolean active = true;
 
 
   @JsonIgnore public List<String> donors = null;
@@ -192,7 +193,8 @@ public class Holding {
       @JsonProperty("date")        Integer date,
       @JsonProperty("boundWith")   Map<Integer,BoundWith> boundWiths,
       @JsonProperty("items")       HoldingsItemSummary itemSummary,
-      @JsonProperty("order")       String openOrderNote) {
+      @JsonProperty("order")       String openOrderNote,
+      @JsonProperty("active")      boolean active) {
     this.copy = copy;
     this.notes = (notes == null || notes.isEmpty()) ? null : notes;
     this.holdings = (holdings == null || holdings.isEmpty()) ? null : holdings;
@@ -208,6 +210,7 @@ public class Holding {
     this.avail = avail;
     this.circ = circ;
     this.online = online;
+    this.active = active;
   }
 
   public String toJson() throws JsonProcessingException {

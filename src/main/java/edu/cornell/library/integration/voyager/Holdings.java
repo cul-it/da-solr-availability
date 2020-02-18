@@ -279,7 +279,7 @@ public class Holdings {
       if (l.desc != null && (l.desc.startsWith("HathiTrust"))) {
         if (hathiHolding == null) {
           hathiHolding = new Holding(
-              null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null);
+              null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
           hathiHolding.links = new ArrayList<>();
           holdings.put(0, hathiHolding);
         }

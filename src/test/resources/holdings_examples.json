@@ -9,7 +9,8 @@
                 "library":"Library Annex",
                 "hoursCode":"annex"},
     "call":"HC59.7 .B16 1977",
-    "date":959745600}}
+    "date":959745600,
+    "active":true}}
 
 
 
@@ -20,7 +21,8 @@
     "holdings":["no.177-182 (2016)"],
     "location":{"code":"was","number":139,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "call":"Oversize NX583.A1 S52 +",
-    "date":1495138879}}
+    "date":1495138879,
+    "active":true}}
 
 
 
@@ -39,6 +41,7 @@
    "call":"Oversize DS488 .S18 ++",
    "circ":true,
    "date":1247590991,
+   "active":true,
    "boundWith":{"3910960":{"masterItemId":3910960,
                            "masterBibId":2095674,
                            "masterTitle":"Accelerated Mahaweli, Sri Lanka Development Programme /",
@@ -70,7 +73,8 @@
                 "library":"Law Library",
                 "hoursCode":"law"},
     "call":"KF3369 .A76 1983",
-	"date":959745600}}
+	"date":959745600,
+  "active":true}}
 
 ,"expectedJsonWithAvailability1131911":
 
@@ -81,6 +85,7 @@
    "call":"KF3369 .A76 1983",
    "circ":true,
    "date":959745600,
+   "active":true,
    "items":{"count":3,"avail":3}}}
 
 
@@ -92,7 +97,8 @@
     "indexes":["1959/1974"],
     "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
     "call":"+ G1 .R33",
-    "date":959745600}}
+    "date":959745600,
+    "active":true}}
 
 
 
@@ -104,6 +110,7 @@
    "call":"New & Noteworthy Books AC8.5 .G74 2016",
    "circ":true,
    "date":1473796018,
+   "active":true,
    "items":{"count":1,
             "unavail":[{"id":10013120,
                         "status":{"code":{"3":"Renewed"},"due":1506218400,"date":1504965705}}]}}}
@@ -118,6 +125,7 @@
    "call":"PS3554.I3 D6x 1996",
    "circ":true,
    "date":1275657369,
+   "active":true,
    "items":{"count":1,
             "unavail":[{"id":6571313,
                         "status":{"code":{"2":"Charged"},"due":1516863600,"date":1504104315}}]}},
@@ -127,6 +135,7 @@
    "call":"PS3554.I3 D6x 1996",
    "circ":true,
    "date":1274884635,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "5860317":{
    "copy":3,
@@ -134,6 +143,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1278418987,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7367226":{
    "notes":["Signed by Joanna Cassidy, actress in Blade Runner, the film version of the book."],
@@ -144,12 +154,14 @@
    "call":"Rare Books PS3554.I3 D6 1996",
    "circ":false,
    "date":1274283600,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7371275":{
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1305137497,
+   "active":true,
    "items":{"count":1,
             "unavail":[{"id":8764607,
                         "status":{"code":{"2":"Charged"},"due":1517468400,"date":1505317642}}]}},
@@ -159,6 +171,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1410380685,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7371279":{
    "copy":3,
@@ -166,6 +179,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1307478334,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7371281":{
    "copy":4,
@@ -173,6 +187,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1309886750,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7371283":{
    "copy":5,
@@ -180,6 +195,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1305137472,
+   "active":true,
    "items":{"count":1,
             "unavail":[{"id":8764617,
                         "status":{"code":{"2":"Charged"},"due":1512975600,"date":1481401648}}]}},
@@ -189,18 +205,21 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1310147166,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7371302":{
    "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1275074667,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7383225":{
    "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1306857113,
+   "active":true,
    "items":{"count":1,
             "unavail":[{"id":8771100,
                         "status":{"code":{"2":"Charged"},"due":1517554800,"date":1505399640}}]}},
@@ -209,6 +228,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276784928,
+   "active":true,
    "items":{"count":1,
             "unavail":[{"id":8771167,
                         "status":{"code":{"3":"Renewed"},"due":1516856340,"date":1484314092}}]}},
@@ -218,6 +238,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276784987,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7383752":{
    "copy":3,
@@ -225,6 +246,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276790437,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7383755":{
    "copy":4,
@@ -232,12 +254,14 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276790545,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7383965":{
    "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276884581,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7383966":{
    "copy":2,
@@ -245,6 +269,7 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276884651,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7387210":{
    "copy":5,
@@ -252,12 +277,14 @@
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1404301940,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "7391702":{
    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1278703820,
+   "active":true,
    "items":{"count":1,"avail":1}}}
 
 
@@ -271,6 +298,7 @@
    "call":"JS39 .M95 Oversize",
    "circ":true,
    "date":959745600,
+   "active":true,
    "items":{"count":1,
             "unavail":[{"id":6294,"status":{"code":{"12":"Missing"},"date":1355862860}}]}}}
 
@@ -298,6 +326,7 @@
                "library":"Veterinary Library","hoursCode":"vet"},
    "circ":true,
    "date":1363963641,
+   "active":true,
    "items":{"count":17,"avail":17}},
  "398886":{
    "notes":["Subscription cancelled after 2009"],
@@ -311,6 +340,7 @@
    "call":"Q1 .N282",
    "circ":true,
    "date":1495197912,
+   "active":true,
    "items":{"count":292,"avail":291,
             "unavail":[{"id":9724204,
                         "enum":"v.515-516:no.7527-7531 - 2014",
@@ -327,6 +357,7 @@
    "call":"HD31.2 .G95 2017",
    "circ":true,
    "date":1472212100,
+   "active":true,
    "items":{
       "count":1,"avail":1,
       "returned":[{"id":10007450,"status":{"available":true,"code":{"11":"Discharged"},"date":1505328069}}]}},
@@ -336,6 +367,7 @@
    "call":"HD31.2 .G95 2017",
    "circ":true,
    "date":1502385643,
+   "active":true,
    "items":{
       "count":1,"avail":1,
       "returned":[{"id":10345845,"status":{"available":true,"code":{"11":"Discharged"},"date":1505164520}}]}}}
@@ -352,6 +384,7 @@
    "call":"Video 9",
    "circ":true,
    "date":1108394508,
+   "active":true,
    "items":{
       "count":4,"avail":4,
       "tempLoc":[
@@ -368,6 +401,7 @@
    "call":"Video 9",
    "circ":true,
    "date":1108129539,
+   "active":true,
    "items":{
       "count":4,"avail":4,
       "tempLoc":[
@@ -383,6 +417,7 @@
    "call":"Video 1192",
    "circ":true,
    "date":1321365882,
+   "active":true,
    "items":{"count":4,"avail":4}}}
 
 
@@ -398,6 +433,7 @@
    "call":"HD9710.A1 W38",
    "circ":true,
    "date":1493048691,
+   "active":true,
    "items":{
       "count":15,"avail":14,
       "unavail":[{
@@ -426,6 +462,7 @@
    "call":"In Process",
    "circ":true,
    "date":1520460653,
+   "active":true,
    "items":{
      "count":1,"avail":1}}}
 
@@ -441,6 +478,7 @@
   "call":"RA652.2.M3 J49x 2004",
   "circ":true,
   "date":1070397488,
+  "active":true,
   "items":{
     "count":1,
     "unavail":[{"id":6969960,"status":{"code":{"14":"Lost--System Applied"},"due":1354683540,"date":1357310288}}]}},
@@ -450,6 +488,7 @@
   "call":"RA652.2.M3 J49x 2004",
   "circ":true,
   "date":1404846031,
+  "active":true,
   "items":{
     "count":1,
     "unavail":[{"id":9469276,"status":{"code":{"3":"Renewed"},"due":1531602000,"date":1500075548}}]}}}
@@ -464,6 +503,7 @@
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1389364051,
+  "active":true,
   "items":{"count":1,"unavail":[{"id":2190221,"status":{"code":{"12":"Missing"},"date":1472486835}}]}},
 "1144752":{
   "copy":2,
@@ -471,6 +511,7 @@
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297829,
+  "active":true,
   "items":{"count":1,"unavail":[{"id":2190222,"status":{"code":{"2":"Charged"},"due":1522350002,"date":1522342802,"shortLoan":true}}]}},
 "1144753":{
   "copy":3,
@@ -478,6 +519,7 @@
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297825,
+  "active":true,
   "items":{"count":1,"avail":1}},
 "1144754":{
   "copy":4,
@@ -485,6 +527,7 @@
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297823,
+  "active":true,
   "items":{"count":1,"avail":1}},
 "1144755":{
   "copy":5,
@@ -492,13 +535,16 @@
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297820,
+  "active":true,
   "items":{"count":1,"avail":1}},
 "1144756":{
   "copy":6,
   "notes":["ILR Multi-copy Storage"],
   "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
   "call":"E806 .B78 1983",
-  "circ":true,"date":1213297828,
+  "circ":true,
+  "date":1213297828,
+  "active":true,
   "items":{"count":1,"avail":1}},
 "1144757":{
   "copy":7,
@@ -506,6 +552,7 @@
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297826,
+  "active":true,
   "items":{"count":1,"avail":1}}}
 
 
@@ -521,6 +568,7 @@
   "location":{"code":"olin,anx","number":101,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
   "call":"P9 .F5 t.64",
   "date":1179841345,
+  "active":true,
   "boundWith":{"2057898":{"masterItemId":2057898,
                           "masterBibId":836782,
                           "masterTitle":"Fifty Oxyrhynchus Papyri : (P. Oxy. Hels.) /",
@@ -565,6 +613,7 @@
   "call":"PL101 .T905",
   "circ":true,
   "date":1476731692,
+  "active":true,
   "items":{"count":76,"avail":76}},
 "449214":{
   "holdings":["cilt 1-32 (1951/1952-1975)"],
@@ -573,6 +622,7 @@
   "call":"PL101 .T905",
   "circ":true,
   "date":959745600,
+  "active":true,
   "items":{"count":34,"avail":34}}}
 
 
@@ -582,7 +632,7 @@
 ,"expectedJsonOnline":
 # bib 10023626
 
-{"10336455":{ "online":true, "date":1505847360 }}
+{"10336455":{ "online":true, "date":1505847360, "active":true }}
 
 ,"expectedJsonOnlineWithLinks":
 # bib 10023626
@@ -591,6 +641,7 @@
 {"10336455":{
   "online":true,
   "date":1505847360,
+  "active":true,
   "links":[
       {"url":"http://proxy.library.cornell.edu/login?url=https://link.springer.com/openurl?genre=book&isbn=978-3-319-63492-0",
        "description":"Full text available from SpringerLink ebooks - Earth and Environmental Science (Contemporary) Connect to text.",
@@ -617,9 +668,10 @@
     "call":"QK545.I4 D59 1914",
     "circ":true,
     "date":1029770131,
+  "active":true,
     "items":{"count":1,"avail":1}},
  "0":{
-    "online":true,
+    "online":true, "active":true,
     "links":[{"url":"http://hdl.handle.net/2027/coo.31924089590891","description":"HathiTrust"}]}}
 
 
@@ -635,6 +687,7 @@
   "call":"KF567.4 .L39 1895",
   "online":true,
   "date":1303926958,
+  "active":true,
   "links":[{
      "url":"http://proxy.library.cornell.edu/login?url=https://www.heinonline.org/HOL/Index?index=beal/lreapcc&collection=bealL_beal",
      "description":"HeinOnline Legal Classics Library Connect to full text. Access limited to authorized subscribers."}]}}
@@ -651,6 +704,7 @@
    "call":"F118 .N56",
    "circ":true,
    "date":959745600,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "3333483":{
    "notes":["Reproduction from digital master. Ithaca, N.Y. : Cornell University Library, 1995. 23 cm."],
@@ -659,15 +713,17 @@
    "call":"F118 .N56 1860a",
    "circ":true,
    "date":959745600,
+   "active":true,
    "items":{"count":1,"avail":1}},
  "3333484":{
    "notes":["Computer file. Ithaca, N.Y. : Cornell University Library, 1995. [492] image files.",
    "Files for the images of individual pages are encoded in Aldus/Microsoft TIFF Version 5.0 using facsimile-compatible CCITT Group 4 compression."],
    "online":true,
    "date":959745600,
+   "active":true,
    "links":[{"url":"http://resolver.library.cornell.edu/moap/anw1478"}]},
  "0":{
-   "online":true,
+   "online":true, "active":true,
    "links":[{"url":"http://catalog.hathitrust.org/Record/009586797","description":"HathiTrust (multiple volumes)"}]}}
 
 
