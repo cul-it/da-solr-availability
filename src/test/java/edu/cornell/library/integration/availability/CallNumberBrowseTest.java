@@ -44,7 +44,7 @@ public class CallNumberBrowseTest {
   public void multipleCopies() throws SQLException, IOException, XMLStreamException {
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
     for (int mfhdId : holdings.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
       holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
 
@@ -107,7 +107,7 @@ public class CallNumberBrowseTest {
   public void serial() throws SQLException, IOException, XMLStreamException {
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 329763);
     for (int mfhdId : holdings.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
       holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
 
@@ -117,7 +117,6 @@ public class CallNumberBrowseTest {
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings);
 
 //    for (SolrInputDocument doc : docs) System.out.println(ClientUtils.toXML(doc));
-
     assertEquals(2,docs.size());
     assertEquals(
         "<doc boost=\"1.0\">"
@@ -151,7 +150,7 @@ public class CallNumberBrowseTest {
 
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 10005850);
     for (int mfhdId : holdings.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
       holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
 

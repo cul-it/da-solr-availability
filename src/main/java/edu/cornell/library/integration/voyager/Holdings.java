@@ -35,7 +35,6 @@ public class Holdings {
       "  FROM bib_mfhd, mfhd_master"+
       " WHERE bib_mfhd.mfhd_id = mfhd_master.mfhd_id"+
       "   AND bib_mfhd.bib_id = ?"+
-      "   AND mfhd_master.suppress_in_opac = 'N'"+
       " ORDER BY bib_mfhd.mfhd_id";
   private static final String holdingByHoldingIdQuery =
       "SELECT *"+

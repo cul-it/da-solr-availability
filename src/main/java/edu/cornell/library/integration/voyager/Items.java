@@ -131,20 +131,20 @@ public class Items implements ChangeDetector {
   private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(
       FormatStyle.SHORT,FormatStyle.SHORT);
 
-  public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhd_id ) throws SQLException {
+  public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhdId, boolean active ) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
       circPolicyGroups = new CircPolicyGroups( voyager );
     }
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
-      pstmt.setInt(1, mfhd_id);
+      pstmt.setInt(1, mfhdId);
       try (ResultSet rs = pstmt.executeQuery()) {
         TreeSet<Item> items = new TreeSet<>();
         while (rs.next())
-          items.add(new Item(voyager,rs, false));
+          items.add(new Item(voyager,rs, false, active));
         Map<Integer,TreeSet<Item>> itemList = new LinkedHashMap<>();
-        itemList.put(mfhd_id, items);
+        itemList.put(mfhdId, items);
         return new ItemList(itemList);
       }
     }
@@ -162,12 +162,12 @@ public class Items implements ChangeDetector {
     Map<Integer,String> requests = new TreeMap<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
       pstmt.setFetchSize(10_000);
-      for (int mfhd_id : holdings.getMfhdIds()) {
-        pstmt.setInt(1, mfhd_id);
+      for (int mfhdId : holdings.getMfhdIds()) {
+        pstmt.setInt(1, mfhdId);
         try (ResultSet rs = pstmt.executeQuery()) {
           TreeSet<Item> items = new TreeSet<>();
           while (rs.next()) {
-            Item i = new Item(voyager,rs,false);
+            Item i = new Item(voyager,rs,false, holdings.get(mfhdId).active);
             items.add(i);
             if ( i.status != null ) {
               if ( i.status.due != null )
@@ -176,7 +176,7 @@ public class Items implements ChangeDetector {
                 requests.put(i.itemId, c.name);
             }
           }
-          il.put(mfhd_id, items);
+          il.put(mfhdId, items);
         }
       }
     }
@@ -243,7 +243,7 @@ public class Items implements ChangeDetector {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
-          return new Item(voyager,rs, true);
+          return new Item(voyager,rs, true, true);
       }
     }
     return null;
@@ -259,7 +259,7 @@ public class Items implements ChangeDetector {
       pstmt.setString(1, barcode);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
-          return new Item(voyager,rs, true);
+          return new Item(voyager,rs, true, true);
       }
     }
     return null;
@@ -344,7 +344,7 @@ public class Items implements ChangeDetector {
     @JsonProperty("date")      public final Integer date;
     @JsonProperty("active")    public boolean active = true;
 
-    Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
+    Item(Connection voyager, ResultSet rs, boolean includeMfhdId, boolean active) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
       this.mfhdId = (includeMfhdId)?rs.getInt("MFHD_ID"):null;
 
@@ -371,6 +371,7 @@ public class Items implements ChangeDetector {
       this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
           ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
       this.empty = (rs.getString("ITEM_BARCODE") == null)?true:null;
+      this.active = active;
     }
 
     Item(

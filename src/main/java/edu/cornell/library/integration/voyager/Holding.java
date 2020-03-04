@@ -70,6 +70,7 @@ public class Holding {
         ? rs.getTimestamp("create_date") : rs.getTimestamp("update_date")).getTime()/1000);
     String mrc = DownloadMARC.downloadMrc(voyager, RecordType.HOLDINGS, rs.getInt("mfhd_id"));
     this.record = new MarcRecord( RecordType.HOLDINGS, mrc );
+    this.active = rs.getString("suppress_in_opac").equals("N");
 
     // process data from holdings marc
     final Map<Integer,BoundWith> boundWiths = new HashMap<>();
