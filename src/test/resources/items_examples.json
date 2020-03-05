@@ -6,6 +6,7 @@
 {"1234567":[
    {"id":2282772,
     "copy":1,
+    "barcode":"31924067383830",
     "sequence":1,
     "location":{"code":"rmc,anx",
                 "number":203,
@@ -25,6 +26,7 @@
 
 {"1184953":[
    {"id":2236014,
+    "barcode":"31924002209538",
     "copy":1,
     "sequence":1,
     "location":{"code":"ilr,anx","number":52,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
@@ -41,6 +43,7 @@
 # holding 9975971, containing UNAVAILABLE item 10013120
 {"9975971":[
    {"id":10013120,
+    "barcode":"31924122496684",
     "copy":1,
     "sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
@@ -57,7 +60,7 @@
 
 
 {"2932":[
-   {"id":18847,"copy":1,"sequence":1,"holds":1,
+   {"id":18847,"barcode":"31924009888029","copy":1,"sequence":1,"holds":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -72,7 +75,7 @@
 
 
 {"6511093":[
-   {"id":8060353,"copy":1,"sequence":1,"recalls":1,
+   {"id":8060353,"barcode":"31924105530020","copy":1,"sequence":1,"recalls":1,
     "location":{"code":"engr,anx","number":21,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
     "circGrp":{"5":"Annex Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -86,7 +89,7 @@
 
 
 {"9957560":[
-   {"id":10007450,"copy":1,"sequence":1,"onReserve":true,
+   {"id":10007450,"barcode":"31924122423662","copy":1,"sequence":1,"onReserve":true,
     "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"ilr"},
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":26,"name":"2hrres"},
@@ -94,7 +97,7 @@
     "date":1472147590,
     "active":true}],
  "10287643":[
-   {"id":10345845,"copy":2,"sequence":1,"onReserve":true,
+   {"id":10345845,"barcode":"31924124599691","copy":2,"sequence":1,"onReserve":true,
     "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"ilr"},
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":26,"name":"2hrres"},
@@ -278,84 +281,84 @@
 
 
 {"4521000":[
-   {"id":5999415,"copy":1,"sequence":1,"enum":"v.1",
+   {"id":5999415,"barcode":"31924090013479","copy":1,"sequence":1,"enum":"v.1",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":984055868},
     "date":984055868,
     "active":true},
-   {"id":6027429,"copy":1,"sequence":2,"enum":"v.2",
+   {"id":6027429,"barcode":"31924090841879","copy":1,"sequence":2,"enum":"v.2",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1103536820},
     "date":987617421,
     "active":true},
-   {"id":6646604,"copy":1,"sequence":3,"enum":"v.3",
+   {"id":6646604,"barcode":"31924096142660","copy":1,"sequence":3,"enum":"v.3",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1046807250},
     "date":1046869046,
     "active":true},
-   {"id":6709722,"copy":1,"sequence":4,"enum":"v.4",
+   {"id":6709722,"barcode":"31924096654094","copy":1,"sequence":4,"enum":"v.4",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1051721054},
     "date":1051731246,
     "active":true},
-   {"id":6778738,"copy":1,"sequence":5,"enum":"v.5",
+   {"id":6778738,"barcode":"31924096849124","copy":1,"sequence":5,"enum":"v.5",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1056640579},
     "date":1056640578,
     "active":true},
-   {"id":6778741,"copy":1,"sequence":6,"enum":"v.6",
+   {"id":6778741,"barcode":"31924096849132","copy":1,"sequence":6,"enum":"v.6",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1056640641},
     "date":1056640641,
     "active":true},
-   {"id":6875293,"copy":1,"sequence":7,"enum":"v.7",
+   {"id":6875293,"barcode":"31924097486447","copy":1,"sequence":7,"enum":"v.7",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1063898732},
     "date":1064602253,
     "active":true},
-   {"id":7033468,"copy":1,"sequence":8,"enum":"v.8",
+   {"id":7033468,"barcode":"31924096707900","copy":1,"sequence":8,"enum":"v.8",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1076946895},
     "date":1077065308,
     "active":true},
-   {"id":7159889,"copy":1,"sequence":9,"enum":"v.9",
+   {"id":7159889,"barcode":"31924099242335","copy":1,"sequence":9,"enum":"v.9",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1090002546},
     "date":1090872849,
     "active":true},
-   {"id":7237659,"copy":1,"sequence":10,"enum":"v.10",
+   {"id":7237659,"barcode":"31924099484093","copy":1,"sequence":10,"enum":"v.10",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1100027059},
     "date":1100724034,
     "active":true},
-   {"id":7237661,"copy":1,"sequence":11,"enum":"v.11",
+   {"id":7237661,"barcode":"31924099484101","copy":1,"sequence":11,"enum":"v.11",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1100027134},
     "date":1100724025,
     "active":true},
-   {"id":7581047,"copy":1,"sequence":12,"enum":"v.12",
+   {"id":7581047,"barcode":"31924102153552","copy":1,"sequence":12,"enum":"v.12",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -370,6 +373,7 @@
 
 {"1055":[
   {"id":6294,
+   "barcode":"31924017242961",
    "copy":1,
    "sequence":1,
    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
@@ -386,7 +390,7 @@
 
 {"2202712":[
    {"id":3451908,
-    "copy":1,"sequence":1,"chron":"1978",
+    "barcode":"31924051040735","copy":1,"sequence":1,"chron":"1978",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -394,7 +398,7 @@
     "date":959745600,
     "active":true},
    {"id":3451909,
-    "copy":1,"sequence":2,"chron":"1980",
+    "barcode":"31924051040743","copy":1,"sequence":2,"chron":"1980",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -402,7 +406,7 @@
     "date":959745600,
     "active":true},
    {"id":3451910,
-    "copy":1,"sequence":3,"chron":"1981",
+    "barcode":"31924051040750","copy":1,"sequence":3,"chron":"1981",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -410,7 +414,7 @@
     "date":959745600,
     "active":true},
    {"id":3451911,
-    "copy":1,"sequence":4,"chron":"1982",
+    "barcode":"31924051040768","copy":1,"sequence":4,"chron":"1982",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -418,7 +422,7 @@
     "date":959745600,
     "active":true},
    {"id":3451912,
-    "copy":1,"sequence":5,"chron":"1985",
+    "barcode":"31924051040776","copy":1,"sequence":5,"chron":"1985",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -427,7 +431,7 @@
     "active":true},
 # Sequence number 6 is unused. Was probably originally 1987 volume, now bound-with. See matching holdings example
    {"id":3451913,
-    "copy":1,"sequence":7,"chron":"1988",
+    "barcode":"31924051040784","copy":1,"sequence":7,"chron":"1988",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -445,7 +449,7 @@
     "date":1247590864,
     "active":true},
    {"id":3451914,
-    "copy":1,"sequence":9,"chron":"1991",
+    "barcode":"31924067574529","copy":1,"sequence":9,"chron":"1991",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -453,7 +457,7 @@
     "date":959745600,
     "active":true},
    {"id":3451915,
-    "copy":1,"sequence":10,"chron":"1992",
+    "barcode":"31924083741052","copy":1,"sequence":10,"chron":"1992",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -461,7 +465,7 @@
     "date":959745600,
     "active":true},
    {"id":3451916,
-    "copy":1,"sequence":11,"chron":"1994",
+    "barcode":"31924075327621","copy":1,"sequence":11,"chron":"1994",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -469,7 +473,7 @@
     "date":959745600,
     "active":true},
    {"id":3451917,
-    "copy":1,"sequence":12,"chron":"1995",
+    "barcode":"31924077553489","copy":1,"sequence":12,"chron":"1995",
     "location":{"code":"sasa","number":122,"name":"Kroch Library Asia","library":"Kroch Library Asia","hoursCode":"asia"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":2,"name":"serial"},
@@ -488,7 +492,7 @@
 
 
 {"5404964":[{
-  "id":6969960,"copy":1,"sequence":1,
+  "id":6969960,"barcode":"31924090213673","copy":1,"sequence":1,
   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
   "circGrp":{"16":"Mann Circ Group"},
   "type":{"id":3,"name":"book"},
@@ -503,7 +507,7 @@
 
 
 {"1144752":[
-  {"id":2190222,"copy":2,"sequence":1,
+  {"id":2190222,"barcode":"31924003641960","copy":2,"sequence":1,
   "location":{"code":"uris,res","number":132,"name":"Uris Library Reserve","library":"Uris Library","hoursCode":"uris"},
   "circGrp":{"19":"Uris Circ Group"},
   "type":{"id":26,"name":"2hrres"},
@@ -538,6 +542,7 @@
 
 {"1766925":
   [{"id":2960377,
+    "barcode":"31924016749552",
     "copy":1,
     "sequence":1,
     "location":{"code":"rmc","number":87,"name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
@@ -580,6 +585,7 @@
 
 {"19612":
   [{"id":36199,
+    "barcode":"31924003888926",
     "copy":1,
     "sequence":1,
     "location":{"code":"engr,anx","number":21,"name":"Library Annex",
@@ -591,6 +597,7 @@
     "active":true}],
  "19613":
   [{"id":36200,
+    "barcode":"31924000033617",
     "copy":1,
     "sequence":1,
     "location":{"code":"mann","number":69,"name":"Mann Library",
@@ -608,6 +615,7 @@
 
 {"50844":
   [{"id":70415,
+    "barcode":"31924014807493",
     "copy":1,
     "sequence":1,
     "location":{"code":"rmc,anx","number":203,
@@ -620,6 +628,7 @@
     "active":true}],
  "50845":
   [{"id":70416,
+    "barcode":"31924004035162",
     "copy":1,
     "sequence":1,
     "location":{"code":"phys,anx","number":116,"name":"Library Annex",
@@ -631,6 +640,7 @@
     "active":true}],
  "6497157":
   [{"id":9819219,
+    "barcode":"31924122255478",
     "copy":1,
     "sequence":1,
     "location":{"code":"olin,anx","number":101,"name":"Library Annex",
@@ -647,6 +657,7 @@
 
 {"6002585":
   [{"id":7537090,
+    "barcode":"31924100538127",
     "copy":1,
     "sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library",
@@ -658,6 +669,7 @@
     "active":true}],
  "6036066":
   [{"id":7565606,
+    "barcode":"31924100247430",
     "copy":1,
     "sequence":1,
     "location":{"code":"rmc,icer","number":121,
@@ -674,6 +686,7 @@
 
 {"365610":
   [{"id":593559,
+    "barcode":"31924052388372",
     "copy":1,
     "sequence":1,
     "location":{"code":"mann,anx","number":71,"name":"Library Annex",
@@ -685,6 +698,7 @@
     "active":true}],
  "4657637":
   [{"id":6173675,
+    "barcode":"31924101402018",
     "copy":1,
     "sequence":1,
     "location":{"code":"rmc,anx","number":203,

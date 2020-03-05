@@ -327,6 +327,7 @@ public class Items implements ChangeDetector {
 
     @JsonProperty("id")        public final int itemId;
     @JsonProperty("mfhdId")    public Integer mfhdId;
+    @JsonProperty("barcode")   public final String barcode;
     @JsonProperty("copy")      private final int copy;
     @JsonProperty("sequence")  private final int sequence;
     @JsonProperty("enum")      public String enumeration;
@@ -370,13 +371,16 @@ public class Items implements ChangeDetector {
       this.status = new ItemStatus( voyager, this.itemId, this.type, this.location );
       this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
           ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
-      this.empty = (rs.getString("ITEM_BARCODE") == null)?true:null;
       this.active = active;
+      String barcode = rs.getString("ITEM_BARCODE");
+      if (barcode == null) { this.empty = true;   this.barcode = null; }
+      else {                 this.empty = null;   this.barcode = barcode; }
     }
 
     Item(
         @JsonProperty("id")        int itemId,
         @JsonProperty("mfhdId")    Integer mfhdId,
+        @JsonProperty("barcode")   String barcode,
         @JsonProperty("copy")      int copy,
         @JsonProperty("sequence")  int sequence,
         @JsonProperty("enum")      String enumeration,
@@ -395,6 +399,7 @@ public class Items implements ChangeDetector {
         ) {
       this.itemId = itemId;
       this.mfhdId = mfhdId;
+      this.barcode = barcode;
       this.copy = copy;
       this.sequence = sequence;
       this.enumeration = enumeration;
