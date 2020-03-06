@@ -1,16 +1,18 @@
 
-{ "expectedJson1184953":
+{ "expectedJson969430":
 
 
 {"1184953":{
-    "location":{"code":"ilr,anx",
-                "number":52,
-                "name":"Library Annex",
-                "library":"Library Annex",
-                "hoursCode":"annex"},
-    "call":"HC59.7 .B16 1977",
-    "date":959745600,
-    "active":true}}
+   "location":{"code":"ilr,anx","number":52,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+   "call":"HC59.7 .B16 1977",
+   "date":959745600,
+   "active":true},
+ "1184954":{
+   "copy":2,
+   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "call":"HC59.7 .B16 1977",
+   "date":959745600,
+   "active":false}}
 
 
 
@@ -328,6 +330,12 @@
    "date":1363963641,
    "active":true,
    "items":{"count":17,"avail":17}},
+ "398885":{
+   "notes":["Electronic version only starting with 2007. Print subscription cancelled after 2006."],
+   "location":{"code":"engr","number":19,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+   "call":"Q1 .N282",
+   "date":1276622954,
+   "active":false},
  "398886":{
    "notes":["Subscription cancelled after 2009"],
    "holdings":["v.229-470:no.5279-7335 (1971-2011)",
@@ -344,8 +352,39 @@
    "items":{"count":292,"avail":291,
             "unavail":[{"id":9724204,
                         "enum":"v.515-516:no.7527-7531 - 2014",
-                        "status":{"code":{"18":"At Bindery"},"date":1429839935}}]}}}
-
+                        "status":{"code":{"18":"At Bindery"},"date":1429839935}}]}},
+ "398887":{
+   "location":{"code":"uris","number":129,"name":"Uris Library","library":"Uris Library","hoursCode":"uris"},
+   "call":"Sixth Level Q1 .N282",
+   "date":1253134548,
+   "active":false},
+ "398888":{
+   "notes":["Subscription cancelled after 1994"],
+   "holdings":["v.247-377 (1974-1995)"],
+   "indexes":["v.247/252-349/354 (1974-1991)"],
+   "location":{"code":"engr","number":19,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+   "call":"Microfiche 403",
+   "date":1290018300,
+   "active":false},
+ "398889":{
+   "notes":["Recent issues located in Current Periodicals Area on 1st floor",
+            "Electronic version only starting with 2016.  Print subscription cancelled after 2015."],
+   "holdings":["v.229-413 (1971-2001)","v.414:no.6859-6864 (2001:Nov. 1-Dec. 6)","v.415-438 (2002-2005)",
+               "v.439-472:no.7073-7344 (2005-2011)","no.7345-7472, 7474-7583 (2011-2015)"],
+   "indexes":["v.229/234-421/426 (1971-2003)"],
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
+   "call":"Q1 .N29","date":1485792076,"active":false},
+ "398890":{
+   "notes":["Electronic version only starting with 2010. Print subscription cancelled after 2009."],
+   "holdings":["v.414 (2001)","v.462 (2009)"],
+   "location":{"code":"gnva","number":38,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+   "call":"Q1 .N29","date":1273665046,
+   "active":false},
+ "398891":{
+   "location":{"code":"bioc","number":8,"name":"Biochem Reading Room (Biotech Building) (Dept. use only)",
+   "library":"Biochem Reading Room (Biotech)"},
+   "date":1276282834,
+   "active":false}}
 
 
 ,"expectedJsonOnReserve":
@@ -706,6 +745,12 @@
    "date":959745600,
    "active":true,
    "items":{"count":1,"avail":1}},
+ "3333482":{
+   "copy":2,
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "call":"F 118 .N56",
+   "date":959745600,
+   "active":false},
  "3333483":{
    "notes":["Reproduction from digital master. Ithaca, N.Y. : Cornell University Library, 1995. 23 cm."],
    "location":{"code":"olin","number":99,"name":"Olin Library",
@@ -726,5 +771,138 @@
    "online":true, "active":true,
    "links":[{"url":"http://catalog.hathitrust.org/Record/009586797","description":"HathiTrust (multiple volumes)"}]}}
 
+
+
+#partially suppressed holdings examples
+
+# b:1449673
+,"RMC and Annex copies active, not other Annex and Iron Mountain":
+
+{"1766925":{
+   "location":{"code":"rmc","number":87,"name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
+               "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+   "call":"Dante Z340 .P58",
+   "date":959745600,
+   "active":true},
+ "1766926":{
+   "notes":["Microfilm. Ithaca, NY : Microfilmed by Preservation Resources on behalf of Cornell University Library, 1998. On 1 microfilm reel with other items ; 35 mm. Low reduction.",
+            "Filmed with: Dante Alighieri, 1265-1321. Comento della Divina commedia"],
+   "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+               "library":"Library Annex","hoursCode":"annex"},
+   "call":"Film 7087 reel 198 no.11",
+   "date":1495630941,
+   "active":true},
+ "1766927":{
+   "notes":["Microfilm. Ithaca, NY : Microfilmed by Preservation Resources on behalf of Cornell University Library, 1998. On 1 microfilm reel with other items : negative ; 35 mm. Low reduction.",
+            "Filmed with: Dante Alighieri, 1265-1321. Comento della Divina commedia",
+            "Master Negative--Not for public use"],
+   "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+               "library":"Library Annex","hoursCode":"annex"},
+   "call":"Film N7087 reel 198 no.11",
+   "date":1508774743,
+   "active":false},
+ "1766928":{
+   "notes":["Microfilm. Ithaca, NY : Microfilmed by Preservation Resources on behalf of Cornell University Library, 1998. On 1 microfilm reel with other items : negative ; 35 mm. Low reduction."],
+   "location":{"code":"nus","number":94,"name":"Iron Mountain","library":"Iron Mountain"},
+   "call":"Vault 65 Sec.104 Drawer 6",
+   "date":1237749761,
+   "active":false}}
+
+# b:11764
+,"Annex copy active, not Mann":
+
+{"19612":{
+   "location":{"code":"engr,anx","number":21,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
+   "call":"QH543 .M96",
+   "date":959745600,
+   "active":true},
+ "19613":{
+   "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
+   "call":"QH543 .M96",
+   "date":1280931832,
+   "active":false}}
+
+# b:34985
+,"Annex copy, rare Annex copy active, not Microfilm":
+
+{"50844":{
+   "location":{"code":"rmc,anx","number":203,
+               "name":"Kroch Library Rare & Manuscripts (Request in advance)",
+               "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+   "call":"Thesis 1951 B433",
+   "date":1156884637,
+   "active":true},
+ "50845":{
+   "location":{"code":"phys,anx","number":116,"name":"Library Annex",
+               "library":"Library Annex","hoursCode":"annex"},
+   "call":"+ Thesis QC10 1951 B433",
+   "date":1170771015,
+   "active":true},
+ "6497157":{
+   "notes":["Microfilm. Ithaca, N.Y. : Microfilmed on behalf of Cornell University Library, [196u]. 1 microfilm reel : negative ; 35 mm.",
+            "Master Negative--Not for public use."],
+   "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+               "library":"Library Annex","hoursCode":"annex"},
+   "call":"Film N1992",
+   "date":1445454906,
+   "active":false}}
+
+# b:5487364
+,"Olin copy active, not RMC copy":
+
+{"6002585":{
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "call":"Icelandic DL312 P66 2004 +",
+   "date":1313478903,
+   "active":true},
+ "6036066":{
+   "notes":["With dust jacket."],
+   "location":{"code":"rmc,icer","number":121,
+               "name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
+               "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+   "call":"Icelandic DL312.P81 I7 2004 +",
+   "date":1124828304,
+   "active":false}}
+
+
+# b:301608
+,"RMC copy, Annex copy & microfilm active, Iron Mountain & master microfilm inactive":
+
+{"365610":{
+   "location":{"code":"mann,anx","number":71,"name":"Library Annex",
+               "library":"Library Annex","hoursCode":"annex"},
+   "call":"Thesis SB124 1921 W855",
+   "date":1219336571,
+   "active":true},
+ "4657637":{
+   "location":{"code":"rmc,anx","number":203,
+               "name":"Kroch Library Rare & Manuscripts (Request in advance)",
+               "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+   "call":"Thesis 1921 W855",
+   "date":1185806836,
+   "active":true},
+ "4657638":{
+   "notes":["Microfilm. Ithaca, N.Y. : Microfilmed by Challenge Industries on behalf of Cornell University Library, 1998. On 1 microfilm reel with other items ; 35 mm. ; Low reduction.",
+            "Filmed with: Whitchurch, Goldwin, 1889- The philosophical bases of asceticism in the Platonic writings of Plato and in the pre-Platonic tradition."],
+   "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+               "library":"Library Annex","hoursCode":"annex"},
+   "call":"Film 8229 reel 55 no.2",
+   "date":1494424654,
+   "active":true},
+ "4657640":{
+   "notes":["Microfilm. Ithaca, N.Y. : Microfilmed by Challenge Industries on behalf of Cornell University Library, 1998. On 1 microfilm reel with other items : negative ; 35 mm. ; Low reduction.",
+            "Master Negative--Not for Public Use",
+            "Filmed with: Whitchurch, Irl Goldwin, 1889- The philosophical bases of asceticism in the Platonic writings of Plato and in the pre-Platonic tradition."],
+   "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+               "library":"Library Annex","hoursCode":"annex"},
+   "call":"Film N8229 reel 55 no.2",
+   "date":1445602462,
+   "active":false},
+ "4657641":{
+   "notes":["Microfilm. Ithaca, N.Y. : Microfilmed by Challenge Industries on behalf of Cornell University Library, 1998. On 1 microfilm reel with other items : negative ; 35 mm. ; Low reduction."],
+   "location":{"code":"nus","number":94,"name":"Iron Mountain","library":"Iron Mountain"},
+   "call":"Vault 65 Sec.94 Drawer 12",
+   "date":1003257416,
+   "active":false}}
 
 }

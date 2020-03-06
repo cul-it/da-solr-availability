@@ -72,7 +72,7 @@ public class BoundWithTest {
   @Test
   public void boundWithDedupe() throws SQLException, IOException, XMLStreamException {
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 833840);
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218, holdings.get(1016218).active);
 
     // before dedupe, boundwith reference in holding block, empty item looks available
     assertNotNull(holdings.get(1016218).boundWiths);

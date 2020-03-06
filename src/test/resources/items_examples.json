@@ -532,4 +532,209 @@
   "active":true,
   "empty":true}]}
 
+
+#partially suppressed examples
+
+
+# b:1449673
+,"RMC and Annex copies active, not other Annex":
+
+
+{"1766925":
+  [{"id":2960377,
+    "barcode":"31924016749552",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"rmc","number":87,"name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
+                "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+    "circGrp":{"22":"RMC Circ Group"},
+    "type":{"id":9,"name":"nocirc"},
+    "status":{"available":true,"code":{"1":"Not Charged"}},
+    "date":959745600,
+    "active":true}],
+ "1766926":
+  [{"id":10269405,
+    "copy":1,
+    "sequence":1,
+    "enum":"Filmed with:",
+    "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+                "library":"Library Annex","hoursCode":"annex"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":19,"name":"microform"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1495542068},
+    "date":1495542068,
+    "active":true,
+    "empty":true}],
+ "1766927":
+  [{"id":10656385,
+    "copy":1,
+    "sequence":1,
+    "enum":"Filmed with",
+    "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+                "library":"Library Annex","hoursCode":"annex"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":9,"name":"nocirc"},
+    "status":{"available":false,"code":{"31":"Unavailable"}},
+    "date":1555614733,
+    "active":false,
+    "empty":true}]}
+
+
+# b:11764
+,"Annex copy active, not Mann":
+
+{"19612":
+  [{"id":36199,
+    "barcode":"31924003888926",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"engr,anx","number":21,"name":"Library Annex",
+                "library":"Library Annex","hoursCode":"annex"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":3,"name":"book"},
+    "status":{"available":true,"code":{"1":"Not Charged"}},
+    "date":959745600,
+    "active":true}],
+ "19613":
+  [{"id":36200,
+    "barcode":"31924000033617",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"mann","number":69,"name":"Mann Library",
+                "library":"Mann Library","hoursCode":"mann"},
+    "circGrp":{"16":"Mann Circ Group"},
+    "type":{"id":3,"name":"book"},
+    "status":{"available":true,"code":{"1":"Not Charged"}},
+    "date":1196806706,
+    "active":false}]}
+
+
+# b:34985
+,"Annex copy, rare Annex copy active, not Microfilm":
+
+
+{"50844":
+  [{"id":70415,
+    "barcode":"31924014807493",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"rmc,anx","number":203,
+                "name":"Kroch Library Rare & Manuscripts (Request in advance)",
+                "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":9,"name":"nocirc"},
+    "status":{"available":true,"code":{"1":"Not Charged"}},
+    "date":959745600,
+    "active":true}],
+ "50845":
+  [{"id":70416,
+    "barcode":"31924004035162",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"phys,anx","number":116,"name":"Library Annex",
+                "library":"Library Annex","hoursCode":"annex"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":3,"name":"book"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1311327076},
+    "date":959745600,
+    "active":true}],
+ "6497157":
+  [{"id":9819219,
+    "barcode":"31924122255478",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+                "library":"Library Annex","hoursCode":"annex"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":19,"name":"microform"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1445454947},
+    "date":1445454947,
+    "active":false}]}
+
+# b:5487364
+,"Olin copy active, not RMC copy":
+
+
+{"6002585":
+  [{"id":7537090,
+    "barcode":"31924100538127",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"olin","number":99,"name":"Olin Library",
+                "library":"Olin Library","hoursCode":"olin"},
+    "circGrp":{"3":"Olin Circ Group"},
+    "type":{"id":3,"name":"book"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1575023784},
+    "date":1277822337,
+    "active":true}],
+ "6036066":
+  [{"id":7565606,
+    "barcode":"31924100247430",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"rmc,icer","number":121,
+                "name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
+                "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+    "circGrp":{"22":"RMC Circ Group"},
+    "type":{"id":9,"name":"nocirc"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1124828316},
+    "date":1124828316,
+    "active":false}]}
+
+# b:301608
+,"RMC copy, Annex copy & 1st microfilm active, 2nd microfilm inactive":
+
+{"365610":
+  [{"id":593559,
+    "barcode":"31924052388372",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"mann,anx","number":71,"name":"Library Annex",
+                "library":"Library Annex","hoursCode":"annex"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":3,"name":"book"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1242563987},
+    "date":1219336571,
+    "active":true}],
+ "4657637":
+  [{"id":6173675,
+    "barcode":"31924101402018",
+    "copy":1,
+    "sequence":1,
+    "location":{"code":"rmc,anx","number":203,
+                "name":"Kroch Library Rare & Manuscripts (Request in advance)",
+                "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":9,"name":"nocirc"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1003257374},
+    "date":1181316158,
+    "active":true}],
+ "4657638":
+  [{"id":10261092,
+    "copy":1,
+    "sequence":1,
+    "enum":"Filmed with:",
+    "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+                "library":"Library Annex","hoursCode":"annex"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":19,"name":"microform"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1494425162},
+    "date":1494425162,
+    "active":true,
+    "empty":true}],
+ "4657640":
+  [{"id":10418672,
+    "copy":1,
+    "sequence":1,
+    "enum":"Filmed with:",
+    "location":{"code":"olin,anx","number":101,"name":"Library Annex",
+                "library":"Library Annex","hoursCode":"annex"},
+    "circGrp":{"5":"Annex Circ Group"},
+    "type":{"id":19,"name":"microform"},
+    "status":{"available":true,"code":{"1":"Not Charged"},"date":1512671657},
+    "date":1512671657,
+    "active":false,
+    "empty":true}]}
+
+
 }
