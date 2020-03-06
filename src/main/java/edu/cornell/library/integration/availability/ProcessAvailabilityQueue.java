@@ -12,10 +12,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
@@ -74,13 +73,13 @@ public class ProcessAvailabilityQueue {
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
-      for (int i = 0; i < 50000; i++){
-        Map<Integer,Set<Change>> bibs = new HashMap<>();
+      for (int i = 0; i < 40_000; i++){
+        Set<BibToUpdate> bibs = new HashSet<>();
         Set<Integer> ids = new HashSet<>();
         stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE, bibRecsVoyager READ");
         Integer priority = null;
         try (  ResultSet rs = pstmt.executeQuery() ) {
-          BIB: while ( rs.next() ) {
+          while ( rs.next() ) {
 
             // batch only within a single priority level
             if (priority == null)
@@ -94,11 +93,6 @@ public class ProcessAvailabilityQueue {
             bibActiveStmt.setInt(1, bibId);
             try (ResultSet rs2 = bibActiveStmt.executeQuery())
             { while (rs2.next()) if (rs2.getBoolean(1)) active = true; }
-            if ( ! active ) {
-              deqStmt.setInt(1,bibId);
-              deqStmt.executeUpdate();
-              continue BIB;
-            }
 
             // Get all queue items for selected bib
             allForBib.setInt(1, bibId);
@@ -112,7 +106,7 @@ public class ProcessAvailabilityQueue {
                 deprioritizeStmt.addBatch();
                 ids.add(id);
               }
-              bibs.put(bibId, changes);
+              bibs.add(new BibToUpdate(bibId,changes,active ));
               deprioritizeStmt.executeBatch();
             }
           }
@@ -149,18 +143,19 @@ public class ProcessAvailabilityQueue {
   static void updateBibsInSolr(
       Connection voyager, Connection inventory,
       SolrClient solr, SolrClient callNumberSolr,
-      Map<Integer,Set<Change>> changedBibs, Integer priority)
+      Set<BibToUpdate> changedBibs, Integer priority)
       throws SQLException, IOException, XMLStreamException, InterruptedException {
 
     while (! changedBibs.isEmpty()) {
-      List<Integer> completedBibUpdates = new ArrayList<>();
+      List<BibToUpdate> completedBibUpdates = new ArrayList<>();
 
       try (PreparedStatement pstmt = inventory.prepareStatement(solrFieldsDataQuery)){
 
         Set<SolrInputDocument> solrDocs = new HashSet<>();
         Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
 
-        for (int bibId : changedBibs.keySet()) {
+        for (BibToUpdate updateDetails : changedBibs) {
+          int bibId = updateDetails.bibId;
           pstmt.setInt(1, bibId);
           try (ResultSet rs = pstmt.executeQuery()) {
             while ( rs.next() ) {
@@ -169,11 +164,15 @@ public class ProcessAvailabilityQueue {
               HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
               holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(voyager, inventory, bibId, holdings);
+              if ( ! updateDetails.active ) {
+                doc.removeField("type");
+                doc.addField("type", "Suppressed Bib");
+              }
 
               boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
               if (masterBoundWith) {
                 doc.addField("bound_with_master_b", true);
-                Set<Integer> changedItems = extractChangedItemIds( changedBibs.get(bibId) );
+                Set<Integer> changedItems = extractChangedItemIds( updateDetails.changes );
                 BoundWith.identifyAndQueueOtherBibsInMasterVolume( inventory, bibId, changedItems );
               }
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
@@ -232,9 +231,11 @@ public class ProcessAvailabilityQueue {
                   doc.addField("availability_facet","Partial Temp Locs");
                 if (h.copy != null)
                   doc.addField("availability_facet", "Copies");
+                if (! h.active )
+                  doc.addField("availability_facet", "Suppressed Holdings");
               }
               Set<String> changes = new HashSet<>();
-              for (Change c : changedBibs.get(bibId))  changes.add(c.toString());
+              for (Change c : updateDetails.changes)  changes.add(c.toString());
               EnumSet<MultiVolFlag> multiVolFlags = MultivolumeAnalysis.analyze(
                   (String)doc.getFieldValue("format_main_facet"),
                   (doc.containsKey("description_display")?join(doc.getFieldValues("description_display")):""),
@@ -275,7 +276,7 @@ public class ProcessAvailabilityQueue {
             if ( ! callnumSolrDocs.isEmpty() )
               callNumberSolr.add(callnumSolrDocs);
           }
-          completedBibUpdates.add(bibId);
+          completedBibUpdates.add(updateDetails);
         }
       } catch (SolrServerException | RemoteSolrException e) {
         System.out.printf("Error communicating with Solr server after processing %d of %d bib update batch.",
@@ -283,8 +284,8 @@ public class ProcessAvailabilityQueue {
         e.printStackTrace();
         Thread.sleep(5000);
       } finally {
-        for (Integer bibId : completedBibUpdates)
-          changedBibs.remove(bibId);
+        for (BibToUpdate updateDetails : completedBibUpdates)
+          changedBibs.remove(updateDetails);
       }
     }
   }
@@ -339,4 +340,23 @@ public class ProcessAvailabilityQueue {
   }
   private static Pattern number = Pattern.compile("[0-9]+");
 
+  private static class BibToUpdate implements Comparable<BibToUpdate>{
+    final int bibId;
+    final Set<Change> changes;
+    final boolean active;
+    public BibToUpdate(int bibId, Set<Change> changes, boolean active) {
+      this.bibId = bibId;
+      this.changes = changes;
+      this.active = active;
+    }
+    @Override public int compareTo(BibToUpdate o) {
+      if ( o == null ) return -1;
+      return Integer.compare(this.bibId,o.bibId);
+    }
+    @Override public boolean equals(Object o) {
+      if ( o == null || ! o.getClass().equals(this.getClass() )) return false;
+      return Objects.equals(this.bibId,((BibToUpdate)o).bibId);
+    }
+    @Override public int hashCode() { return Integer.hashCode(this.bibId); }
+  }
 }
