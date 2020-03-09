@@ -340,7 +340,7 @@ public class ProcessAvailabilityQueue {
   }
   private static Pattern number = Pattern.compile("[0-9]+");
 
-  private static class BibToUpdate implements Comparable<BibToUpdate>{
+  public static class BibToUpdate implements Comparable<BibToUpdate>{
     final int bibId;
     final Set<Change> changes;
     final boolean active;
