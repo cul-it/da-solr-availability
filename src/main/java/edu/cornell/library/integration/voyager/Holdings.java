@@ -151,6 +151,8 @@ public class Holdings {
 
       Set<String> facetValues = new LinkedHashSet<>();
       for (Holding h : this.holdings.values()) {
+        if (h.active == false)
+          continue;
         if (h.online != null && h.online)
           continue;
         Set<String> holdingFacetValues = h.getLocationFacetValues();
