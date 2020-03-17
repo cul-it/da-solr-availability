@@ -321,6 +321,15 @@ public class Items implements ChangeDetector {
             return i;
       return null;
     }
+
+    public Set<String> getBarcodes() {
+      Set<String> barcodes = new HashSet<>();
+      for (TreeSet<Item> items : this.items.values())
+        for ( Item i : items)
+          if ( i.barcode != null )
+            barcodes.add(i.barcode);
+      return barcodes;
+    }
   }
 
   public static class Item implements Comparable<Item> {

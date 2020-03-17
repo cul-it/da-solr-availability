@@ -98,9 +98,7 @@ public class BibliographicSummaryTest {
     }
     BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(h);
     assertEquals("{\"available\":true,"
-        +         "\"availAt\":{\"Library Annex\":\"Q1 .N282\"},"
-        +         "\"unavailAt\":{\"Uris Library\":\"Sixth Level Q1 .N282\","
-        +                         "\"Mann Library\":\"Q1 .N29\"}}",b.toJson());
+        +         "\"availAt\":{\"Library Annex\":\"Q1 .N282\"}}",b.toJson());
   }
 
   @Test

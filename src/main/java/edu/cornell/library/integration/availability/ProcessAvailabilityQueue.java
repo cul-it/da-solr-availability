@@ -178,6 +178,11 @@ public class ProcessAvailabilityQueue {
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
               for (BoundWith.Flag flag : f)
                 doc.addField("availability_facet",flag.getAvailabilityFlag());
+              doc.removeField("barcode_t");
+              doc.addField("barcode_t", items.getBarcodes());
+              doc.removeField("barcode_addl_t");
+              doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
+
               if ( ! f.isEmpty() )
                 doc.addField("bound_with_b", true);
 

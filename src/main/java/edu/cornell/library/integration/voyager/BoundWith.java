@@ -30,6 +30,7 @@ public class BoundWith {
   @JsonProperty("masterTitle")  public final String masterTitle;
   @JsonProperty("masterEnum")   public final String masterEnum;
   @JsonProperty("thisEnum")     public final String thisEnum;
+  @JsonProperty("barcode")      public final String barcode;
   @JsonProperty("status")       public final ItemStatus status;
 
   public static BoundWith from876Field( Connection voyager, DataField f )
@@ -64,7 +65,7 @@ public class BoundWith {
     if (masterBibId == null) return null;
     
     return new BoundWith(masterItem.itemId, masterBibId, masterTitle,
-        masterItem.enumeration, thisEnum, masterItem.status);
+        masterItem.enumeration, thisEnum, barcode, masterItem.status);
   }
 
   public static EnumSet<Flag> dedupeBoundWithReferences(HoldingSet holdings, ItemList items) {
@@ -98,12 +99,14 @@ public class BoundWith {
       @JsonProperty("masterTitle")  String masterTitle,
       @JsonProperty("masterEnum")   String masterEnum,
       @JsonProperty("thisEnum")     String thisEnum,
+      @JsonProperty("barcode")      String barcode,
       @JsonProperty("status")       ItemStatus status) {
     this.masterItemId = masterItemId;
     this.masterBibId = masterBibId;
     this.masterTitle = masterTitle;
     this.masterEnum = masterEnum;
     this.thisEnum = thisEnum;
+    this.barcode = barcode;
     this.status = status;
   }
 

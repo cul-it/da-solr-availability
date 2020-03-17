@@ -49,12 +49,14 @@
                            "masterTitle":"Accelerated Mahaweli, Sri Lanka Development Programme /",
                            "masterEnum":"no.105-106",
                            "thisEnum":"1989",
+                           "barcode":"31924075513964",
                            "status":{"available":true,"code":{"1":"Not Charged"}}},
                 "3131680":{"masterItemId":3131680,
                            "masterBibId":1575369,
                            "masterTitle":"Emerging community : two dialoguing religions of South-East Asia /",
                            "masterEnum":"no.91-95",
                            "thisEnum":"1987",
+                           "barcode":"31924059360838",
                            "status":{"available":true,"code":{"1":"Not Charged"}}}},
    "items":{"count":13,"avail":12,
             "unavail":[{"id":8609801,
@@ -613,6 +615,7 @@
                           "masterTitle":"Fifty Oxyrhynchus Papyri : (P. Oxy. Hels.) /",
                           "masterEnum":"t.63-65",
                           "thisEnum":"",
+                          "barcode":"31924010300469",
                           "status":{"available":false,"code":{"2":"Charged"},"due":1537477200,"date":1505919354}}}}}
 
 

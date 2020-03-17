@@ -31,6 +31,7 @@ public class BoundWithTest {
   +"\"masterTitle\":\"Black biographical dictionaries, 1790-1950\","
   +"\"masterEnum\":\"title# 291 fiche 3/5\","
   +"\"thisEnum\":\"fiche 3/5\","
+  +"\"barcode\":\"31924064096195\","
   +"\"status\":{\"available\":true,"
   +            "\"code\":{\"1\":\"Not Charged\"}}}";
 
@@ -40,6 +41,7 @@ public class BoundWithTest {
   +"\"masterTitle\":\"Monograph of the Palaeontographical Society.\","
   +"\"masterEnum\":\"v.14\","
   +"\"thisEnum\":\"v.14\","
+  +"\"barcode\":\"31924004546812\","
   +"\"status\":{\"available\":true,"
   +            "\"code\":{\"1\":\"Not Charged\"}}}";
 

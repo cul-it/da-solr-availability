@@ -264,6 +264,18 @@ public class Holdings {
           return true;
       return false;
     }
+
+    public Set<String> getBoundWithBarcodes() {
+      Set<String> barcodes = new HashSet<>();
+      for ( Holding h : this.holdings.values() ) {
+        if ( h.boundWiths == null )
+          continue;
+        for ( BoundWith bw : h.boundWiths.values() )
+          barcodes.add(bw.barcode);
+      }
+      return barcodes;
+    }
+
   }
 
   public static void mergeAccessLinksIntoHoldings(HoldingSet holdings, Collection<Object> linkJsons)
