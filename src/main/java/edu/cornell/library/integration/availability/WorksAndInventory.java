@@ -40,10 +40,12 @@ public class WorksAndInventory {
   private final static String selectB2W = "SELECT * FROM bib2work WHERE bib_id = ? AND active = 1";
   private final static String selectB2W2 =
       "SELECT bib2work.bib_id "+
-      "  FROM bib2work, solrFieldsData"+
+      "  FROM bib2work, solrFieldsData, bibRecsSolr"+
       " WHERE work_id = ?"+
       "   AND bib2work.bib_id = solrFieldsData.bib_id"+
-      "   AND recordtype_solr_fields LIKE '%type: Catalog%'";
+      "   AND recordtype_solr_fields LIKE '%type: Catalog%'"+
+      "   AND bib2work.bib_id = bibRecsSolr.bib_id"+
+      "   AND bibRecsSolr.active = 1";
   private final static String insertB2W = "REPLACE INTO bib2work ( bib_id, oclc_id, work_id) VALUES (?,?,?)";
   private final static String selectW2O = "SELECT oclc_id, work_id from workids.work2oclc WHERE oclc_id = ?";
   private final static String updateB2W =
