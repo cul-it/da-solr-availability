@@ -111,7 +111,7 @@
 # 20 holdings, mixed availability
 
 {"4977210":[
-   {"id":6571313,"copy":1,"sequence":1,
+   {"id":6571313,"barcode":"31924095936195","copy":1,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -119,15 +119,15 @@
     "date":1450746764,
     "active":true}],
  "4977214":[
-   {"id":6571303,"copy":2,"sequence":1,
-    "location":{"code":"uris,anx","number":210,"name":"Library Annex","library":"Library Annex","hoursCode":"annexg"},
+   {"id":6571303,"barcode":"31924095936468","copy":2,"sequence":1,
+    "location":{"code":"uris,anx","number":210,"name":"Library Annex","library":"Library Annex","hoursCode":"annex"},
     "circGrp":{"5":"Annex Circ Group"},
     "type":{"id":3,"name":"book"},
     "status":{"available":true,"code":{"1":"Not Charged"},"date":1477744797},
     "date":1274884635,
     "active":true}],
  "5860317":[
-   {"id":7267385,"copy":3,"sequence":1,
+   {"id":7267385,"barcode":"31924099417416","copy":3,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -135,7 +135,7 @@
     "date":1464201047,
     "active":true}],
  "7367226":[
-   {"id":8761066,"copy":1,"sequence":1,
+   {"id":8761066,"barcode":"31924110956939","copy":1,"sequence":1,
     "location":{"code":"rmc",
                 "number":87,
                 "name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
@@ -147,7 +147,7 @@
     "date":1274283570,
     "active":true}],
  "7371275":[
-   {"id":8764607,"copy":1,"sequence":1,
+   {"id":8764607,"barcode":"31924111784553","copy":1,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -155,7 +155,7 @@
     "date":1305137498,
     "active":true}],
  "7371277":[
-   {"id":8764609,"copy":2,"sequence":1,
+   {"id":8764609,"barcode":"31924111784561","copy":2,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -163,7 +163,7 @@
     "date":1464201050,
     "active":true}],
  "7371279":[
-   {"id":8764610,"copy":3,"sequence":1,
+   {"id":8764610,"barcode":"31924111784660","copy":3,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -171,7 +171,7 @@
     "date":1307478335,
     "active":true}],
  "7371281":[
-   {"id":8764612,"copy":4,"sequence":1,
+   {"id":8764612,"barcode":"31924111784579","copy":4,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -179,7 +179,7 @@
     "date":1309886750,
     "active":true}],
  "7371283":[
-   {"id":8764617,"copy":5,"sequence":1,
+   {"id":8764617,"barcode":"31924111784587","copy":5,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -187,7 +187,7 @@
     "date":1464201043,
     "active":true}],
  "7371284":[
-   {"id":8764618,"copy":6,"sequence":1,
+   {"id":8764618,"barcode":"31924111784595","copy":6,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -195,7 +195,7 @@
     "date":1310147180,
     "active":true}],
  "7371302":[
-   {"id":8764637,"copy":1,"sequence":1,
+   {"id":8764637,"barcode":"31924111784629","copy":1,"sequence":1,
     "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -203,7 +203,7 @@
     "date":1275074702,
     "active":true}],
  "7383225":[
-   {"id":8771100,"copy":1,"sequence":1,
+   {"id":8771100,"barcode":"31924111774588","copy":1,"sequence":1,
     "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
     "circGrp":{"3":"Olin Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -211,7 +211,7 @@
     "date":1306954800,
     "active":true}],
  "7383631":[
-   {"id":8771167,"copy":1,"sequence":1,
+   {"id":8771167,"barcode":"31924111774497","copy":1,"sequence":1,
     "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
     "circGrp":{"16":"Mann Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -219,7 +219,7 @@
     "date":1295293495,
     "active":true}],
  "7383632":[
-   {"id":8771170,"copy":2,"sequence":1,
+   {"id":8771170,"barcode":"31924111774042","copy":2,"sequence":1,
     "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
     "circGrp":{"16":"Mann Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -227,7 +227,7 @@
     "date":1295293545,
     "active":true}],
  "7383752":[
-   {"id":8771272,"copy":3,"sequence":1,
+   {"id":8771272,"barcode":"31924111774091","copy":3,"sequence":1,
     "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
     "circGrp":{"16":"Mann Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -235,7 +235,7 @@
     "date":1295626030,
     "active":true}],
  "7383755":[
-   {"id":8771274,"copy":4,"sequence":1,
+   {"id":8771274,"barcode":"31924111774083","copy":4,"sequence":1,
     "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
     "circGrp":{"16":"Mann Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -243,7 +243,7 @@
     "date":1298903237,
     "active":true}],
  "7383965":[
-   {"id":8771861,"copy":1,"sequence":1,
+   {"id":8771861,"barcode":"31924111773416","copy":1,"sequence":1,
     "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -251,7 +251,7 @@
     "date":1276884589,
     "active":true}],
  "7383966":[
-   {"id":8771864,"copy":2,"sequence":1,
+   {"id":8771864,"barcode":"31924111773424","copy":2,"sequence":1,
     "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -259,7 +259,7 @@
     "date":1276884660,
     "active":true}],
  "7387210":[
-   {"id":8776328,"copy":5,"sequence":1,
+   {"id":8776328,"barcode":"31924112176114","copy":5,"sequence":1,
     "location":{"code":"mann","number":69,"name":"Mann Library","library":"Mann Library","hoursCode":"mann"},
     "circGrp":{"16":"Mann Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -267,7 +267,7 @@
     "date":1277990946,
     "active":true}],
  "7391702":[
-   {"id":8780253,"copy":1,"sequence":1,
+   {"id":8780253,"barcode":"31924112180058","copy":1,"sequence":1,
     "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":3,"name":"book"},

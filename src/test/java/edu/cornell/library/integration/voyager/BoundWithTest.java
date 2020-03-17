@@ -92,5 +92,9 @@ public class BoundWithTest {
     assertFalse( items.getItem(1016218,9621977).status.available );
   }
 
+  @Test
+  public void boundWithBarcodes() throws SQLException, IOException, XMLStreamException {
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 833840);
+    assertEquals("[31924010300469]",holdings.getBoundWithBarcodes().toString());
+  }
 }
-// 4690713 2473239 7301315 2098051 2305477 3212523

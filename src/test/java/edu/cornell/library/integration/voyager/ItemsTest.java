@@ -95,6 +95,12 @@ public class ItemsTest {
     ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 4521000, true);
     assertEquals(examples.get("expectedJsonMultiVol").toJson(),items.toJson());
   }
+  @Test
+  public void multiCopyTest() throws SQLException, IOException, XMLStreamException {
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
+    ItemList items = Items.retrieveItemsForHoldings(voyagerTest, null, 4442869, holdings);
+    assertEquals(examples.get("expectedJsonELECTRICSHEEP").toJson(),items.toJson());
+  }
 
   @Test
   public void missingTest() throws SQLException, JsonProcessingException {
@@ -175,4 +181,24 @@ public class ItemsTest {
     }
   }
 
+  @Test
+  public void itemBarcodes() throws SQLException, IOException, XMLStreamException {
+    {
+      ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 4521000, true);
+      String expected =
+      "[31924096142660, 31924096849124, 31924099242335, 31924090841879, 31924090013479, 31924096707900,"
+      + " 31924096849132, 31924097486447, 31924099484093, 31924102153552, 31924096654094, 31924099484101]";
+      assertEquals(expected,items.getBarcodes().toString());
+    }
+    {
+      HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
+      ItemList items = Items.retrieveItemsForHoldings(voyagerTest, null, 4442869, holdings);
+      String expected =
+      "[31924111784595, 31924111784561, 31924111784660, 31924112180058, 31924111784587, 31924111784553,"
+      + " 31924111784579, 31924111774042, 31924111784629, 31924111774091, 31924111774083, 31924111774588,"
+      + " 31924111773424, 31924095936195, 31924110956939, 31924112176114, 31924111774497, 31924099417416,"
+      + " 31924095936468, 31924111773416]";
+      assertEquals(expected,items.getBarcodes().toString());
+    }
+  }
 }
