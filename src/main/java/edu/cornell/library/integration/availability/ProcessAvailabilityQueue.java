@@ -273,7 +273,7 @@ public class ProcessAvailabilityQueue {
 //              System.out.println(ClientUtils.toXML(doc).replaceAll("(<field)", "\n$1"));
             }
             solr.add(solrDocs);
-            if ( ! callnumSolrDocs.isEmpty() )
+            if ( ! callnumSolrDocs.isEmpty() && updateDetails.active )
               callNumberSolr.add(callnumSolrDocs);
           }
           completedBibUpdates.add(updateDetails);
