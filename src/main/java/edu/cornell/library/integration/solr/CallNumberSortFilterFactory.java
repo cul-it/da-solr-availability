@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.util.AbstractAnalysisFactory;
-import org.apache.lucene.analysis.util.MultiTermAwareComponent;
 import org.apache.lucene.analysis.util.ResourceLoader;
 import org.apache.lucene.analysis.util.ResourceLoaderAware;
 import org.apache.lucene.analysis.util.TokenFilterFactory;
@@ -53,37 +51,37 @@ import org.apache.lucene.analysis.util.TokenFilterFactory;
  *
  */
 public class CallNumberSortFilterFactory 
-  extends TokenFilterFactory implements MultiTermAwareComponent, ResourceLoaderAware {
+  extends TokenFilterFactory implements ResourceLoaderAware {
 
   private List<String> prefixes;
   private final String prefixFile;
 
   public CallNumberSortFilterFactory(Map<String,String> args) {
     super(args);
-    prefixFile = get(args, "prefixes");
+    this.prefixFile = get(args, "prefixes");
   }
 
   @Override
   public TokenStream create(TokenStream input) {
-    return new CallNumberSortFilter(input, prefixes);
+    return new CallNumberSortFilter(input, this.prefixes);
   }
 
   @Override
-  public AbstractAnalysisFactory getMultiTermComponent() {
-    return this;
+  public TokenStream normalize(TokenStream input) {
+    return create(input);
   }
 
   @Override
   public void inform(ResourceLoader loader) throws IOException {
-    if (prefixFile != null) {
-      List<String> temp = getLines(loader, prefixFile);
-      prefixes = new ArrayList<>();
+    if (this.prefixFile != null) {
+      List<String> temp = getLines(loader, this.prefixFile);
+      this.prefixes = new ArrayList<>();
       for (String s : temp)
-        prefixes.add(s.toLowerCase().replaceAll("\\.(?!\\d) *"," "));
+        this.prefixes.add(s.toLowerCase().replaceAll("\\.(?!\\d) *"," "));
     }
   }
 
   public List<String> getPrefixes() {
-    return prefixes;
+    return this.prefixes;
   }
 }

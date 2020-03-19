@@ -60,24 +60,16 @@ public class Items implements ChangeDetector {
       "   AND item_barcode.item_barcode = ?";
   private static final String allDueDatesQuery =
       "select bm.bib_id, ct.item_id, ct.current_due_date"+
-      "  from circ_transactions ct, mfhd_item mi, mfhd_master mm, bib_mfhd bm, bib_master bmast"+
+      "  from circ_transactions ct, mfhd_item mi, bib_mfhd bm"+
       " where bm.mfhd_id = mi.mfhd_id"+
-      "   and mi.item_id = ct.item_id"+
-      "   and bm.bib_id = bmast.bib_id"+
-      "   and mm.mfhd_id = mi.mfhd_id"+
-      "   and bmast.suppress_in_opac = 'N'"+
-      "   and mm.suppress_in_opac = 'N'";
+      "   and mi.item_id = ct.item_id";
   private static final String recentItemChangesQuery =
-      "select bib_master.bib_id, item.modify_date, item.create_date, item.item_id"+
-      "  from item, mfhd_item, bib_mfhd, bib_master, mfhd_master "+
-      " where bib_master.bib_id = bib_mfhd.bib_id"+
-      "   and bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
+      "select bib_mfhd.bib_id, item.modify_date, item.create_date, item.item_id"+
+      "  from item, mfhd_item, bib_mfhd"+
+      " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
-      "   and mfhd_item.mfhd_id = mfhd_master.mfhd_id"+
       "   and (item.modify_date > ?"+
-      "       or item.create_date > ?)"+
-      "   and bib_master.suppress_in_opac = 'N'"+
-      "   and mfhd_master.suppress_in_opac = 'N'";
+      "       or item.create_date > ?)";
   static Locations locations = null;
   static ItemTypes itemTypes = null;
   static CircPolicyGroups circPolicyGroups = null;
