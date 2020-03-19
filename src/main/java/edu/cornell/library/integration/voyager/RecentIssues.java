@@ -51,11 +51,9 @@ public class RecentIssues implements ChangeDetector {
 
   private final static String allBibsQuery =
       "SELECT distinct li.bib_id" +
-      "  FROM bib_master bm, line_item li, subscription s,"+
+      "  FROM line_item li, subscription s,"+
       "       component c, issues_received ir, serial_issues si"+
-      " WHERE bm.bib_id = li.bib_id"+
-      "   AND bm.suppress_in_opac = 'N'"+
-      "   AND li.line_item_id = s.line_item_id"+
+      " WHERE li.line_item_id = s.line_item_id"+
       "   AND s.subscription_id = c.subscription_id"+
       "   AND c.component_id = si.component_id"+
       "   AND c.component_id = ir.component_id"+
