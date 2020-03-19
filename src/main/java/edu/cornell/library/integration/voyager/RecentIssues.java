@@ -132,9 +132,11 @@ public class RecentIssues implements ChangeDetector {
       try (  ResultSet rs = pstmt.executeQuery()  ) {
         while (rs.next()) {
           Integer mfhdId = rs.getInt("mfhd_id");
+          String enumchron = rs.getString("enumchron");
           if ( ! issues.containsKey(mfhdId))
             issues.put(mfhdId, new ArrayList<String>());
-          issues.get(mfhdId).add(rs.getString("enumchron"));
+          if ( ! issues.get(mfhdId).contains(enumchron))
+            issues.get(mfhdId).add(enumchron);
         }
       }
     }
