@@ -28,29 +28,22 @@ public class ItemStatuses implements ChangeDetector {
       new HashSet<>( Arrays.asList(2,3,4,5,6,7,8,9,10,12,13,14,18,21,22,23,24,25));
 
   private static final String allRequestsQuery =
-      "select bmast.bib_id, item_status.item_id, ist.item_status_desc"+
-      "  from item_status, item_status_type ist, mfhd_item mi, mfhd_master mm, bib_mfhd bm, bib_master bmast"+
+      "select bm.bib_id, item_status.item_id, ist.item_status_desc"+
+      "  from item_status, item_status_type ist, mfhd_item mi, mfhd_master mm, bib_mfhd bm"+
       " where item_status.item_status = ist.item_status_type"+
       "   and ist.item_status_desc like '%Request'"+
       "   and item_status.item_id = mi.item_id"+
       "   and mi.mfhd_id = mm.mfhd_id"+
       "   and mm.suppress_in_opac = 'N'"+
       "   and mi.mfhd_id = bm.mfhd_id"+
-      "   and bm.bib_id = bmast.bib_id"+
-      "   and bmast.suppress_in_opac = 'N'";
+      "   and bm.bib_id = bmast.bib_id";
   private static final String recentItemStatusChangesQuery =
       "SELECT * FROM item_status WHERE item_status_date > ?";
   private static final String bibIdFromItemIdQuery =
-      "SELECT b.bib_id       "+
-      "  FROM bib_master b,  "+
-      "       bib_mfhd bm,   "+
-      "       mfhd_master m, "+
+      "SELECT bm.bib_id       "+
+      "  FROM bib_mfhd bm,   "+
       "       mfhd_item mi   "+
-      " WHERE b.suppress_in_opac = 'N'  "+
-      "   AND b.bib_id = bm.bib_id      "+
-      "   AND bm.mfhd_id = m.mfhd_id    "+
-      "   AND m.suppress_in_opac = 'N'  "+
-      "   AND m.mfhd_id = mi.mfhd_id    "+
+      " WHERE bm.mfhd_id = mi.mfhd_id    "+
       "   AND mi.item_id = ?            ";
 
   @Override
