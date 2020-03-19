@@ -34,9 +34,7 @@ public class ItemStatuses implements ChangeDetector {
       "   and ist.item_status_desc like '%Request'"+
       "   and item_status.item_id = mi.item_id"+
       "   and mi.mfhd_id = mm.mfhd_id"+
-      "   and mm.suppress_in_opac = 'N'"+
-      "   and mi.mfhd_id = bm.mfhd_id"+
-      "   and bm.bib_id = bmast.bib_id";
+      "   and mi.mfhd_id = bm.mfhd_id";
   private static final String recentItemStatusChangesQuery =
       "SELECT * FROM item_status WHERE item_status_date > ?";
   private static final String bibIdFromItemIdQuery =
