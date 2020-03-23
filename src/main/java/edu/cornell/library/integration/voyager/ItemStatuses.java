@@ -81,6 +81,9 @@ public class ItemStatuses implements ChangeDetector {
         }
       }
     }
+    if ( changes.size() > 4 )
+      for ( Set<Change> bibChanges : changes.values() ) for ( Change c : bibChanges )
+        c.type = Change.Type.ITEM_BATCH;
     return changes;
   }
 

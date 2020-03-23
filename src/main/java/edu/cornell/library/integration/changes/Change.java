@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class Change implements Comparable<Change>{
-  private final Type type;
+  public Type type;
   private final Integer recordId;
   public final String detail;
   private final Timestamp changeDate;
@@ -112,7 +112,7 @@ public class Change implements Comparable<Change>{
     sb.append(')');
   }
 
-  public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, ORDER }
+  public enum Type { BIB, HOLDING, ITEM, ITEM_BATCH, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, ORDER }
 
   @Override
   public boolean equals( Object o ) {
