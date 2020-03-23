@@ -52,7 +52,7 @@ public class MonitorAvailability {
         Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
         PreparedStatement queueIndex = inventoryDB.prepareStatement
-            ("INSERT INTO availabilityQueue ( bib_id, priority, cause, record_date ) VALUES (?,1,?,?)");
+            ("INSERT INTO availabilityQueue ( bib_id, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement getTitle = inventoryDB.prepareStatement
             ("SELECT title FROM bibRecsSolr WHERE bib_id = ?")) {
 
@@ -139,12 +139,18 @@ public class MonitorAvailability {
       String causes = e.getValue().toString();
       System.out.println(bibId+" ("+title+") "+causes);
       q.setInt(1, bibId);
-      q.setString(2, causes);
-      q.setTimestamp(3,getMinChangeDate( e.getValue() ));
+      q.setInt(2,isBatch( e.getValue() )?6:1);
+      q.setString(3, causes);
+      q.setTimestamp(4,getMinChangeDate( e.getValue() ));
       q.addBatch();
       if (++i == 100) { q.executeBatch(); i=0; }
     }
     q.executeBatch();
+  }
+
+  private static boolean isBatch(Set<Change> changes) {
+    for (Change c : changes) if (c.type.equals(Change.Type.ITEM_BATCH)) return true;
+    return false;
   }
 
   private static Timestamp getMinChangeDate(Set<Change> changes) {
