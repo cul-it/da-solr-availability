@@ -89,10 +89,14 @@ public class ProcessAvailabilityQueue {
             int bibId = rs.getInt("bib_id");
 
             // Confirm bib is active
-            boolean active = false;
+            Boolean active = null;
             bibActiveStmt.setInt(1, bibId);
             try (ResultSet rs2 = bibActiveStmt.executeQuery())
-            { while (rs2.next()) if (rs2.getBoolean(1)) active = true; }
+            { while (rs2.next()) active = rs2.getBoolean(1); }
+            if ( active == null ) {
+              System.out.println("Bib in availability queue, not bibRecsVoyager: "+bibId);
+              continue;
+            }
 
             // Get all queue items for selected bib
             allForBib.setInt(1, bibId);
