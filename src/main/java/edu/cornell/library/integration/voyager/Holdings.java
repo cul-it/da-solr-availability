@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -296,14 +297,24 @@ public class Holdings {
           hathiHolding.links = new ArrayList<>();
           holdings.put(0, hathiHolding);
         }
-        hathiHolding.links.add(l);
+        if (l.desc.startsWith("Temporary Access")) {
+          Holding etasExplanationLinkHolding = new Holding (
+              null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
+          holdings.put(1, etasExplanationLinkHolding);
+          etasExplanationLinkHolding.links = Arrays.asList(l);
+        } else {
+          hathiHolding.links.add(l);
+          if ( l.url.contains("shibboleth") )
+            hathiHolding.notes =
+            Arrays.asList("Available by special arrangement in response to the COVID-19 outbreak."
+                + " Simultaneous access is limited.");
+        }
       } else if ( onlineHolding != null ) {
         if ( onlineHolding.links == null )
           onlineHolding.links = new ArrayList<>();
         onlineHolding.links.add(l);
       }
     }
-
    }
 
 }

@@ -37,7 +37,7 @@ import edu.cornell.library.integration.voyager.Locations.Location;
 public class Holding {
 
   @JsonProperty("copy")        public final Integer copy;
-  @JsonProperty("notes")       public final List<String> notes;
+  @JsonProperty("notes")       public List<String> notes;
   @JsonProperty("holdings")    public final List<String> holdings;
   @JsonProperty("supplements") public final List<String> supplements;
   @JsonProperty("indexes")     public final List<String> indexes;
