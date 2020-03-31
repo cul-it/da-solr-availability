@@ -289,7 +289,7 @@ public class Holdings {
         onlineHolding = h;
     for ( Object linkJson : linkJsons ) {
       Link l = Link.fromJson((String)linkJson);
-      if (l.desc != null && (l.desc.startsWith("HathiTrust"))) {
+      if (l.desc != null && (l.url.contains("hathitrust") || l.url.contains("handle.net/2027/"))) {
         if (hathiHolding == null) {
           hathiHolding = new Holding(
               null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
