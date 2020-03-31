@@ -284,6 +284,7 @@ public class Holdings {
 
     Holding onlineHolding = null;
     Holding hathiHolding = null;
+    Holding etasHolding = null;
 
     for ( Holding h : holdings.values() )
       if ( h.online != null && h.online )
@@ -291,23 +292,35 @@ public class Holdings {
     for ( Object linkJson : linkJsons ) {
       Link l = Link.fromJson((String)linkJson);
       if (l.desc != null && (l.url.contains("hathitrust") || l.url.contains("handle.net/2027/"))) {
-        if (hathiHolding == null) {
-          hathiHolding = new Holding(
-              null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
-          hathiHolding.links = new ArrayList<>();
-          holdings.put(0, hathiHolding);
-        }
-        if (l.desc.startsWith("Temporary Access")) {
+
+        // BEGIN Temporary Emergency Access Link Logic
+        if ( l.url.contains("shibboleth") ) {
+          if ( etasHolding == null ) {
+            etasHolding = new Holding(
+                null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
+            etasHolding.links = new ArrayList<>();
+            holdings.put(1, etasHolding);
+            etasHolding.notes =
+                Arrays.asList("Available by special arrangement in response to the COVID-19 outbreak."
+                    + " Simultaneous access is limited.");
+          }
+          etasHolding.links.add(l);
+
+        } else if ( l.desc.startsWith("Temporary Access") ) {
           Holding etasExplanationLinkHolding = new Holding (
               null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
-          holdings.put(1, etasExplanationLinkHolding);
+          holdings.put(2, etasExplanationLinkHolding);
           etasExplanationLinkHolding.links = Arrays.asList(l);
+        // END Temporary Emergency Access Link Logic
+
         } else {
+          if (hathiHolding == null) {
+            hathiHolding = new Holding(
+                null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
+            hathiHolding.links = new ArrayList<>();
+            holdings.put(0, hathiHolding);
+          }
           hathiHolding.links.add(l);
-          if ( l.url.contains("shibboleth") )
-            hathiHolding.notes =
-            Arrays.asList("Available by special arrangement in response to the COVID-19 outbreak."
-                + " Simultaneous access is limited.");
         }
       } else if ( onlineHolding != null ) {
         if ( onlineHolding.links == null )
