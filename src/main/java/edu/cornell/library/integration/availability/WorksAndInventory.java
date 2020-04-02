@@ -33,16 +33,19 @@ public class WorksAndInventory {
 
   private final static String selectBRS = "SELECT * FROM bibRecsSolr WHERE bib_id = ?";
   private final static String replaceBRS =
-      "REPLACE INTO bibRecsSolr (bib_id, record_date, linking_mod_date, title, format, pub_date, language, edition, online, print)"+
-      " VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?)" ;
+      "REPLACE INTO bibRecsSolr"+
+      " (bib_id, record_date, linking_mod_date, title, format, pub_date, language, edition, online, print, active)"+
+      " VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)" ;
   private final static String updateBRS = "UPDATE bibRecsSolr SET record_date = ? WHERE bib_id = ?";
   private final static String selectB2W = "SELECT * FROM bib2work WHERE bib_id = ? AND active = 1";
   private final static String selectB2W2 =
       "SELECT bib2work.bib_id "+
-      "  FROM bib2work, solrFieldsData"+
+      "  FROM bib2work, solrFieldsData, bibRecsSolr"+
       " WHERE work_id = ?"+
       "   AND bib2work.bib_id = solrFieldsData.bib_id"+
-      "   AND recordtype_solr_fields LIKE '%type: Catalog%'";
+      "   AND recordtype_solr_fields LIKE '%type: Catalog%'"+
+      "   AND bib2work.bib_id = bibRecsSolr.bib_id"+
+      "   AND bibRecsSolr.active = 1";
   private final static String insertB2W = "REPLACE INTO bib2work ( bib_id, oclc_id, work_id) VALUES (?,?,?)";
   private final static String selectW2O = "SELECT oclc_id, work_id from workids.work2oclc WHERE oclc_id = ?";
   private final static String updateB2W =
@@ -302,6 +305,7 @@ public class WorksAndInventory {
     p.setString(7, meta.edition);
     p.setBoolean(8, meta.online);
     p.setBoolean(9, meta.print);
+    p.setBoolean(10, meta.active);
     p.executeUpdate();
   }
 
@@ -335,6 +339,7 @@ public class WorksAndInventory {
     meta.edition  = rs.getString("edition");
     meta.online   = rs.getBoolean("online");
     meta.print    = rs.getBoolean("print");
+    meta.active   = rs.getBoolean("active");
 
     return meta;
   }
@@ -367,6 +372,8 @@ public class WorksAndInventory {
       if (online.contains("At the Library"))
         meta.print = true;
     }
+    if ( ((String)doc.getFieldValue("type")).equals("Suppressed Bib") )
+      meta.active = false;
 
     return meta;
   }
@@ -404,14 +411,15 @@ public class WorksAndInventory {
     }
   }
 
-  private static class LinkingMetadata {
+  protected static class LinkingMetadata {
     String title = null;
     String format = null;
     String pubDate = null;
     String language = null;
     String edition = null;
-    Boolean online = false;
-    Boolean print = false;
+    boolean online = false;
+    boolean print = false;
+    boolean active = true;
 
     @Override
     public boolean equals ( final Object o ) {
@@ -425,8 +433,16 @@ public class WorksAndInventory {
           && Objects.equals(this.language, other.language)
           && Objects.equals(this.edition, other.edition)
           && Objects.equals(this.online, other.online)
-          && Objects.equals(this.print, other.print);
+          && Objects.equals(this.print, other.print)
+          && Objects.equals(this.active, other.active);
     }
+
+    @Override
+    public int hashCode() {
+      return String.format("t%s f%s d%s l%s e%s o%b p%b a%b",
+          this.title,this.format,this.pubDate,this.language,this.edition,this.online,this.print,this.active).hashCode();
+    }
+
   }
 
   @JsonAutoDetect(fieldVisibility = Visibility.ANY)

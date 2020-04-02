@@ -50,7 +50,7 @@ class CallNumberBrowse {
     callNumDoc.addField("bibid", bibId);
 
 
-    Map<String,HoldingSet> holdingsByCallNumber = divideHoldingsByCallNumber( holdings );
+    Map<String,HoldingSet> holdingsByCallNumber = divideUnsuppressedHoldingsByCallNumber( holdings );
 
     int i = 0;
     for ( Entry<String,HoldingSet> e : holdingsByCallNumber.entrySet() ) {
@@ -128,10 +128,11 @@ class CallNumberBrowse {
         || lc.contains("on order") || lc.startsWith("available ");
   }
 
-  private static Map<String, HoldingSet> divideHoldingsByCallNumber(HoldingSet holdings) {
+  private static Map<String, HoldingSet> divideUnsuppressedHoldingsByCallNumber(HoldingSet holdings) {
     Map<String,HoldingSet> holdingsByCallNumber = new HashMap<>();
     for (Integer holdingId : holdings.getMfhdIds()) {
       Holding h = holdings.get(holdingId);
+      if ( h.active == false ) continue;
       String callnum = h.call;
       if (callnum == null || callnum.isEmpty())
         callnum = "No Call Number";

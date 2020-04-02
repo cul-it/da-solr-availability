@@ -31,6 +31,7 @@ public class BoundWithTest {
   +"\"masterTitle\":\"Black biographical dictionaries, 1790-1950\","
   +"\"masterEnum\":\"title# 291 fiche 3/5\","
   +"\"thisEnum\":\"fiche 3/5\","
+  +"\"barcode\":\"31924064096195\","
   +"\"status\":{\"available\":true,"
   +            "\"code\":{\"1\":\"Not Charged\"}}}";
 
@@ -40,6 +41,7 @@ public class BoundWithTest {
   +"\"masterTitle\":\"Monograph of the Palaeontographical Society.\","
   +"\"masterEnum\":\"v.14\","
   +"\"thisEnum\":\"v.14\","
+  +"\"barcode\":\"31924004546812\","
   +"\"status\":{\"available\":true,"
   +            "\"code\":{\"1\":\"Not Charged\"}}}";
 
@@ -63,16 +65,16 @@ public class BoundWithTest {
   public void boundWithMainConstructor() throws SQLException, JsonProcessingException {
     DataField f = new DataField(6,"876",' ',' ',"‡3 fiche 3/5 ‡p 31924064096195");
     BoundWith b = BoundWith.from876Field(voyagerTest, f);
-    assertEquals(expectedBoundWithJson4102195,b.toJson());
+    assertEquals(this.expectedBoundWithJson4102195,b.toJson());
     f = new DataField(6,"876",' ',' ',"‡3 v.14 ‡p 31924004546812");
     b = BoundWith.from876Field(voyagerTest, f);
-    assertEquals(expectedBoundWithJson1726636,b.toJson());
+    assertEquals(this.expectedBoundWithJson1726636,b.toJson());
   }
 
   @Test
   public void boundWithDedupe() throws SQLException, IOException, XMLStreamException {
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 833840);
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218, holdings.get(1016218).active);
 
     // before dedupe, boundwith reference in holding block, empty item looks available
     assertNotNull(holdings.get(1016218).boundWiths);
@@ -90,5 +92,9 @@ public class BoundWithTest {
     assertFalse( items.getItem(1016218,9621977).status.available );
   }
 
+  @Test
+  public void boundWithBarcodes() throws SQLException, IOException, XMLStreamException {
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 833840);
+    assertEquals("[31924010300469]",holdings.getBoundWithBarcodes().toString());
+  }
 }
-// 4690713 2473239 7301315 2098051 2305477 3212523

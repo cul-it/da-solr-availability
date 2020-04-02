@@ -77,10 +77,10 @@ public final class Locations {
             ( rule.holdingNote == null || (lcNote != null && lcNote.contains( rule.holdingNote )) ) ) {
           if ( ! rule.suppress )
             return rule.facetValues;
-          return new LinkedHashSet<String>();
+          return new LinkedHashSet<>();
         }
     System.out.println("Failed to map facet location for: "+l);
-    return new LinkedHashSet<String>();
+    return new LinkedHashSet<>();
   }
 
 
@@ -121,7 +121,7 @@ public final class Locations {
       sb.append("; number: ").append(this.number);
       sb.append("; name: ").append(this.name);
       sb.append("; library: ").append(this.library);
-      if (hoursCode != null)
+      if (this.hoursCode != null)
         sb.append("; hoursCode: ").append(this.hoursCode);
       return sb.toString();
     }
@@ -151,7 +151,7 @@ public final class Locations {
     }
 
     @JsonCreator
-    private Location(
+    Location(
         @JsonProperty("code")      String code,
         @JsonProperty("number")    Integer number,
         @JsonProperty("name")      String name,
@@ -274,9 +274,10 @@ public final class Locations {
     final String holdingNote;
     final Set<String> facetValues;
 
+    @Override
     public String toString() {
       return String.format("%s (%s:%s) => %s", this.displayName, ((this.call == null)? "" : this.call),
-          ((this.holdingNote == null)? "" : this.holdingNote),   String.join(" ** ", facetValues) );
+          ((this.holdingNote == null)? "" : this.holdingNote),   String.join(" ** ", this.facetValues) );
     }
     public FacetMapRule( String displayName, Boolean suppress, String call, String holdingNote, String facetValue) {
 

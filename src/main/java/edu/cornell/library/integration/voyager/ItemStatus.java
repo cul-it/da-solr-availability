@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import edu.cornell.library.integration.voyager.ItemStatuses.StatusCode;
@@ -25,6 +26,8 @@ public class ItemStatus {
   public final Boolean shortLoan;
   public final Long due;
   public Long date;
+  @JsonIgnore
+  public final Set<StatusCode> statuses;
 
   @JsonCreator
   public ItemStatus(
@@ -38,6 +41,7 @@ public class ItemStatus {
     this.shortLoan = shortLoan;
     this.due = due;
     this.date = date;
+    this.statuses = null;
   }
 
   public ItemStatus( Connection voyager, int item_id, ItemType type, Location location ) throws SQLException {
@@ -45,7 +49,7 @@ public class ItemStatus {
     String statusQ = "SELECT * FROM item_status WHERE item_id = ?";
     String circQ = "SELECT current_due_date FROM circ_transactions WHERE item_id = ?";
     boolean foundUnavailable = false;
-    Set<StatusCode> statuses = new TreeSet<>();
+    this.statuses = new TreeSet<>();
     Timestamp statusModDate = null;
     Timestamp checkoutDate = null;
     try ( PreparedStatement pstmt = voyager.prepareStatement(statusQ)) {

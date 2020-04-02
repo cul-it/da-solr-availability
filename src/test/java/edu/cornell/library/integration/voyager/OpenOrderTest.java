@@ -151,8 +151,8 @@ public class OpenOrderTest {
 
     assertEquals(
     "{\"11342192\":{\"location\":{\"code\":\"ech\",\"number\":13,\"name\":\"Kroch Library Asia\","
-                 + "\"library\":\"Kroch Library Asia\",\"hoursCode\":\"asia\"},\"date\":1571423403},"+
-     "\"11342193\":{\"online\":true,\"date\":1571423479,\"order\":\"On order as of 10/21/19\"}}",
+                 + "\"library\":\"Kroch Library Asia\",\"hoursCode\":\"asia\"},\"date\":1571423403,\"active\":true},"+
+     "\"11342193\":{\"online\":true,\"date\":1571423479,\"order\":\"On order as of 10/21/19\",\"active\":true}}",
      holdings.toJson() );
 
   }

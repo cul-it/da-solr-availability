@@ -70,6 +70,7 @@ public class BibliographicSummary {
     BibliographicSummary b = new BibliographicSummary();
     for ( Holding h : holdings.values() ) {
 
+      if ( h.active == false ) continue;
       if ( h.online != null && h.online )
       {   b.online = true; continue;   }
 

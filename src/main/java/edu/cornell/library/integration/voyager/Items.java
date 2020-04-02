@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.changes.ChangeDetector;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
+import edu.cornell.library.integration.voyager.ItemStatuses.StatusCode;
 import edu.cornell.library.integration.voyager.ItemTypes.ItemType;
 import edu.cornell.library.integration.voyager.Locations.Location;
 
@@ -59,27 +60,19 @@ public class Items implements ChangeDetector {
       "   AND item_barcode.item_barcode = ?";
   private static final String allDueDatesQuery =
       "select bm.bib_id, ct.item_id, ct.current_due_date"+
-      "  from circ_transactions ct, mfhd_item mi, mfhd_master mm, bib_mfhd bm, bib_master bmast"+
+      "  from circ_transactions ct, mfhd_item mi, bib_mfhd bm"+
       " where bm.mfhd_id = mi.mfhd_id"+
-      "   and mi.item_id = ct.item_id"+
-      "   and bm.bib_id = bmast.bib_id"+
-      "   and mm.mfhd_id = mi.mfhd_id"+
-      "   and bmast.suppress_in_opac = 'N'"+
-      "   and mm.suppress_in_opac = 'N'";
+      "   and mi.item_id = ct.item_id";
   private static final String recentItemChangesQuery =
-      "select bib_master.bib_id, item.modify_date, item.create_date, item.item_id"+
-      "  from item, mfhd_item, bib_mfhd, bib_master, mfhd_master "+
-      " where bib_master.bib_id = bib_mfhd.bib_id"+
-      "   and bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
+      "select bib_mfhd.bib_id, item.modify_date, item.create_date, item.item_id"+
+      "  from item, mfhd_item, bib_mfhd"+
+      " where bib_mfhd.mfhd_id = mfhd_item.mfhd_id"+
       "   and mfhd_item.item_id = item.item_id"+
-      "   and mfhd_item.mfhd_id = mfhd_master.mfhd_id"+
       "   and (item.modify_date > ?"+
-      "       or item.create_date > ?)"+
-      "   and bib_master.suppress_in_opac = 'N'"+
-      "   and mfhd_master.suppress_in_opac = 'N'";
-  private static Locations locations = null;
-  private static ItemTypes itemTypes = null;
-  private static CircPolicyGroups circPolicyGroups = null;
+      "       or item.create_date > ?)";
+  static Locations locations = null;
+  static ItemTypes itemTypes = null;
+  static CircPolicyGroups circPolicyGroups = null;
 
   @Override
   public Map<Integer,Set<Change>> detectChanges(
@@ -107,6 +100,9 @@ public class Items implements ChangeDetector {
         }
       }
     }
+    if ( changes.size() > 4 )
+      for ( Set<Change> bibChanges : changes.values() ) for ( Change c : bibChanges )
+        c.type = Change.Type.ITEM_BATCH;
     return changes;
 
   }
@@ -130,20 +126,20 @@ public class Items implements ChangeDetector {
   private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(
       FormatStyle.SHORT,FormatStyle.SHORT);
 
-  public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhd_id ) throws SQLException {
+  public static ItemList retrieveItemsByHoldingId( Connection voyager, int mfhdId, boolean active ) throws SQLException {
     if (locations == null) {
       locations = new Locations( voyager );
       itemTypes = new ItemTypes( voyager );
       circPolicyGroups = new CircPolicyGroups( voyager );
     }
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
-      pstmt.setInt(1, mfhd_id);
+      pstmt.setInt(1, mfhdId);
       try (ResultSet rs = pstmt.executeQuery()) {
         TreeSet<Item> items = new TreeSet<>();
         while (rs.next())
-          items.add(new Item(voyager,rs, false));
+          items.add(new Item(voyager,rs, false, active));
         Map<Integer,TreeSet<Item>> itemList = new LinkedHashMap<>();
-        itemList.put(mfhd_id, items);
+        itemList.put(mfhdId, items);
         return new ItemList(itemList);
       }
     }
@@ -158,48 +154,49 @@ public class Items implements ChangeDetector {
     }
     ItemList il = new ItemList();
     Map<Integer,String> dueDates = new TreeMap<>();
-    Map<Integer,String> callSlips = new TreeMap<>();
+    Map<Integer,String> requests = new TreeMap<>();
     try (PreparedStatement pstmt = voyager.prepareStatement(itemByMfhdIdQuery)) {
-      for (int mfhd_id : holdings.getMfhdIds()) {
-        pstmt.setInt(1, mfhd_id);
+      pstmt.setFetchSize(10_000);
+      for (int mfhdId : holdings.getMfhdIds()) {
+        pstmt.setInt(1, mfhdId);
         try (ResultSet rs = pstmt.executeQuery()) {
           TreeSet<Item> items = new TreeSet<>();
           while (rs.next()) {
-            Item i = new Item(voyager,rs,false);
+            Item i = new Item(voyager,rs,false, holdings.get(mfhdId).active);
             items.add(i);
             if ( i.status != null ) {
               if ( i.status.due != null )
                 dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
-              if ( i.status.code != null && i.status.code.containsValue("Call Slip Request") )
-                callSlips.put(i.itemId, "Call Slip Request");
+              for ( StatusCode c : i.status.statuses ) if ( c.name.contains("Request") )
+                requests.put(i.itemId, c.name);
             }
           }
-          il.put(mfhd_id, items);
+          il.put(mfhdId, items);
         }
       }
     }
     if (inventory != null) {
       updateInInventory(inventory,bibId,TrackingTable.DUEDATES,dueDates);
-      updateInInventory(inventory,bibId,TrackingTable.CALLSLIPS,callSlips);
+      updateInInventory(inventory,bibId,TrackingTable.REQUESTS,requests);
     }
     return il;
   }
 
   private static enum TrackingTable {
     DUEDATES("itemDueDates"),
-    CALLSLIPS("itemCallSlipRequests");
+    REQUESTS("itemRequests");
     private String tableName;
     private TrackingTable( String tableName ) {
       this.tableName = tableName;
     }
     @Override
-    public String toString() { return tableName; }
+    public String toString() { return this.tableName; }
   }
   private static void updateInInventory(
-      Connection inventory, Integer bibId,TrackingTable table, Map<Integer, String> dueDates)
+      Connection inventory, Integer bibId,TrackingTable table, Map<Integer, String> details)
           throws SQLException {
 
-    if ( dueDates.isEmpty() ) {
+    if ( details.isEmpty() ) {
       try (PreparedStatement delStmt = inventory.prepareStatement(
           "DELETE FROM "+table+" WHERE bib_id = ?")) {
         delStmt.setInt(1, bibId);
@@ -217,7 +214,7 @@ public class Items implements ChangeDetector {
       }
     }
     String json;
-    try { json = mapper.writeValueAsString(dueDates);  }
+    try { json = mapper.writeValueAsString(details);  }
     catch (JsonProcessingException e) { e.printStackTrace(); return; }
 
     if (json.equals(oldJson)) return;
@@ -241,7 +238,7 @@ public class Items implements ChangeDetector {
       pstmt.setInt(1, item_id);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
-          return new Item(voyager,rs, true);
+          return new Item(voyager,rs, true, true);
       }
     }
     return null;
@@ -257,7 +254,7 @@ public class Items implements ChangeDetector {
       pstmt.setString(1, barcode);
       try (ResultSet rs = pstmt.executeQuery()) {
         while (rs.next())
-          return new Item(voyager,rs, true);
+          return new Item(voyager,rs, true, true);
       }
     }
     return null;
@@ -267,7 +264,7 @@ public class Items implements ChangeDetector {
     return mapper.readValue(json, Item.class);
   }
 
-  private static ObjectMapper mapper = new ObjectMapper();
+  static ObjectMapper mapper = new ObjectMapper();
   static {
     mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
@@ -277,11 +274,11 @@ public class Items implements ChangeDetector {
 
     @JsonValue
     public Map<Integer,TreeSet<Item>> getItems() {
-      return items;
+      return this.items;
     }
 
     @JsonCreator
-    private ItemList( Map<Integer,TreeSet<Item>> items ) {
+    ItemList( Map<Integer,TreeSet<Item>> items ) {
       this.items = items;
     }
 
@@ -293,12 +290,12 @@ public class Items implements ChangeDetector {
       return mapper.readValue(json, ItemList.class);
     }
 
-    public void add( Map<Integer,TreeSet<Item>> items ) {
-      this.items.putAll(items);
+    public void add( Map<Integer,TreeSet<Item>> itemSet ) {
+      this.items.putAll(itemSet);
     }
 
-    private void put( Integer mfhd_id, TreeSet<Item> items ) {
-      this.items.put(mfhd_id, items);
+    void put( Integer mfhd_id, TreeSet<Item> itemSet ) {
+      this.items.put(mfhd_id, itemSet);
     }
 
     public String toJson() throws JsonProcessingException {
@@ -306,18 +303,27 @@ public class Items implements ChangeDetector {
     }
 
     public int mfhdCount() {
-      return items.size();
+      return this.items.size();
     }
     public int itemCount() {
-      return items.values().stream().mapToInt(p -> p.size()).sum();
+      return this.items.values().stream().mapToInt(p -> p.size()).sum();
     }
 
     public Item getItem (int mfhd_id, int item_id) {
-      if (items.containsKey(mfhd_id))
-        for (Item i : items.get(mfhd_id))
+      if (this.items.containsKey(mfhd_id))
+        for (Item i : this.items.get(mfhd_id))
           if (i.itemId == item_id)
             return i;
       return null;
+    }
+
+    public Set<String> getBarcodes() {
+      Set<String> barcodes = new HashSet<>();
+      for (TreeSet<Item> items : this.items.values())
+        for ( Item i : items)
+          if ( i.barcode != null )
+            barcodes.add(i.barcode);
+      return barcodes;
     }
   }
 
@@ -325,6 +331,7 @@ public class Items implements ChangeDetector {
 
     @JsonProperty("id")        public final int itemId;
     @JsonProperty("mfhdId")    public Integer mfhdId;
+    @JsonProperty("barcode")   public final String barcode;
     @JsonProperty("copy")      private final int copy;
     @JsonProperty("sequence")  private final int sequence;
     @JsonProperty("enum")      public String enumeration;
@@ -340,8 +347,9 @@ public class Items implements ChangeDetector {
     @JsonProperty("status")    public ItemStatus status;
     @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public final Integer date;
+    @JsonProperty("active")    public boolean active = true;
 
-    private Item(Connection voyager, ResultSet rs, boolean includeMfhdId) throws SQLException {
+    Item(Connection voyager, ResultSet rs, boolean includeMfhdId, boolean active) throws SQLException {
       this.itemId = rs.getInt("ITEM_ID");
       this.mfhdId = (includeMfhdId)?rs.getInt("MFHD_ID"):null;
 
@@ -367,12 +375,16 @@ public class Items implements ChangeDetector {
       this.status = new ItemStatus( voyager, this.itemId, this.type, this.location );
       this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
           ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
-      this.empty = (rs.getString("ITEM_BARCODE") == null)?true:null;
+      this.active = active;
+      String barcode = rs.getString("ITEM_BARCODE");
+      if (barcode == null) { this.empty = true;   this.barcode = null; }
+      else {                 this.empty = null;   this.barcode = barcode; }
     }
 
-    private Item(
+    Item(
         @JsonProperty("id")        int itemId,
         @JsonProperty("mfhdId")    Integer mfhdId,
+        @JsonProperty("barcode")   String barcode,
         @JsonProperty("copy")      int copy,
         @JsonProperty("sequence")  int sequence,
         @JsonProperty("enum")      String enumeration,
@@ -386,10 +398,12 @@ public class Items implements ChangeDetector {
         @JsonProperty("circGrp")   Map<Integer,String> circGrp,
         @JsonProperty("type")      ItemType type,
         @JsonProperty("status")    ItemStatus status,
-        @JsonProperty("date")      Integer date
+        @JsonProperty("date")      Integer date,
+        @JsonProperty("active")    boolean active
         ) {
       this.itemId = itemId;
       this.mfhdId = mfhdId;
+      this.barcode = barcode;
       this.copy = copy;
       this.sequence = sequence;
       this.enumeration = enumeration;
@@ -404,6 +418,7 @@ public class Items implements ChangeDetector {
       this.type = type;
       this.status = status;
       this.date = date;
+      this.active = active;
     }
 
     public String toJson() throws JsonProcessingException {

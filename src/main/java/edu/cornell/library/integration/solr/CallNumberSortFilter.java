@@ -31,11 +31,11 @@ public final class CallNumberSortFilter extends TokenFilter {
   @Override
   public final boolean incrementToken() throws IOException {
 
-    if (!input.incrementToken()) return false;
+    if (!this.input.incrementToken()) return false;
 
-    String outputValue = sortForm(termAttr,prefixes);
-    termAttr.setEmpty();
-    termAttr.append(outputValue);
+    String outputValue = sortForm(this.termAttr,this.prefixes);
+    this.termAttr.setEmpty();
+    this.termAttr.append(outputValue);
     return true;
   }
 
