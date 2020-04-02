@@ -15,14 +15,13 @@ public class MonitorIndexQueue {
 
   private static final String CURRENT_TO_KEY = "queue";
 
-  public static void main(String[] args)
-      throws IOException, ClassNotFoundException, SQLException, InterruptedException {
+  public static void main(String[] args) throws IOException, SQLException, InterruptedException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
-    Class.forName("com.mysql.jdbc.Driver");
+
     try ( Connection inventoryDB = DriverManager.getConnection(
         prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
         PreparedStatement pstmt = inventoryDB.prepareStatement

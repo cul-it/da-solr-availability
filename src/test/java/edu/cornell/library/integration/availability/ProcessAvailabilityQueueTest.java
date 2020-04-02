@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import edu.cornell.library.integration.changes.Change;
 
-public class RecordsToSolrTest {
+public class ProcessAvailabilityQueueTest {
 
   @Test
   public void appendElapsedTime() {

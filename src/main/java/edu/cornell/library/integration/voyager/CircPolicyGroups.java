@@ -13,21 +13,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CircPolicyGroups {
 
   public CircPolicyGroups( final Connection voyager) throws SQLException {
-    if (_groups.isEmpty())
+    if (this._groups.isEmpty())
       populateGroups(voyager);
   }
 
   public Map<Integer,String> getByLocId( int locId ) {
-    if (_groups.containsKey(locId))
-      return _groups.get(locId).group;
+    if (this._groups.containsKey(locId))
+      return this._groups.get(locId).group;
     return null;
   }
 
- public static class CircPolicyGroup{
+ protected static class CircPolicyGroup{
     public final Map<Integer,String> group = new HashMap<>();
     @JsonCreator
-    private CircPolicyGroup( @JsonProperty("id") int id, @JsonProperty("name") String name) {
-      group.put(id, name);
+    CircPolicyGroup( @JsonProperty("id") int id, @JsonProperty("name") String name) {
+      this.group.put(id, name);
     }
   }
 
@@ -45,7 +45,7 @@ public class CircPolicyGroups {
       while (rs.next()) {
         int id = rs.getInt(1);
         String name = rs.getString(2);
-        _groups.put(rs.getInt(3), new CircPolicyGroup(id,name));
+        this._groups.put(rs.getInt(3), new CircPolicyGroup(id,name));
       }
     }
   }

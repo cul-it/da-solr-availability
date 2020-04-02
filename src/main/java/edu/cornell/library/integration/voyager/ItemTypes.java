@@ -18,21 +18,20 @@ public class ItemTypes {
       Arrays.asList("1hrloan","1hrres","2hrloan","2hrres","3hrloan","3hrres","4hrloan","4hrres","8hrres","permres","nocirc");
 
   public ItemTypes( final Connection voyager) throws SQLException {
-    if (_types.isEmpty())
+    if (this._types.isEmpty())
       populateTypes(voyager);
   }
 
   public ItemType getById( int id ) {
-    if (_types.containsKey(id))
-      return _types.get(id);
+    if (this._types.containsKey(id))
+      return this._types.get(id);
     return null;
   }
 
  public static class ItemType{
     public final int id;
     public final String name;
-    @JsonCreator
-    private ItemType( @JsonProperty("id") int id, @JsonProperty("name") String name) {
+    @JsonCreator ItemType( @JsonProperty("id") int id, @JsonProperty("name") String name) {
       this.id = id;
       this.name = name;
     }
@@ -56,7 +55,7 @@ public class ItemTypes {
       while (rs.next()) {
         int id = rs.getInt(1);
         String name = rs.getString(2);
-        _types.put(id, new ItemType(id,name));
+        this._types.put(id, new ItemType(id,name));
       }
     }
   }

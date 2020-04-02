@@ -5,15 +5,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class Change implements Comparable<Change>{
-  private final Type type;
+  public Type type;
   private final Integer recordId;
   public final String detail;
   private final Timestamp changeDate;
@@ -70,7 +68,7 @@ public class Change implements Comparable<Change>{
     if (this.detail != null)
       sb.append(" ").append(this.detail);
     if (this.changeDate != null) {
-      sb.append(" ").append(this.changeDate.toLocalDateTime().format(formatter));
+      sb.append(" ").append(String.format("%1$TD %1$TT",this.changeDate));
       if (showAgeOfChange)
         appendElapsedTime( sb, this.changeDate );
     }
@@ -83,8 +81,8 @@ public class Change implements Comparable<Change>{
   public static void appendElapsedTime( StringBuilder sb, Timestamp since ) {
 
     long seconds = java.time.Duration.between(
-        since.toInstant(), java.time.ZonedDateTime.now().toInstant()).getSeconds();
-    //java.time.Instant.now()).getSeconds();
+        since.toInstant(), java.time.Instant.now()).getSeconds();
+    //java.time.ZonedDateTime.now().toInstant()).getSeconds();
     if ( seconds == 0 ) return;
 
     sb.append(" (");
@@ -114,8 +112,7 @@ public class Change implements Comparable<Change>{
     sb.append(')');
   }
 
-  public enum Type { BIB, HOLDING, ITEM, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, ORDER };
-  private static DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT,FormatStyle.MEDIUM);
+  public enum Type { BIB, HOLDING, ITEM, ITEM_BATCH, CIRC, RESERVE, SERIALISSUES, AGE, RECORD, ORDER }
 
   @Override
   public boolean equals( Object o ) {

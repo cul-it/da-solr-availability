@@ -2,7 +2,9 @@ package edu.cornell.library.integration.voyager;
 
 import static edu.cornell.library.integration.voyager.TestUtil.convertStreamToString;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -65,9 +67,9 @@ public class HoldingsTest {
   @Test
   public void getHoldingByHoldingId() throws SQLException, IOException, XMLStreamException {
     HoldingSet holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1184953);
-    assertEquals(examples.get("expectedJson1184953").toJson(),holding.toJson());
+    assertEquals(examples.get("expectedJson969430").get(1184953).toJson(),holding.get(1184953).toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holding.get(1184953).date)).toString());
-    assertEquals(expectedMarc1184953,holding.get(1184953).record.toString());
+    assertEquals(this.expectedMarc1184953,holding.get(1184953).record.toString());
 
     holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9850688);
     assertEquals(examples.get("expectedJson9850688").toJson(),holding.toJson());
@@ -82,8 +84,10 @@ public class HoldingsTest {
   @Test
   public void getHoldingByBibId() throws SQLException, IOException, XMLStreamException {
     HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 969430);
-    assertEquals(1,holdings.size());
-    assertEquals(examples.get("expectedJson1184953").toJson(),holdings.toJson());
+    assertEquals(2,holdings.size());
+    assertTrue( holdings.get(1184953).active);
+    assertFalse(holdings.get(1184954).active);
+    assertEquals(examples.get("expectedJson969430").toJson(),holdings.toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L*holdings.get(1184953).date)).toString());
   }
 
@@ -105,70 +109,69 @@ public class HoldingsTest {
   @Test
   public void summarizeAvailability() throws SQLException, IOException, XMLStreamException {
     HoldingSet h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9975971);
-    ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, 9975971);
+    ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, 9975971, h.get(9975971).active);
     h.get(9975971).summarizeItemAvailability(i.getItems().get(9975971));
     assertEquals(examples.get("expectedJsonWithAvailability9975971").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1131911);
-    i = Items.retrieveItemsByHoldingId(voyagerTest, 1131911);
+    i = Items.retrieveItemsByHoldingId(voyagerTest, 1131911, h.get(1131911).active);
     h.get(1131911).summarizeItemAvailability(i.getItems().get(1131911));
     assertEquals(examples.get("expectedJsonWithAvailability1131911").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
     for (int mfhdId : h.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonWithAvailabilityELECTRICSHEEP").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1055);
     for (int mfhdId : h.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(1055));
     }
     assertEquals(examples.get("expectedJsonMissing").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 329763);
     for (int mfhdId : h.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedMultivolMixedAvail").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 9628566);
     for (int mfhdId : h.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonOnReserve").toJson(),h.toJson());
 
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 2026746);
     for (int mfhdId : h.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonPartialReserveHolding").toJson(),h.toJson());
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4546769);
     for (int mfhdId : h.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonPartiallyInTempLocAndUnavail").toJson(),h.toJson());
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 10023626);
     for (int mfhdId : h.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJsonOnline").toJson(),h.toJson());
     h = Holdings.retrieveHoldingsByBibId(voyagerTest, 1799377);
     for (int mfhdId : h.getMfhdIds()) {
-      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedJson2202712").toJson(),h.toJson());
     assertEquals("++",h.get(2202712).callNumberSuffix);
   }
-
 
   @Test
   public void urlInsertIntoHoldings() throws SQLException, IOException, XMLStreamException {
@@ -188,14 +191,13 @@ public class HoldingsTest {
     assertEquals(examples.get("expectedJsonOnlineWithLinks").toJson(),h.toJson());
   }
 
-
   @Test
   public void hathiLinkProducesFakeHoldings() throws SQLException, IOException, XMLStreamException {
     Set<Object> urlJsons = new HashSet<>();
     urlJsons.add("{\"description\":\"HathiTrust\",\"url\":\"http://hdl.handle.net/2027/coo.31924089590891\"}");
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4345125);
     for (int mfhdId : h.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
@@ -212,13 +214,12 @@ public class HoldingsTest {
         + "?index=beal/lreapcc&collection=bealL_beal\"}");
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 7187316);
     for (int mfhdId : h.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
     assertEquals(examples.get("interestingOnlineHolding").toJson(),h.toJson());
   }
-
 
   @Test
   public void bothVoyagerAccessLinkAndHathiLink() throws SQLException, IOException, XMLStreamException {
@@ -228,21 +229,19 @@ public class HoldingsTest {
                 + "\"url\":\"http://catalog.hathitrust.org/Record/009586797\"}");
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 2813334);
     for (int mfhdId : h.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     Holdings.mergeAccessLinksIntoHoldings(h, urlJsons);
-    System.out.println(h.toJson());
     assertEquals(examples.get("bothVoyagerAccessLinkAndHathiLink").toJson(),h.toJson());
   }
-
 
   @Test
   public void onSiteUse() throws SQLException, IOException, XMLStreamException {
     int bib = 867;
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
     for (int mfhdId : h.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
   }
@@ -252,7 +251,7 @@ public class HoldingsTest {
     int bib = 9295667;
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
     for (int mfhdId : h.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedInProcess").toJson(),h.toJson());
@@ -263,7 +262,7 @@ public class HoldingsTest {
     int bib = 4888514;
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
     for (int mfhdId : h.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedLost").toJson(),h.toJson());
@@ -274,7 +273,7 @@ public class HoldingsTest {
     int bib = 1282748;
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
     for (int mfhdId : h.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedCheckedOutReserve").toJson(),h.toJson());
@@ -286,7 +285,7 @@ public class HoldingsTest {
     HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, bib);
     h.getRecentIssues(voyagerTest, null, bib);
     for (int mfhdId : h.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId);
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
       h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
     }
     assertEquals(examples.get("expectedRecentItems").toJson(),h.toJson());
@@ -303,4 +302,40 @@ public class HoldingsTest {
           "Professor Ángel Sáenz-Badillos and Professor Judit Targarona Borrás", h.get(mfhdId).donors.get(0));
     }
   }
+
+  @Test
+  public void noCallNumberWithPrefix() throws SQLException, IOException, XMLStreamException {
+    // 852 81 ‡b olin ‡k Newspapers ‡h No call number ‡z Subscription cancelled after 1996.
+    HoldingSet holding = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 2354298);
+    assertEquals("Newspapers",holding.get(2354298).call);
+  }
+
+  @Test
+  public void partiallySuppressedHoldings() throws SQLException, IOException, XMLStreamException {
+    {
+      HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 1449673);
+      assertEquals(examples.get(
+      "RMC and Annex copies active, not other Annex and Iron Mountain").toJson(),h.toJson());
+    }
+    {
+      HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 11764);
+      assertEquals(examples.get("Annex copy active, not Mann").toJson(),h.toJson());
+    }
+    {
+      HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 34985);
+      assertEquals(examples.get(
+      "Annex copy, rare Annex copy active, not Microfilm").toJson(),h.toJson());
+    }
+    {
+      HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 5487364);
+      assertEquals(examples.get("Olin copy active, not RMC copy").toJson(),h.toJson());
+    }
+    {
+      HoldingSet h = Holdings.retrieveHoldingsByBibId(voyagerTest, 301608);
+      assertEquals(examples.get(
+      "RMC copy, Annex copy & microfilm active, Iron Mountain & master microfilm inactive")
+      .toJson(),h.toJson());
+    }
+  }
+
 }

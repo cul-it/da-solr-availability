@@ -54,32 +54,32 @@ public class ItemsTest {
 
   @Test
   public void getItemsByHoldingId() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1234567);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1234567, true);
     assertEquals(examples.get("expectedJson2282772").toJson(),items.toJson());
     assertEquals(1,items.mfhdCount());
     assertEquals(1,items.itemCount());
 
-    items = Items.retrieveItemsByHoldingId(voyagerTest, 1184953);
+    items = Items.retrieveItemsByHoldingId(voyagerTest, 1184953, true);
     assertEquals(examples.get("expectedJson2236014").toJson(),items.toJson());
     assertEquals("Wed May 31 00:00:00 EDT 2000",(new Date(1000L* items.getItem(1184953,2236014).date )).toString());
 
-    items = Items.retrieveItemsByHoldingId(voyagerTest, 9975971);
+    items = Items.retrieveItemsByHoldingId(voyagerTest, 9975971, true);
     assertEquals(examples.get("expectedJson10013120").toJson(),items.toJson());
     assertFalse( items.getItem(9975971,10013120).status.available );
 
-    items = Items.retrieveItemsByHoldingId(voyagerTest, 2202712);
+    items = Items.retrieveItemsByHoldingId(voyagerTest, 2202712, true);
     assertEquals(examples.get("expectedJson2202712").toJson(),items.toJson());
   }
 
   @Test
   public void onHoldTest() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 2932);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 2932, true);
     assertEquals(examples.get("expectedJson18847").toJson(),items.toJson());
   }
 
   @Test
   public void recalledTest() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 6511093);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 6511093, true);
     assertEquals(examples.get("expectedJSON8060353").toJson(),items.toJson());
   }
 
@@ -92,32 +92,38 @@ public class ItemsTest {
 
   @Test
   public void multiVolTest() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 4521000);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 4521000, true);
     assertEquals(examples.get("expectedJsonMultiVol").toJson(),items.toJson());
+  }
+  @Test
+  public void multiCopyTest() throws SQLException, IOException, XMLStreamException {
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
+    ItemList items = Items.retrieveItemsForHoldings(voyagerTest, null, 4442869, holdings);
+    assertEquals(examples.get("expectedJsonELECTRICSHEEP").toJson(),items.toJson());
   }
 
   @Test
   public void missingTest() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1055);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1055, true);
     assertEquals(examples.get("expectedJsonMissing").toJson(),items.toJson());
   }
 
   @Test
   public void lost() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 5404964);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 5404964, true);
     assertEquals(examples.get("expectedLost").toJson(),items.toJson());
   }
 
   @Test
   public void checkedOutReserve() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1144752);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1144752, true);
 //    System.out.println(items.toJson());
     assertEquals(examples.get("expectedCheckedOutReserve").toJson(),items.toJson());
   }
 
   @Test
   public void emptyItem() throws SQLException, JsonProcessingException {
-    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218);
+    ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1016218, true);
     assertEquals(examples.get("expectedBib833840").toJson(),items.toJson());
   }
 
@@ -143,4 +149,56 @@ public class ItemsTest {
     assertEquals("Mon Feb 29 05:37:58 EST 2016",(new Date(1000L*item2.status.date)).toString());
   }
 
+  @Test
+  public void partiallySuppressedHoldings() throws SQLException, IOException, XMLStreamException {
+    {
+      HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest,1449673);
+      ItemList items = Items.retrieveItemsForHoldings(voyagerTest,null,1449673,holdings);
+      assertEquals(examples.get(
+      "RMC and Annex copies active, not other Annex").toJson(),items.toJson());
+    }
+    {
+      HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest,11764);
+      ItemList items = Items.retrieveItemsForHoldings(voyagerTest,null,11764,holdings);
+      assertEquals(examples.get("Annex copy active, not Mann").toJson(),items.toJson());
+    }
+    {
+      HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest,34985);
+      ItemList items = Items.retrieveItemsForHoldings(voyagerTest,null,34985,holdings);
+      assertEquals(examples.get(
+      "Annex copy, rare Annex copy active, not Microfilm").toJson(),items.toJson());
+    }
+    {
+      HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest,5487364);
+      ItemList items = Items.retrieveItemsForHoldings(voyagerTest,null,5487364,holdings);
+      assertEquals(examples.get("Olin copy active, not RMC copy").toJson(),items.toJson());
+    }
+    {
+      HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest,301608);
+      ItemList items = Items.retrieveItemsForHoldings(voyagerTest,null,301608,holdings);
+      assertEquals(examples.get(
+      "RMC copy, Annex copy & 1st microfilm active, 2nd microfilm inactive").toJson(),items.toJson());
+    }
+  }
+
+  @Test
+  public void itemBarcodes() throws SQLException, IOException, XMLStreamException {
+    {
+      ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 4521000, true);
+      String expected =
+      "[31924096142660, 31924096849124, 31924099242335, 31924090841879, 31924090013479, 31924096707900,"
+      + " 31924096849132, 31924097486447, 31924099484093, 31924102153552, 31924096654094, 31924099484101]";
+      assertEquals(expected,items.getBarcodes().toString());
+    }
+    {
+      HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
+      ItemList items = Items.retrieveItemsForHoldings(voyagerTest, null, 4442869, holdings);
+      String expected =
+      "[31924111784595, 31924111784561, 31924111784660, 31924112180058, 31924111784587, 31924111784553,"
+      + " 31924111784579, 31924111774042, 31924111784629, 31924111774091, 31924111774083, 31924111774588,"
+      + " 31924111773424, 31924095936195, 31924110956939, 31924112176114, 31924111774497, 31924099417416,"
+      + " 31924095936468, 31924111773416]";
+      assertEquals(expected,items.getBarcodes().toString());
+    }
+  }
 }

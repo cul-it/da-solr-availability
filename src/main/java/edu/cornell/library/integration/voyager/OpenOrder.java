@@ -46,25 +46,25 @@ public class OpenOrder implements ChangeDetector {
             note = "In pre-order processing";
             Timestamp statusDate = rs.getTimestamp("status_date");
             if ( statusDate != null )
-              note += " as of "+format.format(statusDate);
+              note += " as of "+this.format.format(statusDate);
             break;
           case 7:
-            if ( notes.containsKey(mfhdId) ) continue;
+            if ( this.notes.containsKey(mfhdId) ) continue;
             note = "Order cancelled"; break;
           case 8: case 4:
             int quantity = rs.getInt("quantity");
             if ( quantity == 1 )
-              note = String.format("On order as of %s", format.format(rs.getTimestamp("po_approve_date")));
+              note = String.format("On order as of %s", this.format.format(rs.getTimestamp("po_approve_date")));
             else
               note = String.format("%d copies ordered as of %s",
-                  quantity, format.format(rs.getTimestamp("po_approve_date")));
+                  quantity, this.format.format(rs.getTimestamp("po_approve_date")));
             break;
           }
           if (note != null)
-            if ( notes.containsKey(mfhdId) )
-              notes.put( mfhdId, note+", "+notes.get(mfhdId) );
+            if ( this.notes.containsKey(mfhdId) )
+              this.notes.put( mfhdId, note+", "+this.notes.get(mfhdId) );
             else
-              notes.put( mfhdId, note);
+              this.notes.put( mfhdId, note);
         }
       }
     }

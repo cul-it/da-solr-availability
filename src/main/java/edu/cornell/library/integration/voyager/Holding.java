@@ -37,7 +37,7 @@ import edu.cornell.library.integration.voyager.Locations.Location;
 public class Holding {
 
   @JsonProperty("copy")        public final Integer copy;
-  @JsonProperty("notes")       public final List<String> notes;
+  @JsonProperty("notes")       public List<String> notes;
   @JsonProperty("holdings")    public final List<String> holdings;
   @JsonProperty("supplements") public final List<String> supplements;
   @JsonProperty("indexes")     public final List<String> indexes;
@@ -52,6 +52,7 @@ public class Holding {
   @JsonProperty("online")      public Boolean online = null;
   @JsonProperty("date")        public final Integer date;
   @JsonProperty("links")       public List<Link> links = null;
+  @JsonProperty("active")      public boolean active = true;
 
 
   @JsonIgnore public List<String> donors = null;
@@ -69,6 +70,7 @@ public class Holding {
         ? rs.getTimestamp("create_date") : rs.getTimestamp("update_date")).getTime()/1000);
     String mrc = DownloadMARC.downloadMrc(voyager, RecordType.HOLDINGS, rs.getInt("mfhd_id"));
     this.record = new MarcRecord( RecordType.HOLDINGS, mrc );
+    this.active = rs.getString("suppress_in_opac").equals("N");
 
     // process data from holdings marc
     final Map<Integer,BoundWith> boundWiths = new HashMap<>();
@@ -135,7 +137,7 @@ public class Holding {
           case 't':
             try { 
               copy = Integer.valueOf(sf.value);
-            } catch ( NumberFormatException e ) {
+            } catch ( @SuppressWarnings("unused") NumberFormatException e ) {
               System.out.println("Holdings copy number is invalid. h"+this.record.id+" ("+sf.value+")");
             }
             break CODE;
@@ -169,7 +171,9 @@ public class Holding {
     else
       this.location = holdingLocation;
     this.boundWiths = (boundWiths.isEmpty())?null:boundWiths;
-    if ( holdingLocation == null || call == null || call.matches(".*[Nn]o [Cc]all [Nn]umber.*") )
+    if ( call != null )
+      call =  call.replaceAll("[Nn]o [Cc]all [Nn]umber\\.*", "").trim();
+    if ( holdingLocation == null || call == null || call.isEmpty() )
       this.call = null;
     else
       this.call = call;
@@ -190,7 +194,8 @@ public class Holding {
       @JsonProperty("date")        Integer date,
       @JsonProperty("boundWith")   Map<Integer,BoundWith> boundWiths,
       @JsonProperty("items")       HoldingsItemSummary itemSummary,
-      @JsonProperty("order")       String openOrderNote) {
+      @JsonProperty("order")       String openOrderNote,
+      @JsonProperty("active")      boolean active) {
     this.copy = copy;
     this.notes = (notes == null || notes.isEmpty()) ? null : notes;
     this.holdings = (holdings == null || holdings.isEmpty()) ? null : holdings;
@@ -206,6 +211,7 @@ public class Holding {
     this.avail = avail;
     this.circ = circ;
     this.online = online;
+    this.active = active;
   }
 
   public String toJson() throws JsonProcessingException {
@@ -245,8 +251,8 @@ public class Holding {
     List<ItemReference> returned = new ArrayList<>();
     List<ItemReference> tempLocs = null;
     Set<Location> itemLocations = new HashSet<>();
-    if (boundWiths != null)
-      for (Entry<Integer,BoundWith> bw : boundWiths.entrySet()) {
+    if (this.boundWiths != null)
+      for (Entry<Integer,BoundWith> bw : this.boundWiths.entrySet()) {
         itemCount++;
         if (! bw.getValue().status.available)
           unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null,null,null));

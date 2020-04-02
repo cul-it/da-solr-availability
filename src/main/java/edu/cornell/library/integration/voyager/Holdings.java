@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -35,7 +36,6 @@ public class Holdings {
       "  FROM bib_mfhd, mfhd_master"+
       " WHERE bib_mfhd.mfhd_id = mfhd_master.mfhd_id"+
       "   AND bib_mfhd.bib_id = ?"+
-      "   AND mfhd_master.suppress_in_opac = 'N'"+
       " ORDER BY bib_mfhd.mfhd_id";
   private static final String holdingByHoldingIdQuery =
       "SELECT *"+
@@ -73,10 +73,6 @@ public class Holdings {
       }
     }
     return changedBibs;
-  }
-
-  public static void detectChangedOrderStatus( Connection voyager ) {
-
   }
 
   public static HoldingSet retrieveHoldingsByBibId( Connection voyager, int bib_id )
@@ -128,20 +124,20 @@ public class Holdings {
       this.holdings.put(mfhdId, holding);
     }
     public void put(Integer mfhdId, Holding holding) {
-      holdings.put(mfhdId, holding);
+      this.holdings.put(mfhdId, holding);
     }
     public int size() {
-      return holdings.size();
+      return this.holdings.size();
     }
     public Holding get( Integer mfhdId ) {
-      return holdings.get(mfhdId);
+      return this.holdings.get(mfhdId);
     }
     public Collection<Holding> values() {
       return this.holdings.values();
     }
 
     public Set<Integer> getMfhdIds( ) {
-      return holdings.keySet();
+      return this.holdings.keySet();
     }
 
     public boolean noItemsAvailability() {
@@ -156,6 +152,8 @@ public class Holdings {
 
       Set<String> facetValues = new LinkedHashSet<>();
       for (Holding h : this.holdings.values()) {
+        if (h.active == false)
+          continue;
         if (h.online != null && h.online)
           continue;
         Set<String> holdingFacetValues = h.getLocationFacetValues();
@@ -267,6 +265,18 @@ public class Holdings {
           return true;
       return false;
     }
+
+    public Set<String> getBoundWithBarcodes() {
+      Set<String> barcodes = new HashSet<>();
+      for ( Holding h : this.holdings.values() ) {
+        if ( h.boundWiths == null )
+          continue;
+        for ( BoundWith bw : h.boundWiths.values() )
+          barcodes.add(bw.barcode);
+      }
+      return barcodes;
+    }
+
   }
 
   public static void mergeAccessLinksIntoHoldings(HoldingSet holdings, Collection<Object> linkJsons)
@@ -274,27 +284,50 @@ public class Holdings {
 
     Holding onlineHolding = null;
     Holding hathiHolding = null;
+    Holding etasHolding = null;
 
     for ( Holding h : holdings.values() )
       if ( h.online != null && h.online )
         onlineHolding = h;
     for ( Object linkJson : linkJsons ) {
       Link l = Link.fromJson((String)linkJson);
-      if (l.desc != null && (l.desc.startsWith("HathiTrust"))) {
-        if (hathiHolding == null) {
-          hathiHolding = new Holding(
-              null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null);
-          hathiHolding.links = new ArrayList<>();
-          holdings.put(0, hathiHolding);
+      if (l.desc != null && (l.url.contains("hathitrust") || l.url.contains("handle.net/2027/"))) {
+
+        // BEGIN Temporary Emergency Access Link Logic
+        if ( l.url.contains("shibboleth") ) {
+          if ( etasHolding == null ) {
+            etasHolding = new Holding(
+                null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
+            etasHolding.links = new ArrayList<>();
+            holdings.put(1, etasHolding);
+            etasHolding.notes =
+                Arrays.asList("Available by special arrangement in response to the COVID-19 outbreak."
+                    + " Simultaneous access is limited.");
+          }
+          etasHolding.links.add(l);
+
+        } else if ( l.desc.startsWith("Temporary Access") ) {
+          Holding etasExplanationLinkHolding = new Holding (
+              null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
+          holdings.put(2, etasExplanationLinkHolding);
+          etasExplanationLinkHolding.links = Arrays.asList(l);
+        // END Temporary Emergency Access Link Logic
+
+        } else {
+          if (hathiHolding == null) {
+            hathiHolding = new Holding(
+                null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
+            hathiHolding.links = new ArrayList<>();
+            holdings.put(0, hathiHolding);
+          }
+          hathiHolding.links.add(l);
         }
-        hathiHolding.links.add(l);
       } else if ( onlineHolding != null ) {
         if ( onlineHolding.links == null )
           onlineHolding.links = new ArrayList<>();
         onlineHolding.links.add(l);
       }
     }
-
    }
 
 }
