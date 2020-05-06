@@ -104,7 +104,7 @@ Uris Library Reference (Non-Circulating)				Uris Library > Reference
 Uris Library Reserve				Uris Library > Reserve
 Uris Library Reserve Willis Room 				Uris Library > Reserve Willis Room 
 Veterinary Library (Schurman Hall)				Veterinary Library > Main Collection
-Veterinary Library Core Resource (Non-Circulating)				Veterinary Library > Core Resources
+Veterinary Library Core Resource (5 hour loan)				Veterinary Library > Core Textbooks
 Veterinary Library Rare Books (Non-Circulating)				Veterinary Library > Rare Books
 Veterinary Library Reference (Non-Circulating)				Veterinary Library > Reference
 Veterinary Library Reserve 				Veterinary Library > Reserve 
