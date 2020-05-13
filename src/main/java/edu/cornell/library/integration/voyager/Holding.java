@@ -334,18 +334,21 @@ public class Holding {
     @JsonProperty("ssid")         public final String ssid;
     @JsonProperty("dbcode")       public final String dbcode;
     @JsonProperty("providercode") public final String providercode;
+    @JsonProperty("titleid")      public final String titleid;
 
     public Link (
         @JsonProperty("url")          String url,
         @JsonProperty("description")  String desc,
         @JsonProperty("ssid")         String ssid,
         @JsonProperty("dbcode")       String dbcode,
-        @JsonProperty("providercode") String providercode ) {
+        @JsonProperty("providercode") String providercode,
+        @JsonProperty("titleid")      String titleid) {
       this.url  = url;
       this.desc = desc;
       this.ssid = ssid;
       this.dbcode = dbcode;
       this.providercode = providercode;
+      this.titleid = titleid;
     }
 
     public static Link fromJson( String json ) throws IOException {
