@@ -306,7 +306,7 @@ public class Holdings {
           }
           etasHolding.links.add(l);
 
-        } else if ( l.desc.startsWith("Temporary Access") ) {
+        } else if ( l.desc.startsWith("Temporary Access") || l.desc.endsWith("temporary access")) {
           Holding etasExplanationLinkHolding = new Holding (
               null, null, null, null, null, null, null,null,null,null,true/*online*/,null,null,null,null,true);
           holdings.put(2, etasExplanationLinkHolding);
