@@ -82,7 +82,7 @@ public class ProcessAvailabilityQueue {
         Set<Integer> ids = new HashSet<>();
         stmt.execute("LOCK TABLES solrFieldsData READ,availabilityQueue WRITE,bibRecsVoyager READ,processLock WRITE");
         Integer priority = null;
-        int lockId = 0;
+        List<Integer> lockIds = new ArrayList<>();
         try (  ResultSet rs = pstmt.executeQuery() ) {
           while ( rs.next() ) {
 
@@ -119,7 +119,7 @@ public class ProcessAvailabilityQueue {
             createLockStmt.setInt(1,bibId);
             createLockStmt.executeUpdate();
             try ( ResultSet generatedKeys = createLockStmt.getGeneratedKeys() ) {
-              if (generatedKeys.next()) lockId = generatedKeys.getInt(1);
+              if (generatedKeys.next()) lockIds.add( generatedKeys.getInt(1) );
             }
           }
         }
@@ -138,8 +138,11 @@ public class ProcessAvailabilityQueue {
           clearFromQueueStmt.addBatch();
         }
         clearFromQueueStmt.executeBatch();
-        unlockStmt.setInt(1, lockId);
-        unlockStmt.executeUpdate();
+        for (int lockId : lockIds) {
+          unlockStmt.setInt(1, lockId);
+          unlockStmt.addBatch();
+        }
+        unlockStmt.executeBatch();
       }
       solr.blockUntilFinished();
     }
