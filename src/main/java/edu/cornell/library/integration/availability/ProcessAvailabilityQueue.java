@@ -56,8 +56,10 @@ public class ProcessAvailabilityQueue {
         Statement stmt = inventoryDB.createStatement();
         PreparedStatement pstmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.bib_id, priority"+
-             "  FROM availabilityQueue, solrFieldsData"+
+             "  FROM solrFieldsData, availabilityQueue"+
+             "  LEFT JOIN processLock ON availabilityQueue.bib_id = processLock.bib_id"+
              " WHERE availabilityQueue.bib_id = solrFieldsData.bib_id"+
+             "   AND processLock.date IS NULL"+
              " ORDER BY priority LIMIT 4");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE bib_id = ?");
@@ -65,8 +67,12 @@ public class ProcessAvailabilityQueue {
             ("SELECT active FROM bibRecsVoyager WHERE bib_id = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
             ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
-        PreparedStatement deprioritizeStmt = inventoryDB.prepareStatement
-            ("UPDATE availabilityQueue SET priority = 9 WHERE id = ?");
+        PreparedStatement createLockStmt = inventoryDB.prepareStatement
+            ("INSERT INTO processLock (bib_id) values (?)",Statement.RETURN_GENERATED_KEYS);
+        PreparedStatement unlockStmt = inventoryDB.prepareStatement
+            ("DELETE FROM processLock WHERE id = ?");
+        PreparedStatement oldLocksCleanupStmt = inventoryDB.prepareStatement
+            ("DELETE FROM processLock WHERE date < DATE_SUB( NOW(), INTERVAL 5 MINUTE)");
         PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE id = ?");
         ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
@@ -76,8 +82,9 @@ public class ProcessAvailabilityQueue {
       for (int i = 0; i < 40_000; i++){
         Set<BibToUpdate> bibs = new HashSet<>();
         Set<Integer> ids = new HashSet<>();
-        stmt.execute("LOCK TABLES solrFieldsData READ, availabilityQueue WRITE, bibRecsVoyager READ");
+        stmt.execute("LOCK TABLES solrFieldsData READ,availabilityQueue WRITE,bibRecsVoyager READ,processLock WRITE");
         Integer priority = null;
+        List<Integer> lockIds = new ArrayList<>();
         try (  ResultSet rs = pstmt.executeQuery() ) {
           while ( rs.next() ) {
 
@@ -95,6 +102,7 @@ public class ProcessAvailabilityQueue {
             { while (rs2.next()) active = rs2.getBoolean(1); }
             if ( active == null ) {
               System.out.println("Bib in availability queue, not bibRecsVoyager: "+bibId);
+              stmt.execute("UNLOCK TABLES");
               continue;
             }
 
@@ -106,20 +114,23 @@ public class ProcessAvailabilityQueue {
                 changes.add(new Change(Change.Type.RECORD,null,rs2.getString("cause"),
                                        rs2.getTimestamp("record_date"),null));
                 int id = rs2.getInt("id");
-                deprioritizeStmt.setInt(1,id);
-                deprioritizeStmt.addBatch();
                 ids.add(id);
               }
               bibs.add(new BibToUpdate(bibId,changes,active ));
-              deprioritizeStmt.executeBatch();
+            }
+            createLockStmt.setInt(1,bibId);
+            createLockStmt.executeUpdate();
+            try ( ResultSet generatedKeys = createLockStmt.getGeneratedKeys() ) {
+              if (generatedKeys.next()) lockIds.add( generatedKeys.getInt(1) );
             }
           }
         }
         stmt.execute("UNLOCK TABLES");
 
-        if ( bibs.isEmpty() )
+        if ( bibs.isEmpty() ) {
+          oldLocksCleanupStmt.executeUpdate();
           Thread.sleep(3000);
-        else {
+        } else {
           updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
@@ -129,6 +140,11 @@ public class ProcessAvailabilityQueue {
           clearFromQueueStmt.addBatch();
         }
         clearFromQueueStmt.executeBatch();
+        for (int lockId : lockIds) {
+          unlockStmt.setInt(1, lockId);
+          unlockStmt.addBatch();
+        }
+        unlockStmt.executeBatch();
       }
       solr.blockUntilFinished();
     }
