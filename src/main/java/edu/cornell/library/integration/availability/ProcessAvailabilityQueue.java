@@ -56,8 +56,10 @@ public class ProcessAvailabilityQueue {
         Statement stmt = inventoryDB.createStatement();
         PreparedStatement pstmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.bib_id, priority"+
-             "  FROM availabilityQueue, solrFieldsData"+
+             "  FROM solrFieldsData, availabilityQueue"+
+             "  LEFT JOIN processLock ON availabilityQueue.bib_id = processLock.bib_id"+
              " WHERE availabilityQueue.bib_id = solrFieldsData.bib_id"+
+             "   AND processLock.date IS NULL"+
              " ORDER BY priority LIMIT 4");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE bib_id = ?");
