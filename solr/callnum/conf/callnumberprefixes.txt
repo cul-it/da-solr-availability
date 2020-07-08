@@ -1,10 +1,8 @@
-# Based on Cornell Library's documented call number prefixes as of June 26, 2019:
-# https://confluence.cornell.edu/pages/viewpage.action?pageId=327638890
+# Based on Cornell Library's documented call number prefixes as of July 12, 2019:
+# https://confluence.cornell.edu/pages/viewpage.action?pageId=327638890#HoldingsLocations(LTSProcedure#150)-C
 # with the following adjustments:
 # Added "Disk"
-# Added "Popular Reading Area"
 # Added "Temp"
-# Replaced "Bennett Coll." with "Bennett Collection"
 A.D. White
 Adelmann
 Anhinga
