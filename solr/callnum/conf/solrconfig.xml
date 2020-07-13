@@ -120,7 +120,7 @@
       <str name="echoParams">explicit</str>
       <str name="fl">
         bibid, callnum_display, shelfloc, availability_json, cite_preescaped_display,
-        online, format, fulltitle_display, fulltitle_vern_display
+        online, format, fulltitle_display, fulltitle_vern_display, classification_display
       </str>
       <str name="df">callnum_sort</str>
       <str name="sort">callnum_sort asc</str>
@@ -149,7 +149,7 @@
       <str name="echoParams">explicit</str>
       <str name="fl">
         bibid, callnum_display, shelfloc, availability_json, cite_preescaped_display,
-        online, format, fulltitle_display, fulltitle_vern_display
+        online, format, fulltitle_display, fulltitle_vern_display, classification_display
       </str>
       <str name="df">callnum_sort</str>
       <str name="sort">callnum_sort desc</str>
