@@ -286,7 +286,8 @@ public class ProcessAvailabilityQueue {
 
               WorksAndInventory.updateInventory( inventory, doc );
 
-              List<SolrInputDocument> thisDocsCallNumberDocs = CallNumberBrowse.generateBrowseDocuments(doc,holdings);
+              List<SolrInputDocument> thisDocsCallNumberDocs =
+                  CallNumberBrowse.generateBrowseDocuments(inventory,doc, holdings);
               callnumSolrDocs.addAll( thisDocsCallNumberDocs );
               doc.addField("callnumber_display", CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs));
 

@@ -3,9 +3,12 @@ package edu.cornell.library.integration.availability;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Properties;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -25,13 +28,21 @@ public class CallNumberBrowseTest {
 
   static VoyagerDBConnection testDB = null;
   static Connection voyagerTest = null;
+  static Connection inventory = null;
 //  static Connection voyagerLive = null;
 
   @BeforeClass
   public static void connect() throws SQLException, IOException {
 
+    Properties prop = new Properties();
+    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
+      prop.load(in);
+    }
+
     testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
     voyagerTest = testDB.connection;
+    inventory = DriverManager.getConnection(
+        prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
 //  voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
   }
 
@@ -50,7 +61,7 @@ public class CallNumberBrowseTest {
 
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "4442869");
-    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings);
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
 
     assertEquals(3,docs.size());
     assertEquals(
@@ -62,6 +73,9 @@ public class CallNumberBrowseTest {
         + "<field name=\"callnum_display\">Rare Books PS3554.I3 D6 1996</field>"
         + "<field name=\"availability_json\">{\"available\":true,"
         +    "\"availAt\":{\"Kroch Library Rare &amp; Manuscripts (Non-Circulating)\":\"\"}}</field>"
+        + "<field name=\"classification_display\">P - Language &amp; Literature "
+        +    "&gt; PS - Americal Literature &gt; PS1-3576 - American literature "
+        +    "&gt; PS700-3576 - Individual authors &gt; PS3550-3576 - 1961-2000</field>"
         + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts</field>"
         + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>"
         + "<field name=\"online\">At the Library</field>"
@@ -78,6 +92,9 @@ public class CallNumberBrowseTest {
         +    "\"availAt\":{\"Olin Library\":\"\","
         +                 "\"ILR Library (Ives Hall)\":\"\","
         +                 "\"Mann Library\":\"\"}}</field>"
+        + "<field name=\"classification_display\">P - Language &amp; Literature "
+        +    "&gt; PS - Americal Literature &gt; PS1-3576 - American literature "
+        +    "&gt; PS700-3576 - Individual authors &gt; PS3550-3576 - 1961-2000</field>"
         + "<field name=\"location\">Olin Library</field>"
         + "<field name=\"location\">Olin Library &gt; Main Collection</field>"
         + "<field name=\"location\">ILR Library</field>"
@@ -97,6 +114,9 @@ public class CallNumberBrowseTest {
         + "<field name=\"availability_json\">{\"available\":true,"
         +     "\"availAt\":{\"Library Annex\":\"\"},"
         +     "\"unavailAt\":{\"Olin Library\":\"\"}}</field>"
+        + "<field name=\"classification_display\">P - Language &amp; Literature "
+        +    "&gt; PS - Americal Literature &gt; PS1-3576 - American literature "
+        +    "&gt; PS700-3576 - Individual authors &gt; PS3550-3576 - 1961-2000</field>"
         + "<field name=\"location\">Olin Library</field>"
         + "<field name=\"location\">Olin Library &gt; Main Collection</field>"
         + "<field name=\"location\">Library Annex</field>"
@@ -117,9 +137,8 @@ public class CallNumberBrowseTest {
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "329763");
     mainDoc.addField("lc_callnum_full", "Q1 .N2");
-    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings);
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
 
-//    for (SolrInputDocument doc : docs) System.out.println(ClientUtils.toXML(doc));
     assertEquals(2,docs.size());
     assertEquals(
         "<doc boost=\"1.0\">"
@@ -129,6 +148,8 @@ public class CallNumberBrowseTest {
         + "<field name=\"callnum_sort\">Q1 .N282 0 329763.1</field>"
         + "<field name=\"callnum_display\">Q1 .N282</field>"
         + "<field name=\"availability_json\">{\"available\":true,\"availAt\":{\"Library Annex\":\"\"}}</field>"
+        + "<field name=\"classification_display\">Q - Science &gt; Q - Science (General) "
+        +    "&gt; Q1-295 - General</field>"
         + "<field name=\"location\">Library Annex</field>"
         + "<field name=\"online\">At the Library</field>"
         + "<field name=\"shelfloc\">true</field></doc>",
@@ -140,7 +161,10 @@ public class CallNumberBrowseTest {
         + "<field name=\"id\">329763.2</field>"
         + "<field name=\"callnum_sort\">Q1 .N2 0 329763.2</field>"
         + "<field name=\"callnum_display\">Q1 .N2</field>"
-        + "<field name=\"availability_json\">{\"available\":true,\"availAt\":{\"Veterinary Library (Schurman Hall)\":\"\"}}</field>"
+        + "<field name=\"availability_json\">{\"available\":true,\"availAt\":"
+        +    "{\"Veterinary Library (Schurman Hall)\":\"\"}}</field>"
+        + "<field name=\"classification_display\">Q - Science &gt; Q - Science (General) "
+        +    "&gt; Q1-295 - General</field>"
         + "<field name=\"location\">Veterinary Library</field>"
         + "<field name=\"location\">Veterinary Library &gt; Main Collection</field>"
         + "<field name=\"online\">At the Library</field>"
@@ -162,7 +186,7 @@ public class CallNumberBrowseTest {
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "10005850");
     mainDoc.addField("lc_callnum_full", "TL4030 .P454 2017");
-    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings);
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
     String expected =
     "<doc boost=\"1.0\">"
     + "<field name=\"bibid\">10005850</field>"
@@ -171,6 +195,8 @@ public class CallNumberBrowseTest {
     + "<field name=\"callnum_sort\">TL4030 .P454 2017 0 10005850.1</field>"
     + "<field name=\"callnum_display\">TL4030 .P454 2017</field>"
     + "<field name=\"availability_json\">{\"availAt\":{\"Available for the Library to Purchase\":\"\"}}</field>"
+    + "<field name=\"classification_display\">T - Technology &gt; TL - Motor Vehicles, Aeronautics, Astronautics"
+    +    " &gt; TL787-4050 - Astronautics.  Space travel</field>"
     + "<field name=\"flag\">Bibliographic Call Number</field></doc>";
     assertEquals(1,docs.size());
     assertEquals(expected,ClientUtils.toXML(docs.get(0)));
@@ -198,7 +224,8 @@ public class CallNumberBrowseTest {
 
     assertEquals("<b>上海艺术评论 &#x2F; Shanghai yi shu ping lun = Shanghai art review.</b>"
         + " 《上海艺术评论》编辑部 &#x2F; &quot;Shanghai yi shu ping lun&quot; bian ji bu, 2016年2月- 2016 nian 2 yue-.",
-        CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
+        CallNumberBrowse.generateBrowseDocuments(
+            inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
 
     holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 301608);
     for (int mfhdId : holdings.getMfhdIds()) {
@@ -214,7 +241,8 @@ public class CallNumberBrowseTest {
     mainDoc.addField("pub_date_display", "1921");
 
     assertEquals("Wolfe, Thomas Kennerly, 1892-. <b>A biometrical study of characters in maize.</b> 1921.",
-        CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
+        CallNumberBrowse.generateBrowseDocuments(
+            inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
   }
 
 }
