@@ -38,7 +38,6 @@ class CallNumberBrowse {
       "acquired_dt",
       "fulltitle_display",
       "fulltitle_vern_display",
-      "author_display",
       "pub_date_display") ;
 
   private static final String callNumberField = "lc_callnum_full";
@@ -65,6 +64,14 @@ class CallNumberBrowse {
     if ( doc.containsKey("publisher_display") )
       callNumDoc.addField("publisher_display",
           doc.getFieldValues("publisher_display").stream().map(f -> (String) f).collect(Collectors.joining(",")));
+    if ( doc.containsKey("author_display") ) {
+      String author = (String)doc.getFieldValue("author_display");
+      if (author.endsWith(", author"))
+        author = author.substring(0, author.lastIndexOf(','));
+      else if (author.endsWith("- author"))
+        author = author.substring(0, author.lastIndexOf(' '));
+      callNumDoc.addField("author_display",author);
+    }
     callNumDoc.addField("bibid", bibId);
     callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 

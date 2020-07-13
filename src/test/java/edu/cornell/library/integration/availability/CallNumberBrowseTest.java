@@ -234,7 +234,7 @@ public class CallNumberBrowseTest {
     }
 
     mainDoc = new SolrInputDocument();
-    mainDoc.addField("id", "9520154");
+    mainDoc.addField("id", "301608");
     mainDoc.addField("format", "Journal/Periodical");
     mainDoc.addField("fulltitle_display", "A biometrical study of characters in maize");
     mainDoc.addField("author_display", "Wolfe, Thomas Kennerly, 1892-");
@@ -244,7 +244,7 @@ public class CallNumberBrowseTest {
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
 
-    holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 301608);
+    holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 3212531);
     for (int mfhdId : holdings.getMfhdIds()) {
       ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
       holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
@@ -265,6 +265,31 @@ public class CallNumberBrowseTest {
         + " American Pub. House, 1897.",
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
+
+
+    holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 10663989);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+
+    mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "10663989");
+    mainDoc.addField("format", "Book");
+    mainDoc.addField("fulltitle_display", "Veterinary oral and maxillofacial pathology");
+    mainDoc.addField("author_display", "Murphy, Brian G., 1966- author");
+    mainDoc.addField("publisher_display", "Wiley-Blackwell");
+    mainDoc.addField("pub_date_display", "2020");
+    mainDoc.addField("lc_callnum_full", "SF867 .M87 2019");
+
+    assertEquals("Murphy, Brian G., 1966-"
+        + " <b>Veterinary oral and maxillofacial pathology.</b>"
+        + " Wiley-Blackwell, 2020.",
+        CallNumberBrowse.generateBrowseDocuments(
+            inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
+
+
+
   }
 
 }
