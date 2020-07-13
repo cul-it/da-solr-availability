@@ -20,6 +20,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.solr.common.SolrInputDocument;
 
@@ -38,7 +39,6 @@ class CallNumberBrowse {
       "fulltitle_display",
       "fulltitle_vern_display",
       "author_display",
-      "publisher_display",
       "pub_date_display") ;
 
   private static final String callNumberField = "lc_callnum_full";
@@ -62,6 +62,9 @@ class CallNumberBrowse {
       if (doc.containsKey(field))
         callNumDoc.put(field, doc.getField(field));
     String bibId = (String)doc.getFieldValue("id");
+    if ( doc.containsKey("publisher_display") )
+      callNumDoc.addField("publisher_display",
+          doc.getFieldValues("publisher_display").stream().map(f -> (String) f).collect(Collectors.joining(",")));
     callNumDoc.addField("bibid", bibId);
     callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 
