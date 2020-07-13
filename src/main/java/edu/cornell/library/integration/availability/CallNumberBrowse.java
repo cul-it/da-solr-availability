@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.solr.common.SolrInputDocument;
+import org.apache.solr.common.SolrInputField;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -25,7 +26,10 @@ class CallNumberBrowse {
       "language_facet",
       "acquired_dt",
       "fulltitle_display",
-      "fulltitle_vern_display") ;
+      "fulltitle_vern_display",
+      "author_display",
+      "publisher_display",
+      "pub_date_display") ;
 
   private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";
@@ -48,6 +52,7 @@ class CallNumberBrowse {
         callNumDoc.put(field, doc.getField(field));
     String bibId = (String)doc.getFieldValue("id");
     callNumDoc.addField("bibid", bibId);
+    callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 
 
     Map<String,HoldingSet> holdingsByCallNumber = divideUnsuppressedHoldingsByCallNumber( holdings );
@@ -112,6 +117,46 @@ class CallNumberBrowse {
       browseDocs.add(browseDoc);
     }
     return browseDocs;
+  }
+
+  private static String generateCitation(SolrInputDocument doc) {
+    StringBuilder citation = new StringBuilder();
+    if (doc.containsKey("author_display")) {
+      appendEscaped(citation,(String) doc.getFieldValue("author_display"));
+      citation.append(". ");
+    }
+    if (doc.containsKey("fulltitle_display") || doc.containsKey("fulltitle_vern_display")) {
+      List<String> titles = new ArrayList<>();
+      if (doc.containsKey("fulltitle_vern_display")) titles.add((String) doc.getFieldValue("fulltitle_vern_display"));
+      if (doc.containsKey("fulltitle_display"))      titles.add((String) doc.getFieldValue("fulltitle_display"));
+      citation.append("<b>");
+      appendEscaped(citation,String.join(" / ", titles));
+      citation.append(".</b> ");
+    }
+    if (doc.containsKey("publisher_display")) {
+      appendEscaped(citation,(String) doc.getFieldValue("publisher_display"));
+      citation.append(", ");
+    }
+    if (doc.containsKey("pub_date_display")) {
+      citation.append((String) doc.getFieldValue("pub_date_display"));
+      citation.append(".");
+    }
+    return citation.toString();
+  }
+
+  private static void appendEscaped(StringBuilder citation, String value) {
+    for ( int i = 0; i < value.length(); i++ ) {
+      char c = value.charAt(i);
+      switch (c) {
+      case '<':  citation.append("&lt;");   break;
+      case '>':  citation.append("&gt;");   break;
+      case '&':  citation.append("&amp;");  break;
+      case '"':  citation.append("&quot;"); break;
+      case '\'': citation.append("&#x27;"); break;
+      case '/':  citation.append("&#x2F;"); break;
+      default: citation.append(c);
+      }
+    }
   }
 
   private static String getBibCallNumber(Collection<Object> callNumbers) {

@@ -56,6 +56,7 @@ public class CallNumberBrowseTest {
     assertEquals(
         "<doc boost=\"1.0\">"
         + "<field name=\"bibid\">4442869</field>"
+        + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">4442869.1</field>"
         + "<field name=\"callnum_sort\">Rare Books PS3554.I3 D6 1996 0 4442869.1</field>"
         + "<field name=\"callnum_display\">Rare Books PS3554.I3 D6 1996</field>"
@@ -69,6 +70,7 @@ public class CallNumberBrowseTest {
     assertEquals(
         "<doc boost=\"1.0\">"
         + "<field name=\"bibid\">4442869</field>"
+        + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">4442869.2</field>"
         + "<field name=\"callnum_sort\">PS3554.I3 D6 1996 0 4442869.2</field>"
         + "<field name=\"callnum_display\">PS3554.I3 D6 1996</field>"
@@ -88,6 +90,7 @@ public class CallNumberBrowseTest {
     assertEquals(
         "<doc boost=\"1.0\">"
         + "<field name=\"bibid\">4442869</field>"
+        + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">4442869.3</field>"
         + "<field name=\"callnum_sort\">PS3554.I3 D6x 1996 0 4442869.3</field>"
         + "<field name=\"callnum_display\">PS3554.I3 D6x 1996</field>"
@@ -121,6 +124,7 @@ public class CallNumberBrowseTest {
     assertEquals(
         "<doc boost=\"1.0\">"
         + "<field name=\"bibid\">329763</field>"
+        + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">329763.1</field>"
         + "<field name=\"callnum_sort\">Q1 .N282 0 329763.1</field>"
         + "<field name=\"callnum_display\">Q1 .N282</field>"
@@ -132,6 +136,7 @@ public class CallNumberBrowseTest {
     assertEquals(
         "<doc boost=\"1.0\">"
         + "<field name=\"bibid\">329763</field>"
+        + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">329763.2</field>"
         + "<field name=\"callnum_sort\">Q1 .N2 0 329763.2</field>"
         + "<field name=\"callnum_display\">Q1 .N2</field>"
@@ -161,6 +166,7 @@ public class CallNumberBrowseTest {
     String expected =
     "<doc boost=\"1.0\">"
     + "<field name=\"bibid\">10005850</field>"
+    + "<field name=\"cite_preescaped_display\"></field>"
     + "<field name=\"id\">10005850.1</field>"
     + "<field name=\"callnum_sort\">TL4030 .P454 2017 0 10005850.1</field>"
     + "<field name=\"callnum_display\">TL4030 .P454 2017</field>"
@@ -171,5 +177,44 @@ public class CallNumberBrowseTest {
 
   }
 
+
+  @Test
+  public void bibliographicData() throws SQLException, IOException, XMLStreamException {
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 9520154);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+
+
+    SolrInputDocument mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "9520154");
+    mainDoc.addField("format", "Book");
+    mainDoc.addField("fulltitle_display", "Shanghai yi shu ping lun = Shanghai art review");
+    mainDoc.addField("fulltitle_vern_display", "上海艺术评论");
+    mainDoc.addField("publisher_display", "《上海艺术评论》编辑部 / \"Shanghai yi shu ping lun\" bian ji bu");
+    mainDoc.addField("pub_date_display", "2016年2月- 2016 nian 2 yue-");
+
+    assertEquals("<b>上海艺术评论 &#x2F; Shanghai yi shu ping lun = Shanghai art review.</b>"
+        + " 《上海艺术评论》编辑部 &#x2F; &quot;Shanghai yi shu ping lun&quot; bian ji bu, 2016年2月- 2016 nian 2 yue-.",
+        CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
+
+    holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 301608);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+
+    mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "9520154");
+    mainDoc.addField("format", "Journal/Periodical");
+    mainDoc.addField("fulltitle_display", "A biometrical study of characters in maize");
+    mainDoc.addField("author_display", "Wolfe, Thomas Kennerly, 1892-");
+    mainDoc.addField("pub_date_display", "1921");
+
+    assertEquals("Wolfe, Thomas Kennerly, 1892-. <b>A biometrical study of characters in maize.</b> 1921.",
+        CallNumberBrowse.generateBrowseDocuments(mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
+  }
 
 }
