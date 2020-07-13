@@ -240,7 +240,29 @@ public class CallNumberBrowseTest {
     mainDoc.addField("author_display", "Wolfe, Thomas Kennerly, 1892-");
     mainDoc.addField("pub_date_display", "1921");
 
-    assertEquals("Wolfe, Thomas Kennerly, 1892-. <b>A biometrical study of characters in maize.</b> 1921.",
+    assertEquals("Wolfe, Thomas Kennerly, 1892- <b>A biometrical study of characters in maize.</b> 1921.",
+        CallNumberBrowse.generateBrowseDocuments(
+            inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
+
+    holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 301608);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+
+    mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "3212531");
+    mainDoc.addField("format", "Book");
+    mainDoc.addField("fulltitle_display", "The white side of a black subject : a vindication of the Afro-American"
+        + " race : from the landing of slaves at St. Augustine, Florida, in 1565, to the present time");
+    mainDoc.addField("author_display", "Wood, Norman B. (Norman Barton), 1857-1933.");
+    mainDoc.addField("publisher_display", "American Pub. House");
+    mainDoc.addField("pub_date_display", "1897");
+
+    assertEquals("Wood, Norman B. (Norman Barton), 1857-1933."
+        + " <b>The white side of a black subject : a vindication of the Afro-American race :"
+        + " from the landing of slaves at St. Augustine, Florida, in 1565, to the present time.</b>"
+        + " American Pub. House, 1897.",
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
   }

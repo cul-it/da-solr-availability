@@ -180,7 +180,8 @@ class CallNumberBrowse {
     StringBuilder citation = new StringBuilder();
     if (doc.containsKey("author_display")) {
       appendEscaped(citation,(String) doc.getFieldValue("author_display"));
-      citation.append(". ");
+      char lastChar = citation.charAt(citation.length()-1);
+      citation.append((lastChar == '.' || lastChar == '-')?" ":". ");
     }
     if (doc.containsKey("fulltitle_display") || doc.containsKey("fulltitle_vern_display")) {
       List<String> titles = new ArrayList<>();
