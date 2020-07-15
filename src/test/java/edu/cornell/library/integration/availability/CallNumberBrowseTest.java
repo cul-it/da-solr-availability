@@ -78,8 +78,7 @@ public class CallNumberBrowseTest {
         +    "&gt; PS700-3576 - Individual authors &gt; PS3550-3576 - 1961-2000</field>"
         + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts</field>"
         + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>"
-        + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"shelfloc\">true</field></doc>",
+        + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
         "<doc boost=\"1.0\">"
@@ -101,8 +100,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"location\">ILR Library &gt; Main Collection</field>"
         + "<field name=\"location\">Mann Library</field>"
         + "<field name=\"location\">Mann Library &gt; Main Collection</field>"
-        + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"shelfloc\">true</field></doc>",
+        + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(1)));
     assertEquals(
         "<doc boost=\"1.0\">"
@@ -120,8 +118,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"location\">Olin Library</field>"
         + "<field name=\"location\">Olin Library &gt; Main Collection</field>"
         + "<field name=\"location\">Library Annex</field>"
-        + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"shelfloc\">true</field></doc>",
+        + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(2)));
 
   }
@@ -151,8 +148,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"classification_display\">Q - Science &gt; Q - Science (General) "
         +    "&gt; Q1-295 - General</field>"
         + "<field name=\"location\">Library Annex</field>"
-        + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"shelfloc\">true</field></doc>",
+        + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
         "<doc boost=\"1.0\">"
@@ -167,8 +163,7 @@ public class CallNumberBrowseTest {
         +    "&gt; Q1-295 - General</field>"
         + "<field name=\"location\">Veterinary Library</field>"
         + "<field name=\"location\">Veterinary Library &gt; Main Collection</field>"
-        + "<field name=\"online\">At the Library</field>"
-        + "<field name=\"flag\">Bibliographic Call Number</field></doc>",
+        + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(1)));
 
   }
@@ -196,8 +191,7 @@ public class CallNumberBrowseTest {
     + "<field name=\"callnum_display\">TL4030 .P454 2017</field>"
     + "<field name=\"availability_json\">{\"availAt\":{\"Available for the Library to Purchase\":\"\"}}</field>"
     + "<field name=\"classification_display\">T - Technology &gt; TL - Motor Vehicles, Aeronautics, Astronautics"
-    +    " &gt; TL787-4050 - Astronautics.  Space travel</field>"
-    + "<field name=\"flag\">Bibliographic Call Number</field></doc>";
+    +    " &gt; TL787-4050 - Astronautics.  Space travel</field></doc>";
     assertEquals(1,docs.size());
     assertEquals(expected,ClientUtils.toXML(docs.get(0)));
 
@@ -288,7 +282,30 @@ public class CallNumberBrowseTest {
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
 
+  }
 
+
+  @Test
+  public void bibCallNumberForClosedStacksHoldingsWithNonLcHoldingCallNum()
+      throws SQLException, IOException, XMLStreamException {
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 1449673);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+
+    SolrInputDocument mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "1449673");
+    mainDoc.addField("lc_callnum_full", "Z340 .P58");
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
+
+    for (SolrInputDocument doc : docs)
+      System.out.println(ClientUtils.toXML(doc));
+    assertEquals(3,docs.size());
+    assertEquals("Z340 .P58",docs.get(0).getFieldValue("callnum_display"));
+    assertEquals("Dante Z340 .P58",docs.get(1).getFieldValue("callnum_display"));
+    assertEquals("Film 7087 reel 198 no.11",docs.get(2).getFieldValue("callnum_display"));
 
   }
 

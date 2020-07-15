@@ -24,8 +24,6 @@ import java.util.stream.Collectors;
 
 import org.apache.solr.common.SolrInputDocument;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 
@@ -75,8 +73,9 @@ class CallNumberBrowse {
     callNumDoc.addField("bibid", bibId);
     callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 
-
-    Map<String,HoldingSet> holdingsByCallNumber = divideUnsuppressedHoldingsByCallNumber( holdings );
+    String bibCall = getBibCallNumber( doc.getFieldValues(callNumberField) );
+    Map<String,HoldingSet> holdingsByCallNumber =
+        divideUnsuppressedHoldingsByCallNumber( holdings, bibCall );
 
     int i = 0;
     for ( Entry<String,HoldingSet> e : holdingsByCallNumber.entrySet() ) {
@@ -84,24 +83,14 @@ class CallNumberBrowse {
       HoldingSet holdingsForCallNum = e.getValue();
 
       SolrInputDocument browseDoc = callNumDoc.deepCopy();
-      boolean bibliographicCallNum = false;
       boolean availableCallNum = callNum.equals("Available for the Library to Purchase");
 
-      // try to pull bibliographic call number for missing call number
-      if ( isNonCallNumber(callNum )) {
-        String bibCallNumber = getBibCallNumber( doc.getFieldValues(callNumberField) );
-        if (bibCallNumber != null && ! bibCallNumber.isEmpty()) {
-          callNum = bibCallNumber;
-          bibliographicCallNum = true;
-        } else {
-          continue; // Suppress from callnum browse when no discoverable callnum.
-        }
-      }
-
       BibliographicSummary b ;
-      if ( availableCallNum )
+      if ( availableCallNum ) {
+        if ( bibCall == null || bibCall.isEmpty() ) continue;
+        callNum = bibCall;
         b = availableSummary;
-      else
+      } else
         b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
 
       if (b.online != null && b.online) {
@@ -132,11 +121,7 @@ class CallNumberBrowse {
       if (locations != null && ! locations.isEmpty()) {
         browseDoc.addField("location", locations );
         browseDoc.addField("online", "At the Library");
-        if ( ! bibliographicCallNum )
-          browseDoc.addField("shelfloc", true);
       }
-      if (bibliographicCallNum)
-        browseDoc.addField("flag", "Bibliographic Call Number");
 
       browseDocs.add(browseDoc);
     }
@@ -149,12 +134,11 @@ class CallNumberBrowse {
       List<String> p = new ArrayList<>();
       try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("callnumberprefixes.txt");
           BufferedReader reader = new BufferedReader(new InputStreamReader(in));){
-        while ( reader.ready() ) {
-          String line = reader.readLine().trim();
-          if ( line == null ) continue;
-          if (line.indexOf('#') != -1) line = line.substring(0,line.indexOf('#')).trim();
-          if (line.isEmpty()) continue;
-          p.add(line.toLowerCase());
+        String line;
+        while ( ( line = reader.readLine() ) != null ) {
+          if (line.indexOf('#') != -1) line = line.substring(0,line.indexOf('#'));
+          line = line.trim().toLowerCase();
+          if (! line.isEmpty()) p.add(line);
         }
       }
       prefixes = p;
@@ -237,26 +221,51 @@ class CallNumberBrowse {
 
   private static boolean isNonCallNumber( String call ) {
     String lc = call.toLowerCase().replaceAll("\\s+"," ");
-    return lc.contains("no call") || lc.contains("in proc")
-        || lc.contains("on order") || lc.startsWith("available ");
+    return lc.contains("no call") || lc.contains("in proc") || lc.contains("on order") ;
   }
 
-  private static Map<String, HoldingSet> divideUnsuppressedHoldingsByCallNumber(HoldingSet holdings) {
+  private static Map<String, HoldingSet> divideUnsuppressedHoldingsByCallNumber(HoldingSet holdings, String bibCall) {
     Map<String,HoldingSet> holdingsByCallNumber = new HashMap<>();
     for (Integer holdingId : holdings.getMfhdIds()) {
       Holding h = holdings.get(holdingId);
       if ( h.active == false ) continue;
       String callnum = h.call;
-      if (callnum == null || callnum.isEmpty())
-        callnum = "No Call Number";
-      if ( ! holdingsByCallNumber.containsKey(callnum) )
-        holdingsByCallNumber.put(callnum, new HoldingSet());
-      holdingsByCallNumber.get(callnum).put(holdingId, h);
+
+      boolean nonCallNumber = (callnum == null || callnum.isEmpty() || isNonCallNumber(callnum ) );
+
+      if ( ! nonCallNumber ) {
+        if ( ! holdingsByCallNumber.containsKey(callnum) )
+          holdingsByCallNumber.put(callnum, new HoldingSet());
+        holdingsByCallNumber.get(callnum).put(holdingId, h);
+      }
+
+      if ( ( nonCallNumber || (h.lcCallNum == false && isClosedStackLocation(h)) )
+          && bibCall != null && ! bibCall.isEmpty() ) {
+        if ( ! holdingsByCallNumber.containsKey(bibCall) )
+          holdingsByCallNumber.put(bibCall, new HoldingSet());
+        holdingsByCallNumber.get(bibCall).put(holdingId, h);
+      }
+
     }
     return holdingsByCallNumber;
   }
 
 
+
+  private static boolean isClosedStackLocation(Holding h) {
+
+    if ( h.location == null ) return false;
+    if ( h.location.library != null && 
+        ( h.location.library.equals("Kroch Library Rare & Manuscripts")
+            || h.location.library.equals("ILR Library Kheel Center")
+            || h.location.library.equals("Library Annex") ))
+      return true;
+    if ( h.location.name != null &&
+        ( h.location.name.equals("Music Locked Press")
+            || h.location.name.equals("Mann Special Collections") ))
+      return true;
+    return false;
+  }
 
   public static Set<String> collateCallNumberList(List<SolrInputDocument> callNumberDocs) {
     Set<String> callNums = new HashSet<>();
