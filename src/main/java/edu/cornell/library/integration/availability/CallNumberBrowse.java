@@ -271,10 +271,13 @@ class CallNumberBrowse {
 
   public static Set<String> collateCallNumberList(List<SolrInputDocument> callNumberDocs) {
     Set<String> callNums = new HashSet<>();
-    for (SolrInputDocument doc : callNumberDocs)
-      callNums.add( (String) doc.getFieldValue("callnum_display") );
+    for (SolrInputDocument doc : callNumberDocs) {
+      String callnum = (String) doc.getFieldValue("callnum_display");
+      if ( ! lettersOnly.matcher(callnum).matches() ) callNums.add( callnum );
+    }
     return callNums;
   }
+  private static Pattern lettersOnly = Pattern.compile("[A-Za-z]{1,3}");
 
   private static String sortForm( CharSequence callNumber, List<String> prefixes ) {
 

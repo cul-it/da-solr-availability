@@ -1,6 +1,7 @@
 package edu.cornell.library.integration.availability;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,6 +10,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -300,13 +302,36 @@ public class CallNumberBrowseTest {
     mainDoc.addField("lc_callnum_full", "Z340 .P58");
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
 
-    for (SolrInputDocument doc : docs)
-      System.out.println(ClientUtils.toXML(doc));
     assertEquals(3,docs.size());
     assertEquals("Z340 .P58",docs.get(0).getFieldValue("callnum_display"));
     assertEquals("Dante Z340 .P58",docs.get(1).getFieldValue("callnum_display"));
     assertEquals("Film 7087 reel 198 no.11",docs.get(2).getFieldValue("callnum_display"));
 
+    Set<String> callNumbers = CallNumberBrowse.collateCallNumberList(docs);
+    assertEquals( 3, callNumbers.size() );
   }
 
+  @Test
+  public void letterOnlyCallNumber()
+      throws SQLException, IOException, XMLStreamException {
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 11438152);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+
+    SolrInputDocument mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "11438152");
+    mainDoc.addField("lc_callnum_full", "Q");
+    mainDoc.addField("lc_callnum_full", "Q");
+    mainDoc.addField("url_access_json", "");
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
+
+    assertEquals(1, docs.size());
+    assertEquals("Q",docs.get(0).getFieldValue("callnum_display"));
+
+    Set<String> callNumbers = CallNumberBrowse.collateCallNumberList(docs);
+    assertTrue( callNumbers.isEmpty() );
+  }
 }
