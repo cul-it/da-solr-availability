@@ -165,7 +165,7 @@ class CallNumberBrowse {
     return null;
 
   }
-  private static Pattern lcClass = Pattern.compile("([a-z]{1,3})([0-9\\.]{1,15}).*");
+  private static Pattern lcClass = Pattern.compile("([a-z]{1,3}) ([0-9\\.]{1,15}).*");
   private static PreparedStatement classificationQ = null;
   private static List<String> prefixes = null;
   //  private static Pattern lcClass = Pattern.compile("([A-Za-z]{1,3}) ?\\.?([0-9]{1,6})[^0-9]\\.*");
