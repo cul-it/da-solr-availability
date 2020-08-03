@@ -279,7 +279,7 @@ class CallNumberBrowse {
   }
   private static Pattern lettersOnly = Pattern.compile("[A-Za-z]{1,3}");
 
-  private static String sortForm( CharSequence callNumber, List<String> prefixes ) {
+  static String sortForm( CharSequence callNumber, List<String> prefixes ) {
 
     String lc = Normalizer.normalize(callNumber, Normalizer.Form.NFD)
         .toLowerCase().trim()
