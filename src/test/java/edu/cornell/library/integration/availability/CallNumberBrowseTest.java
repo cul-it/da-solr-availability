@@ -333,5 +333,6 @@ public class CallNumberBrowseTest {
 
     Set<String> callNumbers = CallNumberBrowse.collateCallNumberList(docs);
     assertTrue( callNumbers.isEmpty() );
+    assertEquals("Q - Science > Q - Science (General)",docs.get(0).getFieldValue("classification_display"));
   }
 }
