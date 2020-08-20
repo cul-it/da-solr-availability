@@ -40,6 +40,9 @@
     <field name="author_display"         type="string" indexed="false"  stored="true"  multiValued="false"/> <!-- combined with vern -->
     <field name="publisher_display"      type="string" indexed="false"  stored="true"  multiValued="false"/>
     <field name="pub_date_display"       type="string" indexed="false"  stored="true"  multiValued="false"/>
+    <field name="oclc_id_display"        type="string" indexed="false"  stored="true"  multiValued="true"/>
+    <field name="isbn_display"           type="string" indexed="false"  stored="true"  multiValued="true"/>
+
 
     <!-- Fields duplicated from Blacklight index, filtered to particular holdings -->
     <field name="availability_json"      type="string" indexed="false"  stored="true"  multiValued="false" />
