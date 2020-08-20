@@ -36,7 +36,9 @@ class CallNumberBrowse {
       "acquired_dt",
       "fulltitle_display",
       "fulltitle_vern_display",
-      "pub_date_display") ;
+      "pub_date_display",
+      "isbn_display",
+      "oclc_id_display") ;
 
   private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";

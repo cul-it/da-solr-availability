@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -183,9 +184,13 @@ public class CallNumberBrowseTest {
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "10005850");
     mainDoc.addField("lc_callnum_full", "TL4030 .P454 2017");
+    mainDoc.addField("isbn_display", "9780262035873 (hardcover : alk. paper)");
+    mainDoc.addField("oclc_id_display", "959034140");
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
     String expected =
     "<doc boost=\"1.0\">"
+    + "<field name=\"isbn_display\">9780262035873 (hardcover : alk. paper)</field>"
+    + "<field name=\"oclc_id_display\">959034140</field>"
     + "<field name=\"bibid\">10005850</field>"
     + "<field name=\"cite_preescaped_display\"></field>"
     + "<field name=\"id\">10005850.1</field>"
@@ -277,12 +282,18 @@ public class CallNumberBrowseTest {
     mainDoc.addField("publisher_display", "Wiley-Blackwell");
     mainDoc.addField("pub_date_display", "2020");
     mainDoc.addField("lc_callnum_full", "SF867 .M87 2019");
+    mainDoc.addField("isbn_display", "9781119221258 (hardback)");
+    mainDoc.addField("isbn_display", "1119221250");
+    mainDoc.addField("oclc_id_display", "1082972111");
 
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
     assertEquals("Murphy, Brian G., 1966-"
         + " <b>Veterinary oral and maxillofacial pathology.</b>"
         + " Wiley-Blackwell, 2020.",
-        CallNumberBrowse.generateBrowseDocuments(
-            inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
+        docs.get(0).getFieldValue("cite_preescaped_display"));
+    assertEquals(Arrays.asList("9781119221258 (hardback)","1119221250"),
+        docs.get(0).getFieldValues("isbn_display"));
+    assertEquals("1082972111",docs.get(0).getFieldValue("oclc_id_display"));
 
   }
 
@@ -300,6 +311,7 @@ public class CallNumberBrowseTest {
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "1449673");
     mainDoc.addField("lc_callnum_full", "Z340 .P58");
+    mainDoc.addField("oclc_id_display", "63966981");
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
 
     assertEquals(3,docs.size());
@@ -309,6 +321,8 @@ public class CallNumberBrowseTest {
 
     Set<String> callNumbers = CallNumberBrowse.collateCallNumberList(docs);
     assertEquals( 3, callNumbers.size() );
+
+    assertEquals("63966981",docs.get(0).getFieldValue("oclc_id_display"));
   }
 
   @Test
