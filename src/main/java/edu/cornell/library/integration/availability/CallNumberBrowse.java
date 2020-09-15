@@ -17,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,6 +41,7 @@ class CallNumberBrowse {
       "isbn_display",
       "oclc_id_display") ;
 
+  private static final String lcCallNumberField = "lc_bib_display";
   private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";
 
@@ -75,7 +77,13 @@ class CallNumberBrowse {
     callNumDoc.addField("bibid", bibId);
     callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 
-    String bibCall = getBibCallNumber( doc.getFieldValues(callNumberField) );
+    boolean bibCallLc;
+    String bibCall = getBibCallNumber( doc.getFieldValues(lcCallNumberField) );
+    if ( bibCall == null ) {
+      bibCall = getBibCallNumber( doc.getFieldValues(callNumberField) );
+      bibCallLc = false;
+    } else
+      bibCallLc = true;
     Map<String,HoldingSet> holdingsByCallNumber =
         divideUnsuppressedHoldingsByCallNumber( holdings, bibCall );
 
@@ -84,6 +92,8 @@ class CallNumberBrowse {
       String callNum = e.getKey();
       HoldingSet holdingsForCallNum = e.getValue();
 
+      Holding h1 = holdingsForCallNum.values().iterator().next();
+      boolean isLc = ( Objects.equals(callNum, h1.call) ) ? h1.lcCallNum : bibCallLc ;
       SolrInputDocument browseDoc = callNumDoc.deepCopy();
       boolean availableCallNum = callNum.equals("Available for the Library to Purchase");
 
@@ -91,6 +101,7 @@ class CallNumberBrowse {
       if ( availableCallNum ) {
         if ( bibCall == null || bibCall.isEmpty() ) continue;
         callNum = bibCall;
+        isLc = bibCallLc;
         b = availableSummary;
       } else
         b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
@@ -114,10 +125,13 @@ class CallNumberBrowse {
       browseDoc.addField( "id", id );
       browseDoc.addField( "callnum_sort" , callNum+" 0 "+id );
       browseDoc.addField( "callnum_display" , callNum );
+      browseDoc.addField( "lc_b", isLc );
       browseDoc.addField( "availability_json", b.toJson() );
-      String classificationDescription = generateClassification( inventory, callNum );
-      if ( classificationDescription != null && ! classificationDescription.isEmpty() )
-        browseDoc.addField("classification_display", classificationDescription);
+      if ( isLc ) {
+        String classificationDescription = generateClassification( inventory, callNum );
+        if ( classificationDescription != null && ! classificationDescription.isEmpty() )
+          browseDoc.addField("classification_display", classificationDescription);
+      }
 
       Set<String> locations = holdingsForCallNum.getLocationFacetValues();
       if (locations != null && ! locations.isEmpty()) {

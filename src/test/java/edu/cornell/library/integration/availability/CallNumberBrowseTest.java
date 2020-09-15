@@ -74,6 +74,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"id\">4442869.1</field>"
         + "<field name=\"callnum_sort\">Rare Books PS3554.I3 D6 1996 0 4442869.1</field>"
         + "<field name=\"callnum_display\">Rare Books PS3554.I3 D6 1996</field>"
+        + "<field name=\"lc_b\">true</field>"
         + "<field name=\"availability_json\">{\"available\":true,"
         +    "\"availAt\":{\"Kroch Library Rare &amp; Manuscripts (Non-Circulating)\":\"\"}}</field>"
         + "<field name=\"classification_display\">P - Language &amp; Literature "
@@ -90,6 +91,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"id\">4442869.2</field>"
         + "<field name=\"callnum_sort\">PS3554.I3 D6 1996 0 4442869.2</field>"
         + "<field name=\"callnum_display\">PS3554.I3 D6 1996</field>"
+        + "<field name=\"lc_b\">true</field>"
         + "<field name=\"availability_json\">{\"available\":true,"
         +    "\"availAt\":{\"Olin Library\":\"\","
         +                 "\"ILR Library (Ives Hall)\":\"\","
@@ -112,6 +114,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"id\">4442869.3</field>"
         + "<field name=\"callnum_sort\">PS3554.I3 D6x 1996 0 4442869.3</field>"
         + "<field name=\"callnum_display\">PS3554.I3 D6x 1996</field>"
+        + "<field name=\"lc_b\">true</field>"
         + "<field name=\"availability_json\">{\"available\":true,"
         +     "\"availAt\":{\"Library Annex\":\"\"},"
         +     "\"unavailAt\":{\"Olin Library\":\"\"}}</field>"
@@ -137,6 +140,7 @@ public class CallNumberBrowseTest {
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "329763");
     mainDoc.addField("lc_callnum_full", "Q1 .N2");
+    mainDoc.addField("lc_bib_display", "Q1 .N2");
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
 
     assertEquals(2,docs.size());
@@ -147,6 +151,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"id\">329763.1</field>"
         + "<field name=\"callnum_sort\">Q1 .N282 0 329763.1</field>"
         + "<field name=\"callnum_display\">Q1 .N282</field>"
+        + "<field name=\"lc_b\">true</field>"
         + "<field name=\"availability_json\">{\"available\":true,\"availAt\":{\"Library Annex\":\"\"}}</field>"
         + "<field name=\"classification_display\">Q - Science &gt; Q - Science (General) "
         +    "&gt; Q1-295 - General</field>"
@@ -160,6 +165,7 @@ public class CallNumberBrowseTest {
         + "<field name=\"id\">329763.2</field>"
         + "<field name=\"callnum_sort\">Q1 .N2 0 329763.2</field>"
         + "<field name=\"callnum_display\">Q1 .N2</field>"
+        + "<field name=\"lc_b\">true</field>"
         + "<field name=\"availability_json\">{\"available\":true,\"availAt\":"
         +    "{\"Veterinary Library (Schurman Hall)\":\"\"}}</field>"
         + "<field name=\"classification_display\">Q - Science &gt; Q - Science (General) "
@@ -170,7 +176,6 @@ public class CallNumberBrowseTest {
         ClientUtils.toXML(docs.get(1)));
 
   }
-
 
   @Test
   public void availableToPurchase() throws SQLException, IOException, XMLStreamException {
@@ -183,7 +188,7 @@ public class CallNumberBrowseTest {
 
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "10005850");
-    mainDoc.addField("lc_callnum_full", "TL4030 .P454 2017");
+    mainDoc.addField("lc_bib_display", "TL4030 .P454 2017");
     mainDoc.addField("isbn_display", "9780262035873 (hardcover : alk. paper)");
     mainDoc.addField("oclc_id_display", "959034140");
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
@@ -196,6 +201,7 @@ public class CallNumberBrowseTest {
     + "<field name=\"id\">10005850.1</field>"
     + "<field name=\"callnum_sort\">TL4030 .P454 2017 0 10005850.1</field>"
     + "<field name=\"callnum_display\">TL4030 .P454 2017</field>"
+    + "<field name=\"lc_b\">true</field>"
     + "<field name=\"availability_json\">{\"availAt\":{\"Available for the Library to Purchase\":\"\"}}</field>"
     + "<field name=\"classification_display\">T - Technology &gt; TL - Motor Vehicles, Aeronautics, Astronautics"
     +    " &gt; TL787-4050 - Astronautics.  Space travel</field></doc>";
@@ -203,7 +209,6 @@ public class CallNumberBrowseTest {
     assertEquals(expected,ClientUtils.toXML(docs.get(0)));
 
   }
-
 
   @Test
   public void bibliographicData() throws SQLException, IOException, XMLStreamException {
@@ -297,7 +302,6 @@ public class CallNumberBrowseTest {
 
   }
 
-
   @Test
   public void bibCallNumberForClosedStacksHoldingsWithNonLcHoldingCallNum()
       throws SQLException, IOException, XMLStreamException {
@@ -338,15 +342,81 @@ public class CallNumberBrowseTest {
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "11438152");
     mainDoc.addField("lc_callnum_full", "Q");
-    mainDoc.addField("lc_callnum_full", "Q");
+    mainDoc.addField("lc_bib_display", "Q");
     mainDoc.addField("url_access_json", "");
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
 
     assertEquals(1, docs.size());
     assertEquals("Q",docs.get(0).getFieldValue("callnum_display"));
+    assertEquals(true,docs.get(0).getFieldValue("lc_b"));
 
     Set<String> callNumbers = CallNumberBrowse.collateCallNumberList(docs);
     assertTrue( callNumbers.isEmpty() );
     assertEquals("Q - Science > Q - Science (General)",docs.get(0).getFieldValue("classification_display"));
   }
+
+  @Test
+  public void shelfHoldingsCallLcBibCall() throws SQLException, IOException, XMLStreamException {
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 7259947);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+
+    SolrInputDocument mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "7259947");
+    mainDoc.addField("lc_callnum_full", "D16.3 .B65");
+    mainDoc.addField("lc_bib_display", "D16.3 .B65");
+    mainDoc.addField("lc_callnum_full", "1-2-m.178");
+    mainDoc.addField("lc_callnum_full", "Archives 1-2-m.178");
+    mainDoc.addField("lc_callnum_full", "D16.3 .B72");
+
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
+
+    for (SolrInputDocument doc : docs)
+      System.out.println(ClientUtils.toXML(doc));
+
+    /*
+<doc boost="1.0"><field name="bibid">7259947</field>
+ <field name="cite_preescaped_display"></field>
+ <field name="id">7259947.1</field>
+ <field name="callnum_sort">Archives 1-2-m.178 0 7259947.1</field>
+ <field name="callnum_display">Archives 1-2-m.178</field>
+ <field name="lc_b">false</field>
+ <field name="availability_json">
+    {"available":true,"availAt":{"Kroch Library Rare &amp; Manuscripts (Non-Circulating)":""}}</field>
+ <field name="location">Kroch Library Rare &amp; Manuscripts</field>
+ <field name="location">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>
+ <field name="online">At the Library</field></doc>
+<doc boost="1.0">
+ <field name="bibid">7259947</field>
+ <field name="cite_preescaped_display"></field>
+ <field name="id">7259947.2</field>
+ <field name="callnum_sort">D16.3 .B72 0 7259947.2</field>
+ <field name="callnum_display">D16.3 .B72</field>
+ <field name="lc_b">true</field>
+ <field name="availability_json">{"available":true,"availAt":{"Olin Library":""}}</field>
+ <field name="classification_display">D - World History &gt; D - History (General) &gt; D1-24.5 - General</field>
+ <field name="location">Olin Library</field>
+ <field name="location">Olin Library &gt; Main Collection</field>
+ <field name="online">At the Library</field></doc>
+<doc boost="1.0">
+ <field name="bibid">7259947</field>
+ <field name="cite_preescaped_display">
+ </field><field name="id">7259947.3</field>
+ <field name="callnum_sort">D16.3 .B65 0 7259947.3</field>
+ <field name="callnum_display">D16.3 .B65</field>
+ <field name="lc_b">true</field>
+ <field name="availability_json">
+    {"available":true,"availAt":{"Kroch Library Rare &amp; Manuscripts (Non-Circulating)":""}}</field>
+ <field name="classification_display">D - World History &gt; D - History (General) &gt; D1-24.5 - General</field>
+ <field name="location">Kroch Library Rare &amp; Manuscripts</field>
+ <field name="location">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>
+ <field name="online">At the Library</field></doc>
+
+     */
+
+  }
+
 }
