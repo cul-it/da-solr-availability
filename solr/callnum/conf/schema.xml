@@ -29,6 +29,8 @@
     <field name="shelfloc"        type="boolean"        indexed="true"   stored="true"                  multiValued="false" />
     <field name="cite_preescaped_display" type="string" indexed="false"  stored="true"                  multiValued="false" />
     <field name="classification_display"  type="string" indexed="false"  stored="true"                  multiValued="false" />
+    <field name="lc_b"            type="boolean"        indexed="true"   stored="true"                  multiValued="false" />
+
 
     <!-- Fields duplicated from Blacklight index -->
     <field name="format"                 type="string" indexed="false"  stored="true"  multiValued="true"/>
