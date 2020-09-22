@@ -286,7 +286,7 @@ public class CallNumberBrowseTest {
     mainDoc.addField("author_display", "Murphy, Brian G., 1966- author");
     mainDoc.addField("publisher_display", "Wiley-Blackwell");
     mainDoc.addField("pub_date_display", "2020");
-    mainDoc.addField("lc_callnum_full", "SF867 .M87 2019");
+    mainDoc.addField("lc_bib_display", "SF867 .M87 2019");
     mainDoc.addField("isbn_display", "9781119221258 (hardback)");
     mainDoc.addField("isbn_display", "1119221250");
     mainDoc.addField("oclc_id_display", "1082972111");
@@ -314,7 +314,7 @@ public class CallNumberBrowseTest {
 
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "1449673");
-    mainDoc.addField("lc_callnum_full", "Z340 .P58");
+    mainDoc.addField("lc_bib_display", "Z340 .P58");
     mainDoc.addField("oclc_id_display", "63966981");
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
 
@@ -324,7 +324,7 @@ public class CallNumberBrowseTest {
     assertEquals("Film 7087 reel 198 no.11",docs.get(2).getFieldValue("callnum_display"));
 
     Set<String> callNumbers = CallNumberBrowse.collateCallNumberList(docs);
-    assertEquals( 3, callNumbers.size() );
+    assertEquals( 2, callNumbers.size() );
 
     assertEquals("63966981",docs.get(0).getFieldValue("oclc_id_display"));
   }

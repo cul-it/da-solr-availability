@@ -42,7 +42,6 @@ class CallNumberBrowse {
       "oclc_id_display") ;
 
   private static final String lcCallNumberField = "lc_bib_display";
-  private static final String callNumberField = "lc_callnum_full";
   private static final String urlField = "url_access_json";
 
   private static BibliographicSummary availableSummary;
@@ -77,13 +76,7 @@ class CallNumberBrowse {
     callNumDoc.addField("bibid", bibId);
     callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 
-    boolean bibCallLc;
     String bibCall = getBibCallNumber( doc.getFieldValues(lcCallNumberField) );
-    if ( bibCall == null ) {
-      bibCall = getBibCallNumber( doc.getFieldValues(callNumberField) );
-      bibCallLc = false;
-    } else
-      bibCallLc = true;
     Map<String,HoldingSet> holdingsByCallNumber =
         divideUnsuppressedHoldingsByCallNumber( holdings, bibCall );
 
@@ -93,7 +86,7 @@ class CallNumberBrowse {
       HoldingSet holdingsForCallNum = e.getValue();
 
       Holding h1 = holdingsForCallNum.values().iterator().next();
-      boolean isLc = ( Objects.equals(callNum, h1.call) ) ? h1.lcCallNum : bibCallLc ;
+      boolean isLc = ( Objects.equals(callNum, h1.call) ) ? h1.lcCallNum : true ;
       SolrInputDocument browseDoc = callNumDoc.deepCopy();
       boolean availableCallNum = callNum.equals("Available for the Library to Purchase");
 
@@ -101,7 +94,7 @@ class CallNumberBrowse {
       if ( availableCallNum ) {
         if ( bibCall == null || bibCall.isEmpty() ) continue;
         callNum = bibCall;
-        isLc = bibCallLc;
+        isLc = true;
         b = availableSummary;
       } else
         b = BibliographicSummary.summarizeHoldingAvailability(holdingsForCallNum);
@@ -288,8 +281,10 @@ class CallNumberBrowse {
   public static Set<String> collateCallNumberList(List<SolrInputDocument> callNumberDocs) {
     Set<String> callNums = new HashSet<>();
     for (SolrInputDocument doc : callNumberDocs) {
-      String callnum = (String) doc.getFieldValue("callnum_display");
-      if ( ! lettersOnly.matcher(callnum).matches() ) callNums.add( callnum );
+      if ( (boolean)doc.getFieldValue("lc_b") ) {
+        String callnum = (String) doc.getFieldValue("callnum_display");
+        if ( ! lettersOnly.matcher(callnum).matches() ) callNums.add( callnum );
+      }
     }
     return callNums;
   }
