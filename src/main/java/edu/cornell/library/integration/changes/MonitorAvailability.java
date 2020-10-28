@@ -138,6 +138,10 @@ public class MonitorAvailability {
       try (ResultSet rs1 = getTitle.executeQuery() ) {while (rs1.next()) title = rs1.getString(1);}
       String causes = e.getValue().toString();
       System.out.println(bibId+" ("+title+") "+causes);
+      if (causes.length() > 65_000 ) {
+        causes = causes.substring(0, 65_000);
+        System.out.printf("Causes for bib %d truncated to 65k characters.\n",bibId);
+      }
       q.setInt(1, bibId);
       q.setInt(2,isBatch( e.getValue() )?6:1);
       q.setString(3, causes);
