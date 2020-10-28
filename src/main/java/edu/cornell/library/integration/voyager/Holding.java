@@ -57,6 +57,7 @@ public class Holding {
 
   @JsonIgnore public List<String> donors = null;
   @JsonIgnore public String callNumberSuffix = null;
+  @JsonIgnore public boolean lcCallNum = false;
   @JsonIgnore public MarcRecord record;
   @JsonIgnore public static Locations locations = null;
   @JsonIgnore static ObjectMapper mapper = new ObjectMapper();
@@ -115,6 +116,7 @@ public class Holding {
         notes.add(f.concatenateSpecificSubfields("abcdu3"));
         break;
       case "852":
+        if ( f.ind1.equals('0') ) this.lcCallNum = true;
         for (Subfield sf: f.subfields) {
           CODE: switch (sf.code) {
           case 'b':

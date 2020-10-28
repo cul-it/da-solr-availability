@@ -34,8 +34,8 @@ public class WorksAndInventory {
   private final static String selectBRS = "SELECT * FROM bibRecsSolr WHERE bib_id = ?";
   private final static String replaceBRS =
       "REPLACE INTO bibRecsSolr"+
-      " (bib_id, record_date, linking_mod_date, title, format, pub_date, language, edition, online, print, active)"+
-      " VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?)" ;
+      " (bib_id,record_date,linking_mod_date,title,oclc,format,pub_date,language,edition,online,print,active)"+
+      " VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?)" ;
   private final static String updateBRS = "UPDATE bibRecsSolr SET record_date = ? WHERE bib_id = ?";
   private final static String selectB2W = "SELECT * FROM bib2work WHERE bib_id = ? AND active = 1";
   private final static String selectB2W2 =
@@ -89,7 +89,7 @@ public class WorksAndInventory {
         oldWorks.add(new WorkLink(rs.getLong("oclc_id"),rs.getLong("work_id")));
     }
 
-    Set<WorkLink> works = getWorks( doc, inventory );
+    Set<WorkLink> works = getWorks( meta.oclc, inventory );
     boolean worksUpdate = ! works.equals(oldWorks);
 
 
@@ -299,24 +299,23 @@ public class WorksAndInventory {
     p.setInt(1, bibId);
     p.setTimestamp(2, recordDate);
     p.setString(3, meta.title);
-    p.setString(4, meta.format);
-    p.setString(5, meta.pubDate);
-    p.setString(6, meta.language);
-    p.setString(7, meta.edition);
-    p.setBoolean(8, meta.online);
-    p.setBoolean(9, meta.print);
-    p.setBoolean(10, meta.active);
+    p.setString(4, meta.oclc);
+    p.setString(5, meta.format);
+    p.setString(6, meta.pubDate);
+    p.setString(7, meta.language);
+    p.setString(8, meta.edition);
+    p.setBoolean(9, meta.online);
+    p.setBoolean(10, meta.print);
+    p.setBoolean(11, meta.active);
     p.executeUpdate();
   }
 
-  private static Set<WorkLink> getWorks(SolrInputDocument doc, Connection inventory) throws SQLException {
+  private static Set<WorkLink> getWorks(String oclcIds, Connection inventory) throws SQLException {
     Set<WorkLink> works = new HashSet<>();
-    if ( ! doc.containsKey("oclc_id_display") ) return works;
+    if ( oclcIds == null || oclcIds.isEmpty() ) return works;
 
     if (! pstmts.containsKey("selectW2O")) pstmts.put("selectW2O", inventory.prepareStatement(selectW2O));
-    Collection<Object> oclcIds = doc.getFieldValues("oclc_id_display");
-    for ( Object oclcIdObject : oclcIds ) {
-      String oclc = ((String)oclcIdObject).replaceAll("[^0-9]","");
+    for ( String oclc : oclcIds.split(",") ) {
       if ( oclc.isEmpty() || oclc.length() > 18 ) continue;
       Long oclcId = Long.valueOf(oclc);
       pstmts.get("selectW2O").setLong(1,oclcId);
@@ -333,6 +332,7 @@ public class WorksAndInventory {
     LinkingMetadata meta = new LinkingMetadata();
 
     meta.title    = rs.getString("title");
+    meta.oclc     = rs.getString("oclc");
     meta.format   = rs.getString("format");
     meta.pubDate  = rs.getString("pub_date");
     meta.language = rs.getString("language");
@@ -358,12 +358,15 @@ public class WorksAndInventory {
     if ( doc.containsKey("edition_display"))
       meta.edition  = (String) doc.getFieldValue("edition_display");
 
+    if ( doc.containsKey("oclc_id_display"))
+      meta.oclc = doc.getFieldValues("oclc_id_display")
+      .stream().map(f->((String)f).replaceAll("[^0-9]","")).collect(Collectors.joining(","));
     if ( doc.containsKey("format"))
-      meta.format   = doc.getFieldValues("format").stream().map(f -> (String) f).collect(Collectors.joining(","));
+      meta.format = doc.getFieldValues("format").stream().map(f->(String) f).collect(Collectors.joining(","));
     if ( doc.containsKey("pub_date"))
-      meta.pubDate  = doc.getFieldValues("pub_date").stream().map(f -> (String) f).collect(Collectors.joining(","));
+      meta.pubDate = doc.getFieldValues("pub_date").stream().map(f->(String) f).collect(Collectors.joining(","));
     if ( doc.containsKey("language_facet"))
-      meta.language = doc.getFieldValues("language_facet").stream().map(f -> (String) f).collect(Collectors.joining(","));
+      meta.language = doc.getFieldValues("language_facet").stream().map(f->(String) f).collect(Collectors.joining(","));
 
     if (doc.containsKey("online")) {
       Collection<Object> online = doc.getFieldValues("online");
@@ -413,6 +416,7 @@ public class WorksAndInventory {
 
   protected static class LinkingMetadata {
     String title = null;
+    String oclc = null;
     String format = null;
     String pubDate = null;
     String language = null;
@@ -428,6 +432,7 @@ public class WorksAndInventory {
       if ( ! this.getClass().equals(o.getClass())) return false;
       LinkingMetadata other = (LinkingMetadata) o;
       return Objects.equals(this.title, other.title)
+          && Objects.equals(this.oclc, other.oclc)
           && Objects.equals(this.format, other.format)
           && Objects.equals(this.pubDate, other.pubDate)
           && Objects.equals(this.language, other.language)
