@@ -188,6 +188,7 @@ public class ProcessAvailabilityQueue {
                 doc.removeField("type");
                 doc.addField("type", "Suppressed Bib");
               }
+              doc.addField("notes_t", holdings.getNotes());
 
               boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
               if (masterBoundWith) {
