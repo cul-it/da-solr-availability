@@ -70,7 +70,8 @@ public class PODFullExport {
               f852b = sf;
             if ( f852b != null && h.location != null) {
               f852b.value = h.location.name;
-              f852.subfields.add(new Subfield (-1, 'a', h.location.library ));
+              if ( h.location.library != null )
+                f852.subfields.add(new Subfield (-1, 'a', h.location.library ));
             }
             f852.id = ++maxBibFieldId;
             bibRec.dataFields.add(f852);
