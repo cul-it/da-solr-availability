@@ -58,7 +58,7 @@ public class PODFullExport {
         int unsuppressedPrintHoldingsCount = 0;
         for ( Holding h : holdings.values() ) {
           if ( h.active == false ) continue;
-          if ( h.location.equals(locations.getByCode("serv,remo")) ) continue;
+          if ( h.location == null || h.location.equals(locations.getByCode("serv,remo")) ) continue;
           unsuppressedPrintHoldingsCount++;
           DataField f852 = null;
           for ( DataField f : h.record.dataFields ) if ( f.tag.equals("852") )
