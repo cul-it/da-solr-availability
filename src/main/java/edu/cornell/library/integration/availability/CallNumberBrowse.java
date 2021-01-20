@@ -192,9 +192,9 @@ class CallNumberBrowse {
       List<String> titles = new ArrayList<>();
       if (doc.containsKey("fulltitle_vern_display")) titles.add((String) doc.getFieldValue("fulltitle_vern_display"));
       if (doc.containsKey("fulltitle_display"))      titles.add((String) doc.getFieldValue("fulltitle_display"));
-      citation.append("<b>");
+      citation.append("<strong>");
       appendEscaped(citation,String.join(" / ", titles));
-      citation.append(".</b> ");
+      citation.append(".</strong> ");
     }
     if (doc.containsKey("publisher_display")) {
       appendEscaped(citation,(String) doc.getFieldValue("publisher_display"));

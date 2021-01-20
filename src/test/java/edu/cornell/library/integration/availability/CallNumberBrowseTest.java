@@ -228,7 +228,7 @@ public class CallNumberBrowseTest {
     mainDoc.addField("publisher_display", "《上海艺术评论》编辑部 / \"Shanghai yi shu ping lun\" bian ji bu");
     mainDoc.addField("pub_date_display", "2016年2月- 2016 nian 2 yue-");
 
-    assertEquals("<b>上海艺术评论 &#x2F; Shanghai yi shu ping lun = Shanghai art review.</b>"
+    assertEquals("<strong>上海艺术评论 &#x2F; Shanghai yi shu ping lun = Shanghai art review.</strong>"
         + " 《上海艺术评论》编辑部 &#x2F; &quot;Shanghai yi shu ping lun&quot; bian ji bu, 2016年2月- 2016 nian 2 yue-.",
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
@@ -246,7 +246,7 @@ public class CallNumberBrowseTest {
     mainDoc.addField("author_display", "Wolfe, Thomas Kennerly, 1892-");
     mainDoc.addField("pub_date_display", "1921");
 
-    assertEquals("Wolfe, Thomas Kennerly, 1892- <b>A biometrical study of characters in maize.</b> 1921.",
+    assertEquals("Wolfe, Thomas Kennerly, 1892- <strong>A biometrical study of characters in maize.</strong> 1921.",
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
 
@@ -266,8 +266,8 @@ public class CallNumberBrowseTest {
     mainDoc.addField("pub_date_display", "1897");
 
     assertEquals("Wood, Norman B. (Norman Barton), 1857-1933."
-        + " <b>The white side of a black subject : a vindication of the Afro-American race :"
-        + " from the landing of slaves at St. Augustine, Florida, in 1565, to the present time.</b>"
+        + " <strong>The white side of a black subject : a vindication of the Afro-American race :"
+        + " from the landing of slaves at St. Augustine, Florida, in 1565, to the present time.</strong>"
         + " American Pub. House, 1897.",
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
@@ -293,7 +293,7 @@ public class CallNumberBrowseTest {
 
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
     assertEquals("Murphy, Brian G., 1966-"
-        + " <b>Veterinary oral and maxillofacial pathology.</b>"
+        + " <strong>Veterinary oral and maxillofacial pathology.</strong>"
         + " Wiley-Blackwell, 2020.",
         docs.get(0).getFieldValue("cite_preescaped_display"));
     assertEquals(Arrays.asList("9781119221258 (hardback)","1119221250"),
