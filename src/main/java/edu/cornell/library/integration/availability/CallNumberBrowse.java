@@ -70,10 +70,10 @@ class CallNumberBrowse {
     callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 
     String defaultCall = getBibCallNumber( doc.getFieldValues(lcCallNumberField) );
-    System.out.println("bib call: "+defaultCall);
+//    System.out.println("bib call: "+defaultCall);
     if ( defaultCall == null || defaultCall.isEmpty() )
       defaultCall = selectDefaultHoldingCallNumber( holdings );
-    System.out.println("default call: "+defaultCall);
+//    System.out.println("default call: "+defaultCall);
     Map<String,HoldingSet> holdingsByCallNumber =
         divideUnsuppressedHoldingsByCallNumber( holdings, defaultCall );
 

@@ -292,7 +292,6 @@ public class Holdings {
       for ( Holding h : this.holdings.values() )
         if ( h.call != null && ! h.call.isEmpty() ) {
           String sortCall = CallNumberTools.sortForm(h.call);
-          System.out.println(h.call);
           if (! sortCall.startsWith("qa ")) continue;
 //        exclude cs ranges: QA 75-76, QA 155.7, QA 267-268, QA 402.3, QA 402.35, QA 402.37
           String number = CallNumberTools.getNumberAfterFirstLetters(sortCall);
