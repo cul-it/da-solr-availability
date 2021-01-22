@@ -207,8 +207,6 @@ public class ProcessAvailabilityQueue {
               if ( ! f.isEmpty() )
                 doc.addField("bound_with_b", true);
 
-              if ( holdings.hasMathCallNumber() )
-                doc.addField("collection", "Math Library");
               if ( holdings.summarizeItemAvailability(items) ) 
                 doc.addField("availability_facet", "Returned");
               if ( holdings.applyOpenOrderInformation(voyager,bibId) )
@@ -291,8 +289,12 @@ public class ProcessAvailabilityQueue {
 
               List<SolrInputDocument> thisDocsCallNumberDocs =
                   CallNumberBrowse.generateBrowseDocuments(inventory,doc, holdings);
+
               callnumSolrDocs.addAll( thisDocsCallNumberDocs );
-              doc.addField("callnumber_display", CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs));
+              Set<String> allCallNumbers = CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs);
+              doc.addField("callnumber_display", allCallNumbers);
+              if ( CallNumberTools.hasMathCallNumber(CallNumberBrowse.allLCCallNumbers(thisDocsCallNumberDocs)))
+                doc.addField("collection", "Math Library");
 
               solrDocs.add(doc);
               callNumberSolr.deleteByQuery("bibid:"+bibId);

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -125,6 +126,32 @@ public class CallNumberTools {
     } while (callnum.length() > 0 && ! callnum.equals(previouscallnum)); 
 
     return callnum;
+  }
+
+  public static boolean hasMathCallNumber(Set<String> callNumbers) throws IOException {
+
+    for ( String callNumber : callNumbers ) {
+      String sortCall = CallNumberTools.sortForm(callNumber);
+      if (! sortCall.startsWith("qa")) continue;
+//    exclude cs ranges: QA 75-76, QA 155.7, QA 267-268, QA 402.3, QA 402.35, QA 402.37
+      String number = CallNumberTools.getNumberAfterFirstLetters(sortCall);
+      if (number == null || number.isEmpty()) return true; //include plain QA call numbers
+      Integer i = null;
+      String decimal = null;
+      if (number.contains(".")) {
+        int dotPos = number.indexOf('.');
+        i = Integer.valueOf(number.substring(0, dotPos));
+        decimal = number.substring(dotPos+1);
+      } else
+        i = Integer.valueOf(number);
+      if ( i == 75 || i == 76 ) continue;
+      if ( i == 155 && decimal != null && decimal.equals("7") ) continue;
+      if ( i == 267 || i == 268 ) continue;
+      if ( i == 402 && decimal != null &&
+          ( decimal.equals("3") || decimal.equals("35") || decimal.equals("37") )) continue;
+      return true;
+    }
+    return false;
   }
 
 }

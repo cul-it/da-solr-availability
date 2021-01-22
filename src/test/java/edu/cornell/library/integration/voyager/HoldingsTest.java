@@ -338,18 +338,4 @@ public class HoldingsTest {
     }
   }
 
-  @Test
-  public void areTheseMathCallNumbers() throws SQLException, IOException, XMLStreamException {
-    HoldingSet h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9975971); //AC8.5 .G74 2016
-    assertFalse(h.hasMathCallNumber());
-    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 2034612); //QA1
-    assertTrue(h.hasMathCallNumber());
-    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1420558); //QA75.A1 Z632
-    assertFalse(h.hasMathCallNumber());
-    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1468093); //QA155 .A33 1981
-    assertTrue(h.hasMathCallNumber());
-    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 9598247); //QA155.7.E4 B37 2015
-    assertFalse(h.hasMathCallNumber());
-  }
-
 }
