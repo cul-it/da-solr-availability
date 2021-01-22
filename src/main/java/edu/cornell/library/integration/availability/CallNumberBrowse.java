@@ -250,10 +250,10 @@ class CallNumberBrowse {
     return callNums;
   }
   private static Pattern lettersOnly = Pattern.compile("[A-Za-z]{1,3}");
-  public static Set<String> allLCCallNumbers(List<SolrInputDocument> callNumberDocs) {
+  public static Set<String> allCallNumbers(List<SolrInputDocument> callNumberDocs) {
     Set<String> callNums = new HashSet<>();
     for (SolrInputDocument doc : callNumberDocs)
-      if ( (boolean)doc.getFieldValue("lc_b") ) callNums.add( (String) doc.getFieldValue("callnum_display") );
+      callNums.add( (String) doc.getFieldValue("callnum_display") );
     return callNums;
   }
 

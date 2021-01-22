@@ -293,7 +293,7 @@ public class ProcessAvailabilityQueue {
               callnumSolrDocs.addAll( thisDocsCallNumberDocs );
               Set<String> allCallNumbers = CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs);
               doc.addField("callnumber_display", allCallNumbers);
-              if ( CallNumberTools.hasMathCallNumber(CallNumberBrowse.allLCCallNumbers(thisDocsCallNumberDocs)))
+              if ( CallNumberTools.hasMathCallNumber(CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)))
                 doc.addField("collection", "Math Library");
 
               solrDocs.add(doc);
