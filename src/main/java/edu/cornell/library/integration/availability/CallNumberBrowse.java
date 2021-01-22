@@ -1,14 +1,8 @@
 package edu.cornell.library.integration.availability;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,7 +13,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -76,9 +69,13 @@ class CallNumberBrowse {
     callNumDoc.addField("bibid", bibId);
     callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 
-    String bibCall = getBibCallNumber( doc.getFieldValues(lcCallNumberField) );
+    String defaultCall = getBibCallNumber( doc.getFieldValues(lcCallNumberField) );
+    System.out.println("bib call: "+defaultCall);
+    if ( defaultCall == null || defaultCall.isEmpty() )
+      defaultCall = selectDefaultHoldingCallNumber( holdings );
+    System.out.println("default call: "+defaultCall);
     Map<String,HoldingSet> holdingsByCallNumber =
-        divideUnsuppressedHoldingsByCallNumber( holdings, bibCall );
+        divideUnsuppressedHoldingsByCallNumber( holdings, defaultCall );
 
     int i = 0;
     for ( Entry<String,HoldingSet> e : holdingsByCallNumber.entrySet() ) {
@@ -92,8 +89,8 @@ class CallNumberBrowse {
 
       BibliographicSummary b ;
       if ( availableCallNum ) {
-        if ( bibCall == null || bibCall.isEmpty() ) continue;
-        callNum = bibCall;
+        if ( defaultCall == null || defaultCall.isEmpty() ) continue;
+        callNum = defaultCall;
         isLc = true;
         b = availableSummary;
       } else
@@ -121,7 +118,7 @@ class CallNumberBrowse {
       browseDoc.addField( "lc_b", isLc );
       browseDoc.addField( "availability_json", b.toJson() );
       if ( isLc ) {
-        String classificationDescription = generateClassification( inventory, callNum );
+        String classificationDescription = CallNumberTools.generateClassification( inventory, callNum );
         if ( classificationDescription != null && ! classificationDescription.isEmpty() )
           browseDoc.addField("classification_display", classificationDescription);
       }
@@ -137,47 +134,6 @@ class CallNumberBrowse {
     return browseDocs;
   }
 
-  private static String generateClassification(Connection inventory, String callNum) throws SQLException, IOException {
-    if (inventory == null) return null;
-    if ( prefixes == null ) {
-      List<String> p = new ArrayList<>();
-      try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("callnumberprefixes.txt");
-          BufferedReader reader = new BufferedReader(new InputStreamReader(in));){
-        String line;
-        while ( ( line = reader.readLine() ) != null ) {
-          if (line.indexOf('#') != -1) line = line.substring(0,line.indexOf('#'));
-          line = line.trim().toLowerCase();
-          if (! line.isEmpty()) p.add(line);
-        }
-      }
-      prefixes = p;
-    }
-    Matcher m = lcClass.matcher(sortForm(callNum,prefixes));
-    if (m.matches()) {
-      if ( classificationQ == null )
-        classificationQ = inventory.prepareStatement(
-            "  select label from classifications.classification"
-            + " where ? between low_letters and high_letters"
-            + "   and ? between low_numbers and high_numbers"
-            + " order by high_letters desc, high_numbers desc");
-      classificationQ.setString(1, m.group(1));
-      classificationQ.setString(2, m.group(2));
-
-      try ( ResultSet rs = classificationQ.executeQuery() ) {
-        List<String> parts = new ArrayList<>();
-        while ( rs.next() )
-          parts.add(rs.getString(1));
-        return String.join(" > ", parts);
-      }
-
-    }
-    return null;
-
-  }
-  private static Pattern lcClass = Pattern.compile("([a-z]{1,3}) ?([0-9\\.]{0,15}).*");
-  private static PreparedStatement classificationQ = null;
-  private static List<String> prefixes = null;
-  //  private static Pattern lcClass = Pattern.compile("([A-Za-z]{1,3}) ?\\.?([0-9]{1,6})[^0-9]\\.*");
 
   private static String generateCitation(SolrInputDocument doc) {
     StringBuilder citation = new StringBuilder();
@@ -230,12 +186,17 @@ class CallNumberBrowse {
     return null;
   }
 
+  private static String selectDefaultHoldingCallNumber(HoldingSet holdings) {
+    for (Holding h : holdings.values()) if ( h.lcCallNum && h.call != null && ! h.call.isEmpty() ) return h.call;
+    return null;
+  }
+
   private static boolean isNonCallNumber( String call ) {
     String lc = call.toLowerCase().replaceAll("\\s+"," ");
     return lc.contains("no call") || lc.contains("in proc") || lc.contains("on order") ;
   }
 
-  private static Map<String, HoldingSet> divideUnsuppressedHoldingsByCallNumber(HoldingSet holdings, String bibCall) {
+  private static Map<String, HoldingSet> divideUnsuppressedHoldingsByCallNumber(HoldingSet holdings, String defaultCall) {
     Map<String,HoldingSet> holdingsByCallNumber = new HashMap<>();
     for (Integer holdingId : holdings.getMfhdIds()) {
       Holding h = holdings.get(holdingId);
@@ -251,10 +212,10 @@ class CallNumberBrowse {
       }
 
       if ( ( nonCallNumber || (h.lcCallNum == false && isClosedStackLocation(h)) )
-          && bibCall != null && ! bibCall.isEmpty() ) {
-        if ( ! holdingsByCallNumber.containsKey(bibCall) )
-          holdingsByCallNumber.put(bibCall, new HoldingSet());
-        holdingsByCallNumber.get(bibCall).put(holdingId, h);
+          && defaultCall != null && ! defaultCall.isEmpty() ) {
+        if ( ! holdingsByCallNumber.containsKey(defaultCall) )
+          holdingsByCallNumber.put(defaultCall, new HoldingSet());
+        holdingsByCallNumber.get(defaultCall).put(holdingId, h);
       }
 
     }
@@ -290,53 +251,5 @@ class CallNumberBrowse {
   }
   private static Pattern lettersOnly = Pattern.compile("[A-Za-z]{1,3}");
 
-  static String sortForm( CharSequence callNumber, List<String> prefixes ) {
-
-    String lc = Normalizer.normalize(callNumber, Normalizer.Form.NFD)
-        .toLowerCase().trim()
-        // periods not followed by digits aren't decimals and must go
-        .replaceAll("\\.(?!\\d)", " ").replaceAll("\\s+"," ");
-
-    if (lc.isEmpty()) return lc;
-
-    return stripPrefixes(lc,prefixes)
-        // all remaining non-alphanumeric (incl decimals) must go
-        .replaceAll("[^a-z\\d\\.]+", " ")
-        // separate alphabetic and numeric sections
-        .replaceAll("([a-z])(\\d)", "$1 $2")
-        .replaceAll("(\\d)([a-z])", "$1 $2")
-        // zero pad first integer number component if preceded by
-        // not more than one alphabetic block
-        .replaceAll("^\\s*([a-z]*\\s*)(\\d+)", "$100000000$2")
-        .replaceAll("^([a-z]*\\s*)0*(\\d{9})", "$1$2")
-
-        .trim();
-  }
-
-  private static String stripPrefixes(String callnum, List<String> prefixes) {
-
-    if (prefixes == null || prefixes.isEmpty())
-      return callnum;
-
-    String previouscallnum;
-
-    do {
-
-      previouscallnum = callnum;
-      PREF: for (String prefix : prefixes) {
-        if (callnum.startsWith(prefix)) {
-          callnum = callnum.substring(prefix.length());
-          break PREF;
-        }
-      }
-
-      while (callnum.length() > 0 && -1 < " ,;#+".indexOf(callnum.charAt(0))) {
-        callnum = callnum.substring(1);
-      }
-
-    } while (callnum.length() > 0 && ! callnum.equals(previouscallnum)); 
-
-    return callnum;
-  }
 
 }

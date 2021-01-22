@@ -207,6 +207,8 @@ public class ProcessAvailabilityQueue {
               if ( ! f.isEmpty() )
                 doc.addField("bound_with_b", true);
 
+              if ( holdings.hasMathCallNumber() )
+                doc.addField("collection", "Math Library");
               if ( holdings.summarizeItemAvailability(items) ) 
                 doc.addField("availability_facet", "Returned");
               if ( holdings.applyOpenOrderInformation(voyager,bibId) )

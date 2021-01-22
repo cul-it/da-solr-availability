@@ -132,6 +132,10 @@ INSERT INTO BIB_MFHD VALUES(301608,4657641);
 INSERT INTO BIB_MFHD VALUES(11438152,11711652);
 INSERT INTO BIB_MFHD VALUES(7259947,7691682);
 INSERT INTO BIB_MFHD VALUES(7259947,10164646);
+INSERT INTO BIB_MFHD VALUES(1681672,2034612);
+INSERT INTO BIB_MFHD VALUES(1157555,1420558);
+INSERT INTO BIB_MFHD VALUES(1197440,1468093);
+INSERT INTO BIB_MFHD VALUES(9262507,9598247);
 CREATE TABLE BIB_TEXT ( BIB_ID int, TITLE_BRIEF text );
 INSERT INTO BIB_TEXT VALUES(330581,'Journal of applied physics. ');
 INSERT INTO BIB_TEXT VALUES(3212531,'White side of a black subject a vindication of the Afro-American race : from the landing of slaves at St. Augustine, Florida, in 1565, to the present ');
@@ -189,6 +193,10 @@ INSERT INTO BIB_TEXT VALUES(5487364,'Iￌﾁsland Howells, 1890-1901 = Howell''s
 INSERT INTO BIB_TEXT VALUES(301608,'Biometrical study of characters in maize. ');
 INSERT INTO BIB_TEXT VALUES(11438152,'Matheseos libri VIII. ');
 INSERT INTO BIB_TEXT VALUES(7259947,'Andrew Dickson White, teacher of history. ');
+INSERT INTO BIB_TEXT VALUES(1681672,'On the extension of a parallel translation to a Banach space operator / ');
+INSERT INTO BIB_TEXT VALUES(1157555,'Chislennye metody reshenii￯ﾸﾠa￯ﾸﾡ different￯ﾸﾠs￯ﾸﾡialￊﾹnykh i integralￊﾹnykh uravnentiiￌﾆ i kvadraturnye formuly : sbornik stateiￌﾆ. ');
+INSERT INTO BIB_TEXT VALUES(1197440,'Fundamental concepts of higher algebra / ');
+INSERT INTO BIB_TEXT VALUES(9262507,'Sage for undergraduates / ');
 CREATE TABLE BIB_DATA ( RECORD_SEGMENT blob, BIB_ID int, SEQNUM int );
 INSERT INTO BIB_DATA VALUES('02962cas a2200649 a 450000100070000000500170000700800410002401000220006502200140008703000110010103500250011203500220013703500110015903500190017004000330018904200130022205000140023508200100024921000200025922200310027924500320031024700760034226000530041826500750047130000300054631000160057636200250059251000340061751000400065151000410069151000490073251000500078151000410083152003660087253000920123855003470133055500570167765000260173465000380176065500420179871000350184071000310187571000310190678000350193785300420197285300420201485500230205686300230207986300240210286500240212686500240215086500240217486500240219890500210222294800320224394800370227533058120141106201817.0840709c19319999pausr1p       0   a1eng    a   33023425//r39   a0021-8979  aJAPIAU  a(CStRLIN)NYCX84S3828  a(NIC)notisABK8232  a330581  a(OCoLC)1782306  aDLCcDLCdDLCdDLCdPPTdNIC  alcansdp 4aQC1b.J83  a530.50 aJ. appl. physi.00aJournal of applied physics00aJournal of applied physics.',330581,1);
 INSERT INTO BIB_DATA VALUES('10aPhysics;ba journal of general and applied physicsfJuly 1931-Dec. 1936  a[New York, etc.]bAmerican Institute of Physics.  aSubscription Fulfillment Division, 335 E. 45th St., New York, NY 10017  av.bill., diagrs.c27 cm.  aSemimonthly0 av. 1-   ; July 1931-0 aChemical abstractsx0009-22580 aEngineering index annualx0360-85570 aEngineering index monthlyx0013-79600 aInternational aerospace abstractsx0020-58420 aSelected water resources abstractsx0037-136X0 aNuclear science abstractsx0029-5612  aEmphasizes significant new results in applied physics. Experimental and theoretical physics applied to all aspects of materials including semiconductors, superconductors, metals and alloys, amorphous materials, and oxides. Other topics include electrical, optical, and magnetic devices; optics and lasers; nonlinear optics; electrical discharges; and acoustics.  aRecent issues also available full text on the World Wide Web; abstracts available 1975- ',330581,2);
@@ -314,6 +322,17 @@ INSERT INTO BIB_DATA VALUES(' cum praefatione et indicibus continens /cIulius F
 INSERT INTO BIB_DATA VALUES('ld Wide Web.  aIn Latin.0 aDescription based on online resource; title from PDF title page (publisher''s Web site, viewed 06. Sep 2019)1 aKroll, Wilhelm, eeditor.1 aZiegler, K., eeditor.08iTitle is part of eBook package:dDe GruytertDGBA Classics and Near East Studies <1990z9783110635997oZDB-23-GCN0 cprintz9783598713514 0aBibliotheca scriptorum Graecorum et Romanorum Teubneriana ;vFasciculus II40uhttp://proxy.library.cornell.edu/login?url=https://doi.org/10.1515/9783110965186zConnect to full text. Access limited to authorized subscribers.423Coveruhttp://proxy.library.cornell.edu/login?url=https://www.degruyter.com/cover/covers/9783110965186.jpgzConnect to full text. Access limited to authorized subscribers.2 aTemp_degruyterebksmu  ags0 a20200420bidbatchelts1 a20200420bsdbatcheltsfebk3 a20200420hDG_EBA_BACKALL_Covid_19iDG_EBA_Covid_19.mrc  aNoEx',11438152,3);
 INSERT INTO BIB_DATA VALUES('01431cam a2200361I  4500001000800000005001700008008004100025010001700066035001200083035001800095040003700113043001200150050001600162082001200178100001800190245004700208260004700255300002600302490005300328530002700381600003900408650004800447600006400495650005800559651004400617776011800661776011800779830005400897948002700951948003700978948002701015948002701042725994720170310203508.0730525s1958    miua          000 0 eng c  a   58063790   a7259947  a(OCoLC)630483  aOUNcOUNdOCLCQdOCLCGdSTFdNIC  an-us--- 4aD16.3b.B65  a923.7731 aBordin, Ruth.10aAndrew Dickson White,bteacher of history.  aAnn Arbor,bUniversity of Michiganc[1958]  a19 p.billus.c23 cm.1 aMichigan historical collections bulletin,vno. 8  aAlso available online.10aWhite, Andrew Dickson,d1832-1918. 0aHistoryxStudy and teachingzUnited States.17aWhite, Andrew Dickson,d1832-19182fast0(OCoLC)fst00051740 7aHistoryxStudy and teaching2fast0(OCoLC)fst00958303 7aUnited S',7259947,1);
 INSERT INTO BIB_DATA VALUES('tates2fast0(OCoLC)fst0120415508iOnline version:aBordin, Ruth.tAndrew Dickson White.dAnn Arbor, University of Michigan [1958]w(OCoLC)60328955308iOnline version:aBordin, Ruth.tAndrew Dickson White.dAnn Arbor, University of Michigan [1958]w(OCoLC)605729705 0aMichigan historical collections bulletin,vno. 8.1 a20110616bfdsjl8elts2 a20150101bmdbatcheltsxaddfast2 a20170310bmdmnr1elts1 a20170310bldmnr1elts',7259947,2);
+INSERT INTO BIB_DATA VALUES('01204cam a22003137a 4500001000800000005001700008008004100025020001500066035002200081035002000103035001200123040001300135100001900148245009100167260003900258300002000297490010600317650002200423650001900445650001800464650004500482650004800527650004400575830008500619830009800704905002100802948004000823950002700863168167220200210042703.0900511s1983    fi            000 0 eng d  a9514214684  a(NIC)notisAHW9784  a(OCoLC)11451991  a1681672  dNICbeng1 aRavaska, Timo.10aOn the extension of a parallel translation to a Banach space operator /cTimo Ravaska.  aOulu :bUniversity of Oulu,c1983.  a22 p. ;c25 cm.1 aActa Universitatis Ouluensis. Series A, Scientiae rerum naturalium ;vNo. 143.aMathematica ;vNo. 28 0aLinear operators. 0aBanach spaces. 0aSubmanifolds. 7aBanach spaces.2fast0(OCoLC)fst00826389 7aLinear operators.2fast0(OCoLC)fst00999087 7aSubmanifolds.2fast0(OCoLC)fst01136611 0aActa Universitatis Ouluensis.nSeries A,pScientiae re',1681672,1);
+INSERT INTO BIB_DATA VALUES('rum naturalium ;vno. 143. 0aActa Universitatis Ouluensis.nSeries A,pScientiae rerum naturalium.pMathematica ;vno. 28.  a19990223120000.02 a20200210bmdbatcheltsxWorldShare  aQA1b.A19 no.143lmath',1681672,2);
+INSERT INTO BIB_DATA VALUES('01447cam a2200325 a 4500001000800000005001700008008004100025035002700066035002200093035002000115035001200135040001400147245013800161260004400299300002900343500010100372500009800473504002900571650004800600650004400648650002600692650007400718650007000792650004200862655005200904730007000956905002101026948003701047950003701084115755520141117220541.0861010s1964    rura     b    000 0 rusod  a(CStRLIN)NYCX86B149007  a(NIC)notisAFB8785  a(OCoLC)14589462  a1157555  aCcCdNIC00aChislennye metody reshenii︠a︡ different︠s︡ialʹnykh i integralʹnykh uravnentiĭ i kvadraturnye formuly :bsbornik stateĭ.  aMoskva :bIzdatelʹstvo "Nauka",c1964.  a351 p. :bill. ;c26 cm.  aAt head of title: Redkollegia zhurnala vychislitelʹnoĭ matematiki i matematicheskoĭ fiziki.  a"Dopolnenie k zhurnalu vychislitelʹnoĭ matematiki i matematicheskoĭ fiziki No. 4 tom 4."  aIncludes bibliographies. 0aDifferential equationsxNumerical solutions 0aIntegral equa',1157555,1);
+INSERT INTO BIB_DATA VALUES('tionsxNumerical solutions 0aMathematicsvFormulae 7aDifferential equationsxNumerical solutions2fast0(OCoLC)fst00893451 7aIntegral equationsxNumerical solutions2fast0(OCoLC)fst00975509 7aMathematics2fast0(OCoLC)fst01012163 7aMathematical formulae2fast0(OCoLC)fst014240530 aZhurnal vychislitelʹnoĭ matematiki i matematicheskoĭ fiziki.  a19991028120000.02 a20141117bmdbatcheltsxaddfast  lMATHaQA75.A1bZ632+i05/12/87 C',1157555,2);
+INSERT INTO BIB_DATA VALUES('01078cam a2200325 a 4500001000800000005001700008008004100025010001700066020001500083035002600098035002200124035001900146035001200165040001300177050002000190082001200210100005300222245006400275260005600339300002500395500008000420500002000500504003000520650001200550650003800562903005500600905002100655948003700676950003900713119744020141118000440.0860414r19811956nju      b    001 0 eng    a   81002528   a093642804X  a(CStRLIN)NYCX86B49352  a(NIC)notisAFF9282  a(OCoLC)7875311  a1197440  aDGPO/DLC1 aQA155b.A5 19810 a5122191 aAlbert, A. Adrianq(Abraham Adrian),d1905-1972.10aFundamental concepts of higher algebra /cA. Adrian Albert.  aPassaic, NJ :bPolygonal Pub. House,c[1981] c1956.  aix, 165 p. ;c21 cm.  aReprint. Originally published: Chicago : University of Chicago Press, 1956.  aIncludes index.  aBibliography: p. 152-155. 0aAlgebra 7aAlgebra2fast0(OCoLC)fst00804885 5aGoogled20101214p31924003285008xGoogle duplicate  a192202',1197440,1);
+INSERT INTO BIB_DATA VALUES('02120000.02 a20141117bmdbatcheltsxaddfast  lMATHaQA155b.A33 1981i09/15/86 C',1197440,2);
+INSERT INTO BIB_DATA VALUES('04114cam a2200529 i 4500001000800000005001700008008004100025010001700066020003100083020002800114035002100142035001700163035001200180040006900192042000800261050002500269082001900294084007600313100002100389245004800410264007100458264001100529300004600540336002100586337002500607338002300632504005700655505049000712520093701202630003502139650003202174650003602206650014802242650013402390650012102524650014802645650013102793650012602924650013303050650011603183650005803299650006203357902002003419948002703439948002703466980009103493926250720170206164704.0150626t20152015riua          000 0 eng    a  2014033572  a9781470411114 (alk. paper)  a1470411113 (alk. paper)  a(OCoLC)911946884  a(POOF1)41356  a9262507  aDLCbengerdacDLCdYDXdYDXCPdBTCTAdOCLCFdCDXdIADdWRFdZLM  apcc00aQA155.7.E4bB37 201500a510.285/53223  a15-04a34-04a65-04a90-04a97M1011-04a12-04a28-04a40-04a68U052msc1 aBard, Gregory V.10aSage for undergraduates /cGregory V. Bard. 1',9262507,1);
+INSERT INTO BIB_DATA VALUES('aProvidence, Rhode Island :bAmerican Mathematical Society,c[2015] 4c©2015  axxiv, 352 pages :billustrations ;c26 cm  atext2rdacontent  aunmediated2rdamedia  avolume2rdacarrier  aIncludes bibliographical references (pages 351-352).0 aWelcome to Sage! -- Fun projects using Sage -- Advanced plotting techniques -- Advanced features of Sage -- Programming in Sage and Python -- Building interactive webpages with Sage -- Appendix A. What to do when frustrated! -- Appendix B. Transitioning to SageMathCloud -- Appendix C. Other resources for Sage -- Appendix D. Linear systems with infinitely many solutions -- Appendix E. Installing Sage on your personal computer -- Appendix F. Index of commands by section and by name.  a"As the open-source and free competitor to expensive software like MapleTM, Mathematica®, Magma, and MATLAB®, Sage offers anyone with access to a web browser the ability to use cutting-edge mathematical software and display his or her results ',9262507,2);
+INSERT INTO BIB_DATA VALUES('for others, often with stunning graphics. This book is a gentle introduction to Sage for undergraduate students toward the end of Calculus II (single-variable integral calculus) or higher-level course work such as Multivariate Calculus, Differential Equations, Linear Algebra, or Math Modeling. The book assumes no background in computer science, but the reader who finishes the book will have learned about half of a first semester Computer Science I course, including large parts of the Python programming language. The audience of the book is not only math majors, but also physics, engineering, finance, statistics, chemistry, and computer science majors." -- Publisher''s description00aSageMath (Electronic resource) 0aAlgebraxComputer programs. 0aMathematicsxComputer programs. 7aLinear and multilinear algebra; matrix theory -- Explicit machine computation and programs (not the theory of computation or programming).2msc 7aOrdinary differential equations -- Explicit mac',9262507,3);
+INSERT INTO BIB_DATA VALUES('hine computation and programs (not the theory of computation or programming).2msc 7aNumerical analysis -- Explicit machine computation and programs (not the theory of computation or programming).2msc 7aOperations research, mathematical programming -- Explicit machine computation and programs (not the theory of computation or programming).2msc 7aField theory and polynomials -- Explicit machine computation and programs (not the theory of computation or programming).2msc 7aMeasure and integration -- Explicit machine computation and programs (not the theory of computation or programming).2msc 7aSequences, series, summability -- Explicit machine computation and programs (not the theory of computation or programming).2msc 7aComputer science -- Computing methodologies and applications -- Computer graphics; computational geometry.2msc 7aAlgebraxComputer programs.2fast0(OCoLC)fst00804888 7aMathematicsxComputer programs.2fast0(OCoLC)fst01012173  apfndbRo',9262507,4);
+INSERT INTO BIB_DATA VALUES('senberg0 a20160113brdcac2elts1 a20160113bfdcac2elts  yswr1@cornell.edug1hp7057zPOOF;poof.library.cornell.edu/node/41356;CornellvCouttsUK',9262507,5);
 CREATE TABLE MFHD_DATA ( RECORD_SEGMENT blob, MFHD_ID int, SEQNUM int );
 INSERT INTO MFHD_DATA VALUES('00543dy  a22001813  450000100070000000400070000700500170001400800330003101400170006401400140008185201030009586600260019886700290022486800270025386800270028086800270030786800270033439986033058120090916165548.09301235u    8   2   uu          1 aABK8232CU0010 900039713201bengrhQC1i.J86zSub',399860,1);
 INSERT INTO MFHD_DATA VALUES('scription cancelled effective with end of 2000xwithdrawn (deselected) 8/10/09 180av.1-88 (1931-2000)4180av.33:no.1 (1962:Jan.) 180av.48/52 (1977/1981) 180av.53/60 (1982/1986) 180av.61/70 (1987/1991)4180av.71/80 (1992/1996)',399860,2);
@@ -492,6 +511,10 @@ INSERT INTO MFHD_DATA VALUES('00218cx  a22000851  450000100080000000400080000800
 INSERT INTO MFHD_DATA VALUES('00180nx  a22000851  4500001000900000004000900009005001700018008003300035852002600068117116521143815220200420100815.02004200u||||8|||4001uu|||00000008 bserv,remohIn Process',11711652,1);
 INSERT INTO MFHD_DATA VALUES('00174nx  a22000851  45000010008000000040008000080050017000160080033000338520022000667691682725994720110616111846.01106162u    8   4001uu   090112800bolinhD16.3i.B72',7691682,1);
 INSERT INTO MFHD_DATA VALUES('00182nx  a22000851  450000100090000000400080000900500170001700800330003485200290006710164646725994720170310120838.01703102u    8   4001uu   09011288 brmckArchivesh1-2-m.178',10164646,1);
+INSERT INTO MFHD_DATA VALUES('00205nx  a2200097z  4500001000800000004000800008008003300016014001700049014001400066852002700080203461216816720005172u    8   4001uu   00000001 aAHW9784CU0010 900203440700bmathhQA1i.A19 no.143',2034612,1);
+INSERT INTO MFHD_DATA VALUES('00183cx  a22000851  45000010008000000040008000080050017000160080033000338520031000669598247926250720160113152950.01512160u||||8|||4001uu|||00000000 bmathhQA155.7.E4iB37 2015',9598247,1);
+INSERT INTO MFHD_DATA VALUES('00231cx  a2200109z  45000010008000000040008000080050017000160080033000330140017000660140014000838520024000971420558115755520031020120925.00005172u    8   4001uu   00000001 aAFB8785CU0010 900141856000bmathhQA75.A1iZ632',1420558,1);
+INSERT INTO MFHD_DATA VALUES('00205nx  a2200097z  4500001000800000004000800008008003300016014001700049014001400066852002700080146809311974400005172u    8   4001uu   00000001 aAFF9282CU0010 900146618400bmathhQA155i.A33 1981',1468093,1);
 CREATE TABLE MFHD_ITEM ( MFHD_ID int, ITEM_ID int, ITEM_ENUM text, CHRON text, YEAR text, CAPTION text );
 INSERT INTO MFHD_ITEM VALUES(399861,812658,'v.77','1995:Jan.',NULL,NULL);
 INSERT INTO MFHD_ITEM VALUES(399861,812659,'v.77','1995:Feb.',NULL,NULL);
@@ -2901,6 +2924,10 @@ INSERT INTO MFHD_ITEM VALUES(50845,70416,NULL,NULL,NULL,NULL);
 INSERT INTO MFHD_ITEM VALUES(6036066,7565606,NULL,NULL,NULL,NULL);
 INSERT INTO MFHD_ITEM VALUES(7691682,8955519,NULL,NULL,NULL,NULL);
 INSERT INTO MFHD_ITEM VALUES(10164646,10162699,'BOX  10',NULL,NULL,NULL);
+INSERT INTO MFHD_ITEM VALUES(2034612,3270665,NULL,NULL,NULL,NULL);
+INSERT INTO MFHD_ITEM VALUES(9598247,9855732,NULL,NULL,NULL,NULL);
+INSERT INTO MFHD_ITEM VALUES(1420558,2498844,NULL,NULL,NULL,NULL);
+INSERT INTO MFHD_ITEM VALUES(1468093,2561484,NULL,NULL,NULL,NULL);
 CREATE TABLE ITEM ( ITEM_ID int, COPY_NUMBER int, ITEM_SEQUENCE_NUMBER int,  HOLDS_PLACED int, RECALLS_PLACED int, ON_RESERVE text, TEMP_LOCATION int, PERM_LOCATION int, TEMP_ITEM_TYPE_ID int, ITEM_TYPE_ID int, MODIFY_DATE date, CREATE_DATE date );
 INSERT INTO ITEM VALUES(812658,1,1,0,0,'N',0,116,0,2,1282888057000,959745600000);
 INSERT INTO ITEM VALUES(812659,1,2,0,0,'N',0,116,0,2,1282888063000,959745600000);
@@ -5310,6 +5337,10 @@ INSERT INTO ITEM VALUES(10261092,1,1,0,0,'N',0,101,0,19,NULL,1494425162000);
 INSERT INTO ITEM VALUES(593559,1,1,0,0,'N',0,71,0,3,1219336571000,959745600000);
 INSERT INTO ITEM VALUES(10162699,1,1,0,0,'N',0,87,0,9,1489430884000,1489165742000);
 INSERT INTO ITEM VALUES(8955519,1,1,0,0,'N',0,99,0,3,NULL,1308237537000);
+INSERT INTO ITEM VALUES(3270665,1,1,0,0,'N',0,81,0,3,NULL,959745600000);
+INSERT INTO ITEM VALUES(9855732,1,1,0,0,'N',0,81,0,3,NULL,1452717008000);
+INSERT INTO ITEM VALUES(2498844,1,1,0,0,'N',0,81,0,3,NULL,959745600000);
+INSERT INTO ITEM VALUES(2561484,1,1,0,0,'N',0,81,0,3,NULL,959745600000);
 CREATE TABLE ITEM_BARCODE ( ITEM_ID int, ITEM_BARCODE text, barcode_status string );
 INSERT INTO ITEM_BARCODE VALUES(812658,'31924074030150',1);
 INSERT INTO ITEM_BARCODE VALUES(812659,'31924074030143',1);
@@ -7711,6 +7742,10 @@ INSERT INTO ITEM_BARCODE VALUES(7565606,'31924100247430',1);
 INSERT INTO ITEM_BARCODE VALUES(593559,'31924052388372',1);
 INSERT INTO ITEM_BARCODE VALUES(10162699,'31924065267522',1);
 INSERT INTO ITEM_BARCODE VALUES(8955519,'31924105916237',1);
+INSERT INTO ITEM_BARCODE VALUES(3270665,'31924063600419',1);
+INSERT INTO ITEM_BARCODE VALUES(9855732,'31924122692076',1);
+INSERT INTO ITEM_BARCODE VALUES(2498844,'31924003054503',1);
+INSERT INTO ITEM_BARCODE VALUES(2561484,'31924003285008',1);
 CREATE TABLE item_status_type ( item_status_type int, item_status_desc text );
 INSERT INTO item_status_type VALUES(1,'Not Charged');
 INSERT INTO item_status_type VALUES(2,'Charged');
@@ -10196,6 +10231,10 @@ INSERT INTO item_status VALUES(10261092,1,1494425162000);
 INSERT INTO item_status VALUES(593559,1,1242563987000);
 INSERT INTO item_status VALUES(10162699,1,1489165742000);
 INSERT INTO item_status VALUES(8955519,1,1317375135000);
+INSERT INTO item_status VALUES(3270665,1,NULL);
+INSERT INTO item_status VALUES(9855732,1,1526981812000);
+INSERT INTO item_status VALUES(2498844,1,NULL);
+INSERT INTO item_status VALUES(2561484,1,1295951473000);
 CREATE TABLE circ_transactions ( ITEM_ID int, current_due_date date );
 INSERT INTO circ_transactions VALUES(10013120,1506218400000);
 INSERT INTO circ_transactions VALUES(6571313,1516863600000);
@@ -10584,6 +10623,10 @@ INSERT INTO MFHD_MASTER VALUES(6036066,1117634761000,1124828304000,'Y');
 INSERT INTO MFHD_MASTER VALUES(11711652,1587391695000,NULL,'N');
 INSERT INTO MFHD_MASTER VALUES(7691682,1308237526000,NULL,'N');
 INSERT INTO MFHD_MASTER VALUES(10164646,1489165718000,NULL,'N');
+INSERT INTO MFHD_MASTER VALUES(2034612,959745600000,NULL,'N');
+INSERT INTO MFHD_MASTER VALUES(9598247,1450271124000,1452716990000,'N');
+INSERT INTO MFHD_MASTER VALUES(1420558,959745600000,1066666165000,'N');
+INSERT INTO MFHD_MASTER VALUES(1468093,959745600000,NULL,'N');
 CREATE TABLE circ_policy_group ( circ_group_name string, circ_group_id int );
 INSERT INTO circ_policy_group VALUES('Main Circ Group',1);
 INSERT INTO circ_policy_group VALUES('Entomology Circ Group',8);
@@ -11320,6 +11363,7 @@ INSERT INTO line_item VALUES(817295,10663989,1,273158);
 INSERT INTO line_item VALUES(814585,10602676,1,272316);
 INSERT INTO line_item VALUES(831311,11062722,1,277422);
 INSERT INTO line_item VALUES(317052,5487364,1,150665);
+INSERT INTO line_item VALUES(725103,9262507,1,249514);
 CREATE TABLE purchase_order ( po_approve_date date, po_id int, po_type int );
 INSERT INTO purchase_order VALUES(1458923057000,251803,1);
 INSERT INTO purchase_order VALUES(NULL,274374,1);
@@ -11335,6 +11379,7 @@ INSERT INTO purchase_order VALUES(1550858885000,273214,1);
 INSERT INTO purchase_order VALUES(1546886263000,272316,1);
 INSERT INTO purchase_order VALUES(1571658013000,277422,1);
 INSERT INTO purchase_order VALUES(1114090717000,150665,1);
+INSERT INTO purchase_order VALUES(1450291930000,249514,1);
 CREATE TABLE bib_master ( bib_id int, suppress_in_opac string );
 INSERT INTO bib_master VALUES(330581,'N');
 INSERT INTO bib_master VALUES(3212531,'N');
@@ -11391,6 +11436,10 @@ INSERT INTO bib_master VALUES(5487364,'N');
 INSERT INTO bib_master VALUES(301608,'N');
 INSERT INTO bib_master VALUES(11438152,'N');
 INSERT INTO bib_master VALUES(7259947,'N');
+INSERT INTO bib_master VALUES(1681672,'N');
+INSERT INTO bib_master VALUES(1157555,'N');
+INSERT INTO bib_master VALUES(1197440,'N');
+INSERT INTO bib_master VALUES(9262507,'N');
 CREATE TABLE line_item_copy_status( line_item_id int, mfhd_id int, location_id int, line_item_status int, status_date date );
 INSERT INTO line_item_copy_status VALUES(17081,449213,NULL,NULL,NULL);
 INSERT INTO line_item_copy_status VALUES(735025,9720246,NULL,NULL,NULL);
@@ -11408,4 +11457,5 @@ INSERT INTO line_item_copy_status VALUES(817295,10961068,133,8,1550593014000);
 INSERT INTO line_item_copy_status VALUES(814585,10900194,63,4,1562698102000);
 INSERT INTO line_item_copy_status VALUES(831311,11342193,128,8,1571658013000);
 INSERT INTO line_item_copy_status VALUES(317052,6002585,50,1,1122485233000);
+INSERT INTO line_item_copy_status VALUES(725103,9598247,81,1,1452716836000);
 COMMIT;

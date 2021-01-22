@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.availability.CallNumberTools;
 import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.voyager.Holding.Link;
 import edu.cornell.library.integration.voyager.Items.ItemList;
@@ -284,6 +285,34 @@ public class Holdings {
           barcodes.add(bw.barcode);
       }
       return barcodes;
+    }
+
+    public boolean hasMathCallNumber() throws IOException {
+
+      for ( Holding h : this.holdings.values() )
+        if ( h.call != null && ! h.call.isEmpty() ) {
+          String sortCall = CallNumberTools.sortForm(h.call);
+          System.out.println(h.call);
+          if (! sortCall.startsWith("qa ")) continue;
+//        exclude cs ranges: QA 75-76, QA 155.7, QA 267-268, QA 402.3, QA 402.35, QA 402.37
+          String number = CallNumberTools.getNumberAfterFirstLetters(sortCall);
+          if (number == null) return true; //include plain QA call numbers
+          Integer i = null;
+          String decimal = null;
+          if (number.contains(".")) {
+            int dotPos = number.indexOf('.');
+            i = Integer.valueOf(number.substring(0, dotPos));
+            decimal = number.substring(dotPos+1);
+          } else
+            i = Integer.valueOf(number);
+          if ( i == 75 || i == 76 ) continue;
+          if ( i == 155 && decimal != null && decimal.equals("7") ) continue;
+          if ( i == 267 || i == 268 ) continue;
+          if ( i == 402 && decimal != null &&
+              ( decimal.equals("3") || decimal.equals("35") || decimal.equals("37") )) continue;
+          return true;
+        }
+        return false;
     }
 
   }
