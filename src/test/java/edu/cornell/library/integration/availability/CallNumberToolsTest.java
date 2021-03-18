@@ -21,6 +21,12 @@ public class CallNumberToolsTest {
     assertTrue(CallNumberTools.hasMathCallNumber(new HashSet<>(Arrays.asList("QA155 .A33 1981"))));
     assertFalse(CallNumberTools.hasMathCallNumber(new HashSet<>(Arrays.asList("QA155.7.E4 B37 2015"))));
     assertTrue(CallNumberTools.hasMathCallNumber(new HashSet<>(Arrays.asList("QA"))));
-  }
+
+    assertTrue(CallNumberTools.hasMathCallNumber(new HashSet<>(Arrays.asList("QA276"))));
+    assertTrue(CallNumberTools.hasMathCallNumber(new HashSet<>(Arrays.asList("QA276."))));
+    assertFalse(CallNumberTools.hasMathCallNumber(new HashSet<>(Arrays.asList("QA276.4"))));
+    assertFalse(CallNumberTools.hasMathCallNumber(new HashSet<>(Arrays.asList("QA276.411"))));
+    assertTrue(CallNumberTools.hasMathCallNumber(new HashSet<>(Arrays.asList("QA276.7"))));
+}
 
 }

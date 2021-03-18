@@ -133,7 +133,7 @@ public class CallNumberTools {
     for ( String callNumber : callNumbers ) {
       String sortCall = CallNumberTools.sortForm(callNumber);
       if (! sortCall.startsWith("qa")) continue;
-//    exclude cs ranges: QA 75-76, QA 155.7, QA 267-268, QA 402.3, QA 402.35, QA 402.37
+//    exclude cs ranges: QA 75-76, QA 155.7, QA 267-268, QA276.4, QA 402.3, QA 402.35, QA 402.37
       String number = CallNumberTools.getNumberAfterFirstLetters(sortCall);
       if (number == null || number.isEmpty()) return true; //include plain QA call numbers
       Integer i = null;
@@ -147,6 +147,7 @@ public class CallNumberTools {
       if ( i == 75 || i == 76 ) continue;
       if ( i == 155 && decimal != null && decimal.equals("7") ) continue;
       if ( i == 267 || i == 268 ) continue;
+      if ( i == 276 && decimal != null && decimal.startsWith("4") ) continue;
       if ( i == 402 && decimal != null &&
           ( decimal.equals("3") || decimal.equals("35") || decimal.equals("37") )) continue;
       return true;
