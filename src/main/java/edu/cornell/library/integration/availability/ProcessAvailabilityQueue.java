@@ -188,6 +188,7 @@ public class ProcessAvailabilityQueue {
                 doc.removeField("type");
                 doc.addField("type", "Suppressed Bib");
               }
+              doc.addField("notes_t", holdings.getNotes());
 
               boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
               if (masterBoundWith) {
@@ -288,8 +289,12 @@ public class ProcessAvailabilityQueue {
 
               List<SolrInputDocument> thisDocsCallNumberDocs =
                   CallNumberBrowse.generateBrowseDocuments(inventory,doc, holdings);
+
               callnumSolrDocs.addAll( thisDocsCallNumberDocs );
-              doc.addField("callnumber_display", CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs));
+              Set<String> allCallNumbers = CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs);
+              doc.addField("callnumber_display", allCallNumbers);
+              if ( CallNumberTools.hasMathCallNumber(CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)))
+                doc.addField("collection", "Math Library");
 
               solrDocs.add(doc);
               callNumberSolr.deleteByQuery("bibid:"+bibId);

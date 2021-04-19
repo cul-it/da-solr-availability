@@ -21,6 +21,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.cornell.library.integration.voyager.Holding;
 import edu.cornell.library.integration.voyager.Holdings;
 import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 import edu.cornell.library.integration.voyager.Items;
@@ -228,7 +229,7 @@ public class CallNumberBrowseTest {
     mainDoc.addField("publisher_display", "《上海艺术评论》编辑部 / \"Shanghai yi shu ping lun\" bian ji bu");
     mainDoc.addField("pub_date_display", "2016年2月- 2016 nian 2 yue-");
 
-    assertEquals("<b>上海艺术评论 &#x2F; Shanghai yi shu ping lun = Shanghai art review.</b>"
+    assertEquals("<strong>上海艺术评论 &#x2F; Shanghai yi shu ping lun = Shanghai art review.</strong>"
         + " 《上海艺术评论》编辑部 &#x2F; &quot;Shanghai yi shu ping lun&quot; bian ji bu, 2016年2月- 2016 nian 2 yue-.",
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
@@ -246,7 +247,7 @@ public class CallNumberBrowseTest {
     mainDoc.addField("author_display", "Wolfe, Thomas Kennerly, 1892-");
     mainDoc.addField("pub_date_display", "1921");
 
-    assertEquals("Wolfe, Thomas Kennerly, 1892- <b>A biometrical study of characters in maize.</b> 1921.",
+    assertEquals("Wolfe, Thomas Kennerly, 1892- <strong>A biometrical study of characters in maize.</strong> 1921.",
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
 
@@ -266,8 +267,8 @@ public class CallNumberBrowseTest {
     mainDoc.addField("pub_date_display", "1897");
 
     assertEquals("Wood, Norman B. (Norman Barton), 1857-1933."
-        + " <b>The white side of a black subject : a vindication of the Afro-American race :"
-        + " from the landing of slaves at St. Augustine, Florida, in 1565, to the present time.</b>"
+        + " <strong>The white side of a black subject : a vindication of the Afro-American race :"
+        + " from the landing of slaves at St. Augustine, Florida, in 1565, to the present time.</strong>"
         + " American Pub. House, 1897.",
         CallNumberBrowse.generateBrowseDocuments(
             inventory, mainDoc, holdings).get(0).getFieldValue("cite_preescaped_display"));
@@ -293,7 +294,7 @@ public class CallNumberBrowseTest {
 
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
     assertEquals("Murphy, Brian G., 1966-"
-        + " <b>Veterinary oral and maxillofacial pathology.</b>"
+        + " <strong>Veterinary oral and maxillofacial pathology.</strong>"
         + " Wiley-Blackwell, 2020.",
         docs.get(0).getFieldValue("cite_preescaped_display"));
     assertEquals(Arrays.asList("9781119221258 (hardback)","1119221250"),
@@ -374,49 +375,35 @@ public class CallNumberBrowseTest {
 
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
 
-    for (SolrInputDocument doc : docs)
-      System.out.println(ClientUtils.toXML(doc));
-
-    /*
-<doc boost="1.0"><field name="bibid">7259947</field>
- <field name="cite_preescaped_display"></field>
- <field name="id">7259947.1</field>
- <field name="callnum_sort">Archives 1-2-m.178 0 7259947.1</field>
- <field name="callnum_display">Archives 1-2-m.178</field>
- <field name="lc_b">false</field>
- <field name="availability_json">
-    {"available":true,"availAt":{"Kroch Library Rare &amp; Manuscripts (Non-Circulating)":""}}</field>
- <field name="location">Kroch Library Rare &amp; Manuscripts</field>
- <field name="location">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>
- <field name="online">At the Library</field></doc>
-<doc boost="1.0">
- <field name="bibid">7259947</field>
- <field name="cite_preescaped_display"></field>
- <field name="id">7259947.2</field>
- <field name="callnum_sort">D16.3 .B72 0 7259947.2</field>
- <field name="callnum_display">D16.3 .B72</field>
- <field name="lc_b">true</field>
- <field name="availability_json">{"available":true,"availAt":{"Olin Library":""}}</field>
- <field name="classification_display">D - World History &gt; D - History (General) &gt; D1-24.5 - General</field>
- <field name="location">Olin Library</field>
- <field name="location">Olin Library &gt; Main Collection</field>
- <field name="online">At the Library</field></doc>
-<doc boost="1.0">
- <field name="bibid">7259947</field>
- <field name="cite_preescaped_display">
- </field><field name="id">7259947.3</field>
- <field name="callnum_sort">D16.3 .B65 0 7259947.3</field>
- <field name="callnum_display">D16.3 .B65</field>
- <field name="lc_b">true</field>
- <field name="availability_json">
-    {"available":true,"availAt":{"Kroch Library Rare &amp; Manuscripts (Non-Circulating)":""}}</field>
- <field name="classification_display">D - World History &gt; D - History (General) &gt; D1-24.5 - General</field>
- <field name="location">Kroch Library Rare &amp; Manuscripts</field>
- <field name="location">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>
- <field name="online">At the Library</field></doc>
-
-     */
+//    for (SolrInputDocument doc : docs)
+//      System.out.println(ClientUtils.toXML(doc));
 
   }
 
+  @Test
+  public void hathiLinkNoLcBibCall() throws SQLException, IOException, XMLStreamException {
+
+    SolrInputDocument mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "2311");
+    mainDoc.addField("lc_callnum_full", "KQH  .P55 C7 1902");
+    mainDoc.addField("online", "Online");
+    mainDoc.addField("url_access_json",
+        "{\"description\":\"HathiTrust (multiple volumes)\","
+        + "\"url\":\"http://catalog.hathitrust.org/Record/001881954\"}");
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 2311);
+    for (int mfhdId : holdings.getMfhdIds()) {
+      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
+      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
+    }
+    Holdings.mergeAccessLinksIntoHoldings( holdings,mainDoc.getFieldValues("url_access_json"));
+    System.out.println(holdings.values().size());
+    for ( Holding h : holdings.values() )
+      System.out.println(h.toJson());
+
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
+    for (SolrInputDocument doc : docs)
+      System.out.println(ClientUtils.toXML(doc));
+
+  }
 }

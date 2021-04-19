@@ -49,7 +49,7 @@ public class HoldingsTest {
 
     testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
     voyagerTest = testDB.connection;
-//  voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
+//    voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
 
     // Load expected result JSON for tests
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("holdings_examples.json")){

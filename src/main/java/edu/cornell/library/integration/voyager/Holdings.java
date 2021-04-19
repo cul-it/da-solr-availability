@@ -140,6 +140,15 @@ public class Holdings {
       return this.holdings.keySet();
     }
 
+    public LinkedHashSet<String> getNotes() {
+      LinkedHashSet<String> notes = new LinkedHashSet<>();
+      for (Holding h : this.holdings.values())
+        if ( h.notes != null && ! h.notes.isEmpty() )
+          notes.addAll(h.notes);
+      return notes;
+    }
+
+
     public boolean noItemsAvailability() {
         boolean noItems = false;
         for ( Holding h : this.holdings.values() )
@@ -276,7 +285,6 @@ public class Holdings {
       }
       return barcodes;
     }
-
   }
 
   public static void mergeAccessLinksIntoHoldings(HoldingSet holdings, Collection<Object> linkJsons)
@@ -331,3 +339,4 @@ public class Holdings {
    }
 
 }
+

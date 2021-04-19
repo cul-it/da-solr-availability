@@ -24,7 +24,6 @@ import java.util.TreeMap;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrDocument;
@@ -109,7 +108,7 @@ public class SurveyOnlineHoldingsCallNumberPopulationRate {
         MarcRecord bibRec = new MarcRecord(RecordType.HOLDINGS,
             DownloadMARC.downloadMrc(voyager, RecordType.BIBLIOGRAPHIC, bibId));
         for ( DataField f : bibRec.dataFields ) if ( f.tag.equals("050") || f.tag.equals("950") ){
-          Matcher m = lcClass.matcher(CallNumberBrowse.sortForm(f.concatenateSpecificSubfields("ab"),prefixes));
+          Matcher m = lcClass.matcher(CallNumberTools.sortForm(f.concatenateSpecificSubfields("ab"),prefixes));
           if (m.matches()) {
             bibCallCount++;
             continue TITLE;
@@ -181,7 +180,7 @@ public class SurveyOnlineHoldingsCallNumberPopulationRate {
           MarcRecord bibRec = new MarcRecord(RecordType.HOLDINGS,
               DownloadMARC.downloadMrc(voyager, RecordType.BIBLIOGRAPHIC, bibId));
           for ( DataField f : bibRec.dataFields ) if ( f.tag.equals("050") || f.tag.equals("950") ){
-            Matcher m = lcClass.matcher(CallNumberBrowse.sortForm(f.concatenateSpecificSubfields("ab"),prefixes));
+            Matcher m = lcClass.matcher(CallNumberTools.sortForm(f.concatenateSpecificSubfields("ab"),prefixes));
             if (m.matches()) {
               System.out.printf("lc call number in bib %d for mfhd: %d: %s\n",bibId,e.getKey(),f.concatenateSpecificSubfields("ab"));
               bibCallCount++;

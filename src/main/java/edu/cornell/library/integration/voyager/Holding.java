@@ -337,6 +337,7 @@ public class Holding {
     @JsonProperty("dbcode")       public final String dbcode;
     @JsonProperty("providercode") public final String providercode;
     @JsonProperty("titleid")      public final String titleid;
+    @JsonProperty("users")        public final Integer users;
 
     public Link (
         @JsonProperty("url")          String url,
@@ -344,13 +345,15 @@ public class Holding {
         @JsonProperty("ssid")         String ssid,
         @JsonProperty("dbcode")       String dbcode,
         @JsonProperty("providercode") String providercode,
-        @JsonProperty("titleid")      String titleid) {
+        @JsonProperty("titleid")      String titleid,
+        @JsonProperty("users")        Integer users) {
       this.url  = url;
       this.desc = desc;
       this.ssid = ssid;
       this.dbcode = dbcode;
       this.providercode = providercode;
       this.titleid = titleid;
+      this.users = users;
     }
 
     public static Link fromJson( String json ) throws IOException {
