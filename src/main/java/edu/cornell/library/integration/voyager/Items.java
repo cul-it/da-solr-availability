@@ -20,6 +20,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -163,6 +164,7 @@ public class Items implements ChangeDetector {
           TreeSet<Item> items = new TreeSet<>();
           while (rs.next()) {
             Item i = new Item(voyager,rs,false, holdings.get(mfhdId).active);
+            i.callNumber = holdings.get(mfhdId).call;
             items.add(i);
             if ( i.status != null ) {
               if ( i.status.due != null )
@@ -334,14 +336,16 @@ public class Items implements ChangeDetector {
     @JsonProperty("barcode")   public final String barcode;
     @JsonProperty("copy")      private final int copy;
     @JsonProperty("sequence")  private final int sequence;
+    @JsonProperty("onReserve") private final Boolean onReserve;
+    @JsonProperty("call")      public String callNumber = null;
     @JsonProperty("enum")      public String enumeration;
     @JsonProperty("chron")     public final String chron;
     @JsonProperty("year")      public final String year;
     @JsonProperty("caption")   private final String caption;
     @JsonProperty("holds")     public final Integer holds;
     @JsonProperty("recalls")   public final Integer recalls;
-    @JsonProperty("onReserve") private final Boolean onReserve;
     @JsonProperty("location")  public final Location location;
+    @JsonProperty("permLocation") public final String permLocation;
     @JsonProperty("circGrp")   public final Map<Integer,String> circGrp;
     @JsonProperty("type")      public final ItemType type;
     @JsonProperty("status")    public ItemStatus status;
@@ -355,7 +359,6 @@ public class Items implements ChangeDetector {
 
       this.copy = rs.getInt("COPY_NUMBER");
       this.sequence = rs.getInt("ITEM_SEQUENCE_NUMBER");
-//      this.enumeration = concatEnum(rs.getString("ITEM_ENUM"),rs.getString("CHRON"),rs.getString("YEAR"));
       this.enumeration = rs.getString("ITEM_ENUM");
       this.chron = rs.getString("CHRON");
       this.year = rs.getString("YEAR");
@@ -363,9 +366,11 @@ public class Items implements ChangeDetector {
       this.holds = (rs.getInt("HOLDS_PLACED") == 0)?null:rs.getInt("HOLDS_PLACED");
       this.recalls = (rs.getInt("RECALLS_PLACED") == 0)?null:rs.getInt("RECALLS_PLACED");
       this.onReserve = (rs.getString("ON_RESERVE").equals("N"))?null:true;
+      int permLocationNumber = rs.getInt("PERM_LOCATION");
+      this.permLocation = locations.getByNumber(permLocationNumber).name;
       int locationNumber = rs.getInt("TEMP_LOCATION");
       if (0 == locationNumber)
-        locationNumber = rs.getInt("PERM_LOCATION");
+        locationNumber = permLocationNumber;
       this.location = locations.getByNumber(locationNumber);
       this.circGrp = circPolicyGroups.getByLocId(locationNumber);
       int itemTypeId = rs.getInt("TEMP_ITEM_TYPE_ID");
@@ -387,6 +392,7 @@ public class Items implements ChangeDetector {
         @JsonProperty("barcode")   String barcode,
         @JsonProperty("copy")      int copy,
         @JsonProperty("sequence")  int sequence,
+        @JsonProperty("call")      String callNumber,
         @JsonProperty("enum")      String enumeration,
         @JsonProperty("chron")     String chron,
         @JsonProperty("year")      String year,
@@ -395,6 +401,7 @@ public class Items implements ChangeDetector {
         @JsonProperty("recalls")   Integer recalls,
         @JsonProperty("onReserve") Boolean onReserve,
         @JsonProperty("location")  Location location,
+        @JsonProperty("permLocation") String permLocation,
         @JsonProperty("circGrp")   Map<Integer,String> circGrp,
         @JsonProperty("type")      ItemType type,
         @JsonProperty("status")    ItemStatus status,
@@ -406,6 +413,7 @@ public class Items implements ChangeDetector {
       this.barcode = barcode;
       this.copy = copy;
       this.sequence = sequence;
+      this.callNumber = callNumber;
       this.enumeration = enumeration;
       this.chron = chron;
       this.year = year;
@@ -414,6 +422,7 @@ public class Items implements ChangeDetector {
       this.recalls = recalls;
       this.onReserve = onReserve;
       this.location = location;
+      this.permLocation = permLocation;
       this.circGrp = circGrp;
       this.type = type;
       this.status = status;

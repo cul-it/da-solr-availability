@@ -117,7 +117,6 @@ public class ItemsTest {
   @Test
   public void checkedOutReserve() throws SQLException, JsonProcessingException {
     ItemList items = Items.retrieveItemsByHoldingId(voyagerTest, 1144752, true);
-//    System.out.println(items.toJson());
     assertEquals(examples.get("expectedCheckedOutReserve").toJson(),items.toJson());
   }
 
