@@ -18,8 +18,8 @@ import java.util.stream.Collectors;
 
 import org.apache.solr.common.SolrInputDocument;
 
-import edu.cornell.library.integration.voyager.Holding;
-import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
+import edu.cornell.library.integration.folio.Holding;
+import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 
 class CallNumberBrowse {
 
@@ -48,7 +48,7 @@ class CallNumberBrowse {
       Connection inventory, SolrInputDocument doc, HoldingSet holdings)
       throws SQLException, IOException {
     List<SolrInputDocument> browseDocs = new ArrayList<>();
-    if ( holdings.getMfhdIds().isEmpty() ) return browseDocs;
+    if ( holdings.getUuids().isEmpty() ) return browseDocs;
 
     SolrInputDocument callNumDoc = new SolrInputDocument();
     for ( String field : clonedDocFields )
@@ -198,7 +198,7 @@ class CallNumberBrowse {
 
   private static Map<String, HoldingSet> divideUnsuppressedHoldingsByCallNumber(HoldingSet holdings, String defaultCall) {
     Map<String,HoldingSet> holdingsByCallNumber = new HashMap<>();
-    for (Integer holdingId : holdings.getMfhdIds()) {
+    for (String holdingId : holdings.getUuids()) {
       Holding h = holdings.get(holdingId);
       if ( h.active == false ) continue;
       String callnum = h.call;

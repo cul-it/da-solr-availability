@@ -14,13 +14,12 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -31,30 +30,36 @@ import org.apache.solr.common.SolrInputDocument;
 
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
 import edu.cornell.library.integration.changes.Change;
-import edu.cornell.library.integration.voyager.BoundWith;
-import edu.cornell.library.integration.voyager.Holding;
-import edu.cornell.library.integration.voyager.Holdings;
-import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
-import edu.cornell.library.integration.voyager.ItemReference;
-import edu.cornell.library.integration.voyager.Items;
-import edu.cornell.library.integration.voyager.Items.Item;
-import edu.cornell.library.integration.voyager.Items.ItemList;
+import edu.cornell.library.integration.folio.Holding;
+import edu.cornell.library.integration.folio.Holdings;
+import edu.cornell.library.integration.folio.Holdings.HoldingSet;
+import edu.cornell.library.integration.folio.ItemReference;
+import edu.cornell.library.integration.folio.Items;
+import edu.cornell.library.integration.folio.Items.Item;
+import edu.cornell.library.integration.folio.Items.ItemList;
+import edu.cornell.library.integration.folio.Locations;
+import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.ReferenceData;
 
 public class ProcessAvailabilityQueue {
 
-  public static void main(String[] args) throws IOException, SQLException, XMLStreamException, InterruptedException {
+  public static void main(String[] args) throws IOException, SQLException, InterruptedException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);
     }
 
-    try (Connection voyager = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
-        Connection inventoryDB = DriverManager.getConnection(
+    try (Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
         Statement stmt = inventoryDB.createStatement();
-        PreparedStatement pstmt = inventoryDB.prepareStatement
+/*        PreparedStatement readQStmt = inventoryDB.prepareStatement
+        ("SELECT availabilityQueue.hrid, availabilityQueue.instanceId, priority"+
+         "  FROM availabilityQueue"+
+         "  LEFT JOIN processLock ON availabilityQueue.hrid = processLock.hrid"+
+         " WHERE processLock.date IS NULL"+
+         " ORDER BY priority LIMIT 4");*/
+        PreparedStatement readQStmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.bib_id, priority"+
              "  FROM solrFieldsData, availabilityQueue"+
              "  LEFT JOIN processLock ON availabilityQueue.bib_id = processLock.bib_id"+
@@ -62,11 +67,9 @@ public class ProcessAvailabilityQueue {
              "   AND processLock.date IS NULL"+
              " ORDER BY priority LIMIT 4");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
-            ("DELETE FROM availabilityQueue WHERE bib_id = ?");
-        PreparedStatement bibActiveStmt = inventoryDB.prepareStatement
-            ("SELECT active FROM bibRecsVoyager WHERE bib_id = ?");
+            ("DELETE FROM availabilityQueue WHERE hrid = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
-            ("SELECT id, cause, record_date FROM availabilityQueue WHERE bib_id = ?");
+            ("SELECT id, cause, record_date FROM availabilityQueue WHERE hrid = ?");
         PreparedStatement createLockStmt = inventoryDB.prepareStatement
             ("INSERT INTO processLock (bib_id) values (?)",Statement.RETURN_GENERATED_KEYS);
         PreparedStatement unlockStmt = inventoryDB.prepareStatement
@@ -79,13 +82,19 @@ public class ProcessAvailabilityQueue {
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
-      for (int i = 0; i < 40_000; i++){
+      OkapiClient okapi = new OkapiClient(
+          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),prop.getProperty("okapiTenantFolio"));
+      Locations locations = new Locations(okapi);
+      ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
+
+      for (int i = 0; i < 1; i++){
         Set<BibToUpdate> bibs = new HashSet<>();
         Set<Integer> ids = new HashSet<>();
         stmt.execute("LOCK TABLES solrFieldsData READ,availabilityQueue WRITE,bibRecsVoyager READ,processLock WRITE");
         Integer priority = null;
         List<Integer> lockIds = new ArrayList<>();
-        try (  ResultSet rs = pstmt.executeQuery() ) {
+        try (  ResultSet rs = readQStmt.executeQuery() ) {
+/*
           while ( rs.next() ) {
 
             // batch only within a single priority level
@@ -94,9 +103,10 @@ public class ProcessAvailabilityQueue {
             else if ( priority < rs.getInt("priority"))
               break;
             int bibId = rs.getInt("bib_id");
-
+*/
+        for (int bibId : Arrays.asList(721607, 11722439, 67466, 11697627, 277880, 1003756, 7596729, 361984, 499380, 11705119, 11998727, 120634)) {
             // Confirm bib is active
-            Boolean active = null;
+/*            Boolean active = null;
             bibActiveStmt.setInt(1, bibId);
             try (ResultSet rs2 = bibActiveStmt.executeQuery())
             { while (rs2.next()) active = rs2.getBoolean(1); }
@@ -104,7 +114,7 @@ public class ProcessAvailabilityQueue {
               System.out.println("Bib in availability queue, not bibRecsVoyager: "+bibId);
               stmt.execute("UNLOCK TABLES");
               continue;
-            }
+            }*/
 
             // Get all queue items for selected bib
             allForBib.setInt(1, bibId);
@@ -116,7 +126,7 @@ public class ProcessAvailabilityQueue {
                 int id = rs2.getInt("id");
                 ids.add(id);
               }
-              bibs.add(new BibToUpdate(bibId,changes,active ));
+              bibs.add(new BibToUpdate(bibId,changes,true ));//TODO Get real active boolean when available
             }
             createLockStmt.setInt(1,bibId);
             createLockStmt.executeUpdate();
@@ -131,7 +141,7 @@ public class ProcessAvailabilityQueue {
           oldLocksCleanupStmt.executeUpdate();
           Thread.sleep(3000);
         } else {
-          updateBibsInSolr(voyager,inventoryDB,solr,callNumberSolr,bibs, priority);
+          updateBibsInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,holdingsNoteTypes, bibs, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
         }
@@ -161,10 +171,10 @@ public class ProcessAvailabilityQueue {
       "  FROM solrFieldsData"+
       " WHERE bib_id = ?";
   static void updateBibsInSolr(
-      Connection voyager, Connection inventory,
-      SolrClient solr, SolrClient callNumberSolr,
+      OkapiClient okapi, Connection inventory,
+      SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
       Set<BibToUpdate> changedBibs, Integer priority)
-      throws SQLException, IOException, XMLStreamException, InterruptedException {
+      throws SQLException, IOException, InterruptedException {
 
     while (! changedBibs.isEmpty()) {
       List<BibToUpdate> completedBibUpdates = new ArrayList<>();
@@ -181,15 +191,23 @@ public class ProcessAvailabilityQueue {
             while ( rs.next() ) {
 
               SolrInputDocument doc = constructSolrInputDocument( rs );
-              HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyager,bibId);
-              holdings.getRecentIssues(voyager, inventory, bibId);
-              ItemList items = Items.retrieveItemsForHoldings(voyager, inventory, bibId, holdings);
+              List<Map<String,Object>> instances = okapi.queryAsList("/instance-storage/instances", "hrid=="+bibId, null);
+              if (instances.size() != 1) {
+                System.out.printf("%d instances found for hrid %s\n",instances.size(),bibId);
+                System.exit(0);
+              }
+              Map<String,Object> instance = instances.get(0);
+              String instanceId = (String)instance.get("id");
+              doc.addField("instance_id", instanceId);
+              HoldingSet holdings = Holdings.retrieveHoldingsByInstanceId(okapi,locations,holdingsNoteTypes,instanceId);
+//TODO              holdings.getRecentIssues(voyager, inventory, bibId);
+              ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
               if ( ! updateDetails.active ) {
                 doc.removeField("type");
                 doc.addField("type", "Suppressed Bib");
               }
               doc.addField("notes_t", holdings.getNotes());
-
+/*//TODO reactivate this boundwith stuff
               boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
               if (masterBoundWith) {
                 doc.addField("bound_with_master_b", true);
@@ -199,18 +217,19 @@ public class ProcessAvailabilityQueue {
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
               for (BoundWith.Flag flag : f)
                 doc.addField("availability_facet",flag.getAvailabilityFlag());
-              doc.removeField("barcode_t");
-              doc.addField("barcode_t", items.getBarcodes());
-              doc.removeField("barcode_addl_t");
-              doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
-
               if ( ! f.isEmpty() )
                 doc.addField("bound_with_b", true);
+                */
+              doc.removeField("barcode_t");
+              doc.addField("barcode_t", items.getBarcodes());
+//              doc.removeField("barcode_addl_t");
+//TODO              doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
 
-              if ( holdings.summarizeItemAvailability(items) ) 
-                doc.addField("availability_facet", "Returned");
-              if ( holdings.applyOpenOrderInformation(voyager,bibId) )
-                doc.addField("availability_facet", "On Order");
+
+//              if ( holdings.summarizeItemAvailability(items) ) 
+//TODO returned tracking                doc.addField("availability_facet", "Returned");
+//              if ( holdings.applyOpenOrderInformation(voyager,bibId) )
+//                doc.addField("availability_facet", "On Order");
               if ( holdings.noItemsAvailability() )
                 doc.addField("availability_facet", "No Items Print");
               if ( holdings.hasRecent() )
@@ -235,8 +254,7 @@ public class ProcessAvailabilityQueue {
               else if (! locationFacet.isEmpty())
                 doc.addField("location", locationFacet);
 
-              for ( Integer mfhdId : holdings.getMfhdIds()) {
-                Holding h = holdings.get(mfhdId);
+              for ( Holding h : holdings.values()) {
                 if (h.donors != null)
                   for (String donor : h.donors)
                     doc.addField("donor_display", donor);
@@ -244,10 +262,7 @@ public class ProcessAvailabilityQueue {
                   doc.addField("availability_facet","In Process");
                 if (h.itemSummary != null && h.itemSummary.unavail != null)
                   for (ItemReference ir : h.itemSummary.unavail)
-                    if (ir.status != null && ir.status.code != null) {
-                      String status = ir.status.code.values().iterator().next();
-                      doc.addField("availability_facet",status);
-                    }
+                    if (ir.status != null) doc.addField("availability_facet",ir.status);
                 if (h.callNumberSuffix != null)
                   doc.addField("lc_callnum_suffix", h.callNumberSuffix);
 

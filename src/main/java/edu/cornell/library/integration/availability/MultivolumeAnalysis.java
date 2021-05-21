@@ -4,6 +4,11 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import edu.cornell.library.integration.folio.Holdings.HoldingSet;
+import edu.cornell.library.integration.folio.Items.Item;
+import edu.cornell.library.integration.folio.Items.ItemList;
+import edu.cornell.library.integration.folio.Locations.Location;
+
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -11,11 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
-
-import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
-import edu.cornell.library.integration.voyager.Items.Item;
-import edu.cornell.library.integration.voyager.Items.ItemList;
-import edu.cornell.library.integration.voyager.Locations.Location;
 
 /**
  * Analysis, when applied to holdings and items information for a single bib has these goals:<br/>
@@ -56,7 +56,7 @@ public class MultivolumeAnalysis {
 
     // Look for variability of enumeration within a single location
     Map<Location,LocationEnumStats> enumStats = new HashMap<>();
-    for (Entry<Integer, TreeSet<Item>> e : items.getItems().entrySet()) {
+    for (Entry<String, TreeSet<Item>> e : items.getItems().entrySet()) {
       for (Item i : e.getValue()) {
         if ( ! enumStats.containsKey(i.location) )
           enumStats.put(i.location, new LocationEnumStats());
@@ -158,8 +158,8 @@ public class MultivolumeAnalysis {
 
   private static boolean putHoldingsDescriptionInPlaceOfMissingItemEnums(HoldingSet holdings, ItemList items) {
     boolean missingHoldingsDescriptions = false;
-    for (Entry<Integer, TreeSet<Item>> e : items.getItems().entrySet()) {
-      int holdingId = e.getKey();
+    for (Entry<String, TreeSet<Item>> e : items.getItems().entrySet()) {
+      String holdingId = e.getKey();
 
       for (Item i : e.getValue()) {
         if (i.chron == null && i.enumeration == null && i.year == null) {

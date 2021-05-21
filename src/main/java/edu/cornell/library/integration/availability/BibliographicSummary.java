@@ -19,9 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.changes.Change;
-import edu.cornell.library.integration.voyager.Holding;
-import edu.cornell.library.integration.voyager.ItemReference;
-import edu.cornell.library.integration.voyager.Holdings.HoldingSet;
 
 public class BibliographicSummary {
 
@@ -65,10 +62,11 @@ public class BibliographicSummary {
     return changedBibs;
   }
 
-  public static BibliographicSummary summarizeHoldingAvailability( HoldingSet holdings ){
+
+  public static BibliographicSummary summarizeHoldingAvailability( edu.cornell.library.integration.folio.Holdings.HoldingSet holdings ){
 
     BibliographicSummary b = new BibliographicSummary();
-    for ( Holding h : holdings.values() ) {
+    for ( edu.cornell.library.integration.folio.Holding h : holdings.values() ) {
 
       if ( h.active == false ) continue;
       if ( h.online != null && h.online )
@@ -89,9 +87,67 @@ public class BibliographicSummary {
       if ( h.itemSummary != null && h.itemSummary.tempLocs != null ) {
         List<Integer> unavailableItems = new ArrayList<>();
         if ( h.itemSummary.unavail != null )
-          for ( ItemReference ir : h.itemSummary.unavail )
+          for ( edu.cornell.library.integration.folio.ItemReference ir : h.itemSummary.unavail )
             unavailableItems.add( ir.itemId );
-        for ( ItemReference ir : h.itemSummary.tempLocs )
+        for ( edu.cornell.library.integration.folio.ItemReference ir : h.itemSummary.tempLocs )
+          if ( unavailableItems.contains(ir.itemId) ) {
+            if (! b.unavailAt.containsKey(ir.location.name))
+              b.unavailAt.put(ir.location.name, null);
+          } else {
+            if (! b.availAt.containsKey(ir.location.name))
+              b.availAt.put(ir.location.name, null);
+          }
+      }
+    }
+    if (b.availAt.isEmpty()) {
+      if (b.unavailAt.isEmpty() && b.online)
+        b.available = null;
+      else
+        b.available = false;
+      b.availAt = null;
+    } else {
+      b.available = true;
+      for (String availLoc : b.availAt.keySet())
+        b.unavailAt.remove(availLoc);
+    }
+    if (b.unavailAt.isEmpty())
+      b.unavailAt = null;
+
+    if ( ! b.online ) b.online = null;
+
+    return b;
+
+  }
+
+
+
+  public static BibliographicSummary summarizeHoldingAvailability( edu.cornell.library.integration.voyager.Holdings.HoldingSet holdings ){
+
+    BibliographicSummary b = new BibliographicSummary();
+    for ( edu.cornell.library.integration.voyager.Holding h : holdings.values() ) {
+
+      if ( h.active == false ) continue;
+      if ( h.online != null && h.online )
+      {   b.online = true; continue;   }
+
+      if ( h.location == null ) continue;
+
+      if ((h.avail != null && h.avail) ||
+          (h.itemSummary != null && h.itemSummary.availItemCount != null))
+        b.availAt.put(h.location.name, h.call);
+      else {
+        if (h.orderNote != null)
+          b.unavailAt.put(h.location.name, h.orderNote);
+        else
+          b.unavailAt.put(h.location.name, h.call);
+      }
+
+      if ( h.itemSummary != null && h.itemSummary.tempLocs != null ) {
+        List<Integer> unavailableItems = new ArrayList<>();
+        if ( h.itemSummary.unavail != null )
+          for ( edu.cornell.library.integration.voyager.ItemReference ir : h.itemSummary.unavail )
+            unavailableItems.add( ir.itemId );
+        for ( edu.cornell.library.integration.voyager.ItemReference ir : h.itemSummary.tempLocs )
           if ( unavailableItems.contains(ir.itemId) ) {
             if (! b.unavailAt.containsKey(ir.location.name))
               b.unavailAt.put(ir.location.name, null);

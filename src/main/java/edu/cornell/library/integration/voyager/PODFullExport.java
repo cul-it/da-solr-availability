@@ -29,7 +29,9 @@ public class PODFullExport {
       prop.load(in);
     }
     try (Connection voyager = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"))){
+         prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
+         Connection inventoryDB = DriverManager.getConnection(
+         prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"))){
       Locations locations = new Locations(voyager);
 
       Set<Integer> bibs = getUnsuppressedBibs(voyager);

@@ -10,8 +10,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
-import javax.xml.stream.XMLStreamException;
-
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -21,10 +19,11 @@ import org.apache.solr.common.SolrDocument;
 
 import edu.cornell.library.integration.availability.ProcessAvailabilityQueue.BibToUpdate;
 import edu.cornell.library.integration.changes.Change;
+import edu.cornell.library.integration.folio.OkapiClient;
 
 public class RefreshAvailability {
   public static void main(String[] args)
-      throws IOException, SQLException, XMLStreamException, InterruptedException, SolrServerException {
+      throws IOException, SQLException, SolrServerException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
@@ -32,12 +31,13 @@ public class RefreshAvailability {
     }
 
     try (
-        Connection voyagerLive = DriverManager.getConnection(
-        prop.getProperty("voyagerDBUrl"),prop.getProperty("voyagerDBUser"),prop.getProperty("voyagerDBPass"));
         Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
         SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL"))) {
+
+      OkapiClient okapi = new OkapiClient(
+          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),prop.getProperty("okapiTenantFolio"));
 
       int rows = 50;
       SolrQuery q = new SolrQuery().setQuery("*:*").addSort("timestamp", ORDER.asc)
@@ -59,7 +59,8 @@ public class RefreshAvailability {
         page = (page + 1) % 10;
 
         if ( oldBibs.size() > 0 )
-          ProcessAvailabilityQueue.updateBibsInSolr( voyagerLive, inventoryDB ,solr, callNumberSolr, oldBibs, 8 );
+//TODO Get up to speed with Folio mods          ProcessAvailabilityQueue.updateBibsInSolr( okapi, inventoryDB ,solr, callNumberSolr, oldBibs, 8 );
+          System.out.println("This infrequently used, possibly obsolete tool is not current with the Folio code modifications.");
         else
           try {
             Thread.sleep(500);
