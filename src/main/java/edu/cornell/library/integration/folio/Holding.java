@@ -79,7 +79,7 @@ public class Holding {
     if ( raw.containsKey("notes") ) {
       List<Map<String,Object>> notes = (List<Map<String,Object>>)raw.get("notes");
       for ( Map<String,Object> note : notes ) {
-        String type = holdingsNoteTypes.getName((String) note.get("holdingsNoteType"));
+        String type = holdingsNoteTypes.getName((String) note.get("holdingsNoteTypeId"));
         String text = (String) note.get("note");
         boolean staffOnly = (boolean) note.get("staffOnly");
 
