@@ -94,7 +94,7 @@ public class Items /*TODO implements ChangeDetector */{
     Map<Integer,String> requests = new TreeMap<>();
     for (String holdingId : holdings.getUuids()) {
       List<Map<String, Object>> rawItems =
-            okapi.queryAsList("/item-storage/items", "holdingsId=="+holdingId, null);
+            okapi.queryAsList("/item-storage/items", "holdingsRecordId=="+holdingId, null);
 
       TreeSet<Item> items = new TreeSet<>();
       for (Map<String, Object> rawItem : rawItems) {
