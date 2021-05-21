@@ -60,10 +60,10 @@ public class ProcessAvailabilityQueue {
          " WHERE processLock.date IS NULL"+
          " ORDER BY priority LIMIT 4");*/
         PreparedStatement readQStmt = inventoryDB.prepareStatement
-            ("SELECT availabilityQueue.bib_id, priority"+
+            ("SELECT availabilityQueue.hrid, priority"+
              "  FROM solrFieldsData, availabilityQueue"+
-             "  LEFT JOIN processLock ON availabilityQueue.bib_id = processLock.bib_id"+
-             " WHERE availabilityQueue.bib_id = solrFieldsData.bib_id"+
+             "  LEFT JOIN processLock ON availabilityQueue.hrid = processLock.bib_id"+
+             " WHERE availabilityQueue.hrid = solrFieldsData.bib_id"+
              "   AND processLock.date IS NULL"+
              " ORDER BY priority LIMIT 4");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
