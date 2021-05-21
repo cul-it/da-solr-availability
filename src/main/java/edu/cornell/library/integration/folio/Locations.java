@@ -169,7 +169,7 @@ public final class Locations {
     Map<String,Map<String,String>> libraryPatterns = loadPatternMap("library_names.txt");
     List<FacetMapRule> facetPatterns = loadFacetPatternMap("LocationFacetMapping.txt");
 
-    ReferenceData libraries = new ReferenceData( okapi, "/locations/libraries", "name");
+    ReferenceData libraries = new ReferenceData( okapi, "/location-units/libraries", "name");
     List<Map<String,Object>> okapiLocs = okapi.queryAsList("/locations", null, 500);
     for (Map<String,Object> okapiLoc : okapiLocs) {
       String name = (String)okapiLoc.get("discoveryDisplayName");
