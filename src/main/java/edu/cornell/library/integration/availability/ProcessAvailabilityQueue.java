@@ -37,6 +37,7 @@ import edu.cornell.library.integration.folio.ItemReference;
 import edu.cornell.library.integration.folio.Items;
 import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.Items.ItemList;
+import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
 import edu.cornell.library.integration.folio.OkapiClient;
 import edu.cornell.library.integration.folio.ReferenceData;
@@ -86,6 +87,7 @@ public class ProcessAvailabilityQueue {
           prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),prop.getProperty("okapiTenantFolio"));
       Locations locations = new Locations(okapi);
       ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
+      LoanTypes.initialize(okapi);
 
       for (int i = 0; i < 1; i++){
         Set<BibToUpdate> bibs = new HashSet<>();
@@ -240,7 +242,7 @@ public class ProcessAvailabilityQueue {
                 doc.addField("holdings_json", holdings.toJson());
               for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
                 for ( Item i : itemsForHolding )
-                  if (i.status != null && i.status.shortLoan != null)
+                  if (i.status != null && i.loanType.shortLoan == true)
                     doc.addField("availability_facet", "Short Loan");
               BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdings);
               doc.addField("availability_json", b.toJson());

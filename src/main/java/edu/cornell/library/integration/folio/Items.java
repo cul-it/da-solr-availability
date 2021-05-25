@@ -24,11 +24,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
+import edu.cornell.library.integration.folio.LoanTypes.LoanType;
 import edu.cornell.library.integration.folio.Locations.Location;
 
 public class Items /*TODO implements ChangeDetector */{
 
   static Locations locations = null;
+  static ReferenceData materialTypes = null;
 
 /*
   @Override
@@ -88,6 +90,7 @@ public class Items /*TODO implements ChangeDetector */{
       OkapiClient okapi, Connection inventory, Integer bibId, HoldingSet holdings) throws SQLException, IOException {
     if (locations == null) {
       locations = new Locations( okapi );
+      materialTypes = new ReferenceData( okapi, "/material-types", "name");
     }
     ItemList il = new ItemList();
     Map<Integer,String> dueDates = new TreeMap<>();
@@ -282,8 +285,8 @@ public class Items /*TODO implements ChangeDetector */{
     @JsonProperty("location")  public final Location location;
     @JsonProperty("permLocation") public final String permLocation;
     @JsonProperty("circGrp")   public Map<Integer,String> circGrp;
-    @JsonProperty("loanType")  public String loanType;
-    @JsonProperty("matType")   public String matType;
+    @JsonProperty("loanType")  public LoanType loanType;
+    @JsonProperty("matType")   public Map<String,String> matType;
     @JsonProperty("status")    public ItemStatus status;
     @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public Integer date;
@@ -311,15 +314,17 @@ public class Items /*TODO implements ChangeDetector */{
       this.location = locations.getByUuid(locationId);
 //TODO      this.circGrp = circPolicyGroups.getByLocId(locationNumber);
           
-      this.loanType = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
-      this.matType = (String)raw.get("materialTypeId");
+      String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
+      this.loanType = LoanTypes.getByUuid(loanTypeId);
+      this.matType = materialTypes.getEntryHashByUuid((String)raw.get("materialTypeId"));
       Map<String,Object> statusData = (Map<String,Object>)raw.get("status");
-      this.status = new ItemStatus(okapi,(String)statusData.get("name"),null,null);
+      this.status = new ItemStatus(okapi,(String)statusData.get("name"),this.loanType,this.location);
       //      this.loanType = loanTypes.getByUuid(loanTypeId);
 //      this.status = new ItemStatus( voyager, this.itemId, this.type, this.location );
 //      this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
 //         ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
       this.active = active;
+      if ( ! raw.containsKey("notes") ) return;
     }
 
     Item(
@@ -339,8 +344,8 @@ public class Items /*TODO implements ChangeDetector */{
         @JsonProperty("location")  Location location,
         @JsonProperty("permLocation") String permLocation,
         @JsonProperty("circGrp")   Map<Integer,String> circGrp,
-        @JsonProperty("loanType")  String loanType,
-        @JsonProperty("matType")   String matType,
+        @JsonProperty("loanType")  LoanType loanType,
+        @JsonProperty("matType")   Map<String,String> matType,
         @JsonProperty("status")    ItemStatus status,
         @JsonProperty("empty")     Boolean empty,
         @JsonProperty("date")      Integer date,

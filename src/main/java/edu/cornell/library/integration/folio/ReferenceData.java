@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ReferenceData {
 
+
   // PUBLIC METHODS
 
   /*
@@ -46,6 +47,13 @@ public class ReferenceData {
 
     this.dataByName = processedByName;
     this.dataByUuid = processedByUuid;
+    this.entriesByUuid = new HashMap<>();
+    for ( Entry<String,String> e : this.dataByUuid.entrySet() ) {
+      Map<String,String> entry = new HashMap<>();
+      entry.put("id", e.getKey());
+      entry.put(nameField, e.getValue());
+      this.entriesByUuid.put(e.getKey(), entry);
+    }
   }
 
   /*
@@ -75,8 +83,14 @@ public class ReferenceData {
     return this.dataByName.get(keyValue.toLowerCase());
   }
 
-  /*
-   * Set default key value to use when invalid key is requested. Throws
+  public Map<String,String> getEntryHashByUuid( String uuid ) {
+    if ( this.entriesByUuid.containsKey(uuid))
+      return this.entriesByUuid.get(uuid);
+    return null;
+  }
+
+
+  /* Set default key value to use when invalid key is requested. Throws
    * IllegalArgumentException if invalid.
    */
   public void setDefault(String defaultKey) throws IllegalArgumentException {
@@ -95,6 +109,7 @@ public class ReferenceData {
 
   private final Map<String, String> dataByName;
   private final Map<String, String> dataByUuid;
+  private final Map<String, Map<String,String>> entriesByUuid;
   private static ObjectMapper mapper = new ObjectMapper();
   private String defaultKey = null;
 

@@ -1,10 +1,24 @@
 package edu.cornell.library.integration.folio;
 
+import java.io.IOException;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LoanTypes {
 
-  public enum LoanType{
+  public static void initialize( OkapiClient okapi ) throws IOException { if (_byUuid.isEmpty()) populateLoanTypes(okapi); }
+
+  public final static LoanType getByUuid( String uuid ) {
+    if (_byUuid.containsKey(uuid)) return _byUuid.get(uuid);
+    return null;
+  }
+
+  public enum ExpectedLoanType{
     DAY1  ("1 Day Loan"),
     HOUR12("12 Hour Loan"),
     DAY14 ("14 Day Loan"),
@@ -23,17 +37,55 @@ public class LoanTypes {
     RES   ("Reserves");
 
     final private String label;
-    private LoanType(String label) { this.label = label; }
+    private ExpectedLoanType(String label) { this.label = label; }
     @Override public String toString() { return this.label; }
+    static ExpectedLoanType byName(String name) {
+      for (ExpectedLoanType exp : ExpectedLoanType.values() )
+        if ( exp.label.equals(name) ) return exp;
+      return null;
+    }
   }
 
-  public final static EnumSet<LoanType> shortLoanTypes = EnumSet.of(
-      LoanType.DAY1,
-      LoanType.HOUR12,
-      LoanType.HOUR2,
-      LoanType.HOUR3,
-      LoanType.HOUR4,
-      LoanType.HOUR5,
-      LoanType.HOUR8,
-      LoanType.RES);
+  public final static EnumSet<ExpectedLoanType> shortLoanTypes = EnumSet.of(
+      ExpectedLoanType.DAY1,
+      ExpectedLoanType.HOUR12,
+      ExpectedLoanType.HOUR2,
+      ExpectedLoanType.HOUR3,
+      ExpectedLoanType.HOUR4,
+      ExpectedLoanType.HOUR5,
+      ExpectedLoanType.HOUR8,
+      ExpectedLoanType.RES);
+
+  private static final Map<String,LoanType> _byUuid = new HashMap<>();
+
+  public static class LoanType {
+    @JsonProperty("id")   public final String uuid;
+    @JsonProperty("name") public final String name;
+    @JsonIgnore           public final boolean shortLoan;
+
+    public LoanType(String uuid, String name, boolean shortLoan) {
+      this.uuid = uuid;
+      this.name = name;
+      this.shortLoan = shortLoan;
+    }
+
+  }
+
+  private static void populateLoanTypes( OkapiClient okapi ) throws IOException {
+    List<Map<String,Object>> okapiTypes = okapi.queryAsList("/loan-types",null,500 );
+    EnumSet<ExpectedLoanType> expected = EnumSet.allOf(ExpectedLoanType.class);
+    for ( Map<String,Object> okapiType : okapiTypes ) {
+      String id = (String)okapiType.get("id");
+      String name = (String)okapiType.get("name");
+      ExpectedLoanType exp = ExpectedLoanType.byName(name);
+      if ( exp == null ) {
+        System.out.printf("Unexpected loan type (%s): %s\n",id,name);
+        System.exit(1);
+      }
+      expected.remove(exp);
+      _byUuid.put(id, new LoanType(id,name,shortLoanTypes.contains(exp)));
+    }
+    
+  }
+
 }
