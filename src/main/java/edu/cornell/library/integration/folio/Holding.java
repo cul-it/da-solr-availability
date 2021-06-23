@@ -3,10 +3,12 @@ package edu.cornell.library.integration.folio;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -17,13 +19,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.folio.Items.Item;
+import edu.cornell.library.integration.folio.LoanTypes.ExpectedLoanType;
 import edu.cornell.library.integration.folio.Locations.Location;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Holding {
 
   @JsonProperty("hrid")        public final String hrid;
-  @JsonProperty("copy")        public Integer copy;
+  @JsonProperty("copy")        public String copy;
   @JsonProperty("notes")       public List<String> notes;
   @JsonProperty("holdings")    public final List<String> holdings;
   @JsonProperty("supplements") public final List<String> supplements;
@@ -75,6 +79,8 @@ public class Holding {
     }
     if ( raw.containsKey("callNumberSuffix") )
       this.callNumberSuffix = (String) raw.get("callNumberSuffix");
+    if ( raw.containsKey("copyNumber") )
+      this.copy = (String) raw.get("copyNumber");
 
     if ( raw.containsKey("notes") ) {
       List<Map<String,Object>> notes = (List<Map<String,Object>>)raw.get("notes");
@@ -82,6 +88,7 @@ public class Holding {
         String type = holdingsNoteTypes.getName((String) note.get("holdingsNoteTypeId"));
         String text = (String) note.get("note");
         boolean staffOnly = (boolean) note.get("staffOnly");
+        System.out.printf("%s: %s (%s)\n", type,text,staffOnly);
 
         if ( type.equals("Bound with item data") ) {
           // TODO deal with the bound with mapping after the next load when the syntax is complete
@@ -97,10 +104,10 @@ public class Holding {
             this.donors.add(text);
 
         } else if (
-            type.equals("Restriction") /*506*/ &&
-            type.equals("Provenance") /*561*/ &&
-            type.equals("Copy note") /*562*/ &&
-            type.equals("Reproduction") /*843*/ &&
+            type.equals("Restriction") /*506*/ ||
+            type.equals("Provenance") /*561*/ ||
+            type.equals("Copy note") /*562*/ ||
+            type.equals("Reproduction") /*843*/ ||
             type.equals("Note") /*852$z*/
             ) {
           if ( this.notes == null ) this.notes = new ArrayList<>();
@@ -152,7 +159,7 @@ public class Holding {
 
   Holding(
       @JsonProperty("hrid")        String hrid,
-      @JsonProperty("copy")        Integer copy,
+      @JsonProperty("copy")        String copy,
       @JsonProperty("notes")       List<String> notes,
       @JsonProperty("holdings")    List<String> holdings,
       @JsonProperty("supplements") List<String> supplements,
@@ -218,7 +225,7 @@ public class Holding {
         }
     return facetValues;
   }
-/*TODO
+
   public boolean summarizeItemAvailability( TreeSet<Item> items ) {
     int itemCount = 0;
     boolean discharged = false;
@@ -226,23 +233,23 @@ public class Holding {
     List<ItemReference> returned = new ArrayList<>();
     List<ItemReference> tempLocs = null;
     Set<Location> itemLocations = new HashSet<>();
-    if (this.boundWiths != null)
+/*TODO boundWiths    if (this.boundWiths != null)
       for (Entry<Integer,BoundWith> bw : this.boundWiths.entrySet()) {
         itemCount++;
         if (! bw.getValue().status.status.equals("Available"))
           unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null,null,null));
-      }
+      }*/
     boolean circ = false;
     for (Item item : items) {
       itemCount++;
       itemLocations.add(item.location);
       if (! item.status.status.equals("Available") ) {
-        unavails.add(new ItemReference(item.itemId,null,item.concatEnum(),item.status,null,item.holds,item.recalls));
-      } else if (item.status.code.values().contains("Discharged")) {
+        unavails.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null,item.holds,item.recalls));
+      } else if (item.status.returned != null) {
         discharged = true;
-        returned.add(new ItemReference(item.itemId,null,item.concatEnum(),item.status,null,null,null));
+        returned.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null,null,null));
       }
-      if (item.type != null && ! item.type.name.equals("nocirc"))
+      if (item.loanType != null && ! item.loanType.name.equals(ExpectedLoanType.NOCIRC.name()))
         circ = true;
     }
     if (itemCount == 0)
@@ -256,7 +263,7 @@ public class Holding {
       tempLocs = new ArrayList<>();
       for (Item i : items)
         if (! i.location.equals(this.location))
-          tempLocs.add(new ItemReference(i.itemId,null,i.concatEnum(),null,i.location,i.holds,i.recalls));
+          tempLocs.add(new ItemReference(i.id,null,i.concatEnum(),null,i.location,i.holds,i.recalls));
           
     }
     this.itemSummary = new HoldingsItemSummary(
@@ -267,7 +274,7 @@ public class Holding {
         (returned.size() == 0)?null:returned);
     return discharged;
   }
-*/
+
   /**
    * Any time a comma is followed by a character that is not a space, a
    * space will be inserted.

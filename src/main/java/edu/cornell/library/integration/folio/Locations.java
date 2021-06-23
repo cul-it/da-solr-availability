@@ -51,11 +51,11 @@ public final class Locations {
   }
 
   /**
-   * Retrieve Location object based on <b>number</b>. The value will already
+   * Retrieve Location object based on <b>uuid</b>. The value will already
    * have been loaded into memory. The method cannot be called statically to
    * ensure that the instantiation has been able to load the data.
    * 
-   * @param number
+   * @param uuid
    * @return Location
    */
   @SuppressWarnings("static-method")
@@ -104,6 +104,8 @@ public final class Locations {
     public final String name;
     public final String library;
     public final String hoursCode;
+    public final String id;
+    public final String primaryServicePoint;
 
     /**
      * @return
@@ -150,12 +152,17 @@ public final class Locations {
         @JsonProperty("code")      String code,
         @JsonProperty("name")      String name,
         @JsonProperty("library")   String library,
-        @JsonProperty("hoursCode") String hoursCode
+        @JsonProperty("hoursCode") String hoursCode,
+        @JsonProperty("id")        String id,
+        @JsonProperty("primaryServicePoint")
+                                   String primaryServicePoint
         ) {
       this.code = code;
       this.name = name.trim();
       this.library = library;
       this.hoursCode = hoursCode;
+      this.id = id;
+      this.primaryServicePoint = primaryServicePoint;
     }
   }
 
@@ -177,8 +184,10 @@ public final class Locations {
         name = (String)okapiLoc.get("name");
       Map<String,String> libraryDetails = getLibrary(name, libraryPatterns);
       String libraryName = libraries.getName((String)okapiLoc.get("library"));
+      String id = (String)okapiLoc.get("id");
+      String primaryServicePoint = (String)okapiLoc.get("primaryServicePoint");
       String hoursCode   = (libraryDetails==null)?null:libraryDetails.values().iterator().next();
-      Location l = new Location((String)okapiLoc.get("code"), name, libraryName, hoursCode);
+      Location l = new Location((String)okapiLoc.get("code"), name, libraryName, hoursCode,id,primaryServicePoint);
       _byCode.put(l.code, l);
       _byUuid.put((String)okapiLoc.get("id"), l);
       List<FacetMapRule> locationFacetRules = new ArrayList<>();

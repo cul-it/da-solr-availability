@@ -1,52 +1,64 @@
 package edu.cornell.library.integration.folio;
 
-import java.sql.Timestamp;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
+import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.LoanTypes.ExpectedLoanType;
-import edu.cornell.library.integration.folio.LoanTypes.LoanType;
-import edu.cornell.library.integration.folio.Locations.Location;
+import edu.cornell.library.integration.folio.ServicePoints.ServicePoint;
 
 public class ItemStatus {
   public String status;
   public Long due = null;
-  public Long date = null;
   public Long returned = null;
-  public Long returnedUntil = null;
+  public Boolean shortLoan = null;
+  public Long date = null;
 
-  @JsonCreator
-  public ItemStatus(
-      @JsonProperty("status")        String status,
-      @JsonProperty("due")           Long due,
-      @JsonProperty("date")          Long date,
-      @JsonProperty("returned")      Long returnedDate,
-      @JsonProperty("returnedUntil") Long returnedUntil) {
-    this.status = status;
-    this.due = due;
-    this.date = date;
-    this.returned = returnedDate;
-    this.returnedUntil = returnedUntil;
-  }
+  public ItemStatus( OkapiClient okapi, Map<String,Object> rawItem, Item item ) throws IOException {
 
-  public ItemStatus( OkapiClient okapi, String status, LoanType loanType, Location location ) {
+    Map<String,String> statusData = (Map<String,String>)rawItem.get("status");
+    this.status = statusData.get("name");
 
-    this.status = status;
-
-    Timestamp statusModDate = null;
-    Timestamp checkoutDate = null;
+    if (this.status.equals("Checked out")) {
+      List<Map<String, Object>> loans =
+          okapi.queryAsList("/loan-storage/loans", "itemId=="+item.id, null);
+      for (Map<String,Object> loan : loans) {
+        if ( ! ((Map<String,String>)loan.get("status")).get("name").equals("Open") ) continue;
+        this.due = Instant.parse(((String)loan.get("dueDate")).replace("+00:00","Z")).getEpochSecond();
+      }
+      if ( item.loanType.shortLoan ) this.shortLoan = true;
+      return;
+    }
 
     // nocirc items at the annex are unavailable regardless of the item status
     // DISCOVERYACCESS-4881/DISCOVERYACCESS-4917
     if (this.status.equals("Available")
-        && loanType.name.equals(ExpectedLoanType.NOCIRC.toString()) && location.name.equals("Library Annex")) {
+        && item.loanType.name.equals(ExpectedLoanType.NOCIRC.toString())
+        && item.location.name.equals("Library Annex")) {
+
       this.status = "Unavailable";
+      return;
+
+    }
+
+    if ( this.status.equals("Available") ) {
+      // TODO check for recent return, delayed queueing for end of returned status
+      if (! rawItem.containsKey("lastCheckIn"))
+        return;
+      Map<String,String> lastCheckIn = (Map<String,String>)rawItem.get("lastCheckIn");
+      if ( ! lastCheckIn.containsKey("dateTime") )
+        return;
+      Instant returned = Instant.parse(lastCheckIn.get("dateTime").replace("+00:00","Z"));
+      ServicePoint servicePoint = ServicePoints.getByUuid(item.location.primaryServicePoint);
+      if ( returned.plusSeconds(servicePoint.shelvingLagTime*60).isAfter(Instant.now()))
+        this.returned = returned.getEpochSecond();
       return;
     }
 
-    Long dueDate = null;
-    this.due = dueDate;
+    if ( statusData.containsKey("date") )
+      this.date = Instant.parse(statusData.get("date").replace("+00:00","Z")).getEpochSecond();
   }
 
 }

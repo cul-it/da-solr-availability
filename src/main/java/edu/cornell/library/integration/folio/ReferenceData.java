@@ -61,6 +61,7 @@ public class ReferenceData {
    * return default or null.
    */
   public String getUuid(String keyValue) {
+    if (keyValue == null) return null;
     String value = keyValue.toLowerCase();
     if (this.defaultKey == null || this.dataByName.containsKey(value))
       return this.dataByName.get(value);

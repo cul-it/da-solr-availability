@@ -26,6 +26,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
@@ -41,6 +42,7 @@ import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
 import edu.cornell.library.integration.folio.OkapiClient;
 import edu.cornell.library.integration.folio.ReferenceData;
+import edu.cornell.library.integration.folio.ServicePoints;
 
 public class ProcessAvailabilityQueue {
 
@@ -88,15 +90,16 @@ public class ProcessAvailabilityQueue {
       Locations locations = new Locations(okapi);
       ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
       LoanTypes.initialize(okapi);
+      ServicePoints.initialize(okapi);
 
-      for (int i = 0; i < 1; i++){
+      for (int i = 0; i < 50_000; i++){
         Set<BibToUpdate> bibs = new HashSet<>();
         Set<Integer> ids = new HashSet<>();
         stmt.execute("LOCK TABLES solrFieldsData READ,availabilityQueue WRITE,bibRecsVoyager READ,processLock WRITE");
         Integer priority = null;
         List<Integer> lockIds = new ArrayList<>();
         try (  ResultSet rs = readQStmt.executeQuery() ) {
-/*
+
           while ( rs.next() ) {
 
             // batch only within a single priority level
@@ -104,9 +107,12 @@ public class ProcessAvailabilityQueue {
               priority = rs.getInt("priority");
             else if ( priority < rs.getInt("priority"))
               break;
-            int bibId = rs.getInt("bib_id");
-*/
-        for (int bibId : Arrays.asList(721607, 11722439, 67466, 11697627, 277880, 1003756, 7596729, 361984, 499380, 11705119, 11998727, 120634)) {
+            int bibId = rs.getInt("hrid");
+
+/*        for (int bibId : Arrays.asList(
+            2073985, 721607, 67466, 277880, 1003756, 7596729, 361984,
+             *  499380, 120634, 10976407, 8623, 1077314,595322, 285282, 38097, 3749, 6701, 115983, 130786, 301363,
+             1001,1002,631947,705681,996135,1041597,1378974)) {*/
             // Confirm bib is active
 /*            Boolean active = null;
             bibActiveStmt.setInt(1, bibId);
@@ -228,8 +234,8 @@ public class ProcessAvailabilityQueue {
 //TODO              doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
 
 
-//              if ( holdings.summarizeItemAvailability(items) ) 
-//TODO returned tracking                doc.addField("availability_facet", "Returned");
+              if ( holdings.summarizeItemAvailability(items) ) 
+                doc.addField("availability_facet", "Returned");
 //              if ( holdings.applyOpenOrderInformation(voyager,bibId) )
 //                doc.addField("availability_facet", "On Order");
               if ( holdings.noItemsAvailability() )

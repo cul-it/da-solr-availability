@@ -1,7 +1,6 @@
 package edu.cornell.library.integration.availability;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 import java.util.EnumSet;

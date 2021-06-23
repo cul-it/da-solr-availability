@@ -85,12 +85,12 @@ public class BibliographicSummary {
       }
 
       if ( h.itemSummary != null && h.itemSummary.tempLocs != null ) {
-        List<Integer> unavailableItems = new ArrayList<>();
+        List<String> unavailableItems = new ArrayList<>();
         if ( h.itemSummary.unavail != null )
           for ( edu.cornell.library.integration.folio.ItemReference ir : h.itemSummary.unavail )
-            unavailableItems.add( ir.itemId );
+            unavailableItems.add( ir.id );
         for ( edu.cornell.library.integration.folio.ItemReference ir : h.itemSummary.tempLocs )
-          if ( unavailableItems.contains(ir.itemId) ) {
+          if ( unavailableItems.contains(ir.id) ) {
             if (! b.unavailAt.containsKey(ir.location.name))
               b.unavailAt.put(ir.location.name, null);
           } else {

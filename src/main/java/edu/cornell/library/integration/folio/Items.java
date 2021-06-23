@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -31,6 +32,7 @@ public class Items /*TODO implements ChangeDetector */{
 
   static Locations locations = null;
   static ReferenceData materialTypes = null;
+  static ReferenceData itemNoteTypes = null;
 
 /*
   @Override
@@ -91,13 +93,14 @@ public class Items /*TODO implements ChangeDetector */{
     if (locations == null) {
       locations = new Locations( okapi );
       materialTypes = new ReferenceData( okapi, "/material-types", "name");
+      itemNoteTypes = new ReferenceData( okapi, "/item-note-types", "name");
     }
     ItemList il = new ItemList();
     Map<Integer,String> dueDates = new TreeMap<>();
     Map<Integer,String> requests = new TreeMap<>();
     for (String holdingId : holdings.getUuids()) {
       List<Map<String, Object>> rawItems =
-            okapi.queryAsList("/item-storage/items", "holdingsRecordId=="+holdingId, null);
+            okapi.queryAsList("/item-storage/items", "holdingsRecordId=="+holdingId, 99999);
 
       TreeSet<Item> items = new TreeSet<>();
       for (Map<String, Object> rawItem : rawItems) {
@@ -284,15 +287,15 @@ public class Items /*TODO implements ChangeDetector */{
     @JsonProperty("recalls")   public Integer recalls;
     @JsonProperty("location")  public final Location location;
     @JsonProperty("permLocation") public final String permLocation;
-    @JsonProperty("circGrp")   public Map<Integer,String> circGrp;
     @JsonProperty("loanType")  public LoanType loanType;
     @JsonProperty("matType")   public Map<String,String> matType;
+    @JsonProperty("rmc")       public Map<String,String> rmc;
     @JsonProperty("status")    public ItemStatus status;
     @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public Integer date;
     @JsonProperty("active")    public boolean active = true;
 
-    Item(OkapiClient okapi, Map<String,Object> raw, boolean active) {
+    Item(OkapiClient okapi, Map<String,Object> raw, boolean active) throws IOException {
 
       this.id = (String)raw.get("id");
       this.hrid = (String)raw.get("hrid");
@@ -317,14 +320,31 @@ public class Items /*TODO implements ChangeDetector */{
       String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
       this.loanType = LoanTypes.getByUuid(loanTypeId);
       this.matType = materialTypes.getEntryHashByUuid((String)raw.get("materialTypeId"));
-      Map<String,Object> statusData = (Map<String,Object>)raw.get("status");
-      this.status = new ItemStatus(okapi,(String)statusData.get("name"),this.loanType,this.location);
+      this.status = new ItemStatus(okapi,raw,this);
       //      this.loanType = loanTypes.getByUuid(loanTypeId);
 //      this.status = new ItemStatus( voyager, this.itemId, this.type, this.location );
 //      this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
 //         ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
       this.active = active;
       if ( ! raw.containsKey("notes") ) return;
+      List<Map<String,String>> notes = (List<Map<String,String>>)raw.get("notes");
+      for ( Map<String,String> noteHash : notes ) {
+        String type = itemNoteTypes.getUuid(noteHash.get("noteTypeId"));
+        if (type == null)  continue;
+        Map<String,String> rmcnotes = new HashMap<>();
+
+        switch (type) {
+
+        case "Vault location":
+        case "ArchiveSpace Top Container":
+        case "Restrictions":
+          rmcnotes.put(type, noteHash.get("note"));
+          break;
+        }
+        if ( rmcnotes.size() > 0 )
+          this.rmc = rmcnotes;
+
+      }
     }
 
     Item(
@@ -343,7 +363,6 @@ public class Items /*TODO implements ChangeDetector */{
         @JsonProperty("recalls")   Integer recalls,
         @JsonProperty("location")  Location location,
         @JsonProperty("permLocation") String permLocation,
-        @JsonProperty("circGrp")   Map<Integer,String> circGrp,
         @JsonProperty("loanType")  LoanType loanType,
         @JsonProperty("matType")   Map<String,String> matType,
         @JsonProperty("status")    ItemStatus status,
@@ -366,7 +385,6 @@ public class Items /*TODO implements ChangeDetector */{
       this.recalls = recalls;
       this.location = location;
       this.permLocation = permLocation;
-      this.circGrp = circGrp;
       this.loanType = loanType;
       this.matType = matType;
       this.status = status;

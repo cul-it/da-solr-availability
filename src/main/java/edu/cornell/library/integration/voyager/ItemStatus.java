@@ -58,7 +58,7 @@ public class ItemStatus {
         while (rs.next()) {
           int status_id = rs.getInt("item_status");
           StatusCode code = ItemStatuses.getStatusByCode(voyager, status_id);
-          statuses.add(code);
+          this.statuses.add(code);
           if (statusModDate == null ||
         		  ( rs.getTimestamp("item_status_date") != null && statusModDate.before(rs.getTimestamp("item_status_date"))))
             statusModDate = rs.getTimestamp("item_status_date");
@@ -73,13 +73,13 @@ public class ItemStatus {
     }
     if (foundUnavailable)
       this.available = false;
-    else if (! statuses.isEmpty() && Arrays.asList(1,11).contains(statuses.iterator().next().id))
+    else if (! this.statuses.isEmpty() && Arrays.asList(1,11).contains(this.statuses.iterator().next().id))
       this.available = true;
     else
       this.available = false;
 
-    if (! statuses.isEmpty()) {
-      StatusCode c = statuses.iterator().next();
+    if (! this.statuses.isEmpty()) {
+      StatusCode c = this.statuses.iterator().next();
       this.code = new HashMap<>();
       this.code.put(c.id, c.name);
 

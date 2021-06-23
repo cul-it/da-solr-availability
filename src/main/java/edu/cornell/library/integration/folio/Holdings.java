@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.folio.Holding.Link;
+import edu.cornell.library.integration.folio.Items.ItemList;
 
 public class Holdings {
 
@@ -204,14 +206,13 @@ public class Holdings {
       return onOrder;
     }
 */
-    /*TODO Figure out what this is even supposed to be doing? Tracking discharged statuses downstream? Why?
     public boolean summarizeItemAvailability( ItemList items ) {
       boolean discharged = false;
       for ( Entry<String, Holding> e : this.holdings.entrySet() )
         if ( e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey())) )
           discharged = true;
       return discharged;
-    }*/
+    }
 
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this.holdings);
