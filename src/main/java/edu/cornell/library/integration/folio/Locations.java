@@ -183,7 +183,7 @@ public final class Locations {
       if (name == null)
         name = (String)okapiLoc.get("name");
       Map<String,String> libraryDetails = getLibrary(name, libraryPatterns);
-      String libraryName = libraries.getName((String)okapiLoc.get("library"));
+      String libraryName = libraries.getName((String)okapiLoc.get("libraryId"));
       String id = (String)okapiLoc.get("id");
       String primaryServicePoint = (String)okapiLoc.get("primaryServicePoint");
       String hoursCode   = (libraryDetails==null)?null:libraryDetails.values().iterator().next();
