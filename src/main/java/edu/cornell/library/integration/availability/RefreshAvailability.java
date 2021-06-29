@@ -54,7 +54,7 @@ public class RefreshAvailability {
           Set<Change> t = new HashSet<>();
           t.add(new Change(Change.Type.AGE,bibId,"Updating Availability",
               new Timestamp(((Date)doc.getFieldValue("timestamp")).getTime()),null));
-          oldBibs.add(new BibToUpdate(bibId,t,! ((String)doc.getFieldValue("type")).equals("Suppressed")) );
+          oldBibs.add(new BibToUpdate(bibId,t ));
         }
         page = (page + 1) % 10;
 
