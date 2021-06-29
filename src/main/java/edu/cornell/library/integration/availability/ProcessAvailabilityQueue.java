@@ -124,7 +124,7 @@ public class ProcessAvailabilityQueue {
             }*/
 
             // Get all queue items for selected bib
-            allForBib.setInt(1, bibId);
+            allForBib.setString(1, String.valueOf(bibId));
             try ( ResultSet rs2 = allForBib.executeQuery() ) {
               Set<Change> changes = new HashSet<>();
               while (rs2.next()) {
