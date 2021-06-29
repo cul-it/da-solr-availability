@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -52,6 +53,9 @@ public class Holding {
   @JsonIgnore public String callNumberSuffix = null;
   @JsonIgnore public boolean lcCallNum = false;
   @JsonIgnore static ObjectMapper mapper = new ObjectMapper();
+  static {
+    mapper.setSerializationInclusion(Include.NON_EMPTY);
+  }
 
 
   Holding(Map<String,Object> raw, Locations locations, ReferenceData holdingsNoteTypes) {
