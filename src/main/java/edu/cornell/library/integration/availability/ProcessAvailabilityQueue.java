@@ -26,7 +26,6 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
-import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrInputDocument;
 
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
@@ -134,7 +133,7 @@ public class ProcessAvailabilityQueue {
                 int id = rs2.getInt("id");
                 ids.add(id);
               }
-              bibs.add(new BibToUpdate(bibId,changes,true ));//TODO Get real active boolean when available
+              bibs.add(new BibToUpdate(bibId,changes));
             }
             createLockStmt.setInt(1,bibId);
             createLockStmt.executeUpdate();
@@ -210,7 +209,10 @@ public class ProcessAvailabilityQueue {
               HoldingSet holdings = Holdings.retrieveHoldingsByInstanceId(okapi,locations,holdingsNoteTypes,instanceId);
 //TODO              holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
-              if ( ! updateDetails.active ) {
+              boolean active = true;
+              if ( instance.containsKey("discoverySuppress") )
+                active = ! (boolean) instance.get("discoverySuppress");
+              if ( ! active ) {
                 doc.removeField("type");
                 doc.addField("type", "Suppressed Bib");
               }
@@ -325,10 +327,10 @@ public class ProcessAvailabilityQueue {
               System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
                   changes)+" priority:"+priority);
 //              System.out.println(ClientUtils.toXML(doc).replaceAll("(<field)", "\n$1"));
+              solr.add(solrDocs);
+              if ( ! callnumSolrDocs.isEmpty() && active )
+                callNumberSolr.add(callnumSolrDocs);
             }
-            solr.add(solrDocs);
-            if ( ! callnumSolrDocs.isEmpty() && updateDetails.active )
-              callNumberSolr.add(callnumSolrDocs);
           }
           completedBibUpdates.add(updateDetails);
         }
@@ -397,11 +399,9 @@ public class ProcessAvailabilityQueue {
   public static class BibToUpdate implements Comparable<BibToUpdate>{
     final int bibId;
     final Set<Change> changes;
-    final boolean active;
-    public BibToUpdate(int bibId, Set<Change> changes, boolean active) {
+    public BibToUpdate(int bibId, Set<Change> changes) {
       this.bibId = bibId;
       this.changes = changes;
-      this.active = active;
     }
     @Override public int compareTo(BibToUpdate o) {
       if ( o == null ) return -1;
