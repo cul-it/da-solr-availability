@@ -288,7 +288,7 @@ public class Holdings {
         if (hathiHolding == null) {
           hathiHolding = new Holding(
               null, null, null, null, null, null, null,
-              null, null, /*null, (boundWith)*/ null, null, null, null,
+              null, null, null, null, null, null, null,
               true/*online*/,null,true/*active*/);
           hathiHolding.links = new ArrayList<>();
           holdings.put("0", hathiHolding);

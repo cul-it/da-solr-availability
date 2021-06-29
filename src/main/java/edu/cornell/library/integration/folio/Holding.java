@@ -36,7 +36,7 @@ public class Holding {
 
   @JsonProperty("location")    public Location location;
   @JsonProperty("call")        public String call;
-//TODO  @JsonProperty("boundWith")   public Map<Integer,BoundWith> boundWiths;
+  @JsonProperty("boundWith")   public Map<String,BoundWith> boundWiths;
   @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
   @JsonProperty("order")       public String orderNote = null;
   @JsonProperty("avail")       public Boolean avail = null;
@@ -67,8 +67,13 @@ public class Holding {
     else
       this.active = true;
 
-    if ( raw.containsKey("permanentLocationId") )
-      this.location = locations.getByUuid((String)raw.get("permanentLocationId"));
+    if ( raw.containsKey("permanentLocationId") ) {
+      Location l = locations.getByUuid((String)raw.get("permanentLocationId"));
+      if (l.equals(locations.getByCode("serv,remo")))
+        this.online = true;
+      else
+        this.location = l;
+    }
 
     if ( raw.containsKey("callNumber") ) {
       String call = (String)raw.get("callNumber");
@@ -88,12 +93,10 @@ public class Holding {
         String type = holdingsNoteTypes.getName((String) note.get("holdingsNoteTypeId"));
         String text = (String) note.get("note");
         boolean staffOnly = (boolean) note.get("staffOnly");
-        System.out.printf("%s: %s (%s)\n", type,text,staffOnly);
 
         if ( type.equals("Bound with item data") ) {
-          // TODO deal with the bound with mapping after the next load when the syntax is complete
-//          BoundWith b = BoundWith.from876Field(voyager, f);
-//          if (b != null) boundWiths.put(b.masterItemId,b);
+          BoundWith b = BoundWith.fromNote(note);
+          if (b != null) boundWiths.put(b.masterItemId,b);
           continue;
         }
 
@@ -168,7 +171,7 @@ public class Holding {
 
       @JsonProperty("location")    Location location,
       @JsonProperty("call")        String call,
-//TODO      @JsonProperty("boundWith")   Map<Integer,BoundWith> boundWiths,
+      @JsonProperty("boundWith")   Map<String,BoundWith> boundWiths,
       @JsonProperty("items")       HoldingsItemSummary itemSummary,
       @JsonProperty("order")       String openOrderNote,
       @JsonProperty("avail")       Boolean avail,
@@ -186,7 +189,7 @@ public class Holding {
     this.recentIssues = recentIssues;
     this.location = location;
     this.date = date;
-//TODO    this.boundWiths = boundWiths;
+    this.boundWiths = boundWiths;
     this.call = call;
     this.itemSummary = itemSummary;
     this.orderNote = openOrderNote;
