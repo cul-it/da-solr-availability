@@ -98,9 +98,18 @@ public class Items /*TODO implements ChangeDetector */{
     ItemList il = new ItemList();
     Map<Integer,String> dueDates = new TreeMap<>();
     Map<Integer,String> requests = new TreeMap<>();
+    if (itemByHolding == null)
+      itemByHolding = inventory.prepareStatement("SELECT * FROM itemFolio WHERE holdingHrid = ?");
     for (String holdingId : holdings.getUuids()) {
-      List<Map<String, Object>> rawItems =
-            okapi.queryAsList("/item-storage/items", "holdingsRecordId=="+holdingId, 99999);
+      itemByHolding.setString(1, holdings.get(holdingId).hrid);
+      List<Map<String, Object>> rawItems = new ArrayList<>();
+      try (ResultSet rs = itemByHolding.executeQuery()) {
+        while (rs.next()) {
+          Map<String,Object> rawItem = mapper.readValue(rs.getString("content"), Map.class);
+          if ( ! rawItem.containsKey("id") ) rawItem.put("id", rs.getString("id") );
+          rawItems.add(rawItem);
+        }
+      }
 
       TreeSet<Item> items = new TreeSet<>();
       for (Map<String, Object> rawItem : rawItems) {
@@ -123,6 +132,7 @@ public class Items /*TODO implements ChangeDetector */{
     }
     return il;
   }
+  private static PreparedStatement itemByHolding = null;
 
   private static enum TrackingTable {
     DUEDATES("itemDueDates"),

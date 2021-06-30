@@ -28,6 +28,8 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
 import org.apache.solr.common.SolrInputDocument;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
 import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.folio.Holding;
@@ -55,12 +57,6 @@ public class ProcessAvailabilityQueue {
     try (Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
         Statement stmt = inventoryDB.createStatement();
-/*        PreparedStatement readQStmt = inventoryDB.prepareStatement
-        ("SELECT availabilityQueue.hrid, availabilityQueue.instanceId, priority"+
-         "  FROM availabilityQueue"+
-         "  LEFT JOIN processLock ON availabilityQueue.hrid = processLock.hrid"+
-         " WHERE processLock.date IS NULL"+
-         " ORDER BY priority LIMIT 4");*/
         PreparedStatement readQStmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.hrid, priority"+
              "  FROM solrFieldsData, availabilityQueue"+
@@ -194,19 +190,28 @@ public class ProcessAvailabilityQueue {
         for (BibToUpdate updateDetails : changedBibs) {
           int bibId = updateDetails.bibId;
           pstmt.setInt(1, bibId);
-          try (ResultSet rs = pstmt.executeQuery()) {
+          try (ResultSet rs = pstmt.executeQuery();
+              PreparedStatement instanceByHrid = inventory.prepareStatement("SELECT * FROM instanceFolio WHERE hrid = ?");) {
             while ( rs.next() ) {
 
               SolrInputDocument doc = constructSolrInputDocument( rs );
-              List<Map<String,Object>> instances = okapi.queryAsList("/instance-storage/instances", "hrid=="+bibId, null);
-              if (instances.size() != 1) {
-                System.out.printf("%d instances found for hrid %s\n",instances.size(),bibId);
+              Map<String,Object> instance = null;
+              String instanceId = null;
+              instanceByHrid.setString(1, String.valueOf(bibId));
+              try ( ResultSet rs1 = instanceByHrid.executeQuery() ) {
+                while (rs1.next()) {
+                  instanceId = rs1.getString("id");
+                  instance = mapper.readValue( rs1.getString("content"), Map.class);
+                }
+              }
+              if (instance == null) {
+                System.out.printf("Instances not found for hrid %s\n",bibId);
                 System.exit(0);
               }
-              Map<String,Object> instance = instances.get(0);
-              String instanceId = (String)instance.get("id");
               doc.addField("instance_id", instanceId);
-              HoldingSet holdings = Holdings.retrieveHoldingsByInstanceId(okapi,locations,holdingsNoteTypes,instanceId);
+              HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
+                  inventory,locations,holdingsNoteTypes,String.valueOf(bibId));
+//              HoldingSet holdings = Holdings.retrieveHoldingsByInstanceId(okapi,locations,holdingsNoteTypes,instanceId);
 //TODO              holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
               boolean active = true;
@@ -413,4 +418,6 @@ public class ProcessAvailabilityQueue {
     }
     @Override public int hashCode() { return Integer.hashCode(this.bibId); }
   }
+  private static ObjectMapper mapper = new ObjectMapper();
+
 }

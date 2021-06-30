@@ -70,6 +70,23 @@ public class Holdings {
       holdings.put((String)rawHolding.get("id"),new Holding(rawHolding,locations,holdingsNoteTypes));
     return holdings;
   }
+
+  public static HoldingSet retrieveHoldingsByInstanceHrid(
+      Connection inventory, Locations locations, ReferenceData holdingsNoteTypes, String instanceHrid )
+      throws SQLException,IOException {
+    if ( holdingsByInstance == null )
+      holdingsByInstance = inventory.prepareStatement("SELECT * FROM holdingFolio WHERE instanceHrid = ?");
+    holdingsByInstance.setString(1, instanceHrid);
+    HoldingSet holdings = new HoldingSet();
+    try (ResultSet rs = holdingsByInstance.executeQuery() ) {
+      while (rs.next()) {
+        holdings.put(rs.getString("id"),
+            new Holding(mapper.readValue(rs.getString("content"),Map.class),locations,holdingsNoteTypes));
+      }
+    }
+    return holdings;
+  }
+
   public static HoldingSet retrieveHoldingsByInstanceHrid(
       OkapiClient okapi, Locations locations, ReferenceData holdingsNoteTypes, String instanceHrid )
       throws IOException {
@@ -302,5 +319,6 @@ public class Holdings {
     }
    }
 
+  private static PreparedStatement holdingsByInstance = null;
 }
 
