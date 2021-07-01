@@ -128,6 +128,7 @@ public class Holding {
       List<Map<String,String>> a = (List<Map<String,String>>)raw.get("holdingsStatements");
       List<String> holdings = new ArrayList<>();
       for (Map<String,String> statement : a) {
+        if (statement == null ) continue;
         List<String> parts = new ArrayList<>();
         if ( statement.containsKey("statement") ) parts.add(statement.get("statement"));
         if ( statement.containsKey("note") )      parts.add(statement.get("note"));
