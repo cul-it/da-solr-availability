@@ -265,7 +265,7 @@ public class Holding {
     this.circ = circ;
     if (itemLocations.size() == 1) {
       Location itemLoc = itemLocations.iterator().next();
-      if (! itemLoc.equals(this.location))
+      if ( itemLoc != null && ! itemLoc.equals(this.location))
         this.location = itemLoc;
     } else {
       tempLocs = new ArrayList<>();
