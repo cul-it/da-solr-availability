@@ -327,7 +327,7 @@ public class ProcessAvailabilityQueue {
                 doc.addField("collection", "Math Library");
 
               solrDocs.add(doc);
-              callNumberSolr.deleteByQuery("bibid:"+bibId);
+//TODO              callNumberSolr.deleteByQuery("bibid:"+bibId);
 
               System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
                   changes)+" priority:"+priority);
