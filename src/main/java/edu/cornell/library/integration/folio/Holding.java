@@ -271,7 +271,7 @@ public class Holding {
     } else {
       tempLocs = new ArrayList<>();
       for (Item i : items)
-        if (! i.location.equals(this.location))
+        if (i.location != null && ! i.location.equals(this.location))
           tempLocs.add(new ItemReference(i.id,null,i.concatEnum(),null,i.location,i.holds,i.recalls));
           
     }
