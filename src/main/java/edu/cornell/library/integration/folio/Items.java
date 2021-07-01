@@ -106,7 +106,7 @@ public class Items implements ChangeDetector {
         }
         changes.get(instanceHrid).add(c);
       }
-    } while (false);
+    } while (changedItems.size() == limit);
 /*TODO detect batch updates?    if ( changes.size() > 4 )
       for ( Set<Change> bibChanges : changes.values() ) for ( Change c : bibChanges )
         c.type = Change.Type.ITEM_BATCH;*/
