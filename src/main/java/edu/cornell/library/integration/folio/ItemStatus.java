@@ -35,7 +35,9 @@ public class ItemStatus {
     // nocirc items at the annex are unavailable regardless of the item status
     // DISCOVERYACCESS-4881/DISCOVERYACCESS-4917
     if (this.status.equals("Available")
+        && item.loanType != null
         && item.loanType.name.equals(ExpectedLoanType.NOCIRC.toString())
+        && item.location != null
         && item.location.name.equals("Library Annex")) {
 
       this.status = "Unavailable";
