@@ -63,7 +63,7 @@ public class ProcessAvailabilityQueue {
              "  LEFT JOIN processLock ON availabilityQueue.hrid = processLock.bib_id"+
              " WHERE availabilityQueue.hrid = solrFieldsData.bib_id"+
              "   AND processLock.date IS NULL"+
-             " ORDER BY priority LIMIT 200");
+             " ORDER BY priority LIMIT 10");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE hrid = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
