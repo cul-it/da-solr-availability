@@ -136,12 +136,12 @@ public class ChangeDetector {
         replaceHolding.executeUpdate();
 
         Change c = new Change(Change.Type.HOLDING,id,"Holding modified",modDate,null);
-        if ( ! changes.containsKey(hrid)) {
+        if ( ! changes.containsKey(instanceHrid)) {
           Set<Change> t = new HashSet<>();
           t.add(c);
-          changes.put(hrid,t);
+          changes.put(instanceHrid,t);
         }
-        changes.get(hrid).add(c);
+        changes.get(instanceHrid).add(c);
       }
     } while (changedHoldings.size() == limit);
 
