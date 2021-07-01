@@ -260,8 +260,8 @@ public class Items {
     @JsonProperty("caption")   private String caption;
     @JsonProperty("holds")     public Integer holds;
     @JsonProperty("recalls")   public Integer recalls;
-    @JsonProperty("location")  public final Location location;
-    @JsonProperty("permLocation") public final String permLocation;
+    @JsonProperty("location")  public Location location = null;;
+    @JsonProperty("permLocation") public String permLocation = null;
     @JsonProperty("loanType")  public LoanType loanType;
     @JsonProperty("matType")   public Map<String,String> matType;
     @JsonProperty("rmc")       public Map<String,String> rmc;
@@ -286,10 +286,12 @@ public class Items {
 //TODO      this.holds = (rs.getInt("HOLDS_PLACED") == 0)?null:rs.getInt("HOLDS_PLACED");
 //TODO      this.recalls = (rs.getInt("RECALLS_PLACED") == 0)?null:rs.getInt("RECALLS_PLACED");
 //TODO      this.onReserve = (rs.getString("ON_RESERVE").equals("N"))?null:true;
-      String permLocationId = (String)raw.get("permanentLocationId");
-      this.permLocation = locations.getByUuid(permLocationId).name;
-      String locationId = (raw.containsKey("temporaryLocationId"))? (String)raw.get("temporaryLocationId"): permLocationId;
-      this.location = locations.getByUuid(locationId);
+      if ( raw.containsKey("permanentLocationId") ) {
+        String permLocationId = (String)raw.get("permanentLocationId");
+        this.permLocation = locations.getByUuid(permLocationId).name;
+        String locationId = (raw.containsKey("temporaryLocationId"))? (String)raw.get("temporaryLocationId"): permLocationId;
+        this.location = locations.getByUuid(locationId);
+      }
 //TODO      this.circGrp = circPolicyGroups.getByLocId(locationNumber);
           
       String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
