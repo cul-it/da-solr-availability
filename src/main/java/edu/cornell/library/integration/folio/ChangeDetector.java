@@ -198,6 +198,10 @@ public class ChangeDetector {
 
         String id = (String)item.get("id");
         String barcode = (item.containsKey("barcode"))?(String)item.get("barcode"):null;
+        if (barcode != null && barcode.length()>14) {
+          System.out.println("Barcode too long. Omitting ["+hrid+"/"+barcode+"]");
+          barcode = null;
+        }
         if (replaceItem == null)
           replaceItem = inventory.prepareStatement(
               "REPLACE INTO itemFolio (id, hrid, holdingHrid, moddate, barcode, content) "+
