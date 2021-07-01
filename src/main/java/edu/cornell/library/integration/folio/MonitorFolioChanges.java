@@ -56,9 +56,12 @@ public class MonitorFolioChanges {
 
         queueForIndex(
             ChangeDetector.detectChangedInstances( inventory, okapi, since ),queueGen, getTitle );
-//        Map<String, Set<Change>> changedBibs =
-//            ChangeDetector.detectChangedItems( inventory, okapi, since );
-//        queueForIndex( changedBibs, queueAvail, getTitle );
+        Map<String, Set<Change>> changedBibs =
+            ChangeDetector.detectChangedHoldings( inventory, okapi, since );
+        queueForIndex(changedBibs,queueGen,getTitle);
+        queueForIndex(changedBibs,queueAvail,getTitle);
+//        queueForIndex(
+//            ChangeDetector.detectChangedItems( inventory, okapi, since ), queueAvail, getTitle );
 //        detectors.parallelStream().map(c -> detectChanges(c, okapi, since))
 //        .flatMap(m -> m.entrySet().stream())
 //        .collect(Collectors.toMap(Entry::getKey,Entry::getValue,(v1,v2) -> { v1.addAll(v2); return v1; }));
