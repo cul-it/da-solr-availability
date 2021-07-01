@@ -58,14 +58,14 @@ public class Items implements ChangeDetector {
             metadata.get("updatedDate").replace("+00:00","Z")));
         modDateCursor = modDate;
 
-/*        if ( getPreviousItem == null )
+        if ( getPreviousItem == null )
           getPreviousItem = inventory.prepareStatement("SELECT content FROM itemFolio WHERE hrid = ?");
         getPreviousItem.setString(1, hrid);
         boolean changed = true;
         try ( ResultSet rs = getPreviousItem.executeQuery() ) {
           while (rs.next()) if (rs.getString("content").equals(itemJson)) changed = false;
         }
-        if ( ! changed ) continue;*/
+        if ( ! changed ) continue;
 
         if (getParentage == null)
           getParentage = inventory.prepareStatement(
