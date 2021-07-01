@@ -5,8 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,93 +26,13 @@ import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 import edu.cornell.library.integration.folio.LoanTypes.LoanType;
 import edu.cornell.library.integration.folio.Locations.Location;
 
-public class Items implements ChangeDetector {
+public class Items {
 
   static Locations locations = null;
   static ReferenceData materialTypes = null;
   static ReferenceData itemNoteTypes = null;
 
 
-  @Override
-  public Map<String,Set<Change>> detectChanges(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
-
-    Map<String,Set<Change>> changes = new HashMap<>();
-
-    int limit = 5000;
-    Timestamp modDateCursor = since;
-    List<Map<String, Object>> changedItems;
-
-    do {
-      changedItems = okapi.queryAsList("/item-storage/items",
-          "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
-          " sortBy metadata.updatedDate",limit);
-      for (Map<String,Object> item : changedItems) {
-        
-        String hrid = (String)item.get("hrid");
-        String itemJson = mapper.writeValueAsString(item);
-        Map<String,String> metadata = (Map<String,String>) item.get("metadata");
-        Timestamp modDate = Timestamp.from(Instant.parse(
-            metadata.get("updatedDate").replace("+00:00","Z")));
-        modDateCursor = modDate;
-
-        if ( getPreviousItem == null )
-          getPreviousItem = inventory.prepareStatement("SELECT content FROM itemFolio WHERE hrid = ?");
-        getPreviousItem.setString(1, hrid);
-        boolean changed = true;
-        try ( ResultSet rs = getPreviousItem.executeQuery() ) {
-          while (rs.next()) if (rs.getString("content").equals(itemJson)) changed = false;
-        }
-        if ( ! changed ) continue;
-
-        if (getParentage == null)
-          getParentage = inventory.prepareStatement(
-              "SELECT instanceHrid, hrid FROM holdingFolio WHERE id = ?");
-        getParentage.setString(1, (String)item.get("holdingsRecordId"));
-        String instanceHrid = null;
-        String holdingHrid = null;
-        try (ResultSet rs = getParentage.executeQuery() ) {
-          while (rs.next()) {
-            instanceHrid = rs.getString(1);
-            holdingHrid = rs.getString(2);
-          }
-        }
-        if ( instanceHrid == null ) {
-          System.out.println("Item "+hrid+" can't be tracked to instance, not queueing for index.");
-          continue;
-        }
-
-        String id = (String)item.get("id");
-        String barcode = (item.containsKey("barcode"))?(String)item.get("barcode"):null;
-        if (replaceItem == null)
-          replaceItem = inventory.prepareStatement(
-              "REPLACE INTO itemFolio (id, hrid, holdingHrid, moddate, barcode, content) "+
-              " VALUES (?,?,?,?,?,?)");
-        replaceItem.setString(1, id);
-        replaceItem.setString(2, hrid);
-        replaceItem.setString(3, holdingHrid);
-        replaceItem.setTimestamp(4, modDate);
-        replaceItem.setString(5, barcode);
-        replaceItem.setString(6, itemJson);
-        replaceItem.executeUpdate();
-
-        Change c = new Change(Change.Type.ITEM,id,"Item modified",modDate,null);
-        if ( ! changes.containsKey(instanceHrid)) {
-          Set<Change> t = new HashSet<>();
-          t.add(c);
-          changes.put(instanceHrid,t);
-        }
-        changes.get(instanceHrid).add(c);
-      }
-    } while (changedItems.size() == limit);
-/*TODO detect batch updates?    if ( changes.size() > 4 )
-      for ( Set<Change> bibChanges : changes.values() ) for ( Change c : bibChanges )
-        c.type = Change.Type.ITEM_BATCH;*/
-    return changes;
-  }
-  static PreparedStatement getPreviousItem = null;
-  static PreparedStatement replaceItem = null;
-  static PreparedStatement getParentage = null;
 
 /*  public static Map<Integer,String> collectAllCurrentDueDates( Connection voyager )
       throws SQLException, JsonProcessingException {

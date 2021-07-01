@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
-public class MonitorAvailability {
+public class MonitorFolioChanges {
 
   private static final String CURRENT_TO_KEY = "avail";
 
@@ -30,8 +30,10 @@ public class MonitorAvailability {
     try (
         Connection inventory = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
-        PreparedStatement queueIndex = inventory.prepareStatement
+        PreparedStatement queueAvail = inventory.prepareStatement
             ("INSERT INTO availabilityQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
+        PreparedStatement queueGen = inventory.prepareStatement
+            ("INSERT INTO generationQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement getTitle = inventory.prepareStatement
             ("SELECT title FROM bibRecsSolr WHERE bib_id = ?")) {
 
@@ -52,12 +54,15 @@ public class MonitorAvailability {
         Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
         final Timestamp since = time;
 
-        Map<String, Set<Change>> changedBibs = (new Items()).detectChanges(inventory, okapi, since);
+        queueForIndex(
+            ChangeDetector.detectChangedInstances( inventory, okapi, since ),queueGen, getTitle );
+//        Map<String, Set<Change>> changedBibs =
+//            ChangeDetector.detectChangedItems( inventory, okapi, since );
+//        queueForIndex( changedBibs, queueAvail, getTitle );
 //        detectors.parallelStream().map(c -> detectChanges(c, okapi, since))
 //        .flatMap(m -> m.entrySet().stream())
 //        .collect(Collectors.toMap(Entry::getKey,Entry::getValue,(v1,v2) -> { v1.addAll(v2); return v1; }));
 
-        queueForIndex( changedBibs, queueIndex, getTitle );
         Thread.sleep(500);
         time = newTime;
         Change.setCurrentToDate( time, inventory, CURRENT_TO_KEY );
