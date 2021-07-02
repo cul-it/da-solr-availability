@@ -34,7 +34,8 @@ public class LoanTypes {
     BD    ("BD LOAN"),
     CIRC  ("Circulating"),
     NOCIRC("Non-circulating"),
-    RES   ("Reserves");
+    RES   ("Reserves"),
+    ILL   ("ILL LOAN");
 
     final private String label;
     private ExpectedLoanType(String label) { this.label = label; }
