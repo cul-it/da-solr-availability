@@ -79,15 +79,22 @@ public class Holding {
         this.location = l;
     }
 
-    if ( raw.containsKey("callNumber") ) {
-      String call = (String)raw.get("callNumber");
+    if ( raw.containsKey("callNumberSuffix") )
+      this.callNumberSuffix = (String) raw.get("callNumberSuffix");
+    List<String> callNumberParts = new ArrayList<>();
+    if ( raw.containsKey("callNumberPrefix") )
+      callNumberParts.add((String)raw.get("callNumberPrefix"));
+    if ( raw.containsKey("callNumber") )
+      callNumberParts.add((String)raw.get("callNumber"));
+    if ( this.callNumberSuffix != null )
+      callNumberParts.add(this.callNumberSuffix);
+    if ( ! callNumberParts.isEmpty() ) {
+      String call = String.join(" ", callNumberParts);
       if ( call != null ) {
         call =  call.replaceAll("[Nn]o [Cc]all [Nn]umber\\.*", "").trim();
         if (! call.isEmpty() ) this.call = call;
       }
     }
-    if ( raw.containsKey("callNumberSuffix") )
-      this.callNumberSuffix = (String) raw.get("callNumberSuffix");
     if ( raw.containsKey("copyNumber") )
       this.copy = (String) raw.get("copyNumber");
 
