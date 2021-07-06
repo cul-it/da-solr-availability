@@ -78,7 +78,7 @@ public class Items {
 
       TreeSet<Item> items = new TreeSet<>();
       for (Map<String, Object> rawItem : rawItems) {
-        Item i = new Item(okapi,rawItem,holdings.get(holdingId).active);
+        Item i = new Item(okapi,rawItem,holdings.get(holdingId).active,holdings.get(holdingId).location);
         i.callNumber = holdings.get(holdingId).call;
         items.add(i);
 /*TODO Tabulation of due dates and requests for change tracking is likely not going to be needed in Folio
@@ -270,7 +270,8 @@ public class Items {
     @JsonProperty("date")      public Integer date;
     @JsonProperty("active")    public boolean active = true;
 
-    Item(OkapiClient okapi, Map<String,Object> raw, boolean active) throws IOException {
+    Item(OkapiClient okapi, Map<String,Object> raw, boolean active, Location holdingLocation)
+        throws IOException {
 
       this.id = (String)raw.get("id");
       this.hrid = (String)raw.get("hrid");
@@ -292,6 +293,7 @@ public class Items {
         String locationId = (raw.containsKey("temporaryLocationId"))? (String)raw.get("temporaryLocationId"): permLocationId;
         this.location = locations.getByUuid(locationId);
       }
+      if (this.location == null) this.location = holdingLocation;
 //TODO      this.circGrp = circPolicyGroups.getByLocId(locationNumber);
           
       String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
