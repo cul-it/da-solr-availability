@@ -54,7 +54,8 @@ public class ItemStatus {
         return;
       Instant returned = Instant.parse(lastCheckIn.get("dateTime").replace("+00:00","Z"));
       ServicePoint servicePoint = ServicePoints.getByUuid(item.location.primaryServicePoint);
-      if ( returned.plusSeconds(servicePoint.shelvingLagTime*60).isAfter(Instant.now()))
+      int lagMinutes = (servicePoint.shelvingLagTime == null)?4320:servicePoint.shelvingLagTime;
+      if ( returned.plusSeconds(lagMinutes*60).isAfter(Instant.now()))
         this.returned = returned.getEpochSecond();
       return;
     }
