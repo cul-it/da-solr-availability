@@ -62,6 +62,8 @@ public class MonitorFolioChanges {
         queueForIndex(changedBibs,queueAvail,getTitle);
         queueForIndex(
             ChangeDetector.detectChangedItems( inventory, okapi, since ), queueAvail, getTitle );
+        queueForIndex(
+            ChangeDetector.detectChangedLoans( inventory, okapi, since ), queueAvail, getTitle );
 
         Thread.sleep(10_000);
         time = newTime;

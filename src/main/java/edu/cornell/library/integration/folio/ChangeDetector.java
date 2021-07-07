@@ -228,14 +228,90 @@ public class ChangeDetector {
         c.type = Change.Type.ITEM_BATCH;*/
     return changes;
   }
+
+  public static Map<String,Set<Change>> detectChangedLoans(
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+
+    Map<String,Set<Change>> changes = new HashMap<>();
+
+    int limit = 5000;
+    Timestamp modDateCursor = since;
+    List<Map<String, Object>> changedLoans;
+
+    LOAN: do {
+      changedLoans = okapi.queryAsList("/loan-storage/loans",
+          "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
+          " sortBy metadata.updatedDate",limit);
+      for (Map<String,Object> loan : changedLoans) {
+        
+        String id = (String)loan.get("id");
+        String itemId = (String)loan.get("itemId");
+        String loanJson = mapper.writeValueAsString(loan);
+        Map<String,String> metadata = (Map<String,String>) loan.get("metadata");
+        Timestamp modDate = Timestamp.from(Instant.parse(
+            metadata.get("updatedDate").replace("+00:00","Z")));
+        modDateCursor = modDate;
+
+        if ( getPreviousLoan == null )
+          getPreviousLoan = inventory.prepareStatement("SELECT content FROM loanFolio WHERE id = ?");
+        getPreviousLoan.setString(1, id);
+        try ( ResultSet rs = getPreviousItem.executeQuery() ) {
+          while (rs.next()) if (rs.getString("content").equals(loanJson)) continue LOAN;
+        }
+
+        if (getLoanParentage == null)
+          getLoanParentage = inventory.prepareStatement(
+              "SELECT instanceHrid, itemFolio.hrid FROM holdingFolio, itemFolio"+
+              " WHERE itemFolio.id = ? AND itemFolio.holdingHrid = holdingFolio.hrid");
+        getLoanParentage.setString(1, itemId);
+        String instanceHrid = null;
+        String itemHrid = null;
+        try (ResultSet rs = getLoanParentage.executeQuery() ) {
+          while (rs.next()) {
+            instanceHrid = rs.getString(1);
+            itemHrid = rs.getString(2);
+          }
+        }
+        if ( instanceHrid == null ) {
+          System.out.printf("Loan %s (item %s) can't be tracked to instance,"
+              + " not queueing for index.\n", id, itemHrid);
+          continue;
+        }
+
+        if (replaceLoan == null)
+          replaceLoan = inventory.prepareStatement(
+              "REPLACE INTO loanFolio (id, itemHrid, moddate, content) VALUES (?,?,?,?)");
+        replaceLoan.setString(1, id);
+        replaceLoan.setString(2, itemHrid);
+        replaceLoan.setTimestamp(3, modDate);
+        replaceLoan.setString(4, loanJson);
+        replaceLoan.executeUpdate();
+
+        Change c = new Change(Change.Type.ITEM,id,"Item modified",modDate,null);
+        if ( ! changes.containsKey(instanceHrid)) {
+          Set<Change> t = new HashSet<>();
+          t.add(c);
+          changes.put(instanceHrid,t);
+        }
+        changes.get(instanceHrid).add(c);
+      }
+    } while (changedLoans.size() == limit);
+
+    return changes;
+  }
+
+
   static PreparedStatement getPreviousInstance = null;
   static PreparedStatement getPreviousHolding = null;
   static PreparedStatement getPreviousItem = null;
+  static PreparedStatement getPreviousLoan = null;
   static PreparedStatement replaceInstance = null;
   static PreparedStatement replaceHolding = null;
   static PreparedStatement replaceItem = null;
-  static PreparedStatement getItemParentage = null;
+  static PreparedStatement replaceLoan = null;
   static PreparedStatement getHoldingParentage = null;
+  static PreparedStatement getItemParentage = null;
+  static PreparedStatement getLoanParentage = null;
 
   static ObjectMapper mapper = new ObjectMapper();
   static {
