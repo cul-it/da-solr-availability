@@ -63,7 +63,7 @@ public class MonitorFolioChanges {
         queueForIndex(
             ChangeDetector.detectChangedItems( inventory, okapi, since ), queueAvail, getTitle );
 
-        Thread.sleep(500);
+        Thread.sleep(10_000);
         time = newTime;
         Change.setCurrentToDate( time, inventory, CURRENT_TO_KEY );
       }
