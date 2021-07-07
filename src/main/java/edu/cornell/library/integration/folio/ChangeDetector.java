@@ -174,7 +174,7 @@ public class ChangeDetector {
           getPreviousItem = inventory.prepareStatement("SELECT content FROM itemFolio WHERE hrid = ?");
         getPreviousItem.setString(1, hrid);
         boolean changed = true;
-        try ( ResultSet rs = getPreviousInstance.executeQuery() ) {
+        try ( ResultSet rs = getPreviousItem.executeQuery() ) {
           while (rs.next()) if (rs.getString("content").equals(itemJson)) changed = false;
         }
         if ( ! changed ) continue;
