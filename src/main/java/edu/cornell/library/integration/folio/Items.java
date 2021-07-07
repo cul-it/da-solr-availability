@@ -78,7 +78,7 @@ public class Items {
 
       TreeSet<Item> items = new TreeSet<>();
       for (Map<String, Object> rawItem : rawItems) {
-        Item i = new Item(okapi,rawItem,holdings.get(holdingId).active,holdings.get(holdingId).location);
+        Item i = new Item(inventory,rawItem,holdings.get(holdingId));
         i.callNumber = holdings.get(holdingId).call;
         items.add(i);
 /*TODO Tabulation of due dates and requests for change tracking is likely not going to be needed in Folio
@@ -270,8 +270,8 @@ public class Items {
     @JsonProperty("date")      public Integer date;
     @JsonProperty("active")    public boolean active = true;
 
-    Item(OkapiClient okapi, Map<String,Object> raw, boolean active, Location holdingLocation)
-        throws IOException {
+    Item(Connection inventory, Map<String,Object> raw, Holding holding)
+        throws SQLException, IOException {
 
       this.id = (String)raw.get("id");
       this.hrid = (String)raw.get("hrid");
@@ -293,18 +293,18 @@ public class Items {
         String locationId = (raw.containsKey("temporaryLocationId"))? (String)raw.get("temporaryLocationId"): permLocationId;
         this.location = locations.getByUuid(locationId);
       }
-      if (this.location == null) this.location = holdingLocation;
+      if (this.location == null) this.location = holding.location;
 //TODO      this.circGrp = circPolicyGroups.getByLocId(locationNumber);
           
       String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
       this.loanType = LoanTypes.getByUuid(loanTypeId);
       this.matType = materialTypes.getEntryHashByUuid((String)raw.get("materialTypeId"));
-      this.status = new ItemStatus(okapi,raw,this);
+      this.status = new ItemStatus(inventory,raw,this);
       //      this.loanType = loanTypes.getByUuid(loanTypeId);
 //      this.status = new ItemStatus( voyager, this.itemId, this.type, this.location );
 //      this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
 //         ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
-      this.active = active;
+      this.active = holding.active;
       if ( ! raw.containsKey("notes") ) return;
       List<Map<String,String>> notes = (List<Map<String,String>>)raw.get("notes");
       for ( Map<String,String> noteHash : notes ) {

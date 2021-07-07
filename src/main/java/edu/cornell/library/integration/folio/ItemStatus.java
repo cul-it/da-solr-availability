@@ -1,9 +1,19 @@
 package edu.cornell.library.integration.folio;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.LoanTypes.ExpectedLoanType;
@@ -16,14 +26,21 @@ public class ItemStatus {
   public Boolean shortLoan = null;
   public Long date = null;
 
-  public ItemStatus( OkapiClient okapi, Map<String,Object> rawItem, Item item ) throws IOException {
+  public ItemStatus( Connection inventory, Map<String,Object> rawItem, Item item )
+      throws SQLException, IOException {
 
     Map<String,String> statusData = (Map<String,String>)rawItem.get("status");
     this.status = statusData.get("name");
 
     if (this.status.equals("Checked out")) {
-      List<Map<String, Object>> loans =
-          okapi.queryAsList("/loan-storage/loans", "itemId=="+item.id, null);
+      List<Map<String, Object>> loans = new ArrayList<>();
+//          okapi.queryAsList("/loan-storage/loans", "itemId=="+item.id, null);
+      if ( loansByItem == null )
+        loansByItem = inventory.prepareStatement("SELECT * FROM loanFolio WHERE itemHrid = ?");
+      loansByItem.setString(1, item.hrid);
+      try ( ResultSet rs = loansByItem.executeQuery() ) {
+        while (rs.next()) loans.add(mapper.readValue(rs.getString("content"), Map.class));
+      }
       for (Map<String,Object> loan : loans) {
         if ( ! ((Map<String,String>)loan.get("status")).get("name").equals("Open") ) continue;
         this.due = Instant.parse(((String)loan.get("dueDate")).replace("+00:00","Z")).getEpochSecond();
@@ -63,5 +80,9 @@ public class ItemStatus {
     if ( statusData.containsKey("date") )
       this.date = Instant.parse(statusData.get("date").replace("+00:00","Z")).getEpochSecond();
   }
-
+  static PreparedStatement loansByItem = null;
+  static ObjectMapper mapper = new ObjectMapper();
+  static {
+    mapper.setSerializationInclusion(Include.NON_EMPTY);
+  }
 }
