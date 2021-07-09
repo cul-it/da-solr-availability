@@ -287,13 +287,11 @@ public class Items {
 //TODO      this.holds = (rs.getInt("HOLDS_PLACED") == 0)?null:rs.getInt("HOLDS_PLACED");
 //TODO      this.recalls = (rs.getInt("RECALLS_PLACED") == 0)?null:rs.getInt("RECALLS_PLACED");
 //TODO      this.onReserve = (rs.getString("ON_RESERVE").equals("N"))?null:true;
-      if ( raw.containsKey("permanentLocationId") ) {
-        String permLocationId = (String)raw.get("permanentLocationId");
-        this.permLocation = locations.getByUuid(permLocationId).name;
-        String locationId = (raw.containsKey("temporaryLocationId"))? (String)raw.get("temporaryLocationId"): permLocationId;
-        this.location = locations.getByUuid(locationId);
-      }
-      if (this.location == null) this.location = holding.location;
+      if ( raw.containsKey("temporaryLocationId") )
+        this.location = locations.getByUuid( (String)raw.get("temporaryLocationId") );
+      else
+        this.location = holding.location;
+      this.permLocation = holding.location.name;
 //TODO      this.circGrp = circPolicyGroups.getByLocId(locationNumber);
           
       String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
