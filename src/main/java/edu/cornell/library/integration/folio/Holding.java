@@ -175,6 +175,22 @@ public class Holding {
     } else
       this.indexes = null;
 
+    if (raw.containsKey("receivingHistory"))
+      if ( ((Map<String,Object>)raw.get("receivingHistory")).containsKey("entries")) {
+        List<Map<String,Object>> entries =
+            (List<Map<String,Object>>)((Map<String,Object>)raw.get("receivingHistory")).get("entries");
+        for (Map<String,Object> entry : entries) {
+          if ( entry.containsKey("publicDisplay") && ! (boolean) entry.get("publicDisplay") )
+            continue;
+          List<String> parts = new ArrayList<>();
+          if ( entry.containsKey("enumeration") ) parts.add((String)entry.get("enumeration"));
+          if ( entry.containsKey("chronology") ) parts.add((String)entry.get("chronology"));
+          if ( ! parts.isEmpty() ) {
+            if ( this.recentIssues == null ) this.recentIssues = new ArrayList<>();
+            this.recentIssues.add(String.join(" ", parts));
+          }
+        }
+    }
   }
 
   Holding(
