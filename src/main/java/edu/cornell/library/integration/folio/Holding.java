@@ -30,6 +30,7 @@ public class Holding {
   @JsonProperty("hrid")        public final String hrid;
   @JsonProperty("copy")        public String copy;
   @JsonProperty("notes")       public List<String> notes;
+  @JsonProperty("restrictions")public List<String> restrictions;
   @JsonProperty("holdings")    public final List<String> holdings;
   @JsonProperty("supplements") public final List<String> supplements;
   @JsonProperty("indexes")     public final List<String> indexes;
@@ -119,7 +120,10 @@ public class Holding {
             this.donors.add(text);
 
         } else if (
-            type.equals("Restriction") /*506*/ ||
+            type.equals("Restriction") /*506*/ ) {
+          if ( this.restrictions == null ) this.restrictions = new ArrayList<>();
+          this.restrictions.add(text);
+        } else if (
             type.equals("Provenance") /*561*/ ||
             type.equals("Copy note") /*562*/ ||
             type.equals("Reproduction") /*843*/ ||
