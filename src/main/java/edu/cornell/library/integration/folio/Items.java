@@ -81,13 +81,6 @@ public class Items {
         Item i = new Item(inventory,rawItem,holdings.get(holdingId));
         i.callNumber = holdings.get(holdingId).call;
         items.add(i);
-/*TODO Tabulation of due dates and requests for change tracking is likely not going to be needed in Folio
-        if ( i.status != null ) {
-          if ( i.status.due != null )
-            dueDates.put(i.itemId, (new Timestamp(i.status.due*1000)).toLocalDateTime().format(formatter));
-          for ( StatusCode c : i.status.statuses ) if ( c.name.contains("Request") )
-            requests.put(i.itemId, c.name);
-        }*/
       }
       il.put(holdingId, items);
     }
@@ -144,39 +137,6 @@ public class Items {
     }
 
   }
-
-/*
-  static Item retrieveItemByItemId( Connection voyager, int item_id ) throws SQLException {
-    if (locations == null) {
-      locations = new Locations( voyager );
-      itemTypes = new ItemTypes( voyager );
-      circPolicyGroups = new CircPolicyGroups( voyager );
-    }
-    try (PreparedStatement pstmt = voyager.prepareStatement(itemByItemIdQuery)) {
-      pstmt.setInt(1, item_id);
-      try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next())
-          return new Item(voyager,rs, true);
-      }
-    }
-    return null;
-  }*/
-
-  /*TODO Is this even used by anything? Maybe a test?
-  static Item retrieveItemByBarcode( OkapiClient okapi, String barcode) throws SQLException {
-    if (locations == null) {
-      locations = new Locations( okapi );
-    }
-    try (PreparedStatement pstmt = voyager.prepareStatement(itemByBarcodeQuery)) {
-      pstmt.setString(1, barcode);
-      try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next())
-          return new Item(voyager,rs, true);
-      }
-    }
-    return null;
-  }
-  */
 
   static Item extractItemFromJson( String json ) throws IOException {
     return mapper.readValue(json, Item.class);
@@ -252,15 +212,10 @@ public class Items {
     @JsonProperty("barcode")   public final String barcode;
     @JsonProperty("copy")      private final String copy;
     @JsonProperty("sequence")  private int sequence;
-    @JsonProperty("onReserve") private Boolean onReserve = null;
     @JsonProperty("call")      public String callNumber = null;
     @JsonProperty("enum")      public String enumeration;
     @JsonProperty("chron")     public final String chron;
-    @JsonProperty("year")      public String year;
-    @JsonProperty("caption")   private String caption;
-    @JsonProperty("holds")     public Integer holds;
-    @JsonProperty("recalls")   public Integer recalls;
-    @JsonProperty("location")  public Location location = null;;
+    @JsonProperty("location")  public Location location = null;
     @JsonProperty("permLocation") public String permLocation = null;
     @JsonProperty("loanType")  public LoanType loanType;
     @JsonProperty("matType")   public Map<String,String> matType;
@@ -282,46 +237,36 @@ public class Items {
 //TODO      this.sequence = rs.getInt("ITEM_SEQUENCE_NUMBER");
       this.enumeration = (String)raw.get("enumeration");
       this.chron = (String)raw.get("chronology");
-//TODO      this.year = rs.getString("YEAR");
-//TODO      this.caption = rs.getString("CAPTION"); -> mapped to note in Folio
-//TODO      this.holds = (rs.getInt("HOLDS_PLACED") == 0)?null:rs.getInt("HOLDS_PLACED");
-//TODO      this.recalls = (rs.getInt("RECALLS_PLACED") == 0)?null:rs.getInt("RECALLS_PLACED");
-//TODO      this.onReserve = (rs.getString("ON_RESERVE").equals("N"))?null:true;
+
       if ( raw.containsKey("temporaryLocationId") )
         this.location = locations.getByUuid( (String)raw.get("temporaryLocationId") );
       else
         this.location = holding.location;
       this.permLocation = holding.location.name;
-//TODO      this.circGrp = circPolicyGroups.getByLocId(locationNumber);
-          
+
       String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
       this.loanType = LoanTypes.getByUuid(loanTypeId);
       this.matType = materialTypes.getEntryHashByUuid((String)raw.get("materialTypeId"));
       this.status = new ItemStatus(inventory,raw,this);
-      //      this.loanType = loanTypes.getByUuid(loanTypeId);
-//      this.status = new ItemStatus( voyager, this.itemId, this.type, this.location );
-//      this.date = (int)(((rs.getTimestamp("MODIFY_DATE") == null)
-//         ? rs.getTimestamp("CREATE_DATE") : rs.getTimestamp("MODIFY_DATE")).getTime()/1000);
       this.active = holding.active;
       if ( ! raw.containsKey("notes") ) return;
       List<Map<String,String>> notes = (List<Map<String,String>>)raw.get("notes");
+      Map<String,String> rmcnotes = new HashMap<>();
       for ( Map<String,String> noteHash : notes ) {
-        String type = itemNoteTypes.getUuid(noteHash.get("noteTypeId"));
+        String type = itemNoteTypes.getName(noteHash.get("itemNoteTypeId"));
         if (type == null)  continue;
-        Map<String,String> rmcnotes = new HashMap<>();
 
         switch (type) {
 
         case "Vault location":
-        case "ArchiveSpace Top Container":
+        case "ArchivesSpace Top Container":
         case "Restrictions":
           rmcnotes.put(type, noteHash.get("note"));
           break;
         }
-        if ( rmcnotes.size() > 0 )
-          this.rmc = rmcnotes;
-
       }
+      if ( rmcnotes.size() > 0 )
+        this.rmc = rmcnotes;
     }
 
     Item(
@@ -330,14 +275,9 @@ public class Items {
         @JsonProperty("barcode")   String barcode,
         @JsonProperty("copy")      String copy,
         @JsonProperty("sequence")  int sequence,
-        @JsonProperty("onReserve") Boolean onReserve,
         @JsonProperty("call")      String callNumber,
         @JsonProperty("enum")      String enumeration,
         @JsonProperty("chron")     String chron,
-        @JsonProperty("year")      String year,
-        @JsonProperty("caption")   String caption,
-        @JsonProperty("holds")     Integer holds,
-        @JsonProperty("recalls")   Integer recalls,
         @JsonProperty("location")  Location location,
         @JsonProperty("permLocation") String permLocation,
         @JsonProperty("loanType")  LoanType loanType,
@@ -352,14 +292,9 @@ public class Items {
       this.barcode = barcode;
       this.copy = copy;
       this.sequence = sequence;
-      this.onReserve = onReserve;
       this.callNumber = callNumber;
       this.enumeration = enumeration;
       this.chron = chron;
-      this.year = year;
-      this.caption = caption;
-      this.holds = holds;
-      this.recalls = recalls;
       this.location = location;
       this.permLocation = permLocation;
       this.loanType = loanType;
@@ -393,13 +328,12 @@ public class Items {
     }
 
     String concatEnum() {
-      List<String> enumchronyear = new ArrayList<>();
-      if (this.enumeration != null && !this.enumeration.isEmpty()) enumchronyear.add(this.enumeration);
-      if (this.chron != null && !this.chron.isEmpty()) enumchronyear.add(this.chron);
-      if (this.year != null && !this.year.isEmpty()) enumchronyear.add(this.year);
-      if (enumchronyear.isEmpty())
+      List<String> enumchron = new ArrayList<>();
+      if (this.enumeration != null && !this.enumeration.isEmpty()) enumchron.add(this.enumeration);
+      if (this.chron != null && !this.chron.isEmpty()) enumchron.add(this.chron);
+      if (enumchron.isEmpty())
         return null;
-      return String.join(" - ", enumchronyear);
+      return String.join(" - ", enumchron);
     }
 
   }

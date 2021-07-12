@@ -280,10 +280,10 @@ public class Holding {
       itemCount++;
       itemLocations.add(item.location);
       if (! item.status.status.equals("Available") ) {
-        unavails.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null,item.holds,item.recalls));
+        unavails.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null));
       } else if (item.status.returned != null) {
         discharged = true;
-        returned.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null,null,null));
+        returned.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null));
       }
       if (item.loanType != null && ! item.loanType.name.equals(ExpectedLoanType.NOCIRC.name()))
         circ = true;
@@ -299,7 +299,7 @@ public class Holding {
       tempLocs = new ArrayList<>();
       for (Item i : items)
         if (i.location != null && ! i.location.equals(this.location))
-          tempLocs.add(new ItemReference(i.id,null,i.concatEnum(),null,i.location,i.holds,i.recalls));
+          tempLocs.add(new ItemReference(i.id,null,i.concatEnum(),null,i.location));
           
     }
     this.itemSummary = new HoldingsItemSummary(

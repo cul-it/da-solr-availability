@@ -63,8 +63,7 @@ public class MultivolumeAnalysis {
         LocationEnumStats stats = enumStats.get(i.location);
 
         if ( ! stats.diverseEnumFound || ! stats.blankEnumFound ) {
-          String enumeration = ((i.enumeration==null)?"":i.enumeration)
-              +((i.chron==null)?"":i.chron)+((i.year==null)?"":i.year);
+          String enumeration = ((i.enumeration==null)?"":i.enumeration)+((i.chron==null)?"":i.chron);
           enumeration = enumeration.replaceAll("c\\.\\d+", "");
           enumeration = enumeration.replaceAll("Bound with", "");
           if (stats.aFoundEnum == null)
@@ -162,7 +161,7 @@ public class MultivolumeAnalysis {
       String holdingId = e.getKey();
 
       for (Item i : e.getValue()) {
-        if (i.chron == null && i.enumeration == null && i.year == null) {
+        if (i.chron == null && i.enumeration == null) {
           List<String> holdingsDesc = holdings.get(holdingId).holdings;
           if (holdingsDesc == null || holdingsDesc.isEmpty()) {
             missingHoldingsDescriptions = true;
