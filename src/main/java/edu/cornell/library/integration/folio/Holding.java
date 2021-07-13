@@ -180,6 +180,7 @@ public class Holding {
         List<Map<String,Object>> entries =
             (List<Map<String,Object>>)((Map<String,Object>)raw.get("receivingHistory")).get("entries");
         for (Map<String,Object> entry : entries) {
+          if ( entry == null ) continue;
           if ( entry.containsKey("publicDisplay") && ! (boolean) entry.get("publicDisplay") )
             continue;
           List<String> parts = new ArrayList<>();
