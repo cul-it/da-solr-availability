@@ -40,9 +40,9 @@ public class WorksAndInventory {
   private final static String selectB2W = "SELECT * FROM bib2work WHERE bib_id = ? AND active = 1";
   private final static String selectB2W2 =
       "SELECT bib2work.bib_id "+
-      "  FROM bib2work, solrFieldsData, bibRecsSolr"+
+      "  FROM bib2work, processedMarcData, bibRecsSolr"+
       " WHERE work_id = ?"+
-      "   AND bib2work.bib_id = solrFieldsData.bib_id"+
+      "   AND bib2work.bib_id = processedMarcData.bib_id"+
       "   AND recordtype_solr_fields LIKE '%type: Catalog%'"+
       "   AND bib2work.bib_id = bibRecsSolr.bib_id"+
       "   AND bibRecsSolr.active = 1";

@@ -59,9 +59,9 @@ public class ProcessAvailabilityQueue {
         Statement stmt = inventoryDB.createStatement();
         PreparedStatement readQStmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.hrid, priority"+
-             "  FROM solrFieldsData, availabilityQueue"+
+             "  FROM processedMarcData, availabilityQueue"+
              "  LEFT JOIN processLock ON availabilityQueue.hrid = processLock.bib_id"+
-             " WHERE availabilityQueue.hrid = solrFieldsData.bib_id"+
+             " WHERE availabilityQueue.hrid = processedMarcData.bib_id"+
              "   AND processLock.date IS NULL"+
              " ORDER BY priority LIMIT 10");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
@@ -90,7 +90,7 @@ public class ProcessAvailabilityQueue {
       for (int i = 0; i < 50_000; i++){
         Set<BibToUpdate> bibs = new HashSet<>();
         Set<Integer> ids = new HashSet<>();
-        stmt.execute("LOCK TABLES solrFieldsData READ,availabilityQueue WRITE,bibRecsVoyager READ,processLock WRITE");
+        stmt.execute("LOCK TABLES processedMarcData READ,availabilityQueue WRITE,bibRecsVoyager READ,processLock WRITE");
         Integer priority = null;
         List<Integer> lockIds = new ArrayList<>();
         try (  ResultSet rs = readQStmt.executeQuery() ) {
@@ -171,7 +171,7 @@ public class ProcessAvailabilityQueue {
       "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields, citationref_solr_fields," + 
       "       url_solr_fields,         hathilinks_solr_fields,  newbooks_solr_fields,    recordtype_solr_fields," + 
       "       recordboost_solr_fields, holdings_solr_fields,    otherids_solr_fields" + 
-      "  FROM solrFieldsData"+
+      "  FROM processedMarcData"+
       " WHERE bib_id = ?";
   static void updateBibsInSolr(
       OkapiClient okapi, Connection inventory,
@@ -194,7 +194,7 @@ public class ProcessAvailabilityQueue {
               PreparedStatement instanceByHrid = inventory.prepareStatement("SELECT * FROM instanceFolio WHERE hrid = ?");) {
             while ( rs.next() ) {
 
-              SolrInputDocument doc = constructSolrInputDocument( rs );
+              SolrInputDocument doc = constructSolrInputDocument( rs, bibId );
               Map<String,Object> instance = null;
               String instanceId = null;
               instanceByHrid.setString(1, String.valueOf(bibId));
@@ -351,7 +351,7 @@ public class ProcessAvailabilityQueue {
     }
   }
 
-  private static SolrInputDocument constructSolrInputDocument(ResultSet rs) throws SQLException {
+  private static SolrInputDocument constructSolrInputDocument(ResultSet rs, int hrid) throws SQLException {
 
     List<String> fields = Arrays.asList( // field list maintained here, and in SQL query in updateBibsInSolr()
     "authortitle_solr_fields", "title130_solr_fields",    "subject_solr_fields",     "pubinfo_solr_fields",
