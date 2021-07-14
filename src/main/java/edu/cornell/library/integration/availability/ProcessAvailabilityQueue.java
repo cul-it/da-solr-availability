@@ -170,7 +170,7 @@ public class ProcessAvailabilityQueue {
       "       series_solr_fields,      titlechange_solr_fields, toc_solr_fields,         instruments_solr_fields," + 
       "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields, citationref_solr_fields," + 
       "       url_solr_fields,         hathilinks_solr_fields,  newbooks_solr_fields,    recordtype_solr_fields," + 
-      "       recordboost_solr_fields, holdings_solr_fields,    otherids_solr_fields" + 
+      "       recordboost_solr_fields, callnumber_solr_fields,  otherids_solr_fields" + 
       "  FROM processedMarcData"+
       " WHERE bib_id = ?";
   static void updateBibsInSolr(
@@ -359,7 +359,7 @@ public class ProcessAvailabilityQueue {
     "series_solr_fields",      "titlechange_solr_fields", "toc_solr_fields",         "instruments_solr_fields",
     "marc_solr_fields",        "simpleproc_solr_fields",  "findingaids_solr_fields", "citationref_solr_fields",
     "url_solr_fields",         "hathilinks_solr_fields",  "newbooks_solr_fields",    "recordtype_solr_fields",
-    "recordboost_solr_fields", "holdings_solr_fields",    "otherids_solr_fields" );
+    "recordboost_solr_fields", "callnumber_solr_fields",  "otherids_solr_fields" );
     SolrInputDocument doc = new SolrInputDocument();
     String dates = rs.getString("record_dates");
     if (dates != null)
