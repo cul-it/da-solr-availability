@@ -141,7 +141,7 @@ public class ProcessAvailabilityQueue {
         stmt.execute("UNLOCK TABLES");
 
         if ( bibs.isEmpty() ) {
-          oldLocksCleanupStmt.executeUpdate();
+//TODO          oldLocksCleanupStmt.executeUpdate();
           Thread.sleep(3000);
         } else {
           updateBibsInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,holdingsNoteTypes, bibs, priority);
