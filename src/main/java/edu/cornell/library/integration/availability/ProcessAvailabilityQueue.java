@@ -73,7 +73,7 @@ public class ProcessAvailabilityQueue {
         PreparedStatement unlockStmt = inventoryDB.prepareStatement
             ("DELETE FROM processLock WHERE id = ?");
         PreparedStatement oldLocksCleanupStmt = inventoryDB.prepareStatement
-            ("DELETE FROM processLock WHERE date < DATE_SUB( NOW(), INTERVAL 5 MINUTE)");
+            ("DELETE FROM processLock WHERE date < DATE_SUB( NOW(), INTERVAL 15 MINUTE)");
         PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE id = ?");
         ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
