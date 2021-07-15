@@ -66,7 +66,9 @@ public class Items {
     if (itemByHolding == null)
       itemByHolding = inventory.prepareStatement("SELECT * FROM itemFolio WHERE holdingHrid = ?");
     for (String holdingId : holdings.getUuids()) {
-      itemByHolding.setString(1, holdings.get(holdingId).hrid);
+      Holding h = holdings.get(holdingId);
+      if (h.online != null && h.online) continue;
+      itemByHolding.setString(1, h.hrid);
       List<Map<String, Object>> rawItems = new ArrayList<>();
       try (ResultSet rs = itemByHolding.executeQuery()) {
         while (rs.next()) {
@@ -78,8 +80,8 @@ public class Items {
 
       TreeSet<Item> items = new TreeSet<>();
       for (Map<String, Object> rawItem : rawItems) {
-        Item i = new Item(inventory,rawItem,holdings.get(holdingId));
-        i.callNumber = holdings.get(holdingId).call;
+        Item i = new Item(inventory,rawItem,h);
+        i.callNumber = h.call;
         items.add(i);
       }
       il.put(holdingId, items);

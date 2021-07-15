@@ -226,8 +226,9 @@ public class Holdings {
     public boolean summarizeItemAvailability( ItemList items ) {
       boolean discharged = false;
       for ( Entry<String, Holding> e : this.holdings.entrySet() )
-        if ( e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey())) )
-          discharged = true;
+        if ( e.getValue().online == null || ! e.getValue().online )
+          if ( e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey())) )
+            discharged = true;
       return discharged;
     }
 
