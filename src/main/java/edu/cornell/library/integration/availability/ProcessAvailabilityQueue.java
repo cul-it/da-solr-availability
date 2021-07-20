@@ -277,7 +277,8 @@ public class ProcessAvailabilityQueue {
                   doc.addField("availability_facet","In Process");
                 if (h.itemSummary != null && h.itemSummary.unavail != null)
                   for (ItemReference ir : h.itemSummary.unavail)
-                    if (ir.status != null) doc.addField("availability_facet",ir.status);
+                    if (ir.status != null && ir.status.status != null)
+                      doc.addField("availability_facet",ir.status.status);
                 if (h.callNumberSuffix != null)
                   doc.addField("lc_callnum_suffix", h.callNumberSuffix);
 
