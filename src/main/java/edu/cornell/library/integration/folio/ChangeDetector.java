@@ -12,6 +12,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +34,7 @@ public class ChangeDetector {
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
       INSTANCE: for (Map<String,Object> instance : changedInstances) {
-        
+
         String hrid = (String)instance.get("hrid");
         String instanceJson = mapper.writeValueAsString(instance);
         Map<String,String> metadata = (Map<String,String>) instance.get("metadata");
@@ -63,6 +65,9 @@ public class ChangeDetector {
         replaceInstance.setString(5, instanceJson);
         replaceInstance.executeUpdate();
 
+        if ( ! instance.containsKey("source")
+            || ! ((String)instance.get("source")).equals("MARC") ) continue INSTANCE;
+
         Change c = new Change(Change.Type.INSTANCE,id,"Instance modified",modDate,null);
         if ( ! changes.containsKey(hrid)) {
           Set<Change> t = new HashSet<>();
@@ -70,6 +75,27 @@ public class ChangeDetector {
           changes.put(hrid,t);
         }
         changes.get(hrid).add(c);
+
+        String marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
+            .replaceAll("\\n", " ");
+        if ( getPreviousBib == null )
+          getPreviousBib = inventory.prepareStatement(
+              "SELECT content FROM bibFolio WHERE instanceHrid = ?");
+        getPreviousBib.setString(1, hrid);
+        try ( ResultSet rs = getPreviousBib.executeQuery() ) {
+          while (rs.next()) if (rs.getString("content").equals(marc)) continue INSTANCE;
+        }
+
+        Matcher m = modDateP.matcher(marc);
+        Timestamp marcTimestamp = (m.matches())
+            ? Timestamp.from(Instant.parse(m.group(1).replace("+0000","Z"))): null;
+        if ( replaceBib == null )
+          replaceBib = inventory.prepareStatement(
+              "REPLACE INTO bibFolio ( instanceHrid, moddate, content ) VALUES (?,?,?)");
+        replaceBib.setString(1, hrid);
+        replaceBib.setTimestamp(2, marcTimestamp);
+        replaceBib.setString(3, marc);
+        replaceBib.executeUpdate();
       }
     } while (changedInstances.size() == limit);
 
@@ -197,7 +223,7 @@ public class ChangeDetector {
         }
 
         String id = (String)item.get("id");
-        String barcode = (item.containsKey("barcode"))?(String)item.get("barcode"):null;
+        String barcode = (item.containsKey("barcode"))?((String)item.get("barcode")).trim():null;
         if (barcode != null && barcode.length()>14) {
           System.out.println("Barcode too long. Omitting ["+hrid+"/"+barcode+"]");
           barcode = null;
@@ -300,12 +326,15 @@ public class ChangeDetector {
     return changes;
   }
 
+  static Pattern modDateP = Pattern.compile("^.*\"updatedDate\" *: *\"([^\"]+)\".*$");
 
   static PreparedStatement getPreviousInstance = null;
+  static PreparedStatement getPreviousBib = null;
   static PreparedStatement getPreviousHolding = null;
   static PreparedStatement getPreviousItem = null;
   static PreparedStatement getPreviousLoan = null;
   static PreparedStatement replaceInstance = null;
+  static PreparedStatement replaceBib = null;
   static PreparedStatement replaceHolding = null;
   static PreparedStatement replaceItem = null;
   static PreparedStatement replaceLoan = null;
