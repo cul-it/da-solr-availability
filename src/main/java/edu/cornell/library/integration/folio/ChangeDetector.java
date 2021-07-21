@@ -132,12 +132,12 @@ public class ChangeDetector {
           while (rs.next()) if (rs.getString("content").equals(holdingJson)) continue HOLDING;
         }
 
-        if (getHoldingParentage == null)
-          getHoldingParentage = inventory.prepareStatement(
+        if (getInstanceHridByInstanceId == null)
+          getInstanceHridByInstanceId = inventory.prepareStatement(
               "SELECT hrid FROM instanceFolio WHERE id = ?");
-        getHoldingParentage.setString(1, (String)holding.get("instanceId"));
+        getInstanceHridByInstanceId.setString(1, (String)holding.get("instanceId"));
         String instanceHrid = null;
-        try (ResultSet rs = getHoldingParentage.executeQuery() ) {
+        try (ResultSet rs = getInstanceHridByInstanceId.executeQuery() ) {
           while (rs.next()) instanceHrid = rs.getString(1);
         }
         if ( instanceHrid == null ) {
@@ -249,9 +249,7 @@ public class ChangeDetector {
         changes.get(instanceHrid).add(c);
       }
     } while (changedItems.size() == limit);
-/*TODO detect batch updates?    if ( changes.size() > 4 )
-      for ( Set<Change> bibChanges : changes.values() ) for ( Change c : bibChanges )
-        c.type = Change.Type.ITEM_BATCH;*/
+
     return changes;
   }
 
@@ -264,12 +262,12 @@ public class ChangeDetector {
     Timestamp modDateCursor = since;
     List<Map<String, Object>> changedLoans;
 
-    LOAN: do {
+    do {
       changedLoans = okapi.queryAsList("/loan-storage/loans",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
-      for (Map<String,Object> loan : changedLoans) {
-        
+      LOAN: for (Map<String,Object> loan : changedLoans) {
+
         String id = (String)loan.get("id");
         String itemId = (String)loan.get("itemId");
         String loanJson = mapper.writeValueAsString(loan);
@@ -281,7 +279,7 @@ public class ChangeDetector {
         if ( getPreviousLoan == null )
           getPreviousLoan = inventory.prepareStatement("SELECT content FROM loanFolio WHERE id = ?");
         getPreviousLoan.setString(1, id);
-        try ( ResultSet rs = getPreviousItem.executeQuery() ) {
+        try ( ResultSet rs = getPreviousLoan.executeQuery() ) {
           while (rs.next()) if (rs.getString("content").equals(loanJson)) continue LOAN;
         }
 
@@ -313,7 +311,7 @@ public class ChangeDetector {
         replaceLoan.setString(4, loanJson);
         replaceLoan.executeUpdate();
 
-        Change c = new Change(Change.Type.ITEM,id,"Item modified",modDate,null);
+        Change c = new Change(Change.Type.LOAN,id,"Item modified",modDate,null);
         if ( ! changes.containsKey(instanceHrid)) {
           Set<Change> t = new HashSet<>();
           t.add(c);
@@ -326,6 +324,138 @@ public class ChangeDetector {
     return changes;
   }
 
+  public static Map<String,Set<Change>> detectChangedOrderLines(
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+
+    Map<String,Set<Change>> changes = new HashMap<>();
+
+    int limit = 5000;
+    Timestamp modDateCursor = since;
+    List<Map<String, Object>> changedPols;
+
+    do {
+      changedPols = okapi.queryAsList("/orders-storage/po-lines",
+          "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
+          " sortBy metadata.updatedDate",limit);
+      POL: for (Map<String,Object> pol : changedPols) {
+
+        String id = (String)pol.get("id");
+        Map<String,String> metadata = (Map<String,String>) pol.get("metadata");
+        Timestamp modDate = Timestamp.from(Instant.parse(
+            metadata.get("updatedDate").replace("+00:00","Z")));
+        modDateCursor = modDate;
+        String polJson = mapper.writeValueAsString(pol);
+
+        if ( getPreviousOrderLine == null )
+          getPreviousOrderLine = inventory.prepareStatement(
+              "SELECT content FROM orderLineFolio WHERE id = ?");
+        getPreviousOrderLine.setString(1, id);
+        try ( ResultSet rs = getPreviousOrderLine.executeQuery() ) {
+          while (rs.next()) if (rs.getString("content").equals(polJson)) continue POL;
+        }
+
+        if (getInstanceHridByInstanceId == null)
+          getInstanceHridByInstanceId = inventory.prepareStatement(
+              "SELECT hrid FROM instanceFolio WHERE id = ?");
+        getInstanceHridByInstanceId.setString(1, (String)pol.get("instanceId"));
+        String instanceHrid = null;
+        try (ResultSet rs = getInstanceHridByInstanceId.executeQuery() ) {
+          while (rs.next()) instanceHrid = rs.getString(1);
+        }
+
+        if (replaceOrderLine == null)
+          replaceOrderLine = inventory.prepareStatement(
+              "REPLACE INTO orderLineFolio (id, instanceHrid, orderId, moddate, content)"+
+              " VALUES (?,?,?,?,?)");
+        replaceOrderLine.setString(1, id);
+        replaceOrderLine.setString(2, instanceHrid);
+        replaceOrderLine.setString(3, (String)pol.get("purchaseOrderId"));
+        replaceOrderLine.setTimestamp(4, modDate);
+        replaceOrderLine.setString(5, polJson);
+        replaceOrderLine.executeUpdate();
+
+        if ( instanceHrid == null ) {
+          System.out.println(
+              "Purchase order line "+id+" can't be tracked to instance, not queueing for index.");
+          continue;
+        }
+        Change c = new Change(Change.Type.ORDER,id,"Order Line modified",modDate,null);
+        if ( ! changes.containsKey(instanceHrid)) {
+          Set<Change> t = new HashSet<>();
+          t.add(c);
+          changes.put(instanceHrid,t);
+        }
+        changes.get(instanceHrid).add(c);
+      }
+
+    } while (changedPols.size() == limit);
+
+    return changes;
+
+  }
+
+  public static Map<String,Set<Change>> detectChangedOrders(
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+
+    Map<String,Set<Change>> changes = new HashMap<>();
+
+    int limit = 5000;
+    Timestamp modDateCursor = since;
+    List<Map<String, Object>> changedOrders;
+
+    do {
+      changedOrders = okapi.queryAsList("/orders-storage/purchase-orders",
+          "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
+          " sortBy metadata.updatedDate",limit);
+      ORDER: for (Map<String,Object> order : changedOrders) {
+
+        String id = (String)order.get("id");
+        Map<String,String> metadata = (Map<String,String>) order.get("metadata");
+        Timestamp modDate = Timestamp.from(Instant.parse(
+            metadata.get("updatedDate").replace("+00:00","Z")));
+        modDateCursor = modDate;
+        String orderJson = mapper.writeValueAsString(order);
+
+        if ( getPreviousOrder == null )
+          getPreviousOrder = inventory.prepareStatement("SELECT content FROM orderFolio WHERE id = ?");
+        getPreviousOrder.setString(1, id);
+        try ( ResultSet rs = getPreviousOrder.executeQuery() ) {
+          while (rs.next()) if (rs.getString("content").equals(orderJson)) continue ORDER;
+        }
+
+        if (replaceOrder == null)
+          replaceOrder = inventory.prepareStatement(
+              "REPLACE INTO orderFolio (id, moddate, content) VALUES (?,?,?)");
+        replaceOrder.setString(1, id);
+        replaceOrder.setTimestamp(2, modDate);
+        replaceOrder.setString(3, orderJson);
+        replaceOrder.executeUpdate();
+
+        if (getOrderParentage == null)
+          getOrderParentage = inventory.prepareStatement(
+              "SELECT instanceHrid FROM orderLineFolio WHERE orderId = ?");
+        getOrderParentage.setString(1, id);
+
+        try (ResultSet rs = getOrderParentage.executeQuery() ) {
+          while (rs.next()) {
+            String instanceHrid = rs.getString(1);
+            Change c = new Change(Change.Type.ORDER,id,"Order modified",modDate,null);
+            if ( ! changes.containsKey(instanceHrid)) {
+              Set<Change> t = new HashSet<>();
+              t.add(c);
+              changes.put(instanceHrid,t);
+            }
+            changes.get(instanceHrid).add(c);
+          }
+        }
+      }
+
+    } while (changedOrders.size() == limit);
+
+    return changes;
+  }
+
+
   static Pattern modDateP = Pattern.compile("^.*\"updatedDate\" *: *\"([^\"]+)\".*$");
 
   static PreparedStatement getPreviousInstance = null;
@@ -333,14 +463,19 @@ public class ChangeDetector {
   static PreparedStatement getPreviousHolding = null;
   static PreparedStatement getPreviousItem = null;
   static PreparedStatement getPreviousLoan = null;
+  static PreparedStatement getPreviousOrder = null;
+  static PreparedStatement getPreviousOrderLine = null;
   static PreparedStatement replaceInstance = null;
   static PreparedStatement replaceBib = null;
   static PreparedStatement replaceHolding = null;
   static PreparedStatement replaceItem = null;
   static PreparedStatement replaceLoan = null;
-  static PreparedStatement getHoldingParentage = null;
+  static PreparedStatement replaceOrder = null;
+  static PreparedStatement replaceOrderLine = null;
+  static PreparedStatement getInstanceHridByInstanceId = null;
   static PreparedStatement getItemParentage = null;
   static PreparedStatement getLoanParentage = null;
+  static PreparedStatement getOrderParentage = null;
 
   static ObjectMapper mapper = new ObjectMapper();
   static {
