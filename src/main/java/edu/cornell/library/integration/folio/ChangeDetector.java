@@ -77,7 +77,7 @@ public class ChangeDetector {
         changes.get(hrid).add(c);
 
         String marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
-            .replaceAll("\\n", " ");
+            .replaceAll("\\s*\\n\\s*", " ");
         if ( getPreviousBib == null )
           getPreviousBib = inventory.prepareStatement(
               "SELECT content FROM bibFolio WHERE instanceHrid = ?");
