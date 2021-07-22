@@ -68,8 +68,8 @@ public class Holding {
       this.date = (int) Instant.parse((String)metadata.get("CreatedDate")).getEpochSecond();
     this.hrid = (String)raw.get("hrid");
 
-    if (  ( raw.containsKey("discoverySuppress") && ! (boolean) raw.get("discoverySuppress") )
-        || ( raw.containsKey("staffSuppress") && ! (boolean) raw.get("staffSuppress") ) )
+    if (  ( raw.containsKey("discoverySuppress") && (boolean) raw.get("discoverySuppress") )
+        || ( raw.containsKey("staffSuppress") && (boolean) raw.get("staffSuppress") ) )
       this.active = false;
     else
       this.active = true;
