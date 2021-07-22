@@ -42,6 +42,7 @@ import edu.cornell.library.integration.folio.Items.ItemList;
 import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
 import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.OpenOrder;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
 
@@ -249,8 +250,8 @@ public class ProcessAvailabilityQueue {
 
               if ( holdings.summarizeItemAvailability(items) ) 
                 doc.addField("availability_facet", "Returned");
-//              if ( holdings.applyOpenOrderInformation(voyager,bibId) )
-//                doc.addField("availability_facet", "On Order");
+              if ( OpenOrder.applyOpenOrders(inventory,holdings,String.valueOf(bibId)) )
+                doc.addField("availability_facet", "On Order");
               if ( holdings.noItemsAvailability() )
                 doc.addField("availability_facet", "No Items Print");
               if ( holdings.hasRecent() )
