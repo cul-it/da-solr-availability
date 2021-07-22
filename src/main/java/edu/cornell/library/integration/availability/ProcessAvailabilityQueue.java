@@ -63,7 +63,7 @@ public class ProcessAvailabilityQueue {
              "  LEFT JOIN processLock ON availabilityQueue.hrid = processLock.bib_id"+
              " WHERE availabilityQueue.hrid = processedMarcData.bib_id"+
              "   AND processLock.date IS NULL"+
-             " ORDER BY priority LIMIT 10");
+             " ORDER BY priority LIMIT 1");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE hrid = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
@@ -103,6 +103,7 @@ public class ProcessAvailabilityQueue {
             else if ( priority < rs.getInt("priority"))
               break;
             int bibId = rs.getInt("hrid");
+            System.out.println(bibId);
 
 /*        for (int bibId : Arrays.asList(
             2073985, 721607, 67466, 277880, 1003756, 7596729, 361984,
@@ -217,9 +218,9 @@ public class ProcessAvailabilityQueue {
               boolean active = true;
 
               if (  ( instance.containsKey("discoverySuppress")
-                     && ! (boolean) instance.get("discoverySuppress") )
+                     && (boolean) instance.get("discoverySuppress") )
                   || ( instance.containsKey("staffSuppress")
-                     && ! (boolean) instance.get("staffSuppress") ) )
+                     && (boolean) instance.get("staffSuppress") ) )
                 active = false;
 
               if ( ! active ) {
