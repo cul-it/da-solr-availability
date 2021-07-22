@@ -103,7 +103,7 @@ public class ProcessAvailabilityQueue {
             else if ( priority < rs.getInt("priority"))
               break;
             int bibId = rs.getInt("hrid");
-            System.out.println(bibId);
+//            System.out.println(bibId);
 
 /*        for (int bibId : Arrays.asList(
             2073985, 721607, 67466, 277880, 1003756, 7596729, 361984,
