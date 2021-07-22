@@ -51,9 +51,13 @@ public class ChangeDetector {
         }
 
         String id = (String)instance.get("id");
-        Object o = instance.get("discoverySuppress");
-        boolean active =
-            (o == null)?false:String.class.isInstance(o)?Boolean.valueOf((String)o):(boolean)o;
+        Object o1 = instance.get("discoverySuppress");
+        boolean active1 =
+            (o1 == null)?false:String.class.isInstance(o1)?Boolean.valueOf((String)o1):(boolean)o1;
+        Object o2 = instance.get("staffSuppress");
+        boolean active2 =
+            (o2 == null)?false:String.class.isInstance(o2)?Boolean.valueOf((String)o2):(boolean)o2;
+        boolean active = active1 && active2;
         if (replaceInstance == null)
           replaceInstance = inventory.prepareStatement(
               "REPLACE INTO instanceFolio (id, hrid, active, moddate, content) "+

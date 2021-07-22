@@ -215,8 +215,13 @@ public class ProcessAvailabilityQueue {
 //TODO              holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
               boolean active = true;
-              if ( instance.containsKey("discoverySuppress") )
-                active = ! (boolean) instance.get("discoverySuppress");
+
+              if (  ( instance.containsKey("discoverySuppress")
+                     && ! (boolean) instance.get("discoverySuppress") )
+                  || ( instance.containsKey("staffSuppress")
+                     && ! (boolean) instance.get("staffSuppress") ) )
+                active = false;
+
               if ( ! active ) {
                 doc.removeField("type");
                 doc.addField("type", "Suppressed Bib");
