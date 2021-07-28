@@ -443,6 +443,7 @@ public class ChangeDetector {
         try (ResultSet rs = getOrderParentage.executeQuery() ) {
           while (rs.next()) {
             String instanceHrid = rs.getString(1);
+            if ( instanceHrid == null || instanceHrid.isEmpty() ) continue;
             Change c = new Change(Change.Type.ORDER,id,"Order modified",modDate,null);
             if ( ! changes.containsKey(instanceHrid)) {
               Set<Change> t = new HashSet<>();
