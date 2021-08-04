@@ -278,7 +278,8 @@ public class Items {
       List<Map<String,String>> notes = (List<Map<String,String>>)raw.get("notes");
       Map<String,String> rmcnotes = new HashMap<>();
       for ( Map<String,String> noteHash : notes ) {
-        String type = itemNoteTypes.getName(noteHash.get("itemNoteTypeId"));
+        String type = ( itemNoteTypes != null ) ?
+         itemNoteTypes.getName(noteHash.get("itemNoteTypeId")) : null;
         if (type == null)  continue;
 
         switch (type) {
