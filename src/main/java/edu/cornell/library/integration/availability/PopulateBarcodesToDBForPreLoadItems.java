@@ -41,7 +41,9 @@ public class PopulateBarcodesToDBForPreLoadItems {
               System.out.println("No barcode: "+rs.getString("content"));
               continue;
             }
-            u.setString(1, m.group(1));
+            String barcode = m.group(1);
+            if (barcode.length() > 15) continue;
+            u.setString(1, barcode);
             u.setString(2, rs.getString("id"));
             u.addBatch();
           }

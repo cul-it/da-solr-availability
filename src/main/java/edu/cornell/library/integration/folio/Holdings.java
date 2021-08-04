@@ -11,10 +11,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -60,7 +58,7 @@ public class Holdings {
     }
     return changedBibs;
   }
-
+/*
   public static HoldingSet retrieveHoldingsByInstanceId(
       OkapiClient okapi, Locations locations, ReferenceData holdingsNoteTypes, String instanceId )
       throws IOException {
@@ -71,23 +69,25 @@ public class Holdings {
       holdings.put((String)rawHolding.get("id"),new Holding(rawHolding,locations,holdingsNoteTypes));
     return holdings;
   }
-
+*/
   public static HoldingSet retrieveHoldingsByInstanceHrid(
       Connection inventory, Locations locations, ReferenceData holdingsNoteTypes, String instanceHrid )
       throws SQLException,IOException {
     if ( holdingsByInstance == null )
-      holdingsByInstance = inventory.prepareStatement("SELECT * FROM holdingFolio WHERE instanceHrid = ?");
+      holdingsByInstance = inventory.prepareStatement(
+          "SELECT * FROM holdingFolio WHERE instanceHrid = ?");
     holdingsByInstance.setString(1, instanceHrid);
     HoldingSet holdings = new HoldingSet();
     try (ResultSet rs = holdingsByInstance.executeQuery() ) {
       while (rs.next()) {
         holdings.put(rs.getString("id"),
-            new Holding(mapper.readValue(rs.getString("content"),Map.class),locations,holdingsNoteTypes));
+            new Holding(inventory,mapper.readValue(rs.getString("content"),Map.class),
+                locations,holdingsNoteTypes));
       }
     }
     return holdings;
   }
-
+/*
   public static HoldingSet retrieveHoldingsByInstanceHrid(
       OkapiClient okapi, Locations locations, ReferenceData holdingsNoteTypes, String instanceHrid )
       throws IOException {
@@ -101,7 +101,7 @@ public class Holdings {
     String instanceId = (String)instance.get("id");
     return retrieveHoldingsByInstanceId(okapi,locations,holdingsNoteTypes,instanceId);
   }
-
+*/
 
   public static HoldingSet extractHoldingsFromJson( String json ) throws IOException {
     return mapper.readValue(json, HoldingSet.class);
@@ -230,7 +230,7 @@ public class Holdings {
           return true;
       return false;
     }
-/*
+
     public Set<String> getBoundWithBarcodes() {
       Set<String> barcodes = new HashSet<>();
       for ( Holding h : this.holdings.values() ) {
@@ -240,7 +240,7 @@ public class Holdings {
           barcodes.add(bw.barcode);
       }
       return barcodes;
-    }*/
+    }
   }
 
   public static void mergeAccessLinksIntoHoldings(HoldingSet holdings, Collection<Object> linkJsons)

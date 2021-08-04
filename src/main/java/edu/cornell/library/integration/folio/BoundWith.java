@@ -1,5 +1,6 @@
 package edu.cornell.library.integration.folio;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,65 +11,81 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.Items.ItemList;
-import edu.cornell.library.integration.marc.DataField;
-import edu.cornell.library.integration.marc.Subfield;
 
 public class BoundWith {
 
   @JsonProperty("masterItemId") public final String masterItemId;
-  @JsonProperty("masterBibId")  public final int masterBibId;
+  @JsonProperty("masterBibId")  public final String masterBibId;
   @JsonProperty("masterTitle")  public final String masterTitle;
   @JsonProperty("masterEnum")   public final String masterEnum;
   @JsonProperty("thisEnum")     public final String thisEnum;
   @JsonProperty("barcode")      public final String barcode;
   @JsonProperty("status")       public final ItemStatus status;
 
-  public static BoundWith fromNote( Map<String,Object> note ) {
-    String thisEnum = "";
-    String barcode = null;
-    String text = (String) note.get("note");
-    if (text.contains("|")) {
-      String parts[] = text.split(" *| *");
-      barcode = parts[1];
-      thisEnum = parts[0];
-    } else
-      barcode = text;
-    if (barcode == null) return null;
+  private static Pattern barcodeP = Pattern.compile("^(31924\\d*)(.*)$");
+  public static Map<String,BoundWith> fromNote( Connection inventory, String note )
+      throws SQLException, JsonParseException, JsonMappingException, IOException {
 
-    //TODO retrieve master item information for bound-with
-    return null;
-    // lookup item main item this is bound into
-/*    Item masterItem = Items.retrieveItemByBarcode(voyager, barcode);
-    if (masterItem == null) return null;
-    Integer masterBibId = null;
-    String masterTitle = null;
-    try (PreparedStatement pstmt = voyager.prepareStatement(
-        "SELECT bt.bib_id, bt.title_brief"
-        + " FROM bib_mfhd bm, bib_text bt"
-        + " WHERE bt.bib_id = bm.bib_id AND bm.mfhd_id = ?")) {
-      pstmt.setString(1, masterItem.hrid);
-      try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next()) {
-          masterBibId = rs.getInt("BIB_ID");
-          masterTitle = rs.getString("TITLE_BRIEF").trim();
+    String text = note.trim();
+    int barcodePos = text.indexOf("31924");
+    Map<String,BoundWith> b = new HashMap<>();
+    while ( barcodePos > -1 ) {
+      String thisEnum = null;
+      if ( barcodePos > 0 ) {
+        thisEnum = text.substring(0,barcodePos).replaceAll("[\\|\\\\n]", "").trim();
+        text = text.substring(barcodePos);
+      }
+      Matcher m = barcodeP.matcher(text);
+      String barcode = null;
+      if ( m.matches() ) {
+        barcode = m.group(1);
+        text = m.group(2).trim();
+      }
+      
+      if (barcode == null) break;
+      if (text.length() > barcode.length())
+        text = text.substring(barcode.length()).trim();
+      else text = "";
+      barcodePos = text.indexOf("31924");
+
+      // lookup item main item this is bound into
+      Item masterItem = Items.retrieveItemByBarcode(inventory, barcode);
+      if (masterItem == null) continue;
+      String masterBibId = null;
+      String masterTitle = null;
+      try (PreparedStatement pstmt = inventory.prepareStatement(
+          "SELECT brs.bib_id, brs.title"
+          + " FROM itemFolio i, holdingFolio h, bibRecsSolr brs"
+          + " WHERE i.hrid = ? AND i.holdingHrid = h.hrid AND h.instanceHrid = brs.bib_id")) {
+        pstmt.setString(1, masterItem.hrid);
+        try (ResultSet rs = pstmt.executeQuery()) {
+          while (rs.next()) {
+            masterBibId = rs.getString("bib_id");
+            masterTitle = rs.getString("title").trim();
+          }
         }
       }
+      if (masterBibId == null) continue;
+      b.put(masterItem.hrid, new BoundWith(masterItem.id, masterBibId, masterTitle,
+        masterItem.enumeration, thisEnum, barcode, masterItem.status));
     }
-    if (masterBibId == null) return null;
 
-    return new BoundWith(masterItem.id, masterBibId, masterTitle,
-        masterItem.enumeration, thisEnum, barcode, masterItem.status);
-        */
+    return b;
+
   }
 
   public static EnumSet<Flag> dedupeBoundWithReferences(HoldingSet holdings, ItemList items) {
@@ -98,7 +115,7 @@ public class BoundWith {
   @JsonCreator
   public BoundWith(
       @JsonProperty("masterItemId") String masterItemId,
-      @JsonProperty("masterBibId")  int masterBibId,
+      @JsonProperty("masterBibId")  String masterBibId,
       @JsonProperty("masterTitle")  String masterTitle,
       @JsonProperty("masterEnum")   String masterEnum,
       @JsonProperty("thisEnum")     String thisEnum,
@@ -151,6 +168,7 @@ public class BoundWith {
   }
 
   private static int countEmptyItems(Set<Item> items) {
+    if ( items == null ) return 0;
     int count = 0;
     for (Item i : items) if (i.empty != null && i.empty) count++;
     return count;
@@ -162,28 +180,27 @@ public class BoundWith {
   }
 
 
-  public static boolean storeRecordLinksInInventory(Connection inventory, Integer bibId, HoldingSet holdings)
-      throws SQLException {
+  public static boolean storeRecordLinksInInventory (
+      Connection inventory, String bibId, HoldingSet holdings)throws SQLException {
 
     // Determine whether this bib contains master items into which other bibs are bound
     boolean masterBoundWith = false;
     try ( PreparedStatement pstmt = inventory.prepareStatement(
-        "SELECT * FROM boundWith WHERE master_bib_id = ? LIMIT 1")) {
-      pstmt.setInt(1, bibId);
+        "SELECT * FROM boundWith WHERE masterInstanceHrid = ? LIMIT 1")) {
+      pstmt.setString(1, bibId);
       try ( ResultSet rs = pstmt.executeQuery() ) {
         if (rs.next()) masterBoundWith = true;
       }
     }
-    Map<String,Integer> previousLinks = new HashMap<>();
-    Map<String,Integer> currentLinks  = new HashMap<>();
+    Map<String,String> previousLinks = new HashMap<>();
+    Map<String,String> currentLinks  = new HashMap<>();
 
     // Pull previous links from inventory
-/*
     try ( PreparedStatement pstmt = inventory.prepareStatement(
-        "SELECT master_bib_id, master_item_id FROM boundWith WHERE bound_with_bib_id = ?")) {
-      pstmt.setInt(1, bibId);
+        "SELECT masterInstanceHrid, masterItemId FROM boundWith WHERE boundWithInstanceHrid = ?")) {
+      pstmt.setString(1, bibId);
       try ( ResultSet rs = pstmt.executeQuery() ) {
-        while (rs.next()) previousLinks.put(rs.getInt(2),rs.getInt(1));
+        while (rs.next()) previousLinks.put(rs.getString(2),rs.getString(1));
       }
     }
 
@@ -203,12 +220,13 @@ public class BoundWith {
     // One or more link has been dropped
     if ( ! currentLinks.keySet().containsAll(previousLinks.keySet()) )
       try ( PreparedStatement pstmt = inventory.prepareStatement(
-          "DELETE FROM boundWith WHERE bound_with_bib_id = ? AND master_item_id = ? AND master_bib_id = ?") ) {
-        pstmt.setInt(1, bibId);
-        for ( Entry<Integer,Integer> e : previousLinks.entrySet() )
+          "DELETE FROM boundWith"
+          + " WHERE boundWithInstanceHrid = ? AND masterItemId = ? AND masterInstanceHrid = ?") ) {
+        pstmt.setString(1, bibId);
+        for ( Entry<String, String> e : previousLinks.entrySet() )
           if ( ! currentLinks.containsKey(e.getKey()) ) {
-            pstmt.setInt(2, e.getKey());
-            pstmt.setInt(3, e.getValue());
+            pstmt.setString(2, e.getKey());
+            pstmt.setString(3, e.getValue());
             pstmt.addBatch();
           }
         pstmt.executeBatch();
@@ -217,31 +235,32 @@ public class BoundWith {
     // One or more link has been added
     if ( ! previousLinks.keySet().containsAll(currentLinks.keySet()) )
       try (PreparedStatement pstmt = inventory.prepareStatement(
-          "INSERT INTO boundWith ( bound_with_bib_id, master_item_id, master_bib_id ) VALUES ( ?, ?, ? )")) {
-        pstmt.setInt(1, bibId);
-        for ( Entry<Integer,Integer> e : currentLinks.entrySet() )
+          "INSERT INTO boundWith ( boundWithInstanceHrid, masterItemId, masterInstanceHrid )"
+          + " VALUES ( ?, ?, ? )")) {
+        pstmt.setString(1, bibId);
+        for ( Entry<String,String> e : currentLinks.entrySet() )
           if ( ! previousLinks.containsKey(e.getKey()) ) {
-            pstmt.setInt(2, e.getKey());
-            pstmt.setInt(3, e.getValue());
+            pstmt.setString(2, e.getKey());
+            pstmt.setString(3, e.getValue());
             pstmt.addBatch();
           }
         pstmt.executeBatch();
       }
-*/
+
     return masterBoundWith;
   }
 
   public static void identifyAndQueueOtherBibsInMasterVolume(
-      Connection inventory, int bibId, Set<Integer> itemIds) throws SQLException {
-    Map<Integer,Set<String>> otherBibs = new HashMap<>();
+      Connection inventory, String bibId, Set<String> itemIds) throws SQLException {
+    Map<String,Set<String>> otherBibs = new HashMap<>();
     try (PreparedStatement pstmt = inventory.prepareStatement(
-        "SELECT master_item_id, bound_with_bib_id FROM boundWith WHERE master_bib_id = ?")) {
-      pstmt.setInt(1, bibId);
+        "SELECT masterItemHrid, boundWithInstanceHrid FROM boundWith WHERE masterInstanceHrid = ?")) {
+      pstmt.setString(1, bibId);
       try ( ResultSet rs = pstmt.executeQuery() ) {
         while ( rs.next() ) {
-          int itemId = rs.getInt(1);
-          int otherBib = rs.getInt(2);
-          if ( itemIds.contains(itemId) && otherBib != bibId) {
+          String itemId = rs.getString(1);
+          String otherBib = rs.getString(2);
+          if ( itemIds.contains(itemId) && ! otherBib.equals( bibId )) {
             if ( ! otherBibs.containsKey(otherBib) )
               otherBibs.put(otherBib, new HashSet<String>() );
             otherBibs.get(otherBib).add(String.valueOf(itemId));
@@ -251,9 +270,9 @@ public class BoundWith {
     }
     if ( otherBibs.isEmpty() ) return;
     try (PreparedStatement pstmt = inventory.prepareStatement(
-        "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,3,?,NOW())")) {
-      for ( Entry<Integer,Set<String>> e : otherBibs.entrySet() ) {
-        pstmt.setInt(1, e.getKey());
+        "INSERT INTO availabilityQueue (hrid, priority, cause, record_date) VALUES (?,3,?,NOW())")) {
+      for ( Entry<String,Set<String>> e : otherBibs.entrySet() ) {
+        pstmt.setString(1, e.getKey());
         pstmt.setString(2, "Bound with update from b"+bibId+" and i"+String.join(", i", e.getValue()));
         pstmt.addBatch();
       }

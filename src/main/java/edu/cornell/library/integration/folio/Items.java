@@ -19,7 +19,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
@@ -93,6 +95,22 @@ public class Items {
     return il;
   }
   private static PreparedStatement itemByHolding = null;
+
+  static Item retrieveItemByBarcode ( Connection inventory, String barcode )
+      throws SQLException, JsonParseException, JsonMappingException, IOException {
+    try ( PreparedStatement pstmt = inventory.prepareStatement(
+        "SELECT * FROM itemFolio WHERE barcode = ?")) {
+      pstmt.setString(1, barcode);
+      try ( ResultSet rs = pstmt.executeQuery() ) {
+        while (rs.next()) {
+          Item i = new Item(inventory, mapper.readValue(rs.getString("content"),Map.class),null);
+          i.id = rs.getString("id");
+          return i;
+        }
+      }
+    }
+    return null;
+  }
 
   private static enum TrackingTable {
     DUEDATES("itemDueDates"),
@@ -209,7 +227,7 @@ public class Items {
 
   public static class Item implements Comparable<Item> {
 
-    @JsonProperty("id")        public final String id;
+    @JsonProperty("id")        public String id;
     @JsonProperty("hrid")      public final String hrid;
     @JsonProperty("barcode")   public final String barcode;
     @JsonProperty("copy")      private final String copy;
@@ -244,15 +262,18 @@ public class Items {
         this.location = locations.getByUuid( (String)raw.get("effectiveLocationId") );
       else if ( raw.containsKey("temporaryLocationId") )
         this.location = locations.getByUuid( (String)raw.get("temporaryLocationId") );
-      else
+      else if (holding != null)
         this.location = holding.location;
-      this.permLocation = holding.location.name;
+      if ( holding != null ) {
+        this.permLocation = holding.location.name;
+        this.active = holding.active;
+      }
 
       String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
       this.loanType = LoanTypes.getByUuid(loanTypeId);
-      this.matType = materialTypes.getEntryHashByUuid((String)raw.get("materialTypeId"));
+      if ( materialTypes != null )
+        this.matType = materialTypes.getEntryHashByUuid((String)raw.get("materialTypeId"));
       this.status = new ItemStatus(inventory,raw,this);
-      this.active = holding.active;
       if ( ! raw.containsKey("notes") ) return;
       List<Map<String,String>> notes = (List<Map<String,String>>)raw.get("notes");
       Map<String,String> rmcnotes = new HashMap<>();

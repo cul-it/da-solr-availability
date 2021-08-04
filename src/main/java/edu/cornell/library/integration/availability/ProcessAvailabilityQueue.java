@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
 import edu.cornell.library.integration.changes.Change;
+import edu.cornell.library.integration.folio.BoundWith;
 import edu.cornell.library.integration.folio.Holding;
 import edu.cornell.library.integration.folio.Holdings;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
@@ -229,23 +230,27 @@ public class ProcessAvailabilityQueue {
                 doc.addField("type", "Suppressed Bib");
               }
               doc.addField("notes_t", holdings.getNotes());
-/*//TODO reactivate this boundwith stuff
-              boolean masterBoundWith = BoundWith.storeRecordLinksInInventory(inventory,bibId,holdings);
+
+              boolean masterBoundWith =
+                  BoundWith.storeRecordLinksInInventory(inventory,String.valueOf(bibId),holdings);
               if (masterBoundWith) {
                 doc.addField("bound_with_master_b", true);
-                Set<Integer> changedItems = extractChangedItemIds( updateDetails.changes );
-                BoundWith.identifyAndQueueOtherBibsInMasterVolume( inventory, bibId, changedItems );
+                Set<String> changedItems = extractChangedItemIds( updateDetails.changes );
+                BoundWith.identifyAndQueueOtherBibsInMasterVolume(
+                    inventory, String.valueOf(bibId), changedItems );
               }
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
-              for (BoundWith.Flag flag : f)
+              for (BoundWith.Flag flag : f) {
                 doc.addField("availability_facet",flag.getAvailabilityFlag());
+                System.out.println( flag.getAvailabilityFlag() );
+              }
               if ( ! f.isEmpty() )
                 doc.addField("bound_with_b", true);
-                */
+
               doc.removeField("barcode_t");
               doc.addField("barcode_t", items.getBarcodes());
-//              doc.removeField("barcode_addl_t");
-//TODO              doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
+              doc.removeField("barcode_addl_t");
+              doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
 
 
               if ( holdings.summarizeItemAvailability(items) ) 
@@ -398,13 +403,12 @@ public class ProcessAvailabilityQueue {
     return sb.toString();
   }
 
-  private static Set<Integer> extractChangedItemIds(Set<Change> changes) {
-    Set<Integer> items = new HashSet<>();
+  private static Set<String> extractChangedItemIds(Set<Change> changes) {
+    Set<String> items = new HashSet<>();
     for (Change c : changes)
-      if (c.detail.contains("ITEM") || c.detail.contains("CIRC"))
+      if (c.detail.contains("ITEM") || c.detail.contains("CIRC") || c.detail.contains("LOAN"))
         for (String part : c.detail.split("[\\s\"]+"))
-          if (number.matcher(part).matches())
-            items.add(Integer.valueOf(part));
+          if (number.matcher(part).matches()) items.add(part);
     return items;
   }
   private static Pattern number = Pattern.compile("[0-9]+");

@@ -1,6 +1,8 @@
 package edu.cornell.library.integration.folio;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,7 +19,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Items.Item;
@@ -38,7 +42,7 @@ public class Holding {
 
   @JsonProperty("location")    public Location location;
   @JsonProperty("call")        public String call;
-  @JsonProperty("boundWith")   public Map<String,BoundWith> boundWiths;
+  @JsonProperty("boundWith")   public Map<String,BoundWith> boundWiths = null;
   @JsonProperty("items")       public HoldingsItemSummary itemSummary = null;
   @JsonProperty("order")       public String orderNote = null;
   @JsonProperty("avail")       public Boolean avail = null;
@@ -59,7 +63,9 @@ public class Holding {
   }
 
 
-  Holding(Map<String,Object> raw, Locations locations, ReferenceData holdingsNoteTypes) {
+  Holding(Connection inventory, Map<String,Object> raw,
+      Locations locations, ReferenceData holdingsNoteTypes)
+      throws JsonParseException, JsonMappingException, SQLException, IOException {
 
     Map<String,Object> metadata = (Map<String,Object>)raw.get("metadata");
     if ( metadata.containsKey("UpdatedDate") && metadata.get("UpdatedDate") != null )
@@ -110,8 +116,10 @@ public class Holding {
         boolean staffOnly = (String.class.isInstance(so)) ? Boolean.valueOf((String)so): (boolean) so;
 
         if ( type.equals("Bound with item data") ) {
-          BoundWith b = BoundWith.fromNote(note);
-          if (b != null) boundWiths.put(b.masterItemId,b);
+          if (this.boundWiths == null)
+            this.boundWiths = BoundWith.fromNote(inventory,(String)note.get("note"));
+          else
+            this.boundWiths.putAll(BoundWith.fromNote(inventory,(String)note.get("note")));
           continue;
         }
 
