@@ -254,7 +254,7 @@ public class BoundWith {
       Connection inventory, String bibId, Set<String> itemIds) throws SQLException {
     Map<String,Set<String>> otherBibs = new HashMap<>();
     try (PreparedStatement pstmt = inventory.prepareStatement(
-        "SELECT masterItemHrid, boundWithInstanceHrid FROM boundWith WHERE masterInstanceHrid = ?")) {
+        "SELECT masterItemId, boundWithInstanceHrid FROM boundWith WHERE masterInstanceHrid = ?")) {
       pstmt.setString(1, bibId);
       try ( ResultSet rs = pstmt.executeQuery() ) {
         while ( rs.next() ) {
