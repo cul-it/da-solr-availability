@@ -240,10 +240,8 @@ public class ProcessAvailabilityQueue {
                     inventory, String.valueOf(bibId), changedItems );
               }
               EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
-              for (BoundWith.Flag flag : f) {
+              for ( BoundWith.Flag flag : f )
                 doc.addField("availability_facet",flag.getAvailabilityFlag());
-                System.out.println( flag.getAvailabilityFlag() );
-              }
               if ( ! f.isEmpty() )
                 doc.addField("bound_with_b", true);
 
