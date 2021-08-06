@@ -92,7 +92,7 @@ public class ProcessAvailabilityQueue {
       for (int i = 0; i < 50_000; i++){
         Set<BibToUpdate> bibs = new HashSet<>();
         Set<Integer> ids = new HashSet<>();
-        stmt.execute("LOCK TABLES processedMarcData READ,availabilityQueue WRITE,bibRecsVoyager READ,processLock WRITE");
+        stmt.execute("LOCK TABLES processLock WRITE");
         Integer priority = null;
         List<Integer> lockIds = new ArrayList<>();
         try (  ResultSet rs = readQStmt.executeQuery() ) {
