@@ -43,9 +43,9 @@ public class Holdings {
         while (rs.next()) {
           Change c ;
           if (rs.getTimestamp(2) == null)
-            c = new Change(Change.Type.HOLDING,rs.getInt(4),"New ("+rs.getInt(4)+")",rs.getTimestamp(3),null);
+            c = new Change(Change.Type.HOLDING,rs.getString(4),"New ("+rs.getInt(4)+")",rs.getTimestamp(3),null);
           else
-            c = new Change(Change.Type.HOLDING,rs.getInt(4),"Update ("+rs.getInt(4)+")",rs.getTimestamp(2),null);
+            c = new Change(Change.Type.HOLDING,rs.getString(4),"Update ("+rs.getInt(4)+")",rs.getTimestamp(2),null);
           if (changedBibs.containsKey(rs.getInt(1)))
             changedBibs.get(rs.getInt(1)).add(c);
           else {

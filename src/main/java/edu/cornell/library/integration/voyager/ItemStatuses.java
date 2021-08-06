@@ -63,7 +63,7 @@ public class ItemStatuses implements ChangeDetector {
           bibStmt.setInt(1, item.itemId);
           try( ResultSet bibRs = bibStmt.executeQuery() ) {
             while (bibRs.next()) {
-              Change c = new Change(Change.Type.CIRC,item.itemId,
+              Change c = new Change(Change.Type.CIRC,String.valueOf(item.itemId),
                   String.join( " ",((item.enumeration!= null)?"("+item.enumeration+")":""),
                       item.status.code.values().iterator().next()),
                   new Timestamp((item.status.date != null)?item.status.date*1000:System.currentTimeMillis()),

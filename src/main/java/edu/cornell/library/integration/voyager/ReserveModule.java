@@ -51,7 +51,7 @@ public class ReserveModule implements ChangeDetector {
           bibStmt.setInt(1, item.itemId);
           try( ResultSet bibRs = bibStmt.executeQuery() ) {
             while (bibRs.next()) {
-              Change c = new Change(Change.Type.RESERVE,item.itemId,
+              Change c = new Change(Change.Type.RESERVE,String.valueOf(item.itemId),
                   ((item.enumeration!= null)?item.itemId+" ("+item.enumeration+")":String.valueOf(item.itemId)),
                   modDate, item.location.name);
               Integer bibId = bibRs.getInt(1);

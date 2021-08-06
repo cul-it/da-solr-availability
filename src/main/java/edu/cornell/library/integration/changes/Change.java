@@ -12,14 +12,14 @@ import java.util.concurrent.TimeUnit;
 
 public class Change implements Comparable<Change>{
   public Type type;
-  private final Integer recordId;
+  private final String recordId;
   public final String detail;
   private final Timestamp changeDate;
   private final String location;
 
   public Timestamp date() { return this.changeDate; }
 
-  public Change (Type type, Integer recordId, String detail, Timestamp changeDate, String location) {
+  public Change (Type type, String recordId, String detail, Timestamp changeDate, String location) {
     this.type = type;
     this.recordId = recordId;
     this.detail = detail;

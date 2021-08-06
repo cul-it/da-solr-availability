@@ -52,38 +52,41 @@ public class ProcessAvailabilityQueue {
   public static void main(String[] args) throws IOException, SQLException, InterruptedException {
 
     Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
+    try (InputStream in = Thread.currentThread().getContextClassLoader().
+        getResourceAsStream("database.properties")){
       prop.load(in);
     }
 
     try (Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
-        Statement stmt = inventoryDB.createStatement();
+            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),
+            prop.getProperty("inventoryDBPass"));
         PreparedStatement readQStmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.hrid, priority"+
              "  FROM processedMarcData, availabilityQueue"+
-             "  LEFT JOIN processLock ON availabilityQueue.hrid = processLock.bib_id"+
+             "  LEFT JOIN bibLock ON availabilityQueue.hrid = bibLock.hrid"+
              " WHERE availabilityQueue.hrid = processedMarcData.bib_id"+
-             "   AND processLock.date IS NULL"+
+             "   AND bibLock.date IS NULL"+
              " ORDER BY priority LIMIT 1");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE hrid = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
             ("SELECT id, cause, record_date FROM availabilityQueue WHERE hrid = ?");
         PreparedStatement createLockStmt = inventoryDB.prepareStatement
-            ("INSERT INTO processLock (bib_id) values (?)",Statement.RETURN_GENERATED_KEYS);
+            ("INSERT INTO bibLock (hrid) values (?)",Statement.RETURN_GENERATED_KEYS);
         PreparedStatement unlockStmt = inventoryDB.prepareStatement
-            ("DELETE FROM processLock WHERE id = ?");
+            ("DELETE FROM bibLock WHERE id = ?");
         PreparedStatement oldLocksCleanupStmt = inventoryDB.prepareStatement
-            ("DELETE FROM processLock WHERE date < DATE_SUB( NOW(), INTERVAL 15 MINUTE)");
+            ("DELETE FROM bibLock WHERE date < DATE_SUB( NOW(), INTERVAL 15 MINUTE)");
         PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE id = ?");
-        ConcurrentUpdateSolrClient solr = new ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
+        ConcurrentUpdateSolrClient solr = new
+            ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
       OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),prop.getProperty("okapiTenantFolio"));
+          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),
+          prop.getProperty("okapiTenantFolio"));
       Locations locations = new Locations(okapi);
       ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
       LoanTypes.initialize(okapi);
@@ -92,38 +95,30 @@ public class ProcessAvailabilityQueue {
       for (int i = 0; i < 50_000; i++){
         Set<BibToUpdate> bibs = new HashSet<>();
         Set<Integer> ids = new HashSet<>();
-        stmt.execute("LOCK TABLES processLock WRITE");
         Integer priority = null;
         List<Integer> lockIds = new ArrayList<>();
         try (  ResultSet rs = readQStmt.executeQuery() ) {
 
-          while ( rs.next() ) {
+          BIB: while ( rs.next() ) {
 
             // batch only within a single priority level
             if (priority == null)
               priority = rs.getInt("priority");
             else if ( priority < rs.getInt("priority"))
               break;
-            int bibId = rs.getInt("hrid");
-//            System.out.println(bibId);
+            String bibId = rs.getString("hrid");
 
-/*        for (int bibId : Arrays.asList(
-            2073985, 721607, 67466, 277880, 1003756, 7596729, 361984,
-             *  499380, 120634, 10976407, 8623, 1077314,595322, 285282, 38097, 3749, 6701, 115983, 130786, 301363,
-             1001,1002,631947,705681,996135,1041597,1378974)) {*/
-            // Confirm bib is active
-/*            Boolean active = null;
-            bibActiveStmt.setInt(1, bibId);
-            try (ResultSet rs2 = bibActiveStmt.executeQuery())
-            { while (rs2.next()) active = rs2.getBoolean(1); }
-            if ( active == null ) {
-              System.out.println("Bib in availability queue, not bibRecsVoyager: "+bibId);
-              stmt.execute("UNLOCK TABLES");
-              continue;
-            }*/
+            // Attempt to lock bib, and skip if fails
+            createLockStmt.setString(1,bibId);
+            try {
+              createLockStmt.executeUpdate();
+            } catch (SQLException e) {
+              System.out.println("Tried to lock instance "+bibId);
+              continue BIB;
+            }
 
             // Get all queue items for selected bib
-            allForBib.setString(1, String.valueOf(bibId));
+            allForBib.setString(1, bibId);
             try ( ResultSet rs2 = allForBib.executeQuery() ) {
               Set<Change> changes = new HashSet<>();
               while (rs2.next()) {
@@ -134,20 +129,18 @@ public class ProcessAvailabilityQueue {
               }
               bibs.add(new BibToUpdate(bibId,changes));
             }
-            createLockStmt.setInt(1,bibId);
-            createLockStmt.executeUpdate();
             try ( ResultSet generatedKeys = createLockStmt.getGeneratedKeys() ) {
               if (generatedKeys.next()) lockIds.add( generatedKeys.getInt(1) );
             }
           }
         }
-        stmt.execute("UNLOCK TABLES");
 
         if ( bibs.isEmpty() ) {
 //TODO          oldLocksCleanupStmt.executeUpdate();
           Thread.sleep(3000);
         } else {
-          updateBibsInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,holdingsNoteTypes, bibs, priority);
+          updateBibsInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,
+              holdingsNoteTypes, bibs, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
         }
@@ -167,13 +160,16 @@ public class ProcessAvailabilityQueue {
   }
 
   final static String solrFieldsDataQuery =
-      "SELECT record_dates," + // field list maintained here, and in constructSolrInputDocument() below
-      "       authortitle_solr_fields, title130_solr_fields,    subject_solr_fields,     pubinfo_solr_fields," + 
-      "       format_solr_fields,      factfiction_solr_fields, language_solr_fields,    isbn_solr_fields," + 
-      "       series_solr_fields,      titlechange_solr_fields, toc_solr_fields,         instruments_solr_fields," + 
-      "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields, citationref_solr_fields," + 
-      "       url_solr_fields,         hathilinks_solr_fields,  newbooks_solr_fields,    recordtype_solr_fields," + 
-      "       recordboost_solr_fields, callnumber_solr_fields,  otherids_solr_fields" + 
+      "SELECT record_dates," +
+      // field list maintained here, and in constructSolrInputDocument() below
+      "       authortitle_solr_fields, title130_solr_fields,    subject_solr_fields,"+
+      "       pubinfo_solr_fields,     format_solr_fields,      factfiction_solr_fields,"+
+      "       language_solr_fields,    isbn_solr_fields,        series_solr_fields,"+
+      "       titlechange_solr_fields, toc_solr_fields,         instruments_solr_fields," + 
+      "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields,"+
+      "       citationref_solr_fields, url_solr_fields,         hathilinks_solr_fields,"+
+      "       newbooks_solr_fields,    recordtype_solr_fields,  recordboost_solr_fields,"+
+      "       callnumber_solr_fields,  otherids_solr_fields" + 
       "  FROM processedMarcData"+
       " WHERE bib_id = ?";
   static void updateBibsInSolr(
@@ -191,10 +187,11 @@ public class ProcessAvailabilityQueue {
         Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
 
         for (BibToUpdate updateDetails : changedBibs) {
-          int bibId = updateDetails.bibId;
-          pstmt.setInt(1, bibId);
+          String bibId = updateDetails.bibId;
+          pstmt.setInt(1, Integer.valueOf(bibId));
           try (ResultSet rs = pstmt.executeQuery();
-              PreparedStatement instanceByHrid = inventory.prepareStatement("SELECT * FROM instanceFolio WHERE hrid = ?");) {
+              PreparedStatement instanceByHrid = inventory.prepareStatement(
+                  "SELECT * FROM instanceFolio WHERE hrid = ?");) {
             while ( rs.next() ) {
 
               SolrInputDocument doc = constructSolrInputDocument( rs, bibId );
@@ -214,8 +211,6 @@ public class ProcessAvailabilityQueue {
               doc.addField("instance_id", instanceId);
               HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
                   inventory,locations,holdingsNoteTypes,String.valueOf(bibId));
-//              HoldingSet holdings = Holdings.retrieveHoldingsByInstanceId(okapi,locations,holdingsNoteTypes,instanceId);
-//TODO              holdings.getRecentIssues(voyager, inventory, bibId);
               ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
               boolean active = true;
 
@@ -305,7 +300,8 @@ public class ProcessAvailabilityQueue {
               for (Change c : updateDetails.changes)  changes.add(c.toString());
               EnumSet<MultiVolFlag> multiVolFlags = MultivolumeAnalysis.analyze(
                   (String)doc.getFieldValue("format_main_facet"),
-                  (doc.containsKey("description_display")?join(doc.getFieldValues("description_display")):""),
+                  (doc.containsKey("description_display")
+                      ?join(doc.getFieldValues("description_display")):""),
                   (doc.containsKey("f300e_b")), holdings, items);
               if ( items.itemCount() > 0 )
                 doc.addField("items_json", items.toJson());
@@ -332,9 +328,11 @@ public class ProcessAvailabilityQueue {
                   CallNumberBrowse.generateBrowseDocuments(inventory,doc, holdings);
 
               callnumSolrDocs.addAll( thisDocsCallNumberDocs );
-              Set<String> allCallNumbers = CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs);
+              Set<String> allCallNumbers =
+                  CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs);
               doc.addField("callnumber_display", allCallNumbers);
-              if ( CallNumberTools.hasMathCallNumber(CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)))
+              if ( CallNumberTools.hasMathCallNumber(
+                  CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)))
                 doc.addField("collection", "Math Library");
 
               solrDocs.add(doc);
@@ -351,7 +349,8 @@ public class ProcessAvailabilityQueue {
           completedBibUpdates.add(updateDetails);
         }
       } catch (SolrServerException | RemoteSolrException e) {
-        System.out.printf("Error communicating with Solr server after processing %d of %d bib update batch.",
+        System.out.printf(
+            "Error communicating with Solr server after processing %d of %d bib update batch.",
             completedBibUpdates.size(),changedBibs.size());
         e.printStackTrace();
         Thread.sleep(5000);
@@ -362,15 +361,19 @@ public class ProcessAvailabilityQueue {
     }
   }
 
-  private static SolrInputDocument constructSolrInputDocument(ResultSet rs, int hrid) throws SQLException {
+  private static SolrInputDocument constructSolrInputDocument(ResultSet rs, String hrid)
+      throws SQLException {
 
-    List<String> fields = Arrays.asList( // field list maintained here, and in SQL query in updateBibsInSolr()
-    "authortitle_solr_fields", "title130_solr_fields",    "subject_solr_fields",     "pubinfo_solr_fields",
-    "format_solr_fields",      "factfiction_solr_fields", "language_solr_fields",    "isbn_solr_fields",
-    "series_solr_fields",      "titlechange_solr_fields", "toc_solr_fields",         "instruments_solr_fields",
-    "marc_solr_fields",        "simpleproc_solr_fields",  "findingaids_solr_fields", "citationref_solr_fields",
-    "url_solr_fields",         "hathilinks_solr_fields",  "newbooks_solr_fields",    "recordtype_solr_fields",
-    "recordboost_solr_fields", "callnumber_solr_fields",  "otherids_solr_fields" );
+    List<String> fields = Arrays.asList(
+    // field list maintained here, and in SQL query in updateBibsInSolr()
+    "authortitle_solr_fields", "title130_solr_fields",    "subject_solr_fields",
+    "pubinfo_solr_fields",     "format_solr_fields",      "factfiction_solr_fields",
+    "language_solr_fields",    "isbn_solr_fields",        "series_solr_fields",
+    "titlechange_solr_fields", "toc_solr_fields",         "instruments_solr_fields",
+    "marc_solr_fields",        "simpleproc_solr_fields",  "findingaids_solr_fields",
+    "citationref_solr_fields", "url_solr_fields",         "hathilinks_solr_fields",
+    "newbooks_solr_fields",    "recordtype_solr_fields",  "recordboost_solr_fields",
+    "callnumber_solr_fields",  "otherids_solr_fields" );
     SolrInputDocument doc = new SolrInputDocument();
     String dates = rs.getString("record_dates");
     if (dates != null)
@@ -412,21 +415,21 @@ public class ProcessAvailabilityQueue {
   private static Pattern number = Pattern.compile("[0-9]+");
 
   public static class BibToUpdate implements Comparable<BibToUpdate>{
-    final int bibId;
+    final String bibId;
     final Set<Change> changes;
-    public BibToUpdate(int bibId, Set<Change> changes) {
+    public BibToUpdate(String bibId, Set<Change> changes) {
       this.bibId = bibId;
       this.changes = changes;
     }
     @Override public int compareTo(BibToUpdate o) {
       if ( o == null ) return -1;
-      return Integer.compare(this.bibId,o.bibId);
+      return this.bibId.compareTo( o.bibId );
     }
     @Override public boolean equals(Object o) {
       if ( o == null || ! o.getClass().equals(this.getClass() )) return false;
       return Objects.equals(this.bibId,((BibToUpdate)o).bibId);
     }
-    @Override public int hashCode() { return Integer.hashCode(this.bibId); }
+    @Override public int hashCode() { return this.bibId.hashCode(); }
   }
   private static ObjectMapper mapper = new ObjectMapper();
 

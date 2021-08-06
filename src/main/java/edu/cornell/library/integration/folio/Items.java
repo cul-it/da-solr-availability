@@ -56,7 +56,7 @@ public class Items {
 
 
   public static ItemList retrieveItemsForHoldings(
-      OkapiClient okapi, Connection inventory, Integer bibId, HoldingSet holdings) throws SQLException, IOException {
+      OkapiClient okapi, Connection inventory, String bibId, HoldingSet holdings) throws SQLException, IOException {
     if (locations == null) {
       locations = new Locations( okapi );
       materialTypes = new ReferenceData( okapi, "/material-types", "name");
@@ -123,13 +123,13 @@ public class Items {
     public String toString() { return this.tableName; }
   }
   private static void updateInInventory(
-      Connection inventory, Integer bibId,TrackingTable table, Map<Integer, String> details)
+      Connection inventory, String bibId,TrackingTable table, Map<Integer, String> details)
           throws SQLException {
 
     if ( details.isEmpty() ) {
       try (PreparedStatement delStmt = inventory.prepareStatement(
           "DELETE FROM "+table+" WHERE bib_id = ?")) {
-        delStmt.setInt(1, bibId);
+        delStmt.setString(1, bibId);
         delStmt.executeUpdate();
       }
       return;      
@@ -138,7 +138,7 @@ public class Items {
     String oldJson = null;
     try (PreparedStatement selStmt = inventory.prepareStatement(
         "SELECT json FROM "+table+" WHERE bib_id = ?")) {
-      selStmt.setInt(1, bibId);
+      selStmt.setString(1, bibId);
       try (ResultSet rs = selStmt.executeQuery()) {
         while (rs.next()) oldJson = rs.getString(1);
       }
@@ -151,7 +151,7 @@ public class Items {
 
     try (PreparedStatement updStmt = inventory.prepareStatement(
         "REPLACE INTO "+table+" (bib_id, json) VALUES (?,?)")) {
-      updStmt.setInt(1, bibId);
+      updStmt.setString(1, bibId);
       updStmt.setString(2, json);
       updStmt.executeUpdate();
     }

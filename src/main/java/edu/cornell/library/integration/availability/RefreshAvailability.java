@@ -50,7 +50,7 @@ public class RefreshAvailability {
         q.setStart(page * rows);
         Set<BibToUpdate> oldBibs = new HashSet<>();
         for (SolrDocument doc : solr.query(q).getResults()) {
-          Integer bibId = Integer.valueOf((String)doc.getFieldValue("id"));
+          String bibId = (String)doc.getFieldValue("id");
           Set<Change> t = new HashSet<>();
           t.add(new Change(Change.Type.AGE,bibId,"Updating Availability",
               new Timestamp(((Date)doc.getFieldValue("timestamp")).getTime()),null));

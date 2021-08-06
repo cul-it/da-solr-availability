@@ -88,9 +88,9 @@ public class Items implements ChangeDetector {
           Timestamp modDate = rs.getTimestamp("modify_date");
           Change c;
           if (modDate != null)
-            c = new Change(Change.Type.ITEM,rs.getInt("item_id"),"Item modified",modDate,null);
+            c = new Change(Change.Type.ITEM,rs.getString("item_id"),"Item modified",modDate,null);
           else
-            c = new Change(Change.Type.ITEM,rs.getInt("item_id"),"Item created",rs.getTimestamp("create_date"),null);
+            c = new Change(Change.Type.ITEM,rs.getString("item_id"),"Item created",rs.getTimestamp("create_date"),null);
           if ( ! changes.containsKey(rs.getInt("bib_id"))) {
             Set<Change> t = new HashSet<>();
             t.add(c);

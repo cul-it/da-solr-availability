@@ -98,7 +98,7 @@ public class OpenOrder implements ChangeDetector {
       try (  ResultSet rs = pstmt.executeQuery()  ) {
         while (rs.next()) {
           Integer bibId = rs.getInt("bib_id");
-          Change c = new Change(Change.Type.ORDER,rs.getInt("line_item_id"),
+          Change c = new Change(Change.Type.ORDER,rs.getString("line_item_id"),
               String.format("Order status update on h%d: %s",
                   rs.getInt("mfhd_id"), orderStatuses.get(rs.getInt("line_item_status"))),
               rs.getTimestamp("status_date"),null);

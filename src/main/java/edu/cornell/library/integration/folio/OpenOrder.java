@@ -21,7 +21,7 @@ import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.changes.ChangeDetector;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 
-public class OpenOrder implements ChangeDetector {
+public class OpenOrder {
 
   Map<Integer,String> notes = new HashMap<>();
 
@@ -109,44 +109,6 @@ public class OpenOrder implements ChangeDetector {
    * preferrable.
    */
   public OpenOrder() {}
-  @Override
-  public Map<Integer, Set<Change>> detectChanges(
-      Connection voyager, Timestamp since) throws SQLException {
-
-    Map<Integer,Set<Change>> changes = new HashMap<>();
-
-    final String getRecentOrderStatusChanges =
-        "SELECT li.bib_id, lics.line_item_id, lics.status_date, lics.mfhd_id, lics.line_item_status" + 
-        "  FROM line_item li, line_item_copy_status lics, bib_master bm, mfhd_master mm" + 
-        "  WHERE li.line_item_id = lics.line_item_id" + 
-        "    AND lics.status_date > ?" + 
-        "    AND li.bib_id = bm.bib_id" + 
-        "    AND bm.suppress_in_opac = 'N'" + 
-        "    AND lics.mfhd_id = mm.mfhd_id" + 
-        "    AND mm.suppress_in_opac = 'N'";
-
-    try (  PreparedStatement pstmt = voyager.prepareStatement(getRecentOrderStatusChanges)   ) {
-      pstmt.setTimestamp(1,since);
-      try (  ResultSet rs = pstmt.executeQuery()  ) {
-        while (rs.next()) {
-          Integer bibId = rs.getInt("bib_id");
-          Change c = new Change(Change.Type.ORDER,rs.getInt("line_item_id"),
-              String.format("Order status update on h%d: %s",
-                  rs.getInt("mfhd_id"), orderStatuses.get(rs.getInt("line_item_status"))),
-              rs.getTimestamp("status_date"),null);
-          if (changes.containsKey(bibId))
-            changes.get(bibId).add(c);
-          else {
-            Set<Change> t = new HashSet<>();
-            t.add(c);
-            changes.put(bibId,t);
-          }
-        }
-      }
-    }
-    return changes;
-
-  }
 
   private static List<String> orderStatuses = Arrays.asList(
       "Pending","Received Complete","Backordered","Returned","Claimed",
