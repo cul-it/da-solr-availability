@@ -58,19 +58,20 @@ public class ChangeDetector {
         boolean active2 =
             (o2 == null)?false:String.class.isInstance(o2)?Boolean.valueOf((String)o2):(boolean)o2;
         boolean active = active1 && active2;
+        String source = (String)instance.get("source");
         if (replaceInstance == null)
           replaceInstance = inventory.prepareStatement(
-              "REPLACE INTO instanceFolio (id, hrid, active, moddate, content) "+
-              " VALUES (?,?,?,?,?)");
+              "REPLACE INTO instanceFolio (id, hrid, active, source, moddate, content) "+
+              " VALUES (?,?,?,?,?,?)");
         replaceInstance.setString(1, id);
         replaceInstance.setString(2, hrid);
         replaceInstance.setBoolean(3, active);
-        replaceInstance.setTimestamp(4, modDate);
-        replaceInstance.setString(5, instanceJson);
+        replaceInstance.setString(4, source);
+        replaceInstance.setTimestamp(5, modDate);
+        replaceInstance.setString(6, instanceJson);
         replaceInstance.executeUpdate();
 
-        if ( ! instance.containsKey("source")
-            || ! ((String)instance.get("source")).equals("MARC") ) continue INSTANCE;
+        if ( ! source.equals("MARC") ) continue INSTANCE;
 
         Change c = new Change(Change.Type.INSTANCE,id,"Instance modified",modDate,null);
         if ( ! changes.containsKey(hrid)) {
