@@ -34,29 +34,9 @@ public class Items {
   static ReferenceData materialTypes = null;
   static ReferenceData itemNoteTypes = null;
 
-
-
-/*  public static Map<Integer,String> collectAllCurrentDueDates( Connection voyager )
-      throws SQLException, JsonProcessingException {
-    Map<Integer,Map<Integer,String>> t = new HashMap<>();
-    try ( PreparedStatement pstmt = voyager.prepareStatement(allDueDatesQuery);
-        ResultSet rs = pstmt.executeQuery()) {
-      while (rs.next()) {
-        Integer bibId = rs.getInt(1);
-        if (! t.containsKey(bibId) ) t.put(bibId, new TreeMap<>());
-        t.get(bibId).put(rs.getInt(2), rs.getTimestamp(3).toLocalDateTime().format(formatter));
-      }
-    }
-    Map<Integer,String> dueDateJsons = new HashMap<>();
-    for (Entry<Integer,Map<Integer,String>> e : t.entrySet())
-      dueDateJsons.put(e.getKey(), mapper.writeValueAsString(e.getValue()));
-    return dueDateJsons;
-  }
-  */
-
-
   public static ItemList retrieveItemsForHoldings(
-      OkapiClient okapi, Connection inventory, String bibId, HoldingSet holdings) throws SQLException, IOException {
+      OkapiClient okapi, Connection inventory, String bibId, HoldingSet holdings)
+          throws SQLException, IOException {
     if (locations == null) {
       locations = new Locations( okapi );
       materialTypes = new ReferenceData( okapi, "/material-types", "name");
@@ -268,8 +248,11 @@ public class Items {
         this.permLocation = holding.location.name;
         this.active = holding.active;
       }
+      if ( raw.containsKey("discoverySuppress") && (boolean)raw.get("discoverySuppress") )
+        this.active = false;
 
-      String loanTypeId = (raw.containsKey("temporaryLoanTypeId")) ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
+      String loanTypeId = (raw.containsKey("temporaryLoanTypeId"))
+          ? (String)raw.get("temporaryLoanTypeId"): (String)raw.get("permanentLoanTypeId");
       this.loanType = LoanTypes.getByUuid(loanTypeId);
       if ( materialTypes != null )
         this.matType = materialTypes.getEntryHashByUuid((String)raw.get("materialTypeId"));
