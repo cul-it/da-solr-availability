@@ -106,7 +106,8 @@ public class Holding {
     }
     if ( raw.containsKey("callNumberTypeId") ) {
       String type = callNumberTypes.getName((String)raw.get("callNumberTypeId"));
-      if ( type != null && type.equals("Library of Congress classification"))
+      if ( type != null &&
+          ( type.equals("Library of Congress classification") || type.equals("LC Modified") ) )
         this.lcCallNum = true;
     }
     if ( raw.containsKey("copyNumber") )
