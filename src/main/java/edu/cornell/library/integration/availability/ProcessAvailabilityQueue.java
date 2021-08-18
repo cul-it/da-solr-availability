@@ -89,6 +89,7 @@ public class ProcessAvailabilityQueue {
           prop.getProperty("okapiTenantFolio"));
       Locations locations = new Locations(okapi);
       ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
+      ReferenceData callNumberTypes = new ReferenceData(okapi, "/call-number-types","name");
       LoanTypes.initialize(okapi);
       ServicePoints.initialize(okapi);
 
@@ -140,7 +141,7 @@ public class ProcessAvailabilityQueue {
           Thread.sleep(3000);
         } else {
           updateBibsInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,
-              holdingsNoteTypes, bibs, priority);
+              holdingsNoteTypes, callNumberTypes, bibs, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
         }
@@ -175,7 +176,7 @@ public class ProcessAvailabilityQueue {
   static void updateBibsInSolr(
       OkapiClient okapi, Connection inventory,
       SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
-      Set<BibToUpdate> changedBibs, Integer priority)
+      ReferenceData callNumberTypes, Set<BibToUpdate> changedBibs, Integer priority)
       throws SQLException, IOException, InterruptedException {
 
     while (! changedBibs.isEmpty()) {
@@ -210,7 +211,7 @@ public class ProcessAvailabilityQueue {
               }
               doc.addField("instance_id", instanceId);
               HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
-                  inventory,locations,holdingsNoteTypes,String.valueOf(bibId));
+                  inventory,locations,holdingsNoteTypes,callNumberTypes, String.valueOf(bibId));
               ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
               boolean active = true;
 

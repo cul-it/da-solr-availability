@@ -64,7 +64,7 @@ public class Holding {
 
 
   Holding(Connection inventory, Map<String,Object> raw,
-      Locations locations, ReferenceData holdingsNoteTypes)
+      Locations locations, ReferenceData holdingsNoteTypes, ReferenceData callNumberTypes)
       throws JsonParseException, JsonMappingException, SQLException, IOException {
 
     Map<String,Object> metadata = (Map<String,Object>)raw.get("metadata");
@@ -103,6 +103,11 @@ public class Holding {
         call =  call.replaceAll("[Nn]o [Cc]all [Nn]umber\\.*", "").trim();
         if (! call.isEmpty() ) this.call = call;
       }
+    }
+    if ( raw.containsKey("callNumberTypeId") ) {
+      String type = callNumberTypes.getName((String)raw.get("callNumberTypeId"));
+      if ( type != null && type.equals("Library of Congress classification"))
+        this.lcCallNum = true;
     }
     if ( raw.containsKey("copyNumber") )
       this.copy = (String) raw.get("copyNumber");

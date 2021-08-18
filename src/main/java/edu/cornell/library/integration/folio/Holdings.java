@@ -71,8 +71,8 @@ public class Holdings {
   }
 */
   public static HoldingSet retrieveHoldingsByInstanceHrid(
-      Connection inventory, Locations locations, ReferenceData holdingsNoteTypes, String instanceHrid )
-      throws SQLException,IOException {
+      Connection inventory, Locations locations, ReferenceData holdingsNoteTypes,
+      ReferenceData callNumberTypes, String instanceHrid ) throws SQLException,IOException {
     if ( holdingsByInstance == null )
       holdingsByInstance = inventory.prepareStatement(
           "SELECT * FROM holdingFolio WHERE instanceHrid = ?");
@@ -82,7 +82,7 @@ public class Holdings {
       while (rs.next()) {
         holdings.put(rs.getString("id"),
             new Holding(inventory,mapper.readValue(rs.getString("content"),Map.class),
-                locations,holdingsNoteTypes));
+                locations,holdingsNoteTypes, callNumberTypes));
       }
     }
     return holdings;
