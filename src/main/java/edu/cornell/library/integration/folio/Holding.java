@@ -295,6 +295,7 @@ public class Holding {
       }*/
     boolean circ = false;
     for (Item item : items) {
+      if ( ! item.active ) continue;
       itemCount++;
       itemLocations.add(item.location);
       if (! item.status.status.equals("Available") ) {
