@@ -52,8 +52,9 @@ public class ProcessAvailabilityQueue {
   public static void main(String[] args) throws IOException, SQLException, InterruptedException {
 
     Properties prop = new Properties();
+    String configFile = System.getenv("configFile");
     try (InputStream in = Thread.currentThread().getContextClassLoader().
-        getResourceAsStream("database.properties")){
+        getResourceAsStream((configFile == null)?"database.properties":configFile)){
       prop.load(in);
     }
 
