@@ -280,9 +280,9 @@ public class Holding {
     return facetValues;
   }
 
-  public boolean summarizeItemAvailability( TreeSet<Item> items ) {
+  public Instant summarizeItemAvailability( TreeSet<Item> items ) {
     int itemCount = 0;
-    boolean discharged = false;
+    Instant dischargedUntil = null;
     List<ItemReference> unavails = new ArrayList<>();
     List<ItemReference> returned = new ArrayList<>();
     List<ItemReference> tempLocs = null;
@@ -301,14 +301,15 @@ public class Holding {
       if (! item.status.status.equals("Available") ) {
         unavails.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null));
       } else if (item.status.returned != null) {
-        discharged = true;
+        if ( dischargedUntil == null || dischargedUntil.isAfter(item.status.returnedUntil))
+          dischargedUntil = item.status.returnedUntil;
         returned.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null));
       }
       if (item.loanType != null && ! item.loanType.name.equals(ExpectedLoanType.NOCIRC.name()))
         circ = true;
     }
     if (itemCount == 0)
-      return false;
+      return null;
     this.circ = circ;
     if (itemLocations.size() == 1) {
       Location itemLoc = itemLocations.iterator().next();
@@ -327,7 +328,7 @@ public class Holding {
         (unavails.size() == 0)?null:unavails,
         tempLocs,
         (returned.size() == 0)?null:returned);
-    return discharged;
+    return dischargedUntil;
   }
 
   /**

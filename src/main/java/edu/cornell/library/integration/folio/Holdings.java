@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -176,13 +177,15 @@ public class Holdings {
     }
 
 
-    public boolean summarizeItemAvailability( ItemList items ) {
-      boolean discharged = false;
+    public Instant summarizeItemAvailability( ItemList items ) {
+      Instant bDischargedUntil = null;
       for ( Entry<String, Holding> e : this.holdings.entrySet() )
-        if ( e.getValue().online == null || ! e.getValue().online )
-          if ( e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey())) )
-            discharged = true;
-      return discharged;
+        if ( e.getValue().online == null || ! e.getValue().online ) {
+          Instant hUntil = e.getValue().summarizeItemAvailability(items.getItems().get(e.getKey()));
+          if ( hUntil != null && ( bDischargedUntil == null || bDischargedUntil.isAfter(hUntil) ) )
+            bDischargedUntil = hUntil;
+        }
+      return bDischargedUntil;
     }
 
     public String toJson() throws JsonProcessingException {

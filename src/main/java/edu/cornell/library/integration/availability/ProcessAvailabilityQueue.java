@@ -10,6 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -256,8 +258,12 @@ public class ProcessAvailabilityQueue {
               doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
 
 
-              if ( holdings.summarizeItemAvailability(items) ) 
+              Instant returnedUntil = holdings.summarizeItemAvailability(items);
+              if ( returnedUntil != null ) {
                 doc.addField("availability_facet", "Returned");
+                doc.addField("returned_until_dt",
+                    String.format("%1$tFT%1$tTZ",Timestamp.from(returnedUntil)));
+              }
               if ( OpenOrder.applyOpenOrders(inventory,holdings,String.valueOf(bibId)) )
                 doc.addField("availability_facet", "On Order");
               if ( holdings.noItemsAvailability() )
