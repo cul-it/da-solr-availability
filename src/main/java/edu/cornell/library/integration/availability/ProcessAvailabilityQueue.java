@@ -10,8 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -262,7 +264,8 @@ public class ProcessAvailabilityQueue {
               if ( returnedUntil != null ) {
                 doc.addField("availability_facet", "Returned");
                 doc.addField("returned_until_dt",
-                    String.format("%1$tFT%1$tTZ",Timestamp.from(returnedUntil)));
+                    ZonedDateTime.ofInstant(returnedUntil, ZoneId.of("UTC"))
+                    .format(DateTimeFormatter.ISO_INSTANT));
               }
               if ( OpenOrder.applyOpenOrders(inventory,holdings,String.valueOf(bibId)) )
                 doc.addField("availability_facet", "On Order");
