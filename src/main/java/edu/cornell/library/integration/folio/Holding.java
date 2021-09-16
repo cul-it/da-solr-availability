@@ -305,7 +305,7 @@ public class Holding {
           dischargedUntil = item.status.returnedUntil;
         returned.add(new ItemReference(item.id,null,item.concatEnum(),item.status,null));
       }
-      if (item.loanType != null && ! item.loanType.name.equals(ExpectedLoanType.NOCIRC.name()))
+      if (item.loanType != null && ! item.loanType.name.equals(ExpectedLoanType.NOCIRC.toString()))
         circ = true;
     }
     if (itemCount == 0)
