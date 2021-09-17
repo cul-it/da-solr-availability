@@ -226,18 +226,7 @@ public class ProcessAvailabilityQueue {
               HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
                   inventory,locations,holdingsNoteTypes,callNumberTypes, String.valueOf(bibId));
               ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
-              boolean active = true;
-
-              if (  ( instance.containsKey("discoverySuppress")
-                     && (boolean) instance.get("discoverySuppress") )
-                  || ( instance.containsKey("staffSuppress")
-                     && (boolean) instance.get("staffSuppress") ) )
-                active = false;
-
-              if ( ! active ) {
-                doc.removeField("type");
-                doc.addField("type", "Suppressed Bib");
-              }
+              boolean active = doc.getFieldValue("type").equals("Catalog");
               doc.addField("notes_t", holdings.getNotes());
 
               boolean masterBoundWith =
