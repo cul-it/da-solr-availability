@@ -96,7 +96,7 @@ public class ChangeDetector {
             ? Timestamp.from(Instant.parse(m.group(1).replace("+0000","Z"))): null;
         if ( replaceBib == null )
           replaceBib = inventory.prepareStatement(
-              "REPLACE INTO bibFolio ( instanceHrid, moddate, content ) VALUES (?,?,?)");
+              "REPLACE INTO bibFolio (instanceHrid,moddate,content,podCurrent) VALUES (?,?,?,0)");
         replaceBib.setString(1, hrid);
         replaceBib.setTimestamp(2, marcTimestamp);
         replaceBib.setString(3, marc);
@@ -156,8 +156,8 @@ public class ChangeDetector {
             (o == null)?false:String.class.isInstance(o)?Boolean.valueOf((String)o):(boolean)o;
         if (replaceHolding == null)
           replaceHolding = inventory.prepareStatement(
-              "REPLACE INTO holdingFolio (id, hrid, instanceHrid, active, moddate, content) "+
-              " VALUES (?,?,?,?,?,?)");
+              "REPLACE INTO holdingFolio (id,hrid,instanceHrid,active,moddate,content,podCurrent) "+
+              " VALUES (?,?,?,?,?,?,0)");
         replaceHolding.setString(1, id);
         replaceHolding.setString(2, hrid);
         replaceHolding.setString(3, instanceHrid);
