@@ -45,7 +45,6 @@ public class PODFullExport {
 
       Set<String> bibs = getBibsToExport(inventory);
       System.out.println("Unsuppressed bib count: "+bibs.size());
-      int noexBibsSkipped = 0, onlineBibsSkipped = 0;
 
       int fileNum = 1;
       BufferedWriter writer = Files.newBufferedWriter(Paths.get(
@@ -77,12 +76,13 @@ public class PODFullExport {
         if ( unsuppressedPrintHoldings )
           sendToPod = false;
 
+        if ( ! sendToPod ) continue;
+
         if ( recordsInFile >= 50_000 ) {
           writer.write("</collection>\n");
           writer.flush();
           writer.close();
-          System.out.printf("Closing file %03d with %d skipped NoEx and %d skipped online\n",
-              fileNum,noexBibsSkipped,onlineBibsSkipped);
+          System.out.printf("Closing file %03d\n", fileNum);
           writer = new BufferedWriter(Files.newBufferedWriter(
               Paths.get(String.format("cornell-full-%03d.xml",++fileNum))));
           recordsInFile = 0;
