@@ -112,7 +112,7 @@ public class PODFullExport {
     boolean unsuppressedPrintHoldings = false;
     for ( Holding h : holdings.values() ) {
       if ( h.active == false ) continue;
-      if ( h.online == true ) continue;
+      if ( h.online != null && h.online == true ) continue;
       unsuppressedPrintHoldings = true;
       DataField f852 = new DataField( ++maxBibFieldId, "852" );
       int sfId = 0;
