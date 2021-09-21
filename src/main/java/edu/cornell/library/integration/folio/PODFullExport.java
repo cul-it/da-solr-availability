@@ -53,9 +53,13 @@ public class PODFullExport {
       writer.write("<?xml version='1.0' encoding='UTF-8'?>"
           + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
 
-      bib: for (String bibId : bibs) {
+      for (String bibId : bibs) {
         boolean sendToPod = true;
         MarcRecord bibRec = DownloadMARC.getMarc(inventory,MarcRecord.RecordType.BIBLIOGRAPHIC,bibId);
+        if ( bibRec == null ) {
+          System.out.printf("Skipping non-MARC instance #%s\n",bibId);
+          continue;
+        }
         Map<String,Object> instance = getInstance( inventory, bibId);
 
         // if the bib(instance) is suppressed, we don't want to send to POD.
