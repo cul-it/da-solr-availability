@@ -73,7 +73,7 @@ public class PODFullExport {
             addHoldingsDataToBibRec(bibRec,inventory,locations,holdingsNoteTypes,callNumberTypes);
 
         // If there are no unsuppressed print holdings, the record is also not eligible for POD
-        if ( unsuppressedPrintHoldings )
+        if ( ! unsuppressedPrintHoldings )
           sendToPod = false;
 
         if ( ! sendToPod ) continue;
