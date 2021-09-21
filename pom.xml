@@ -20,6 +20,7 @@
             <include>**/availability/*.java</include>
             <include>**/changes/*.java</include>
             <include>**/folio/*.java</include>
+            <include>**/marc/*.java</include>
             <include>**/voyager/*.java</include>
           </includes>
         </configuration>
@@ -63,12 +64,6 @@
       <artifactId>ojdbc7</artifactId>
       <version>12.1.0.2</version>
       <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>edu.cornell.library.integration</groupId>
-      <artifactId>da-solr-marc</artifactId>
-      <version>1</version>
-      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.marc4j</groupId>

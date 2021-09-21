@@ -56,6 +56,8 @@ public class Items {
         while (rs.next()) {
           Map<String,Object> rawItem = mapper.readValue(rs.getString("content"), Map.class);
           if ( ! rawItem.containsKey("id") ) rawItem.put("id", rs.getString("id") );
+          Integer sequence = rs.getInt("sequence");
+          if ( sequence != 0 ) rawItem.put("sequence", sequence);
           rawItems.add(rawItem);
         }
       }
@@ -234,7 +236,8 @@ public class Items {
       if (barcode == null) { this.empty = true;   this.barcode = null; }
       else {                 this.empty = null;   this.barcode = barcode; }
       this.copy = (String)raw.get("copyNumber");
-//TODO      this.sequence = rs.getInt("ITEM_SEQUENCE_NUMBER");
+      if ( raw.containsKey("sequence") )
+        this.sequence = (int) raw.get("sequence");
       this.enumeration = (String)raw.get("enumeration");
       this.chron = (String)raw.get("chronology");
 

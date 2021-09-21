@@ -54,6 +54,7 @@ public class Holding {
   @JsonProperty("active")      public boolean active = true;
 
 
+  @JsonIgnore public Map<String,Object> rawFolioHolding = null;
   @JsonIgnore public List<String> donors = null;
   @JsonIgnore public String callNumberSuffix = null;
   @JsonIgnore public boolean lcCallNum = false;
@@ -67,6 +68,7 @@ public class Holding {
       Locations locations, ReferenceData holdingsNoteTypes, ReferenceData callNumberTypes)
       throws JsonParseException, JsonMappingException, SQLException, IOException {
 
+    this.rawFolioHolding = raw;
     Map<String,Object> metadata = (Map<String,Object>)raw.get("metadata");
     if ( metadata.containsKey("UpdatedDate") && metadata.get("UpdatedDate") != null )
       this.date = (int) Instant.parse((String)metadata.get("UpdatedDate")).getEpochSecond();
@@ -166,7 +168,8 @@ public class Holding {
       this.holdings = null;
 
     if ( raw.containsKey("holdingsStatementsForSupplements") ) {
-      List<Map<String,String>> a = (List<Map<String,String>>)raw.get("holdingsStatementsForSupplements");
+      List<Map<String,String>> a =
+          (List<Map<String,String>>)raw.get("holdingsStatementsForSupplements");
       List<String> holdings = new ArrayList<>();
       for (Map<String,String> statement : a) {
         if (statement == null ) continue;
@@ -195,8 +198,8 @@ public class Holding {
 
     if (raw.containsKey("receivingHistory"))
       if ( ((Map<String,Object>)raw.get("receivingHistory")).containsKey("entries")) {
-        List<Map<String,Object>> entries =
-            (List<Map<String,Object>>)((Map<String,Object>)raw.get("receivingHistory")).get("entries");
+        List<Map<String,Object>> entries = (List<Map<String,Object>>)
+            ((Map<String,Object>)raw.get("receivingHistory")).get("entries");
         for (Map<String,Object> entry : entries) {
           if ( entry == null ) continue;
           if ( entry.containsKey("publicDisplay") && ! (boolean) entry.get("publicDisplay") )
@@ -266,8 +269,8 @@ public class Holding {
   public Set<String> getLocationFacetValues() {
     Set<String> facetValues = new LinkedHashSet<>();
     if (this.location != null)
-      facetValues.addAll(
-          Locations.facetValues(this.location, this.call, (this.notes == null) ? null : String.join(" ", this.notes)));
+      facetValues.addAll(Locations.facetValues(this.location, this.call,
+          (this.notes == null) ? null : String.join(" ", this.notes)));
     else return facetValues;
 
     if (this.itemSummary != null && this.itemSummary.tempLocs != null)
@@ -288,12 +291,6 @@ public class Holding {
     List<ItemReference> returned = new ArrayList<>();
     List<ItemReference> tempLocs = null;
     Set<Location> itemLocations = new HashSet<>();
-/*TODO boundWiths    if (this.boundWiths != null)
-      for (Entry<Integer,BoundWith> bw : this.boundWiths.entrySet()) {
-        itemCount++;
-        if (! bw.getValue().status.status.equals("Available"))
-          unavails.add(new ItemReference(bw.getKey(),true,bw.getValue().thisEnum,null,null,null,null));
-      }*/
     boolean circ = false;
     for (Item item : items) {
       if ( ! item.active ) continue;

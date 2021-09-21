@@ -31,21 +31,6 @@ public class DownloadMARC {
     }
   }
 
-  /**
-   * Retrieve specified MARC record and return MARC XML format as string.
-   * 
-   * @param voyager Database connection to Oracle
-   * @param type
-   *          (RecordType.BIBLIOGRAPHIC, RecordType.HOLDINGS, RecordType.AUTHORITY)
-   * @param id
-   * @return String XML encoded MARC file; null if id not found in Voyager
-   * @throws SQLException
-   * @throws IOException
-   */
-  public static String downloadXml(Connection voyager, RecordType type, Integer id)
-      throws SQLException, IOException {
-    return MarcRecord.marcToXml(downloadMrc(voyager, type, id));
-  }
 
   private static PreparedStatement prepareStatement(Connection voyager, RecordType type) throws SQLException {
     if (type.equals(RecordType.BIBLIOGRAPHIC))
