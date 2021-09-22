@@ -213,7 +213,7 @@ public class Items {
     @JsonProperty("hrid")      public final String hrid;
     @JsonProperty("barcode")   public final String barcode;
     @JsonProperty("copy")      private final String copy;
-    @JsonProperty("sequence")  private int sequence;
+    @JsonProperty("sequence")  private Integer sequence = null;
     @JsonProperty("call")      public String callNumber = null;
     @JsonProperty("enum")      public String enumeration;
     @JsonProperty("chron")     public final String chron;
@@ -286,7 +286,7 @@ public class Items {
         @JsonProperty("hrid")      String hrid,
         @JsonProperty("barcode")   String barcode,
         @JsonProperty("copy")      String copy,
-        @JsonProperty("sequence")  int sequence,
+        @JsonProperty("sequence")  Integer sequence,
         @JsonProperty("call")      String callNumber,
         @JsonProperty("enum")      String enumeration,
         @JsonProperty("chron")     String chron,
@@ -323,7 +323,16 @@ public class Items {
 
     @Override
     public int compareTo( final Item other ) {
-      return this.id.compareTo( other.id );
+      if ( this.sequence != null ) {
+        if ( other.sequence != null ) {
+          int i = this.sequence.compareTo(other.sequence);
+          if ( i != 0 ) return i;
+          return this.hrid.compareTo(other.hrid);
+        }
+        return -1;
+      }
+      if ( other.sequence != null ) return 1;
+      return this.hrid.compareTo( other.hrid );
     }
 
     @Override
