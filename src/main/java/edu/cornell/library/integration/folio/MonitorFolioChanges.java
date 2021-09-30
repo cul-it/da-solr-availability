@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,7 +36,11 @@ public class MonitorFolioChanges {
         PreparedStatement queueGen = inventory.prepareStatement
             ("INSERT INTO generationQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement getTitle = inventory.prepareStatement
-            ("SELECT title FROM bibRecsSolr WHERE bib_id = ?")) {
+            ("SELECT title FROM bibRecsSolr WHERE bib_id = ?");
+        PreparedStatement trimUserChangeLog = inventory.prepareStatement
+            ("DELETE FROM userChanges WHERE date < SUBDATE( NOW(), INTERVAL 5 MINUTE )");
+        PreparedStatement getUserChangeTotals = inventory.prepareStatement
+            ("SELECT id, COUNT(*) FROM userChanges GROUP BY 1")) {
 
       OkapiClient okapi = new OkapiClient(
           prop.getProperty("okapiUrlFolio"),
@@ -54,20 +59,21 @@ public class MonitorFolioChanges {
         Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
         final Timestamp since = time;
 
-        queueForIndex(
-            ChangeDetector.detectChangedInstances( inventory, okapi, since ),queueGen, getTitle );
+        trimUserChangeLog.executeUpdate();
+        queueForIndex( ChangeDetector.detectChangedInstances( inventory, okapi, since ),
+            queueGen, getTitle, getUserChangeTotals );
         Map<String, Set<Change>> changedBibs =
             ChangeDetector.detectChangedHoldings( inventory, okapi, since );
-        queueForIndex(changedBibs,queueGen,getTitle);
-        queueForIndex(changedBibs,queueAvail,getTitle);
-        queueForIndex(
-            ChangeDetector.detectChangedItems( inventory, okapi, since ), queueAvail, getTitle );
-        queueForIndex(
-            ChangeDetector.detectChangedLoans( inventory, okapi, since ), queueAvail, getTitle );
-        queueForIndex(
-            ChangeDetector.detectChangedOrderLines( inventory, okapi, since ), queueAvail, getTitle );
-        queueForIndex(
-            ChangeDetector.detectChangedOrders( inventory, okapi, since ), queueAvail, getTitle );
+        queueForIndex(changedBibs,queueGen,getTitle, getUserChangeTotals);
+        queueForIndex(changedBibs,queueAvail,getTitle, getUserChangeTotals);
+        queueForIndex(ChangeDetector.detectChangedItems( inventory, okapi, since ),
+            queueAvail, getTitle, getUserChangeTotals );
+        queueForIndex( ChangeDetector.detectChangedLoans( inventory, okapi, since ),
+            queueAvail, getTitle, getUserChangeTotals );
+        queueForIndex( ChangeDetector.detectChangedOrderLines( inventory, okapi, since ),
+            queueAvail, getTitle, getUserChangeTotals );
+        queueForIndex( ChangeDetector.detectChangedOrders( inventory, okapi, since ),
+            queueAvail, getTitle, getUserChangeTotals );
 
         Thread.sleep(10_000);
         time = newTime;
@@ -98,9 +104,16 @@ public class MonitorFolioChanges {
   }
 
 
-  private static void queueForIndex(
-      Map<String, Set<Change>> changedBibs, PreparedStatement q, PreparedStatement getTitle)
+  private static void queueForIndex( Map<String, Set<Change>> changedBibs,
+      PreparedStatement q, PreparedStatement getTitle, PreparedStatement getUserTotals)
           throws SQLException {
+
+    if ( changedBibs.isEmpty() ) return;
+
+    Map<String,Integer> userCounts = new HashMap<>();
+    try ( ResultSet rs = getUserTotals.executeQuery() ) {
+      while ( rs.next() ) userCounts.put(rs.getString(1), rs.getInt(2));
+    }
 
     int i = 0;
     for (Entry<String,Set<Change>> e : changedBibs.entrySet()) {
@@ -110,23 +123,30 @@ public class MonitorFolioChanges {
       try (ResultSet rs1 = getTitle.executeQuery() ) {while (rs1.next()) title = rs1.getString(1);}
       String causes = e.getValue().toString();
       System.out.println(bibId+" ("+title+") "+causes);
+      int priority = 6;
+      for ( Change c : e.getValue() ) {
+        if ( c.userId != null && userCounts.containsKey(c.userId) ) {
+          int changeCount = userCounts.get(c.userId);
+          if ( changeCount < 10 )
+            priority = 1;
+          else if (changeCount < 100 )
+            priority = 4;
+          else if (changeCount < 500)
+            priority = 5;
+        }
+      }
       if (causes.length() > 65_000 ) {
         causes = causes.substring(0, 65_000);
         System.out.printf("Causes for bib %d truncated to 65k characters.\n",bibId);
       }
       q.setInt(1, bibId);
-      q.setInt(2,isBatch( e.getValue() )?6:1);
+      q.setInt(2,priority);
       q.setString(3, causes);
       q.setTimestamp(4,getMinChangeDate( e.getValue() ));
       q.addBatch();
       if (++i == 100) { q.executeBatch(); i=0; }
     }
     q.executeBatch();
-  }
-
-  private static boolean isBatch(Set<Change> changes) {
-    for (Change c : changes) if (c.type.equals(Change.Type.ITEM_BATCH)) return true;
-    return false;
   }
 
   private static Timestamp getMinChangeDate(Set<Change> changes) {

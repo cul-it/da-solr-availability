@@ -73,7 +73,8 @@ public class ChangeDetector {
 
         if ( ! source.equals("MARC") ) continue INSTANCE;
 
-        Change c = new Change(Change.Type.INSTANCE,id,"Instance modified",modDate,null);
+        Change c = new Change(Change.Type.INSTANCE,id,"Instance modified",
+            modDate,null,trackUserChange( inventory, instanceJson ));
         if ( ! changes.containsKey(hrid)) {
           Set<Change> t = new HashSet<>();
           t.add(c);
@@ -166,13 +167,15 @@ public class ChangeDetector {
         replaceHolding.setString(6, holdingJson);
         replaceHolding.executeUpdate();
 
-        Change c = new Change(Change.Type.HOLDING,id,"Holding modified",modDate,null);
+        Change c = new Change(Change.Type.HOLDING,id,"Holding modified",
+            modDate,null,trackUserChange( inventory, holdingJson ));
         if ( ! changes.containsKey(instanceHrid)) {
           Set<Change> t = new HashSet<>();
           t.add(c);
           changes.put(instanceHrid,t);
         }
         changes.get(instanceHrid).add(c);
+
       }
     } while (changedHoldings.size() == limit);
 
@@ -245,7 +248,8 @@ public class ChangeDetector {
         replaceItem.setString(6, itemJson);
         replaceItem.executeUpdate();
 
-        Change c = new Change(Change.Type.ITEM,id,"Item modified",modDate,null);
+        Change c = new Change(Change.Type.ITEM,id,"Item modified",
+            modDate,null,trackUserChange( inventory, itemJson ));
         if ( ! changes.containsKey(instanceHrid)) {
           Set<Change> t = new HashSet<>();
           t.add(c);
@@ -253,6 +257,7 @@ public class ChangeDetector {
         }
         changes.get(instanceHrid).add(c);
       }
+
     } while (changedItems.size() == limit);
 
     return changes;
@@ -316,7 +321,8 @@ public class ChangeDetector {
         replaceLoan.setString(4, loanJson);
         replaceLoan.executeUpdate();
 
-        Change c = new Change(Change.Type.LOAN,id,"Item modified",modDate,null);
+        Change c = new Change(Change.Type.LOAN,id,"Item modified",
+            modDate,null,trackUserChange( inventory, loanJson ));
         if ( ! changes.containsKey(instanceHrid)) {
           Set<Change> t = new HashSet<>();
           t.add(c);
@@ -384,7 +390,8 @@ public class ChangeDetector {
               "Purchase order line "+id+" can't be tracked to instance, not queueing for index.");
           continue;
         }
-        Change c = new Change(Change.Type.ORDER,id,"Order Line modified",modDate,null);
+        Change c = new Change(Change.Type.ORDER,id,"Order Line modified",
+            modDate,null,trackUserChange( inventory, polJson ));
         if ( ! changes.containsKey(instanceHrid)) {
           Set<Change> t = new HashSet<>();
           t.add(c);
@@ -445,7 +452,8 @@ public class ChangeDetector {
           while (rs.next()) {
             String instanceHrid = rs.getString(1);
             if ( instanceHrid == null || instanceHrid.isEmpty() ) continue;
-            Change c = new Change(Change.Type.ORDER,id,"Order modified",modDate,null);
+            Change c = new Change(Change.Type.ORDER,id,"Order modified",
+                modDate,null,trackUserChange( inventory, orderJson ));
             if ( ! changes.containsKey(instanceHrid)) {
               Set<Change> t = new HashSet<>();
               t.add(c);
@@ -461,8 +469,22 @@ public class ChangeDetector {
     return changes;
   }
 
+  public static String trackUserChange( Connection inventory, String json ) throws SQLException {
+    Matcher userM = modUserP.matcher(json);
+    if ( userM.matches() ) {
+      String userId = userM.group(1);
+      if ( trackUpdatesByUser == null )
+        trackUpdatesByUser = inventory.prepareStatement(
+            "INSERT INTO userChanges (id) VALUES (?)");
+      trackUpdatesByUser.setString(1, userId);
+      trackUpdatesByUser.executeUpdate();
+      return userId;
+    }
+    return null;
+  }
 
   static Pattern modDateP = Pattern.compile("^.*\"updatedDate\" *: *\"([^\"]+)\".*$");
+  static Pattern modUserP = Pattern.compile("^.*\"updatedByUserId\" *: *\"([^\"]+)\".*$");
 
   static PreparedStatement getPreviousInstance = null;
   static PreparedStatement getPreviousBib = null;
@@ -482,6 +504,7 @@ public class ChangeDetector {
   static PreparedStatement getItemParentage = null;
   static PreparedStatement getLoanParentage = null;
   static PreparedStatement getOrderParentage = null;
+  static PreparedStatement trackUpdatesByUser = null;
 
   static ObjectMapper mapper = new ObjectMapper();
   static {

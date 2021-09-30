@@ -14,17 +14,20 @@ public class Change implements Comparable<Change>{
   public Type type;
   private final String recordId;
   public final String detail;
+  public final String userId;
   private final Timestamp changeDate;
   private final String location;
 
   public Timestamp date() { return this.changeDate; }
 
-  public Change (Type type, String id, String detail, Timestamp changeDate, String location) {
+  public Change (
+      Type type, String id, String detail, Timestamp changeDate, String location, String userId) {
     this.type = type;
     this.recordId = id;
     this.detail = detail;
     this.changeDate = changeDate;
     this.location = location;
+    this.userId = userId;
   }
 
 
