@@ -38,7 +38,7 @@ public class MonitorFolioChanges {
         PreparedStatement getTitle = inventory.prepareStatement
             ("SELECT title FROM bibRecsSolr WHERE bib_id = ?");
         PreparedStatement trimUserChangeLog = inventory.prepareStatement
-            ("DELETE FROM userChanges WHERE date < SUBDATE( NOW(), INTERVAL 5 MINUTE )");
+            ("DELETE FROM userChanges WHERE date < SUBDATE( NOW(), INTERVAL 3 MINUTE )");
         PreparedStatement getUserChangeTotals = inventory.prepareStatement
             ("SELECT id, COUNT(*) FROM userChanges GROUP BY 1")) {
 
@@ -127,7 +127,7 @@ public class MonitorFolioChanges {
       for ( Change c : e.getValue() ) {
         if ( c.userId != null && userCounts.containsKey(c.userId) ) {
           int changeCount = userCounts.get(c.userId);
-          if ( changeCount < 10 )
+          if ( changeCount < 25 )
             priority = 1;
           else if (changeCount < 100 )
             priority = 4;
