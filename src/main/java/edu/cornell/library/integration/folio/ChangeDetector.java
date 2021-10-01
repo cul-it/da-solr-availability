@@ -140,12 +140,17 @@ public class ChangeDetector {
 
         if (getInstanceHridByInstanceId == null)
           getInstanceHridByInstanceId = inventory.prepareStatement(
-              "SELECT hrid FROM instanceFolio WHERE id = ?");
+              "SELECT hrid, source FROM instanceFolio WHERE id = ?");
         getInstanceHridByInstanceId.setString(1, (String)holding.get("instanceId"));
         String instanceHrid = null;
+        String source = null;
         try (ResultSet rs = getInstanceHridByInstanceId.executeQuery() ) {
-          while (rs.next()) instanceHrid = rs.getString(1);
+          while (rs.next()) {
+            instanceHrid = rs.getString(1);
+            source = rs.getString(2);
+          }
         }
+
         if ( instanceHrid == null ) {
           System.out.println("Holding "+hrid+" can't be tracked to instance, not queueing for index.");
           continue;
@@ -166,6 +171,12 @@ public class ChangeDetector {
         replaceHolding.setTimestamp(5, modDate);
         replaceHolding.setString(6, holdingJson);
         replaceHolding.executeUpdate();
+
+        if ( source == null || ! source.equals("MARC") ) {
+          System.out.printf("Holding %s not queued because instance (%s) has source %s.\n",
+              hrid,instanceHrid,source);
+          continue;
+        }
 
         Change c = new Change(Change.Type.HOLDING,id,"Holding modified",
             modDate,null,trackUserChange( inventory, holdingJson ));
@@ -215,14 +226,18 @@ public class ChangeDetector {
 
         if (getItemParentage == null)
           getItemParentage = inventory.prepareStatement(
-              "SELECT instanceHrid, hrid FROM holdingFolio WHERE id = ?");
+              "SELECT i.hrid, h.hrid, i.source"+
+              "  FROM holdingFolio h , instanceFolio i"+
+              " WHERE h.id = ? AND h.instanceHrid = i.hrid");
         getItemParentage.setString(1, (String)item.get("holdingsRecordId"));
         String instanceHrid = null;
         String holdingHrid = null;
+        String source = null;
         try (ResultSet rs = getItemParentage.executeQuery() ) {
           while (rs.next()) {
             instanceHrid = rs.getString(1);
             holdingHrid = rs.getString(2);
+            source = rs.getString(3);
           }
         }
         if ( instanceHrid == null ) {
@@ -247,6 +262,12 @@ public class ChangeDetector {
         replaceItem.setString(5, barcode);
         replaceItem.setString(6, itemJson);
         replaceItem.executeUpdate();
+
+        if ( source == null || ! source.equals("MARC") ) {
+          System.out.printf("Item %s not queued because instance (%s) has source %s.\n",
+              hrid,instanceHrid,source);
+          continue;
+        }
 
         Change c = new Change(Change.Type.ITEM,id,"Item modified",
             modDate,null,trackUserChange( inventory, itemJson ));
