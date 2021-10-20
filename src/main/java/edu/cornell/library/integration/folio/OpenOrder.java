@@ -8,17 +8,14 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.cornell.library.integration.changes.Change;
-import edu.cornell.library.integration.changes.ChangeDetector;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 
 public class OpenOrder {
@@ -56,15 +53,15 @@ public class OpenOrder {
                 switch (receiptStatus) {
                 case "Pending":
                   Map<String,String> olMetadata = (Map<String,String>)orderLine.get("metadata");
-                  Timestamp polCreateDate = Timestamp.from(Instant.parse(
-                      olMetadata.get("createdDate").replace("+00:00","Z")));
+                  Timestamp polCreateDate = Timestamp.from(
+                      isoDT.parse(((String)order.get("createdDate")),Instant::from));
                   note = "In pre-order processing as of "+format.format(polCreateDate);
                   break;
                 case "Cancelled":
                   note = "Order cancelled"; break;
                 case "Awaiting Receipt":
-                  Timestamp approvalDate = Timestamp.from(Instant.parse(
-                      ((String)order.get("approvalDate")).replace("+00:00","Z")));
+                  Timestamp approvalDate = Timestamp.from(
+                      isoDT.parse(((String)order.get("approvalDate")),Instant::from));
                   int quantity = (int)location.get("quantity");
                   if ( quantity == 1 )
                     note = "On order as of "+format.format(approvalDate);
@@ -113,4 +110,6 @@ public class OpenOrder {
   private static List<String> orderStatuses = Arrays.asList(
       "Pending","Received Complete","Backordered","Returned","Claimed",
       "Invoice Pending","Invoiced","Canceled","Approved","Received Partial","Rolled Over");
+  private static DateTimeFormatter isoDT = DateTimeFormatter.ISO_DATE_TIME;
+
 }

@@ -71,8 +71,6 @@ public class ChangeDetector {
         replaceInstance.setString(6, instanceJson);
         replaceInstance.executeUpdate();
 
-        if ( ! source.equals("MARC") ) continue INSTANCE;
-
         Change c = new Change(Change.Type.INSTANCE,id,"Instance modified",
             modDate,null,trackUserChange( inventory, instanceJson ));
         if ( ! changes.containsKey(hrid)) {
@@ -81,6 +79,8 @@ public class ChangeDetector {
           changes.put(hrid,t);
         }
         changes.get(hrid).add(c);
+
+        if ( ! source.equals("MARC") ) continue INSTANCE;
 
         String marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
             .replaceAll("\\s*\\n\\s*", " ");
@@ -140,14 +140,12 @@ public class ChangeDetector {
 
         if (getInstanceHridByInstanceId == null)
           getInstanceHridByInstanceId = inventory.prepareStatement(
-              "SELECT hrid, source FROM instanceFolio WHERE id = ?");
+              "SELECT hrid FROM instanceFolio WHERE id = ?");
         getInstanceHridByInstanceId.setString(1, (String)holding.get("instanceId"));
         String instanceHrid = null;
-        String source = null;
         try (ResultSet rs = getInstanceHridByInstanceId.executeQuery() ) {
           while (rs.next()) {
             instanceHrid = rs.getString(1);
-            source = rs.getString(2);
           }
         }
 
@@ -171,12 +169,6 @@ public class ChangeDetector {
         replaceHolding.setTimestamp(5, modDate);
         replaceHolding.setString(6, holdingJson);
         replaceHolding.executeUpdate();
-
-        if ( source == null || ! source.equals("MARC") ) {
-          System.out.printf("Holding %s not queued because instance (%s) has source %s.\n",
-              hrid,instanceHrid,source);
-          continue;
-        }
 
         Change c = new Change(Change.Type.HOLDING,id,"Holding modified",
             modDate,null,trackUserChange( inventory, holdingJson ));
@@ -226,18 +218,14 @@ public class ChangeDetector {
 
         if (getItemParentage == null)
           getItemParentage = inventory.prepareStatement(
-              "SELECT i.hrid, h.hrid, i.source"+
-              "  FROM holdingFolio h , instanceFolio i"+
-              " WHERE h.id = ? AND h.instanceHrid = i.hrid");
+              "SELECT instanceHrid, hrid FROM holdingFolio WHERE id = ?");
         getItemParentage.setString(1, (String)item.get("holdingsRecordId"));
         String instanceHrid = null;
         String holdingHrid = null;
-        String source = null;
         try (ResultSet rs = getItemParentage.executeQuery() ) {
           while (rs.next()) {
             instanceHrid = rs.getString(1);
             holdingHrid = rs.getString(2);
-            source = rs.getString(3);
           }
         }
         if ( instanceHrid == null ) {
@@ -262,12 +250,6 @@ public class ChangeDetector {
         replaceItem.setString(5, barcode);
         replaceItem.setString(6, itemJson);
         replaceItem.executeUpdate();
-
-        if ( source == null || ! source.equals("MARC") ) {
-          System.out.printf("Item %s not queued because instance (%s) has source %s.\n",
-              hrid,instanceHrid,source);
-          continue;
-        }
 
         Change c = new Change(Change.Type.ITEM,id,"Item modified",
             modDate,null,trackUserChange( inventory, itemJson ));

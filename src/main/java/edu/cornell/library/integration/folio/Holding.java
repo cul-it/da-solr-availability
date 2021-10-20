@@ -69,11 +69,11 @@ public class Holding {
       throws JsonParseException, JsonMappingException, SQLException, IOException {
 
     this.rawFolioHolding = raw;
-    Map<String,Object> metadata = (Map<String,Object>)raw.get("metadata");
+    Map<String,String> metadata = (Map<String,String>)raw.get("metadata");
     if ( metadata.containsKey("UpdatedDate") && metadata.get("UpdatedDate") != null )
-      this.date = (int) Instant.parse((String)metadata.get("UpdatedDate")).getEpochSecond();
+      this.date = (int) Instant.parse(metadata.get("UpdatedDate")).getEpochSecond();
     else if ( metadata.containsKey("CreatedDate") && metadata.get("CreatedDate") != null )
-      this.date = (int) Instant.parse((String)metadata.get("CreatedDate")).getEpochSecond();
+      this.date = (int) Instant.parse(metadata.get("CreatedDate")).getEpochSecond();
     this.hrid = (String)raw.get("hrid");
 
     if (  ( raw.containsKey("discoverySuppress") && (boolean) raw.get("discoverySuppress") )
