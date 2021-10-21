@@ -54,7 +54,7 @@ public class OpenOrder {
                 case "Pending":
                   Map<String,String> olMetadata = (Map<String,String>)orderLine.get("metadata");
                   Timestamp polCreateDate = Timestamp.from(
-                      isoDT.parse(((String)order.get("createdDate")),Instant::from));
+                      isoDT.parse((olMetadata.get("createdDate")),Instant::from));
                   note = "In pre-order processing as of "+format.format(polCreateDate);
                   break;
                 case "Cancelled":
