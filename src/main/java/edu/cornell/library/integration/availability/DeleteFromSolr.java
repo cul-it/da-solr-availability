@@ -1,5 +1,6 @@
 package edu.cornell.library.integration.availability;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,11 +11,15 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
+
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Utility to delete bibs from Solr index.
@@ -47,15 +52,15 @@ class DeleteFromSolr {
         prop.getProperty("inventoryDBUser"),
         prop.getProperty("inventoryDBPass"));
         PreparedStatement queryQ = inventoryDB.prepareStatement
-            ("SELECT bib_id FROM deleteQueue ORDER BY priority LIMIT 100");
-        PreparedStatement voyagerCheckQ = inventoryDB.prepareStatement
-            ("SELECT active FROM bibRecsVoyager WHERE bib_id = ?");
+            ("SELECT hrid FROM deleteQueue ORDER BY priority LIMIT 100");
+        PreparedStatement folioCacheCheck = inventoryDB.prepareStatement
+            ("SELECT content FROM instanceFolio WHERE hrid = ?");
         PreparedStatement deleteFromQ = inventoryDB.prepareStatement
-            ("DELETE FROM deleteQueue WHERE bib_id = ?");
+            ("DELETE FROM deleteQueue WHERE hrid = ?");
         PreparedStatement deleteFromGenQ = inventoryDB.prepareStatement
-            ("DELETE FROM generationQueue WHERE bib_id = ?");
+            ("DELETE FROM generationQueue WHERE hrid = ?");
         PreparedStatement deleteFromAvailQ = inventoryDB.prepareStatement
-            ("DELETE FROM availabilityQueue WHERE bib_id = ?");
+            ("DELETE FROM availabilityQueue WHERE hrid = ?");
         PreparedStatement getTitle = inventoryDB.prepareStatement
             ("SELECT title FROM bibRecsSolr WHERE bib_id = ?");
         PreparedStatement deleteFromBRS = inventoryDB.prepareStatement
@@ -69,7 +74,7 @@ class DeleteFromSolr {
         PreparedStatement getHoldingIds = inventoryDB.prepareStatement
             ("SELECT mfhd_id FROM mfhdRecsSolr WHERE bib_id = ?");
         PreparedStatement queueHeadingsUpdate = inventoryDB.prepareStatement
-            ("INSERT INTO headingsQueue (bib_id,priority,cause,record_date ) VALUES (?,5,'Delete all',now())");
+            ("INSERT INTO headingsQueue (hrid,priority,cause,record_date ) VALUES (?,5,'Delete all',now())");
         Statement stmt = inventoryDB.createStatement();
         HttpSolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL")) ){
@@ -77,20 +82,20 @@ class DeleteFromSolr {
       int countFound = 0;
       do {
 
-        List<Integer> bibIds = new ArrayList<>();
+        List<String> bibIds = new ArrayList<>();
         countFound = 0;
 
         try ( ResultSet rs = queryQ.executeQuery() ) { while ( rs.next() ) {
 
-          Integer bibId = rs.getInt(1);
+          String bibId = rs.getString(1);
 
           String title = null;
-          getTitle.setInt(1,bibId);
+          getTitle.setInt(1,Integer.valueOf(bibId));
           try (ResultSet rs1 = getTitle.executeQuery() ) {while (rs1.next()) title = rs1.getString(1);}
 
-          if ( checkActiveInVoyager( voyagerCheckQ, bibId ) ) {
+          if ( checkActiveInFolio( folioCacheCheck, bibId ) ) {
             System.out.printf("Marked for deletion, but now active. Dequeuing %d: (%s)\n",bibId,title);
-            deleteFromQ.setInt(1,bibId);
+            deleteFromQ.setString(1,bibId);
             deleteFromQ.addBatch();
             continue;
           }
@@ -105,13 +110,14 @@ class DeleteFromSolr {
           callNumberSolr.deleteByQuery("bibid:"+bibId);
 
           // Delete from Inventory tables
-          deleteFromBRS.setInt(1, bibId);
+          deleteFromBRS.setInt(1, Integer.valueOf(bibId));
           deleteFromBRS.addBatch();
-          deleteFromSFD.setInt(1, bibId);
+          deleteFromSFD.setInt(1, Integer.valueOf(bibId));
           deleteFromSFD.addBatch();
           Set<Integer> holdingIds = new HashSet<>();
-          getHoldingIds.setInt(1,bibId);
-          try (ResultSet rs1 = getHoldingIds.executeQuery()) {while (rs1.next()) holdingIds.add(rs1.getInt(1));}
+          getHoldingIds.setInt(1,Integer.valueOf(bibId));
+          try (ResultSet rs1 = getHoldingIds.executeQuery()) {
+            while (rs1.next()) holdingIds.add(rs1.getInt(1));}
           for ( Integer holdingId : holdingIds ) {
             deleteFromMRS.setInt(1, holdingId);
             deleteFromMRS.addBatch();
@@ -120,21 +126,21 @@ class DeleteFromSolr {
           }
 
           // Delete solr Fields Data
-          deleteFromSFD.setInt(1, bibId);
+          deleteFromSFD.setInt(1, Integer.valueOf(bibId));
           deleteFromSFD.addBatch();
 
           // Delete from Delete Queue
-          deleteFromQ.setInt(1,bibId);
+          deleteFromQ.setString(1,bibId);
           deleteFromQ.addBatch();
   
           // Delete from other queues
-          deleteFromGenQ.setInt(1,bibId);
+          deleteFromGenQ.setString(1,bibId);
           deleteFromGenQ.addBatch();
-          deleteFromAvailQ.setInt(1,bibId);
+          deleteFromAvailQ.setString(1,bibId);
           deleteFromAvailQ.addBatch();
 
           // Queue headings counts update
-          queueHeadingsUpdate.setInt(1, bibId);
+          queueHeadingsUpdate.setString(1, bibId);
           queueHeadingsUpdate.addBatch();
         }}
 
@@ -154,12 +160,32 @@ class DeleteFromSolr {
     }
   }
 
-  private static boolean checkActiveInVoyager(PreparedStatement voyagerCheckQ, Integer bibId) throws SQLException {
-    voyagerCheckQ.setInt(1, bibId);
-    try ( ResultSet rs = voyagerCheckQ.executeQuery() ) {
-      while ( rs.next() ) return rs.getBoolean(1);
+  private static boolean checkActiveInFolio(PreparedStatement folioCacheCheck, String bibId)
+      throws IOException, SQLException {
+    folioCacheCheck.setString(1, bibId);
+    try ( ResultSet rs = folioCacheCheck.executeQuery() ) {
+      while ( rs.next() ) {
+        Map<String,Object> instance = mapper.readValue(rs.getString(1), Map.class);
+        if (instance.containsKey("discoverySuppress")) {
+          Object o = instance.get("discoverySuppress");
+          if (String.class.isInstance(o)) {
+            if (((String)o).equals("true")) return false;
+          } else if ((Boolean)o) return false;
+        }
+        if (instance.containsKey("staffSuppress")) {
+          Object o = instance.get("staffSuppress");
+          if (String.class.isInstance(o)) {
+            if (((String)o).equals("true")) return false;
+          } else if ((Boolean)o) return false;
+        }
+        return true; // record found, neither suppression flag set
+      }
     }
-    return false;
+    return false; // record not found, therefore not active
+  }
+  static ObjectMapper mapper = new ObjectMapper();
+  static {
+    mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
 
 }

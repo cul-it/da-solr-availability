@@ -107,7 +107,7 @@ public class WorksAndInventory {
     triggerOtherWorksReindex( bibId, works, oldWorks, linkingUpdate, inventory );
   }
 
-  public static void deleteWorkRelationships ( Connection inventory, List<Integer> bibIds ) throws SQLException {
+  public static void deleteWorkRelationships ( Connection inventory, List<String> bibIds ) throws SQLException {
     try ( PreparedStatement getWorkLinkedBibs = inventory.prepareStatement
             ("SELECT o.bib_id FROM bib2work as t, bib2work as o"+
              " WHERE t.bib_id = ?"+
@@ -116,17 +116,18 @@ public class WorksAndInventory {
              "   AND o.active = 1" );
         PreparedStatement deactiveB2W = inventory.prepareStatement("UPDATE bib2work SET active = 0 WHERE bib_id = ?") ){
 
-      for (Integer bibId : bibIds) {
+      for (String bibString : bibIds) {
+        Integer bibInt = Integer.valueOf(bibString);
         Set<Integer> connectedBibs = new HashSet<>();
-        getWorkLinkedBibs.setInt(1, bibId);
+        getWorkLinkedBibs.setInt(1, bibInt);
         try ( ResultSet rs = getWorkLinkedBibs.executeQuery() ) {
           while ( rs.next() ) {
             connectedBibs.add( rs.getInt(1) );
           }
         }
-        deactiveB2W.setInt(1, bibId);
+        deactiveB2W.setInt(1, bibInt);
         deactiveB2W.addBatch();
-        insertConnectedBibsToAvailQueue( connectedBibs, bibId, inventory );
+        insertConnectedBibsToAvailQueue( connectedBibs, bibInt, inventory );
       }
       deactiveB2W.executeBatch();
     }
