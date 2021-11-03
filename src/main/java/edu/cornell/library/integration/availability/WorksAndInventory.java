@@ -46,7 +46,8 @@ public class WorksAndInventory {
       "   AND recordtype_solr_fields LIKE '%type: Catalog%'"+
       "   AND bib2work.bib_id = bibRecsSolr.bib_id"+
       "   AND bibRecsSolr.active = 1";
-  private final static String insertB2W = "REPLACE INTO bib2work ( bib_id, oclc_id, work_id) VALUES (?,?,?)";
+  private final static String insertB2W =
+      "REPLACE INTO bib2work ( bib_id, oclc_id, work_id, active) VALUES (?,?,?,1)";
   private final static String selectW2O = "SELECT oclc_id, work_id from workids.work2oclc WHERE oclc_id = ?";
   private final static String updateB2W =
       "UPDATE bib2work SET active = 0"+
