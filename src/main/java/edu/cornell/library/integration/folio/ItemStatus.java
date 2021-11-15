@@ -86,6 +86,9 @@ public class ItemStatus {
     if ( statusData.containsKey("date") )
       this.date = Instant.parse(statusData.get("date").replace("+00:00","Z")).getEpochSecond();
   }
+  public ItemStatus(String status) { this.status = status; }
+
+  public static ItemStatus AVAIL = new ItemStatus("Available");
   static PreparedStatement loansByItem = null;
   static ObjectMapper mapper = new ObjectMapper();
   static {

@@ -317,6 +317,34 @@ public class Items {
       this.active = active;
     }
 
+    Item(
+        @JsonProperty("id")        String id,
+        @JsonProperty("hrid")      String hrid,
+        @JsonProperty("copy")      String copy,
+        @JsonProperty("call")      String callNumber,
+        @JsonProperty("enum")      String enumeration,
+        @JsonProperty("location")  Location location,
+        @JsonProperty("permLocation") String permLocation,
+        @JsonProperty("loanType")  LoanType loanType,
+        @JsonProperty("matType")   Map<String,String> matType,
+        @JsonProperty("status")    ItemStatus status
+        ) {
+      this.id = id;
+      this.hrid = hrid;
+      this.barcode = null;
+      this.copy = copy;
+      this.sequence = null;
+      this.callNumber = callNumber;
+      this.enumeration = enumeration;
+      this.chron = null;
+      this.location = location;
+      this.permLocation = permLocation;
+      this.loanType = loanType;
+      this.matType = matType;
+      this.status = status;
+      this.active = true;
+    }
+
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this);
     }
@@ -357,6 +385,37 @@ public class Items {
       return String.join(" - ", enumchron);
     }
 
+  }
+
+  public static boolean applyDummyRMCItems(HoldingSet holdings, ItemList items) {
+    Map<String,TreeSet<Item>> itemHash = items.getItems() ;
+    boolean dummyItemApplied = false;
+    for ( String hId : holdings.getUuids() ) {
+      if ( itemHash.containsKey(hId) && ! itemHash.get(hId).isEmpty() ) continue;
+      Holding h = holdings.get(hId);
+      if ( h.active == false ||
+           h.location == null ||
+           h.location.library == null ||
+           ! h.location.library.equals("Kroch Library Rare & Manuscripts"))
+        continue;
+      // We have an unsuppressed RMC holding with no items
+      Item dummy = new Item(
+          "holding:"+hId, //id
+          "holding:"+h.hrid,//hrid
+          (h.copy==null || h.copy.isEmpty())?"1":h.copy,
+          h.call,
+          (h.holdings==null)?null:String.join("; ",h.holdings),//enum
+          h.location,
+          h.location.name,//permloc
+          LoanTypes.getByName("Non-circulating"),
+          materialTypes.getEntryHashByName("unspecified"),
+          ItemStatus.AVAIL);
+      TreeSet<Item> itemSet = new TreeSet<>();
+      itemSet.add(dummy);
+      items.put(hId, itemSet);
+      dummyItemApplied = true;
+    }
+    return dummyItemApplied;
   }
 
 }

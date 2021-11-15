@@ -90,6 +90,13 @@ public class ReferenceData {
     return null;
   }
 
+  public Map<String,String> getEntryHashByName( String name ) {
+    if ( name == null ) return null;
+    String value = name.toLowerCase();
+    if ( ! this.dataByName.containsKey(value)) return null;
+    return this.entriesByUuid.get(this.dataByName.get(value));
+  }
+
 
   /* Set default key value to use when invalid key is requested. Throws
    * IllegalArgumentException if invalid.

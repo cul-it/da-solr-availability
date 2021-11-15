@@ -17,6 +17,13 @@ public class LoanTypes {
     if (_byUuid.containsKey(uuid)) return _byUuid.get(uuid);
     return null;
   }
+  public final static LoanType getByName( String name ) {
+    if (_byName.containsKey(name)) return _byName.get(name);
+    return null;
+  }
+  public final static LoanType byExpectedType( ExpectedLoanType type ) {
+    return _byName.get(type.name());
+  }
 
   public enum ExpectedLoanType{
     DAY1  ("1 Day Loan"),
@@ -58,6 +65,7 @@ public class LoanTypes {
       ExpectedLoanType.RES);
 
   private static final Map<String,LoanType> _byUuid = new HashMap<>();
+  private static final Map<String,LoanType> _byName = new HashMap<>();
 
   public static class LoanType {
     @JsonProperty("id")   public final String uuid;
@@ -84,7 +92,9 @@ public class LoanTypes {
         System.exit(1);
       }
       expected.remove(exp);
-      _byUuid.put(id, new LoanType(id,name,shortLoanTypes.contains(exp)));
+      boolean shortLoan = shortLoanTypes.contains(exp);
+      _byUuid.put(id,  new LoanType(id,name,shortLoan));
+      _byName.put(name,new LoanType(id,name,shortLoan));
     }
     
   }

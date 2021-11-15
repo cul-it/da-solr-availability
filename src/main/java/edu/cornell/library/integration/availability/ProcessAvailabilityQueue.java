@@ -226,6 +226,8 @@ public class ProcessAvailabilityQueue {
               HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
                   inventory,locations,holdingsNoteTypes,callNumberTypes, String.valueOf(bibId));
               ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
+              if ( Items.applyDummyRMCItems(holdings,items) )
+                doc.addField("availability_facet","RMC Dummy Item");
               boolean active = doc.getFieldValue("type").equals("Catalog");
               doc.addField("notes_t", holdings.getNotes());
 
