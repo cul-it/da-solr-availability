@@ -241,10 +241,10 @@ public class Items {
       this.enumeration = (String)raw.get("enumeration");
       this.chron = (String)raw.get("chronology");
 
-      if ( raw.containsKey("effectiveLocationId") )
-        this.location = locations.getByUuid( (String)raw.get("effectiveLocationId") );
-      else if ( raw.containsKey("temporaryLocationId") )
+      if ( raw.containsKey("temporaryLocationId") )
         this.location = locations.getByUuid( (String)raw.get("temporaryLocationId") );
+      else if ( raw.containsKey("permanentLocationId") )
+        this.location = locations.getByUuid( (String)raw.get("permanentLocationId") );
       else if (holding != null)
         this.location = holding.location;
       if ( holding != null ) {
