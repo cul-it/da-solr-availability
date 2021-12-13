@@ -82,8 +82,16 @@ public class ChangeDetector {
 
         if ( ! source.equals("MARC") ) continue INSTANCE;
 
-        String marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
+        String marc = null;
+        try {
+        marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
             .replaceAll("\\s*\\n\\s*", " ");
+        } catch (IOException e) {
+          if ( e.getMessage().equals("Not Found") ) {
+            System.out.printf("MARC Record Not Found in SRS: %s %s\n",hrid,id);
+            continue INSTANCE;
+          }
+        }
         if ( getPreviousBib == null )
           getPreviousBib = inventory.prepareStatement(
               "SELECT content FROM bibFolio WHERE instanceHrid = ?");
