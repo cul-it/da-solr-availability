@@ -23,6 +23,7 @@ Fine Arts Library Reserve				Fine Arts Library > Reserve
 ILR Library (Ives Hall)				ILR Library > Main Collection
 ILR Library Reference (Non-Circulating)		Labor Law		ILR Library > Labor Law Reference
 ILR Library Reference (Non-Circulating)				ILR Library > Reference
+ILR Library Permanent Reserve 				ILR Library > Reserve
 ILR Library Reserve 				ILR Library > Reserve
 ILR Multi-Copy Storage				ILR Library > Main Collection
 ILR Library Kheel Center				ILR Library Kheel Center > Main Collection
