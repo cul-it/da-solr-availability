@@ -77,7 +77,7 @@ public class ProcessAvailabilityQueue {
             ("SELECT availabilityQueue.hrid, priority"+
              "  FROM processedMarcData, availabilityQueue"+
              "  LEFT JOIN bibLock ON availabilityQueue.hrid = bibLock.hrid"+
-             " WHERE availabilityQueue.hrid = processedMarcData.bib_id"+
+             " WHERE availabilityQueue.hrid = processedMarcData.hrid"+
              "   AND bibLock.date IS NULL"+
              " ORDER BY priority LIMIT 1");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
@@ -185,7 +185,7 @@ public class ProcessAvailabilityQueue {
       "       newbooks_solr_fields,    recordtype_solr_fields,  recordboost_solr_fields,"+
       "       callnumber_solr_fields,  otherids_solr_fields" + 
       "  FROM processedMarcData"+
-      " WHERE bib_id = ?";
+      " WHERE hrid = ?";
   static void updateBibsInSolr(
       OkapiClient okapi, Connection inventory,
       SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
@@ -202,7 +202,7 @@ public class ProcessAvailabilityQueue {
 
         for (BibToUpdate updateDetails : changedBibs) {
           String bibId = updateDetails.bibId;
-          pstmt.setInt(1, Integer.valueOf(bibId));
+          pstmt.setString(1, bibId);
           try (ResultSet rs = pstmt.executeQuery();
               PreparedStatement instanceByHrid = inventory.prepareStatement(
                   "SELECT * FROM instanceFolio WHERE hrid = ?");) {
@@ -211,7 +211,7 @@ public class ProcessAvailabilityQueue {
               SolrInputDocument doc = constructSolrInputDocument( rs, bibId );
               Map<String,Object> instance = null;
               String instanceId = null;
-              instanceByHrid.setString(1, String.valueOf(bibId));
+              instanceByHrid.setString(1, bibId);
               try ( ResultSet rs1 = instanceByHrid.executeQuery() ) {
                 while (rs1.next()) {
                   instanceId = rs1.getString("id");
@@ -258,7 +258,7 @@ public class ProcessAvailabilityQueue {
                     ZonedDateTime.ofInstant(returnedUntil, ZoneId.of("UTC"))
                     .format(DateTimeFormatter.ISO_INSTANT));
               }
-              if ( OpenOrder.applyOpenOrders(inventory,holdings,String.valueOf(bibId)) )
+              if ( OpenOrder.applyOpenOrders(inventory,holdings,bibId) )
                 doc.addField("availability_facet", "On Order");
               if ( holdings.noItemsAvailability() )
                 doc.addField("availability_facet", "No Items Print");
