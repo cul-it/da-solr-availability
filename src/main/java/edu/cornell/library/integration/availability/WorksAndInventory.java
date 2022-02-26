@@ -42,7 +42,7 @@ public class WorksAndInventory {
       "SELECT bib2work.bib_id "+
       "  FROM bib2work, processedMarcData, bibRecsSolr"+
       " WHERE work_id = ?"+
-      "   AND bib2work.bib_id = processedMarcData.bib_id"+
+      "   AND bib2work.bib_id = processedMarcData.hrid"+
       "   AND recordtype_solr_fields LIKE '%type: Catalog%'"+
       "   AND bib2work.bib_id = bibRecsSolr.bib_id"+
       "   AND bibRecsSolr.active = 1";
