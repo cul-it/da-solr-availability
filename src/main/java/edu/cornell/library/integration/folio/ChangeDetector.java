@@ -84,7 +84,7 @@ public class ChangeDetector {
 
         String marc = null;
         try {
-        marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
+        marc = okapi.query("/source-storage/records/"+id) //+"/formatted?idType=INSTANCE")
             .replaceAll("\\s*\\n\\s*", " ");
         } catch (IOException e) {
           if ( e.getMessage().equals("Not Found") ) {
