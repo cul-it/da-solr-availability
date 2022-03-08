@@ -9,7 +9,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +16,7 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
+import edu.cornell.library.integration.folio.Locations.Location;
 
 public class OpenOrder {
 
@@ -52,7 +52,7 @@ public class OpenOrder {
                 String note = null;
                 switch (receiptStatus) {
                 case "Pending":
-                  Map<String,String> olMetadata = (Map<String,String>)orderLine.get("metadata");
+                  Map<String,String> olMetadata = Map.class.cast(orderLine.get("metadata"));
                   Timestamp polCreateDate = Timestamp.from(
                       isoDT.parse((olMetadata.get("createdDate")),Instant::from));
                   note = "In pre-order processing as of "+format.format(polCreateDate);
@@ -73,18 +73,22 @@ public class OpenOrder {
                   System.out.println("Unexpected pol receipt status: "+receiptStatus);
                   continue OL;
                 }
-                String locationId = (String)location.get("locationId");
-                for ( Holding h : holdings.values() ) {
-                  // Block order note if:
-                  // * There are any items on the mfhd
-                  // * The holding call number is "Available for the Library to Purchase"
-                  // * The holding call number is "In Process"
-                  if (h.location != null
-                      && h.location.id.equals(locationId)
-                      && (h.itemSummary == null || h.itemSummary.itemCount == 0)
-                      && ! (h.call != null
-                            && (h.call.equalsIgnoreCase("Available for the Library to Purchase")
-                                || h.call.equalsIgnoreCase("In Process")))) {
+                // Block order note if:
+                // * There are any items on the mfhd
+                // * The holding call number is "Available for the Library to Purchase"
+                // * The holding call number is "In Process"
+                String orderHoldId = (String)location.get("holdingId");
+                if ( orderHoldId != null ) {
+                  Holding h = holdings.get(orderHoldId);
+                  if ( h != null && ! hasExtantItem(h) && ! hasBlockedCallNumber( h.call )) {
+                    h.orderNote = note;
+                    onOrder = true;
+                  }
+                }
+                String orderLocId = (String)location.get("locationId");
+                if ( orderLocId != null ) for (Holding h : holdings.values() ) {
+                  if (hasMatchingLocation(h.location,orderLocId)
+                      && ! hasExtantItem(h) && ! hasBlockedCallNumber(h.call)) {
                     h.orderNote = note;
                     onOrder = true;
                   }
@@ -99,6 +103,29 @@ public class OpenOrder {
     return onOrder;
   }
 
+  private static boolean hasMatchingLocation( Location holdingLoc, String orderLocationUuid ) {
+    if ( holdingLoc == null ) return false;
+    return holdingLoc.id.equals(orderLocationUuid);
+  }
+
+  private static boolean hasBlockedCallNumber( String call ) {
+    if (call == null) return false;
+    if ( call.equalsIgnoreCase("Available for the Library to Purchase") ) return true;
+    if ( call.equalsIgnoreCase("In Process") ) return true;
+    return false;
+  }
+
+  private static boolean hasExtantItem( Holding h ) {
+    if (h.itemSummary == null) return false;
+    if (h.itemSummary.itemCount == 0) return false;
+    int onOrderItemCount = 0;
+    if ( h.itemSummary.unavail != null )
+      for ( ItemReference i : h.itemSummary.unavail )
+        if ( i.status.status.contains("rder") ) //On order, Order closed
+          onOrderItemCount++;
+    return h.itemSummary.itemCount > onOrderItemCount;
+  }
+
   private static ObjectMapper mapper = new ObjectMapper();
 
   /* Object instantiation without arguments is intended only for detectChanges()
@@ -107,9 +134,6 @@ public class OpenOrder {
    */
   public OpenOrder() {}
 
-  private static List<String> orderStatuses = Arrays.asList(
-      "Pending","Received Complete","Backordered","Returned","Claimed",
-      "Invoice Pending","Invoiced","Canceled","Approved","Received Partial","Rolled Over");
   private static DateTimeFormatter isoDT = DateTimeFormatter.ISO_DATE_TIME;
 
 }
