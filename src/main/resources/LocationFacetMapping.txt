@@ -69,6 +69,7 @@ Music Library A/V (Non-Circulating)				Music Library > A/V
 Music Library Locked Press (Reference Desk)				Music Library > Reference
 Music Library Reference (Non-Circulating) 				Music Library > Reference
 Music Library Reserve 				Music Library > Reserve
+Nestle Library Permanent Reserve				Nestle Library > Permanent Reserve
 Nestle Library Reserve 				Nestle Library > Reserve
 Olin Library		New & Noteworthy		Olin Library > New & Noteworthy Books Shelf
 Olin Library				Olin Library > Main Collection
