@@ -406,10 +406,10 @@ public class ChangeDetector {
               " VALUES (?,?,?,?,?,?)");
         replaceOrderLine.setString(1, id);
         replaceOrderLine.setString(2, instanceId);
-        replaceOrderLine.setString(2, instanceHrid);
-        replaceOrderLine.setString(3, (String)pol.get("purchaseOrderId"));
-        replaceOrderLine.setTimestamp(4, modDate);
-        replaceOrderLine.setString(5, polJson);
+        replaceOrderLine.setString(3, instanceHrid);
+        replaceOrderLine.setString(4, (String)pol.get("purchaseOrderId"));
+        replaceOrderLine.setTimestamp(5, modDate);
+        replaceOrderLine.setString(6, polJson);
         replaceOrderLine.executeUpdate();
 
         if ( instanceHrid == null ) {
