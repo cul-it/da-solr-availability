@@ -338,7 +338,7 @@ public class ChangeDetector {
 
         if (replaceLoan == null)
           replaceLoan = inventory.prepareStatement(
-              "REPLACE INTO loanFolio (id, itemId, itemHrid, moddate, content) VALUES (?,?,?,?,?)");
+              "REPLACE INTO loanFolio (id, holdingId, itemHrid, moddate, content) VALUES (?,?,?,?,?)");
         replaceLoan.setString(1, id);
         replaceLoan.setString(2, itemId);
         replaceLoan.setString(3, itemHrid);
