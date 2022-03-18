@@ -62,7 +62,7 @@ public class ChangeDetector {
         if (replaceInstance == null)
           replaceInstance = inventory.prepareStatement(
               "REPLACE INTO instanceFolio (id, hrid, active, source, moddate, content) "+
-              " VALUES (?,?,?,?,?,?)");
+              " VALUES (?,?,?,?,?,?,?)");
         replaceInstance.setString(1, id);
         replaceInstance.setString(2, hrid);
         replaceInstance.setBoolean(3, active);
@@ -83,13 +83,22 @@ public class ChangeDetector {
         if ( ! source.equals("MARC") ) continue INSTANCE;
 
         String marc = null;
+        String srsQuery = "/source-storage/records/"+id+"/formatted?idType=INSTANCE";
         try {
-        marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
-            .replaceAll("\\s*\\n\\s*", " ");
+          marc = okapi.query(srsQuery).replaceAll("\\s*\\n\\s*", " ");
         } catch (IOException e) {
           if ( e.getMessage().equals("Not Found") ) {
+            // If MARC not found, wait 3 seconds and try one more time.
             System.out.printf("MARC Record Not Found in SRS: %s %s\n",hrid,id);
-            continue INSTANCE;
+            try {
+              marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
+                  .replaceAll("\\s*\\n\\s*", " ");
+            } catch (IOException e2) {
+              if ( e2.getMessage().equals("Not Found") ) {
+                System.out.printf("MARC Record Not Found in SRS: %s %s\n",hrid,id);
+                continue INSTANCE;
+              }
+            }
           }
         }
         if ( getPreviousBib == null )
@@ -146,10 +155,11 @@ public class ChangeDetector {
           while (rs.next()) if (rs.getString("content").equals(holdingJson)) continue HOLDING;
         }
 
+        String instanceId = (String)holding.get("instanceId");
         if (getInstanceHridByInstanceId == null)
           getInstanceHridByInstanceId = inventory.prepareStatement(
               "SELECT hrid FROM instanceFolio WHERE id = ?");
-        getInstanceHridByInstanceId.setString(1, (String)holding.get("instanceId"));
+        getInstanceHridByInstanceId.setString(1,instanceId);
         String instanceHrid = null;
         try (ResultSet rs = getInstanceHridByInstanceId.executeQuery() ) {
           while (rs.next()) {
@@ -168,14 +178,15 @@ public class ChangeDetector {
             (o == null)?false:String.class.isInstance(o)?Boolean.valueOf((String)o):(boolean)o;
         if (replaceHolding == null)
           replaceHolding = inventory.prepareStatement(
-              "REPLACE INTO holdingFolio (id,hrid,instanceHrid,active,moddate,content,podCurrent) "+
-              " VALUES (?,?,?,?,?,?,0)");
+              "REPLACE INTO holdingFolio (id,hrid,instanceId,instanceHrid,active,moddate,content,podCurrent) "+
+              " VALUES (?,?,?,?,?,?,?,0)");
         replaceHolding.setString(1, id);
         replaceHolding.setString(2, hrid);
-        replaceHolding.setString(3, instanceHrid);
-        replaceHolding.setBoolean(4, active);
-        replaceHolding.setTimestamp(5, modDate);
-        replaceHolding.setString(6, holdingJson);
+        replaceHolding.setString(3, instanceId);
+        replaceHolding.setString(4, instanceHrid);
+        replaceHolding.setBoolean(5, active);
+        replaceHolding.setTimestamp(6, modDate);
+        replaceHolding.setString(7, holdingJson);
         replaceHolding.executeUpdate();
 
         Change c = new Change(Change.Type.HOLDING,id,"Holding modified",
@@ -224,10 +235,11 @@ public class ChangeDetector {
         }
         if ( ! changed ) continue;
 
+        String holdingId = (String)item.get("holdingsRecordId");
         if (getItemParentage == null)
           getItemParentage = inventory.prepareStatement(
               "SELECT instanceHrid, hrid FROM holdingFolio WHERE id = ?");
-        getItemParentage.setString(1, (String)item.get("holdingsRecordId"));
+        getItemParentage.setString(1,holdingId);
         String instanceHrid = null;
         String holdingHrid = null;
         try (ResultSet rs = getItemParentage.executeQuery() ) {
@@ -249,14 +261,15 @@ public class ChangeDetector {
         }
         if (replaceItem == null)
           replaceItem = inventory.prepareStatement(
-              "REPLACE INTO itemFolio (id, hrid, holdingHrid, moddate, barcode, content) "+
-              " VALUES (?,?,?,?,?,?)");
+              "REPLACE INTO itemFolio (id, hrid, holdingId, holdingHrid, moddate, barcode, content) "+
+              " VALUES (?,?,?,?,?,?,?)");
         replaceItem.setString(1, id);
         replaceItem.setString(2, hrid);
-        replaceItem.setString(3, holdingHrid);
-        replaceItem.setTimestamp(4, modDate);
-        replaceItem.setString(5, barcode);
-        replaceItem.setString(6, itemJson);
+        replaceItem.setString(3, holdingId);
+        replaceItem.setString(4, holdingHrid);
+        replaceItem.setTimestamp(5, modDate);
+        replaceItem.setString(6, barcode);
+        replaceItem.setString(7, itemJson);
         replaceItem.executeUpdate();
 
         Change c = new Change(Change.Type.ITEM,id,"Item modified",
@@ -325,11 +338,12 @@ public class ChangeDetector {
 
         if (replaceLoan == null)
           replaceLoan = inventory.prepareStatement(
-              "REPLACE INTO loanFolio (id, itemHrid, moddate, content) VALUES (?,?,?,?)");
+              "REPLACE INTO loanFolio (id, itemId, itemHrid, moddate, content) VALUES (?,?,?,?,?)");
         replaceLoan.setString(1, id);
-        replaceLoan.setString(2, itemHrid);
-        replaceLoan.setTimestamp(3, modDate);
-        replaceLoan.setString(4, loanJson);
+        replaceLoan.setString(2, itemId);
+        replaceLoan.setString(3, itemHrid);
+        replaceLoan.setTimestamp(4, modDate);
+        replaceLoan.setString(5, loanJson);
         replaceLoan.executeUpdate();
 
         Change c = new Change(Change.Type.LOAN,id,"Item modified",
@@ -376,10 +390,11 @@ public class ChangeDetector {
           while (rs.next()) if (rs.getString("content").equals(polJson)) continue POL;
         }
 
+        String instanceId = (String)pol.get("instanceId");
         if (getInstanceHridByInstanceId == null)
           getInstanceHridByInstanceId = inventory.prepareStatement(
               "SELECT hrid FROM instanceFolio WHERE id = ?");
-        getInstanceHridByInstanceId.setString(1, (String)pol.get("instanceId"));
+        getInstanceHridByInstanceId.setString(1,instanceId);
         String instanceHrid = null;
         try (ResultSet rs = getInstanceHridByInstanceId.executeQuery() ) {
           while (rs.next()) instanceHrid = rs.getString(1);
@@ -387,9 +402,10 @@ public class ChangeDetector {
 
         if (replaceOrderLine == null)
           replaceOrderLine = inventory.prepareStatement(
-              "REPLACE INTO orderLineFolio (id, instanceHrid, orderId, moddate, content)"+
-              " VALUES (?,?,?,?,?)");
+              "REPLACE INTO orderLineFolio (id, instanceId, instanceHrid, orderId, moddate, content)"+
+              " VALUES (?,?,?,?,?,?)");
         replaceOrderLine.setString(1, id);
+        replaceOrderLine.setString(2, instanceId);
         replaceOrderLine.setString(2, instanceHrid);
         replaceOrderLine.setString(3, (String)pol.get("purchaseOrderId"));
         replaceOrderLine.setTimestamp(4, modDate);
