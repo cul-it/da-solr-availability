@@ -62,7 +62,7 @@ public class ChangeDetector {
         if (replaceInstance == null)
           replaceInstance = inventory.prepareStatement(
               "REPLACE INTO instanceFolio (id, hrid, active, source, moddate, content) "+
-              " VALUES (?,?,?,?,?,?,?)");
+              " VALUES (?,?,?,?,?,?)");
         replaceInstance.setString(1, id);
         replaceInstance.setString(2, hrid);
         replaceInstance.setBoolean(3, active);
