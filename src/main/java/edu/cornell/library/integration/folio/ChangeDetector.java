@@ -405,7 +405,7 @@ public class ChangeDetector {
               "REPLACE INTO orderLineFolio (id, instanceId, instanceHrid, orderId, moddate, content)"+
               " VALUES (?,?,?,?,?,?)");
         replaceOrderLine.setString(1, id);
-        replaceOrderLine.setString(2, instanceId);
+        replaceOrderLine.setString(2, (instanceId==null)?"":instanceId);
         replaceOrderLine.setString(3, instanceHrid);
         replaceOrderLine.setString(4, (String)pol.get("purchaseOrderId"));
         replaceOrderLine.setTimestamp(5, modDate);
