@@ -159,7 +159,7 @@ public class ProcessAvailabilityQueue {
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
         }
-        if ( updateSuccess != false ) {
+        if ( updateSuccess != null && updateSuccess.equals(true) ) {
           for (int id : ids) {
             clearFromQueueStmt.setInt(1, id);
             clearFromQueueStmt.addBatch();
