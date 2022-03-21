@@ -107,7 +107,7 @@ public class ProcessAvailabilityQueue {
       ServicePoints.initialize(okapi);
 
       for (int i = 0; i < 50_000; i++){
-        Set<BibToUpdate> bibs = new HashSet<>();
+        BibToUpdate bib = null;
         Set<Integer> ids = new HashSet<>();
         Integer priority = null;
         List<Integer> lockIds = new ArrayList<>();
@@ -141,7 +141,7 @@ public class ProcessAvailabilityQueue {
                 int id = rs2.getInt("id");
                 ids.add(id);
               }
-              bibs.add(new BibToUpdate(bibId,changes));
+              bib = new BibToUpdate(bibId,changes);
             }
             try ( ResultSet generatedKeys = createLockStmt.getGeneratedKeys() ) {
               if (generatedKeys.next()) lockIds.add( generatedKeys.getInt(1) );
@@ -149,25 +149,28 @@ public class ProcessAvailabilityQueue {
           }
         }
 
-        if ( bibs.isEmpty() ) {
+        Boolean updateSuccess = null;
+        if ( bib == null ) {
 //TODO          oldLocksCleanupStmt.executeUpdate();
           Thread.sleep(3000);
         } else {
-          updateBibsInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,
-              holdingsNoteTypes, callNumberTypes, bibs, priority);
+          updateSuccess = updateBibInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,
+              holdingsNoteTypes, callNumberTypes, bib, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
         }
-        for (int id : ids) {
-          clearFromQueueStmt.setInt(1, id);
-          clearFromQueueStmt.addBatch();
+        if ( updateSuccess != false ) {
+          for (int id : ids) {
+            clearFromQueueStmt.setInt(1, id);
+            clearFromQueueStmt.addBatch();
+          }
+          clearFromQueueStmt.executeBatch();
+          for (int lockId : lockIds) {
+            unlockStmt.setInt(1, lockId);
+            unlockStmt.addBatch();
+          }
+          unlockStmt.executeBatch();
         }
-        clearFromQueueStmt.executeBatch();
-        for (int lockId : lockIds) {
-          unlockStmt.setInt(1, lockId);
-          unlockStmt.addBatch();
-        }
-        unlockStmt.executeBatch();
       }
       solr.blockUntilFinished();
     }
@@ -186,189 +189,180 @@ public class ProcessAvailabilityQueue {
       "       callnumber_solr_fields,  otherids_solr_fields" + 
       "  FROM processedMarcData"+
       " WHERE hrid = ?";
-  static void updateBibsInSolr(
+  static boolean updateBibInSolr(
       OkapiClient okapi, Connection inventory,
       SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
-      ReferenceData callNumberTypes, Set<BibToUpdate> changedBibs, Integer priority)
+      ReferenceData callNumberTypes, BibToUpdate changedBib, Integer priority)
       throws SQLException, IOException, InterruptedException {
 
-    while (! changedBibs.isEmpty()) {
-      List<BibToUpdate> completedBibUpdates = new ArrayList<>();
+    Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
+    String bibId = changedBib.bibId;
+    SolrInputDocument doc = null;
+    Map<String,Object> instance = null;
+    String instanceId = null;
 
-      try (PreparedStatement pstmt = inventory.prepareStatement(solrFieldsDataQuery)){
-
-        Set<SolrInputDocument> solrDocs = new HashSet<>();
-        Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
-
-        for (BibToUpdate updateDetails : changedBibs) {
-          String bibId = updateDetails.bibId;
-          pstmt.setString(1, bibId);
-          try (ResultSet rs = pstmt.executeQuery();
-              PreparedStatement instanceByHrid = inventory.prepareStatement(
-                  "SELECT * FROM instanceFolio WHERE hrid = ?");) {
-            while ( rs.next() ) {
-
-              SolrInputDocument doc = constructSolrInputDocument( rs, bibId );
-              Map<String,Object> instance = null;
-              String instanceId = null;
-              instanceByHrid.setString(1, bibId);
-              try ( ResultSet rs1 = instanceByHrid.executeQuery() ) {
-                while (rs1.next()) {
-                  instanceId = rs1.getString("id");
-                  instance = mapper.readValue( rs1.getString("content"), Map.class);
-                }
-              }
-              if (instance == null) {
-                System.out.printf("Instances not found for hrid %s\n",bibId);
-                System.exit(0);
-              }
-              doc.addField("instance_id", instanceId);
-              HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
-                  inventory,locations,holdingsNoteTypes,callNumberTypes, String.valueOf(bibId));
-              ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
-              if ( Items.applyDummyRMCItems(holdings,items) )
-                doc.addField("availability_facet","RMC Dummy Item");
-              boolean active = doc.getFieldValue("type").equals("Catalog");
-              doc.addField("notes_t", holdings.getNotes());
-
-              boolean masterBoundWith =
-                  BoundWith.storeRecordLinksInInventory(inventory,String.valueOf(bibId),holdings);
-              if (masterBoundWith) {
-                doc.addField("bound_with_master_b", true);
-                Set<String> changedItems = extractChangedItemIds( updateDetails.changes );
-                BoundWith.identifyAndQueueOtherBibsInMasterVolume(
-                    inventory, String.valueOf(bibId), changedItems );
-              }
-              EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
-              for ( BoundWith.Flag flag : f )
-                doc.addField("availability_facet",flag.getAvailabilityFlag());
-              if ( ! f.isEmpty() )
-                doc.addField("bound_with_b", true);
-
-              doc.removeField("barcode_t");
-              doc.addField("barcode_t", items.getBarcodes());
-              doc.removeField("barcode_addl_t");
-              doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
+    try (PreparedStatement pstmt = inventory.prepareStatement(solrFieldsDataQuery)){
 
 
-              Instant returnedUntil = holdings.summarizeItemAvailability(items);
-              if ( returnedUntil != null ) {
-                doc.addField("availability_facet", "Returned");
-                doc.addField("returned_until_dt",
-                    ZonedDateTime.ofInstant(returnedUntil, ZoneId.of("UTC"))
-                    .format(DateTimeFormatter.ISO_INSTANT));
-              }
-              if ( OpenOrder.applyOpenOrders(inventory,holdings,bibId) )
-                doc.addField("availability_facet", "On Order");
-              if ( holdings.noItemsAvailability() )
-                doc.addField("availability_facet", "No Items Print");
-              if ( holdings.hasRecent() )
-                doc.addField("availability_facet", "Recent Issues");
-              if ( doc.containsKey("url_access_json") )
-                Holdings.mergeAccessLinksIntoHoldings( holdings,doc.getFieldValues("url_access_json"));
-              if ( holdings.size() > 0 )
-                doc.addField("holdings_json", holdings.toJson());
-              for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
-                for ( Item i : itemsForHolding )
-                  if (i.status != null && i.loanType.shortLoan == true)
-                    doc.addField("availability_facet", "Short Loan");
-              BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdings);
-              doc.addField("availability_json", b.toJson());
-              if ( b.availAt != null && b.unavailAt != null )
-                doc.addField("availability_facet", "Avail and Unavail");
-              Set<String> locationFacet = holdings.getLocationFacetValues();
-              if (doc.containsKey("location"))
-                doc.removeField("location");
-              if (locationFacet == null)
-                System.out.println("b"+bibId+" location facets are null.");
-              else if (! locationFacet.isEmpty())
-                doc.addField("location", locationFacet);
+      pstmt.setString(1, bibId);
+      try (ResultSet rs = pstmt.executeQuery();
+          PreparedStatement instanceByHrid = inventory.prepareStatement(
+              "SELECT * FROM instanceFolio WHERE hrid = ?");) {
 
-              for ( Holding h : holdings.values()) {
-                if (h.donors != null)
-                  for (String donor : h.donors)
-                    doc.addField("donor_display", donor);
-                if (h.call != null && h.call.matches(".*In Process.*"))
-                  doc.addField("availability_facet","In Process");
-                if (h.itemSummary != null && h.itemSummary.unavail != null)
-                  for (ItemReference ir : h.itemSummary.unavail)
-                    if (ir.status != null && ir.status.status != null)
-                      doc.addField("availability_facet",ir.status.status);
-                if (h.callNumberSuffix != null)
-                  doc.addField("lc_callnum_suffix", h.callNumberSuffix);
-
-                if (h.itemSummary != null &&
-                    h.itemSummary.tempLocs != null &&
-                    ! h.itemSummary.tempLocs.isEmpty())
-                  doc.addField("availability_facet","Partial Temp Locs");
-                if (h.copy != null)
-                  doc.addField("availability_facet", "Copies");
-                if (! h.active )
-                  doc.addField("availability_facet", "Suppressed Holdings");
-              }
-              Set<String> changes = new HashSet<>();
-              for (Change c : updateDetails.changes)  changes.add(c.toString());
-              EnumSet<MultiVolFlag> multiVolFlags = MultivolumeAnalysis.analyze(
-                  (String)doc.getFieldValue("format_main_facet"),
-                  (doc.containsKey("description_display")
-                      ?join(doc.getFieldValues("description_display")):""),
-                  (doc.containsKey("f300e_b")), holdings, items);
-              if ( items.itemCount() > 0 )
-                doc.addField("items_json", items.toJson());
-              boolean oldMultiVolFlag = Boolean.valueOf((String)doc.getFieldValue("multivol_b"));
-              if ( oldMultiVolFlag != multiVolFlags.contains(MultiVolFlag.MULTIVOL)) {
-                System.out.println("Multivol logic conclusion mismatch b"+bibId);
-              }
-              doc.removeField("multivol_b");
-              for (MultiVolFlag flag : multiVolFlags) {
-                String solrField = flag.getSolrField();
-                if ( doc.containsKey(solrField) ) doc.remove(solrField);
-                doc.addField(solrField, true);
-              }
-
-              // Temporary workaround can be removed once all Solr fields in db have SimpleProc v1.2
-              if ( doc.containsKey("f300e_b")) {
-                doc.removeField("f300e_b");
-                doc.addField("f300e_b", true);
-              }
-
-              WorksAndInventory.updateInventory( inventory, doc );
-
-              List<SolrInputDocument> thisDocsCallNumberDocs =
-                  CallNumberBrowse.generateBrowseDocuments(inventory,doc, holdings);
-
-              callnumSolrDocs.addAll( thisDocsCallNumberDocs );
-              Set<String> allCallNumbers =
-                  CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs);
-              doc.addField("callnumber_display", allCallNumbers);
-              if ( CallNumberTools.hasMathCallNumber(
-                  CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)))
-                doc.addField("collection", "Math Library");
-
-              solrDocs.add(doc);
-              callNumberSolr.deleteByQuery("bibid:"+bibId);
-
-              System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
-                  changes)+" priority:"+priority);
-//              System.out.println(ClientUtils.toXML(doc).replaceAll("(<field)", "\n$1"));
-              solr.add(solrDocs);
-              if ( ! callnumSolrDocs.isEmpty() && active )
-                callNumberSolr.add(callnumSolrDocs);
-            }
-          }
-          completedBibUpdates.add(updateDetails);
+        if ( ! rs.next() ) {
+          System.out.println( "Bibliographic fields for record "+bibId+" not found.");
+          return false;
         }
-      } catch (SolrServerException | RemoteSolrException e) {
-        System.out.printf(
-            "Error communicating with Solr server after processing %d of %d bib update batch.",
-            completedBibUpdates.size(),changedBibs.size());
-        e.printStackTrace();
-        Thread.sleep(5000);
-      } finally {
-        for (BibToUpdate updateDetails : completedBibUpdates)
-          changedBibs.remove(updateDetails);
+
+        doc = constructSolrInputDocument( rs, bibId );
+
+        instanceByHrid.setString(1, bibId);
+        try ( ResultSet rs1 = instanceByHrid.executeQuery() ) {
+          while (rs1.next()) {
+            instanceId = rs1.getString("id");
+            instance = mapper.readValue( rs1.getString("content"), Map.class);
+          }
+        }
       }
     }
+
+    if (instance == null) {
+      System.out.printf("Instances not found for hrid %s\n",bibId);
+      return false;
+    }
+    doc.addField("instance_id", instanceId);
+    HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
+        inventory,locations,holdingsNoteTypes,callNumberTypes, String.valueOf(bibId));
+    ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
+    if ( Items.applyDummyRMCItems(holdings,items) )
+      doc.addField("availability_facet","RMC Dummy Item");
+    boolean active = doc.getFieldValue("type").equals("Catalog");
+    doc.addField("notes_t", holdings.getNotes());
+
+    boolean masterBoundWith =
+        BoundWith.storeRecordLinksInInventory(inventory,String.valueOf(bibId),holdings);
+    if (masterBoundWith) {
+      doc.addField("bound_with_master_b", true);
+      Set<String> changedItems = extractChangedItemIds( changedBib.changes );
+      BoundWith.identifyAndQueueOtherBibsInMasterVolume(
+          inventory, String.valueOf(bibId), changedItems );
+    }
+    EnumSet<BoundWith.Flag> f = BoundWith.dedupeBoundWithReferences(holdings,items);
+    for ( BoundWith.Flag flag : f )
+      doc.addField("availability_facet",flag.getAvailabilityFlag());
+    if ( ! f.isEmpty() )
+      doc.addField("bound_with_b", true);
+
+    doc.removeField("barcode_t");
+    doc.addField("barcode_t", items.getBarcodes());
+    doc.removeField("barcode_addl_t");
+    doc.addField("barcode_addl_t", holdings.getBoundWithBarcodes());
+
+
+    Instant returnedUntil = holdings.summarizeItemAvailability(items);
+    if ( returnedUntil != null ) {
+      doc.addField("availability_facet", "Returned");
+      doc.addField("returned_until_dt",
+          ZonedDateTime.ofInstant(returnedUntil, ZoneId.of("UTC"))
+          .format(DateTimeFormatter.ISO_INSTANT));
+    }
+    if ( OpenOrder.applyOpenOrders(inventory,holdings,bibId) )
+      doc.addField("availability_facet", "On Order");
+    if ( holdings.noItemsAvailability() )
+      doc.addField("availability_facet", "No Items Print");
+    if ( holdings.hasRecent() )
+      doc.addField("availability_facet", "Recent Issues");
+    if ( doc.containsKey("url_access_json") )
+      Holdings.mergeAccessLinksIntoHoldings( holdings,doc.getFieldValues("url_access_json"));
+    if ( holdings.size() > 0 )
+      doc.addField("holdings_json", holdings.toJson());
+    for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
+      for ( Item i : itemsForHolding )
+        if (i.status != null && i.loanType.shortLoan == true)
+          doc.addField("availability_facet", "Short Loan");
+    BibliographicSummary b = BibliographicSummary.summarizeHoldingAvailability(holdings);
+    doc.addField("availability_json", b.toJson());
+    if ( b.availAt != null && b.unavailAt != null )
+      doc.addField("availability_facet", "Avail and Unavail");
+    Set<String> locationFacet = holdings.getLocationFacetValues();
+    if (doc.containsKey("location"))
+      doc.removeField("location");
+    if (locationFacet == null)
+      System.out.println("b"+bibId+" location facets are null.");
+    else if (! locationFacet.isEmpty())
+      doc.addField("location", locationFacet);
+
+    for ( Holding h : holdings.values()) {
+      if (h.donors != null)
+        for (String donor : h.donors)
+          doc.addField("donor_display", donor);
+      if (h.call != null && h.call.matches(".*In Process.*"))
+        doc.addField("availability_facet","In Process");
+      if (h.itemSummary != null && h.itemSummary.unavail != null)
+        for (ItemReference ir : h.itemSummary.unavail)
+          if (ir.status != null && ir.status.status != null)
+            doc.addField("availability_facet",ir.status.status);
+      if (h.callNumberSuffix != null)
+        doc.addField("lc_callnum_suffix", h.callNumberSuffix);
+
+      if (h.itemSummary != null &&
+          h.itemSummary.tempLocs != null &&
+          ! h.itemSummary.tempLocs.isEmpty())
+        doc.addField("availability_facet","Partial Temp Locs");
+      if (h.copy != null)
+        doc.addField("availability_facet", "Copies");
+      if (! h.active )
+        doc.addField("availability_facet", "Suppressed Holdings");
+    }
+    Set<String> changes = new HashSet<>();
+    for (Change c : changedBib.changes)  changes.add(c.toString());
+    EnumSet<MultiVolFlag> multiVolFlags = MultivolumeAnalysis.analyze(
+        (String)doc.getFieldValue("format_main_facet"),
+        (doc.containsKey("description_display")
+            ?join(doc.getFieldValues("description_display")):""),
+        (doc.containsKey("f300e_b")), holdings, items);
+    if ( items.itemCount() > 0 )
+      doc.addField("items_json", items.toJson());
+    boolean oldMultiVolFlag = Boolean.valueOf((String)doc.getFieldValue("multivol_b"));
+    if ( oldMultiVolFlag != multiVolFlags.contains(MultiVolFlag.MULTIVOL)) {
+      System.out.println("Multivol logic conclusion mismatch b"+bibId);
+    }
+    doc.removeField("multivol_b");
+    for (MultiVolFlag flag : multiVolFlags) {
+      String solrField = flag.getSolrField();
+      if ( doc.containsKey(solrField) ) doc.remove(solrField);
+      doc.addField(solrField, true);
+    }
+
+    WorksAndInventory.updateInventory( inventory, doc );
+
+    List<SolrInputDocument> thisDocsCallNumberDocs =
+        CallNumberBrowse.generateBrowseDocuments(inventory,doc, holdings);
+
+    callnumSolrDocs.addAll( thisDocsCallNumberDocs );
+    Set<String> allCallNumbers =
+        CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs);
+    doc.addField("callnumber_display", allCallNumbers);
+    if ( CallNumberTools.hasMathCallNumber(
+        CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)))
+      doc.addField("collection", "Math Library");
+
+    System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
+        changes)+" priority:"+priority);
+
+    try {
+
+      solr.add(doc);
+      callNumberSolr.deleteByQuery("bibid:"+bibId);
+      if ( ! callnumSolrDocs.isEmpty() && active )
+        callNumberSolr.add(callnumSolrDocs);
+    } catch (SolrServerException | RemoteSolrException e) {
+      System.out.printf("Error communicating with Solr server after processing.");
+      e.printStackTrace();
+      Thread.sleep(5000);
+      return false;
+    }
+    return true;
   }
 
   private static SolrInputDocument constructSolrInputDocument(ResultSet rs, String hrid)
