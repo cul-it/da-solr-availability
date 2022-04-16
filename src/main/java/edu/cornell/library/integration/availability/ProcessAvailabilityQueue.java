@@ -159,12 +159,17 @@ public class ProcessAvailabilityQueue {
               holdingsNoteTypes, callNumberTypes, bib, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
-          if ( ! updateSuccess.equals(UpdateResults.SUCCESS) ) {
+          if ( ! updateSuccess.equals(UpdateResults.FAILURE) ) {
             for (int id : ids) {
               clearFromQueueStmt.setInt(1, id);
               clearFromQueueStmt.addBatch();
             }
             clearFromQueueStmt.executeBatch();
+            for (int lockId : lockIds) {
+              unlockStmt.setInt(1, lockId);
+              unlockStmt.addBatch();
+            }
+            unlockStmt.executeBatch();
             if ( updateSuccess.equals(UpdateResults.NOBIBDATA) ) {
               System.out.println(bib.bibId +" lacks processed bib data. Redirecting to gen queue.");
               queueGen.setString(1, bib.bibId);
@@ -174,11 +179,6 @@ public class ProcessAvailabilityQueue {
               queueGen.setString(3, "Redirected from availability <"+String.join("; ",changes)+">");
               queueGen.executeUpdate();
             }
-            for (int lockId : lockIds) {
-              unlockStmt.setInt(1, lockId);
-              unlockStmt.addBatch();
-            }
-            unlockStmt.executeBatch();
           }
         }
       }
