@@ -75,10 +75,9 @@ public class ProcessAvailabilityQueue {
             prop.getProperty("inventoryDBPass"));
         PreparedStatement readQStmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.hrid, priority"+
-             "  FROM processedMarcData, availabilityQueue"+
+             "  FROM availabilityQueue"+
              "  LEFT JOIN bibLock ON availabilityQueue.hrid = bibLock.hrid"+
-             " WHERE availabilityQueue.hrid = processedMarcData.hrid"+
-             "   AND bibLock.date IS NULL"+
+             " WHERE bibLock.date IS NULL"+
              " ORDER BY priority, record_date LIMIT 1");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE hrid = ?");
@@ -92,6 +91,9 @@ public class ProcessAvailabilityQueue {
             ("DELETE FROM bibLock WHERE date < DATE_SUB( NOW(), INTERVAL 15 MINUTE)");
         PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE id = ?");
+        PreparedStatement queueGen = inventoryDB.prepareStatement
+            ("INSERT INTO generationQueue ( hrid, priority, cause, record_date )"
+                + " VALUES (?,?,?,NOW())");
         ConcurrentUpdateSolrClient solr = new
             ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
@@ -149,27 +151,35 @@ public class ProcessAvailabilityQueue {
           }
         }
 
-        Boolean updateSuccess = null;
         if ( bib == null ) {
-//TODO          oldLocksCleanupStmt.executeUpdate();
+          oldLocksCleanupStmt.executeUpdate();
           Thread.sleep(3000);
         } else {
-          updateSuccess = updateBibInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,
+          UpdateResults updateSuccess = updateBibInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,
               holdingsNoteTypes, callNumberTypes, bib, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
-        }
-        if ( updateSuccess != null && updateSuccess.equals(true) ) {
-          for (int id : ids) {
-            clearFromQueueStmt.setInt(1, id);
-            clearFromQueueStmt.addBatch();
+          if ( ! updateSuccess.equals(UpdateResults.SUCCESS) ) {
+            for (int id : ids) {
+              clearFromQueueStmt.setInt(1, id);
+              clearFromQueueStmt.addBatch();
+            }
+            clearFromQueueStmt.executeBatch();
+            if ( updateSuccess.equals(UpdateResults.NOBIBDATA) ) {
+              System.out.println(bib.bibId +" lacks processed bib data. Redirecting to gen queue.");
+              queueGen.setString(1, bib.bibId);
+              queueGen.setInt(2,priority);
+              Set<String> changes = new HashSet<>();
+              for (Change c : bib.changes)  changes.add(c.toString());
+              queueGen.setString(3, "Redirected from availability <"+String.join("; ",changes)+">");
+              queueGen.executeUpdate();
+            }
+            for (int lockId : lockIds) {
+              unlockStmt.setInt(1, lockId);
+              unlockStmt.addBatch();
+            }
+            unlockStmt.executeBatch();
           }
-          clearFromQueueStmt.executeBatch();
-          for (int lockId : lockIds) {
-            unlockStmt.setInt(1, lockId);
-            unlockStmt.addBatch();
-          }
-          unlockStmt.executeBatch();
         }
       }
       solr.blockUntilFinished();
@@ -189,7 +199,7 @@ public class ProcessAvailabilityQueue {
       "       callnumber_solr_fields,  otherids_solr_fields" + 
       "  FROM processedMarcData"+
       " WHERE hrid = ?";
-  static boolean updateBibInSolr(
+  static UpdateResults updateBibInSolr(
       OkapiClient okapi, Connection inventory,
       SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
       ReferenceData callNumberTypes, BibToUpdate changedBib, Integer priority)
@@ -211,7 +221,7 @@ public class ProcessAvailabilityQueue {
 
         if ( ! rs.next() ) {
           System.out.println( "Bibliographic fields for record "+bibId+" not found.");
-          return false;
+          return UpdateResults.NOBIBDATA;
         }
 
         doc = constructSolrInputDocument( rs, bibId );
@@ -228,7 +238,7 @@ public class ProcessAvailabilityQueue {
 
     if (instance == null) {
       System.out.printf("Instances not found for hrid %s\n",bibId);
-      return false;
+      return UpdateResults.FAILURE;
     }
     doc.addField("instance_id", instanceId);
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
@@ -360,9 +370,9 @@ public class ProcessAvailabilityQueue {
       System.out.printf("Error communicating with Solr server after processing.");
       e.printStackTrace();
       Thread.sleep(5000);
-      return false;
+      return UpdateResults.FAILURE;
     }
-    return true;
+    return UpdateResults.SUCCESS;
   }
 
   private static SolrInputDocument constructSolrInputDocument(ResultSet rs, String hrid)
@@ -436,5 +446,5 @@ public class ProcessAvailabilityQueue {
     @Override public int hashCode() { return this.bibId.hashCode(); }
   }
   private static ObjectMapper mapper = new ObjectMapper();
-
+  private static enum UpdateResults { SUCCESS, FAILURE, NOBIBDATA; }
 }
