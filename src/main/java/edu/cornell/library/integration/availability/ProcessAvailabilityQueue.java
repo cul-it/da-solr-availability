@@ -79,7 +79,7 @@ public class ProcessAvailabilityQueue {
              "  LEFT JOIN bibLock ON availabilityQueue.hrid = bibLock.hrid"+
              " WHERE availabilityQueue.hrid = processedMarcData.hrid"+
              "   AND bibLock.date IS NULL"+
-             " ORDER BY priority LIMIT 1");
+             " ORDER BY priority, record_date LIMIT 1");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
             ("DELETE FROM availabilityQueue WHERE hrid = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
