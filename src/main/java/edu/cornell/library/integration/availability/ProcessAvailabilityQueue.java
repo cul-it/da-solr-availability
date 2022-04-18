@@ -105,6 +105,7 @@ public class ProcessAvailabilityQueue {
       Locations locations = new Locations(okapi);
       ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
       ReferenceData callNumberTypes = new ReferenceData(okapi, "/call-number-types","name");
+      ReferenceData statCodes = new ReferenceData(okapi,"/statistical-codes","code");
       LoanTypes.initialize(okapi);
       ServicePoints.initialize(okapi);
 
@@ -155,8 +156,9 @@ public class ProcessAvailabilityQueue {
           oldLocksCleanupStmt.executeUpdate();
           Thread.sleep(3000);
         } else {
-          UpdateResults updateSuccess = updateBibInSolr(okapi,inventoryDB,solr,callNumberSolr,locations,
-              holdingsNoteTypes, callNumberTypes, bib, priority);
+          UpdateResults updateSuccess = updateBibInSolr(
+              okapi,inventoryDB,solr,callNumberSolr,locations,
+              holdingsNoteTypes, callNumberTypes, statCodes, bib, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
           if ( ! updateSuccess.equals(UpdateResults.FAILURE) ) {
@@ -202,7 +204,7 @@ public class ProcessAvailabilityQueue {
   static UpdateResults updateBibInSolr(
       OkapiClient okapi, Connection inventory,
       SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
-      ReferenceData callNumberTypes, BibToUpdate changedBib, Integer priority)
+      ReferenceData callNumberTypes, ReferenceData statCodes, BibToUpdate changedBib, Integer priority)
       throws SQLException, IOException, InterruptedException {
 
     Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
@@ -244,6 +246,8 @@ public class ProcessAvailabilityQueue {
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
         inventory,locations,holdingsNoteTypes,callNumberTypes, String.valueOf(bibId));
     ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
+    doc.addField("statcode_facet", holdings.getStatCodes(statCodes));
+    doc.addField("statcode_facet", items.getStatCodes(statCodes));
     if ( Items.applyDummyRMCItems(holdings,items) )
       doc.addField("availability_facet","RMC Dummy Item");
     boolean active = doc.getFieldValue("type").equals("Catalog");

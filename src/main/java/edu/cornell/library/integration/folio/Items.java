@@ -16,6 +16,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -205,6 +206,21 @@ public class Items {
             barcodes.add(i.barcode);
       return barcodes;
     }
+
+    public Object getStatCodes(ReferenceData statCodesRefData) {
+      Set<String> statcodes = new HashSet<>();
+      for (TreeSet<Item> items : this.items.values())
+        for ( Item i : items) {
+          if ( i.rawFolioItem.containsKey("statisticalCodeIds")) {
+            List<String> codeUuids = (List<String>)i.rawFolioItem.get("statisticalCodeIds");
+            for (String uuid : codeUuids) {
+              String code = statCodesRefData.getName(uuid);
+              if ( code != null ) statcodes.add("item_"+code);
+            }
+          }
+        }
+      return statcodes;
+    }
   }
 
   public static class Item implements Comparable<Item> {
@@ -227,9 +243,12 @@ public class Items {
     @JsonProperty("date")      public Integer date;
     @JsonProperty("active")    public boolean active = true;
 
+    @JsonIgnore public Map<String,Object> rawFolioItem = null;
+
     Item(Connection inventory, Map<String,Object> raw, Holding holding)
         throws SQLException, IOException {
 
+      this.rawFolioItem = raw;
       this.id = (String)raw.get("id");
       this.hrid = (String)raw.get("hrid");
       String barcode = (String)raw.get("barcode");
