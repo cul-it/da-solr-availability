@@ -69,7 +69,15 @@ public class ChangeDetector {
         replaceInstance.setString(4, source);
         replaceInstance.setTimestamp(5, modDate);
         replaceInstance.setString(6, instanceJson);
-        replaceInstance.executeUpdate();
+        try {
+          replaceInstance.executeUpdate();
+        } catch ( SQLException e ) {
+          e.printStackTrace();
+          System.out.println(id);
+          System.out.println(hrid);
+          System.out.println(instanceJson);
+          throw new SQLException( e );
+        }
 
         Change c = new Change(Change.Type.INSTANCE,id,"Instance modified",
             modDate,null,trackUserChange( inventory, instanceJson ));
