@@ -37,7 +37,7 @@ public class BoundWith {
   @JsonProperty("status")       public final ItemStatus status;
 
   private static Pattern barcodeP = Pattern.compile("^(31924\\d*)(.*)$");
-  public static Map<String,BoundWith> fromNote( Connection inventory, String note )
+  public static Map<String,BoundWith> fromNote( Connection inventory, String note, Holding holding )
       throws SQLException, JsonParseException, JsonMappingException, IOException {
 
     String text = note.trim();
@@ -63,7 +63,7 @@ public class BoundWith {
       barcodePos = text.indexOf("31924");
 
       // lookup item main item this is bound into
-      Item masterItem = Items.retrieveItemByBarcode(inventory, barcode);
+      Item masterItem = Items.retrieveItemByBarcode(inventory, barcode, holding);
       if (masterItem == null) continue;
       String masterBibId = null;
       String masterTitle = null;

@@ -79,14 +79,14 @@ public class Items {
   }
   private static PreparedStatement itemByHolding = null;
 
-  static Item retrieveItemByBarcode ( Connection inventory, String barcode )
+  static Item retrieveItemByBarcode ( Connection inventory, String barcode, Holding holding )
       throws SQLException, JsonParseException, JsonMappingException, IOException {
     try ( PreparedStatement pstmt = inventory.prepareStatement(
         "SELECT * FROM itemFolio WHERE barcode = ?")) {
       pstmt.setString(1, barcode);
       try ( ResultSet rs = pstmt.executeQuery() ) {
         while (rs.next()) {
-          Item i = new Item(inventory, mapper.readValue(rs.getString("content"),Map.class),null);
+          Item i = new Item(inventory, mapper.readValue(rs.getString("content"),Map.class),holding);
           i.id = rs.getString("id");
           return i;
         }

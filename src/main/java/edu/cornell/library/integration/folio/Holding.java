@@ -125,9 +125,9 @@ public class Holding {
 
         if ( type.equals("Bound with item data") ) {
           if (this.boundWiths == null)
-            this.boundWiths = BoundWith.fromNote(inventory,(String)note.get("note"));
+            this.boundWiths = BoundWith.fromNote(inventory,(String)note.get("note"),this);
           else
-            this.boundWiths.putAll(BoundWith.fromNote(inventory,(String)note.get("note")));
+            this.boundWiths.putAll(BoundWith.fromNote(inventory,(String)note.get("note"),this));
           continue;
         }
 

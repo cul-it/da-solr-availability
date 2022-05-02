@@ -34,7 +34,7 @@ public class BoundWithTest {
 
   @Test
   public void BasicFromNote() throws SQLException, IOException {
-    Map<String,BoundWith> boundWiths = BoundWith.fromNote(inventory, "31924101472383");
+    Map<String,BoundWith> boundWiths = BoundWith.fromNote(inventory, "31924101472383",null);
     String expected =
     "{\"8048352\":{"
     + "\"masterItemId\":\"99b26736-5213-4d50-a441-784c612ad94c\","
@@ -48,7 +48,7 @@ public class BoundWithTest {
 
   @Test
   public void EnumeratedFromNote() throws SQLException, IOException {
-    Map<String,BoundWith> boundWiths = BoundWith.fromNote(inventory, "v.8 (1930) 31924101472474");
+    Map<String,BoundWith> boundWiths = BoundWith.fromNote(inventory, "v.8 (1930) 31924101472474",null);
     String expected =
     "{\"8048237\":{"
     + "\"masterItemId\":\"f6a8d4cb-23e8-461e-a032-a48d5be95e2c\","
@@ -63,7 +63,7 @@ public class BoundWithTest {
 
   @Test
   public void EnumeratedPipedFromNote() throws SQLException, IOException {
-    Map<String,BoundWith> boundWiths = BoundWith.fromNote(inventory, "v.8 (1930)|31924101472474");
+    Map<String,BoundWith> boundWiths = BoundWith.fromNote(inventory, "v.8 (1930)|31924101472474",null);
     String expected =
     "{\"8048237\":{"
     + "\"masterItemId\":\"f6a8d4cb-23e8-461e-a032-a48d5be95e2c\","
@@ -78,7 +78,8 @@ public class BoundWithTest {
 
   @Test
   public void EnumeratedExtraneousSpaceFromNote() throws SQLException, IOException {
-    Map<String,BoundWith> boundWiths = BoundWith.fromNote(inventory, "\\nv.8 (1930) | 31924101472474\\n\\n  ");
+    Map<String,BoundWith> boundWiths = BoundWith.fromNote(
+        inventory, "\\nv.8 (1930) | 31924101472474\\n\\n  ",null);
     String expected =
     "{\"8048237\":{"
     + "\"masterItemId\":\"f6a8d4cb-23e8-461e-a032-a48d5be95e2c\","
@@ -95,7 +96,7 @@ public class BoundWithTest {
   public void MultipleInOneFromNote() throws SQLException, IOException {
     Map<String,BoundWith> boundWiths = BoundWith.fromNote(inventory,
         "pt.1=v.20    31924061381269\\npt.2=v.24    31924061381277\\n"
-        + "pt.3=v.29    31924061381293\\npt.4-pt.5=v.33-35  31924061381319  \\n\\n");
+        + "pt.3=v.29    31924061381293\\npt.4-pt.5=v.33-35  31924061381319  \\n\\n",null);
     String expected =
     "{\"3697490\":{\"masterItemId\":\"f8b12212-96ff-474f-b29c-20d9b24e7a24\","
                 + "\"masterBibId\":\"1948271\","
