@@ -222,7 +222,6 @@ public class OkapiClient {
 
   private HttpURLConnection commonConnectionSetup(final String path) throws IOException {
     final URL fullPath = new URL(this.url + path);
-    System.out.println(fullPath.toString());
     final HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();
     c.setRequestProperty("Content-Type", "application/json;charset=utf-8");
     c.setRequestProperty("X-Okapi-Tenant", this.tenant);
