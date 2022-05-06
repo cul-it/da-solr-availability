@@ -120,7 +120,7 @@ public class ProcessAvailabilityQueue {
       ServicePoints.initialize(okapi);
       Items.initialize(okapi, locations);
 
-      for (int i = 0; i < 50_000; i++){
+      for (int i = 0; i < 500_000; i++){
         BibToUpdate bib = null;
         Set<Integer> ids = new HashSet<>();
         Integer priority = null;
