@@ -10,17 +10,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -28,10 +34,13 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -55,7 +64,8 @@ import edu.cornell.library.integration.folio.ServicePoints;
 
 public class ProcessAvailabilityQueue {
 
-  public static void main(String[] args) throws IOException, SQLException, InterruptedException {
+  public static void main(String[] args)
+      throws IOException, SQLException, InterruptedException, SolrServerException {
 
     Properties prop = new Properties();
     String configFile = System.getenv("configFile");
@@ -155,7 +165,7 @@ public class ProcessAvailabilityQueue {
 
         if ( bib == null ) {
           oldLocksCleanupStmt.executeUpdate();
-          Thread.sleep(3000);
+          queueRecordsNotRecentlyUpdated(inventoryDB,solr);
         } else {
           UpdateResults updateSuccess = updateBibInSolr(
               okapi,inventoryDB,solr,callNumberSolr,locations,
@@ -186,6 +196,76 @@ public class ProcessAvailabilityQueue {
         }
       }
       solr.blockUntilFinished();
+    }
+  }
+
+  private static void queueRecordsNotRecentlyUpdated(Connection inventory, SolrClient solr)
+      throws SQLException, SolrServerException, IOException {
+
+    // Confirm that queue is actually empty
+    try ( Statement stmt = inventory.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT COUNT(*) FROM availabilityQueue")) {
+      while (rs.next()) if ( rs.getInt(1) > 10 ) return;
+    }
+
+    // Get target modification date cursor
+    Instant cursor = null;
+    try ( Statement stmt = inventory.createStatement();
+        ResultSet rs = stmt.executeQuery(
+            "SELECT current_to_date FROM updateCursor WHERE cursor_name = 'solr_times'")) {
+      while (rs.next())
+        cursor = rs.getObject(1, LocalDateTime.class).toInstant(ZoneOffset.UTC);
+    }
+
+    // Query Solr for records
+    SolrQuery q = new SolrQuery();
+    q.setFields("id","timestamp");
+    q.setQuery("timestamp:[* TO \""+cursor+"\"]");
+    q.setRows(1_000);
+    q.setRequestHandler("standard");
+    q.setSort("random",ORDER.asc);
+    Map<String,Timestamp> recordIds = new HashMap<>();
+    for (SolrDocument doc : solr.query(q).getResults()) {
+      Timestamp lastIndexDate = Timestamp.valueOf(((Date)doc
+          .getFieldValue("timestamp")).toInstant().atZone(ZoneId.of("Z")).toLocalDateTime());
+      recordIds.put((String)doc.getFieldValue("id"),lastIndexDate);
+    }
+
+    // Queue results
+    if (! recordIds.isEmpty()) {
+      try ( PreparedStatement insert = inventory.prepareStatement(
+          "INSERT INTO availabilityQueue(hrid, priority, cause, record_date)"
+          + " VALUES (?,9,'Age of Record',?)")) {
+        for ( Entry<String,Timestamp> e : recordIds.entrySet() ) {
+          insert.setString(1, e.getKey());
+          insert.setTimestamp(2, e.getValue());
+          insert.addBatch();
+        }
+        insert.executeBatch();
+      }
+      return;
+    }
+
+    // If no results found, identify new cursor
+    q = new SolrQuery();
+    q.setFields("timestamp");
+    q.setQuery("id:*");
+    q.setRows(1);
+    q.setSort("timestamp", ORDER.desc);
+    q.setRequestHandler("standard");
+    Timestamp mostRecentSolrTimestamp = null;
+    for (SolrDocument doc : solr.query(q).getResults())
+      mostRecentSolrTimestamp =
+          Timestamp.valueOf(((Date)doc.getFieldValue("timestamp"))
+              .toInstant().atZone(ZoneId.of("Z")).toLocalDateTime());
+    if (mostRecentSolrTimestamp != null) {
+      System.out.println("Most Recent Solr Timestamp: "+mostRecentSolrTimestamp);
+      try (PreparedStatement updateCursor = inventory.prepareStatement(
+          "UPDATE updateCursor SET current_to_date = ? WHERE cursor_name = 'solr_times'")) {
+        updateCursor.setTimestamp(1, mostRecentSolrTimestamp);
+        updateCursor.executeUpdate();
+      }
     }
   }
 
