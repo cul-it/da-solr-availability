@@ -108,6 +108,7 @@ public class ProcessAvailabilityQueue {
       ReferenceData statCodes = new ReferenceData(okapi,"/statistical-codes","code");
       LoanTypes.initialize(okapi);
       ServicePoints.initialize(okapi);
+      Items.initialize(okapi, locations);
 
       for (int i = 0; i < 50_000; i++){
         BibToUpdate bib = null;

@@ -35,6 +35,14 @@ public class Items {
   static ReferenceData materialTypes = null;
   static ReferenceData itemNoteTypes = null;
 
+  public static void initialize(OkapiClient okapi, Locations locs) throws IOException {
+    if (locations == null) {
+      locations = locs;
+      materialTypes = new ReferenceData( okapi, "/material-types", "name");
+      itemNoteTypes = new ReferenceData( okapi, "/item-note-types", "name");
+    }
+  }
+
   public static ItemList retrieveItemsForHoldings(
       OkapiClient okapi, Connection inventory, String bibId, HoldingSet holdings)
           throws SQLException, IOException {
