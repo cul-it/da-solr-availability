@@ -15,11 +15,12 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -220,9 +221,10 @@ public class PODFullExport {
             f866.subfields.add(new Subfield(1,'0',h.hrid));
             f866.subfields.add(new Subfield(2,'a',
                 statement.get("statement").replaceAll("\n", "")));
-            if ( statement.containsKey("note") )
-              f866.subfields.add(new Subfield(3,'z',
-                  statement.get("note").replaceAll("\n", "")));
+            if ( statement.containsKey("note") ) {
+              String note = statement.get("note").replaceAll("\n", "");
+              if ( ! note.isEmpty() ) f866.subfields.add(new Subfield(3,'z',note));
+            }
             holdingRec.dataFields.add(f866);
           }
         }
@@ -237,9 +239,10 @@ public class PODFullExport {
             f867.subfields.add(new Subfield(1,'0',h.hrid));
             f867.subfields.add(new Subfield(2,'a',
                 statement.get("statement").replaceAll("\n", "")));
-            if ( statement.containsKey("note") )
-              f867.subfields.add(new Subfield(3,'z',
-                  statement.get("note").replaceAll("\n", "")));
+            if ( statement.containsKey("note") ) {
+              String note = statement.get("note").replaceAll("\n", "");
+              if ( ! note.isEmpty() ) f867.subfields.add(new Subfield(3,'z',note));
+            }
             holdingRec.dataFields.add(f867);
           }
         }
@@ -254,9 +257,10 @@ public class PODFullExport {
             f868.subfields.add(new Subfield(1,'0',h.hrid));
             f868.subfields.add(new Subfield(2,'a',
                 statement.get("statement").replaceAll("\n", "")));
-            if ( statement.containsKey("note") )
-              f868.subfields.add(new Subfield(3,'z',
-                  statement.get("note").replaceAll("\n", "")));
+            if ( statement.containsKey("note") ) {
+              String note = statement.get("note").replaceAll("\n", "");
+              if ( ! note.isEmpty() ) f868.subfields.add(new Subfield(3,'z',note));
+            }
             holdingRec.dataFields.add(f868);
           }
         }
@@ -275,8 +279,11 @@ public class PODFullExport {
           if ( item.chron != null && ! item.chron.isEmpty() )
             f890.subfields.add(new Subfield(7,'c',item.chron));
           if ( item.rawFolioItem.containsKey("yearCaption") ) {
-            String yearCaption = ((String)item.rawFolioItem.get("yearCaption")).trim();
-            if ( ! yearCaption.isEmpty() ) f890.subfields.add(new Subfield(8,'y',yearCaption));
+            List<String> yearCaptions = (ArrayList)item.rawFolioItem.get("yearCaption");
+            List<String> nonNulls = new ArrayList<>();
+            for (String s : yearCaptions) if (s != null && ! s.isEmpty()) nonNulls.add(s);
+            if ( ! nonNulls.isEmpty() )
+              f890.subfields.add(new Subfield(8,'y',String.join(" ", nonNulls)));
           }
           if ( item.rawFolioItem.containsKey("numberOfPieces") ) {
             Object pieces = item.rawFolioItem.get("numberOfPieces");
@@ -333,11 +340,11 @@ public class PODFullExport {
   }
 
   private static Set<String> getBibsToExport(Connection inventory) throws SQLException {
-    Set<String> bibs = new TreeSet<>();
+    Set<String> bibs = new LinkedHashSet<>();
     try ( Statement stmt = inventory.createStatement() ){
       stmt.setFetchSize(1_000_000);
       try ( ResultSet rs = stmt.executeQuery(
-          "SELECT instanceHrid FROM bibFolio")) {
+          "SELECT instanceHrid FROM bibFolio ORDER BY RAND()")) {
         while ( rs.next() ) bibs.add(rs.getString(1));
       }
     }
