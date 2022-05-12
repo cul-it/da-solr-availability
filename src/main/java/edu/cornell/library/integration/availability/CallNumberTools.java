@@ -161,16 +161,16 @@ public class CallNumberTools {
     }
 
     // Engineering Library T, TA- TP, QA 75-76, QA267-268, QC320-999, QE
-    for ( String callNumber : callNumbers ) {
+    ENG: for ( String callNumber : callNumbers ) {
       String[] callParts = CallNumberTools.sortForm(callNumber).split(" ");
       if ( callParts.length == 0 ) continue;
       String letters = callParts[0].toUpperCase();
       switch (letters) {
-      case "T": case "TA": case "TB": case "TC": case "TD": case "TE": case "TF": case "TG":
+      case "T":  case "TA": case "TB": case "TC": case "TD": case "TE": case "TF": case "TG":
       case "TH": case "TI": case "TJ": case "TK": case "TL": case "TM": case "TN": case "TO":
       case "TP": case "QE":
         flags.add("Engineering Library");
-        break;
+        break ENG;
       case "QA": case "QC":
         break;
       default:
