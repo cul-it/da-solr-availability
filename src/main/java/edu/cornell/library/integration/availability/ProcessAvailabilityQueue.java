@@ -438,9 +438,10 @@ public class ProcessAvailabilityQueue {
     Set<String> allCallNumbers =
         CallNumberBrowse.collateCallNumberList(thisDocsCallNumberDocs);
     doc.addField("callnumber_display", allCallNumbers);
-    if ( CallNumberTools.hasMathCallNumber(
-        CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)))
-      doc.addField("collection", "Math Library");
+    
+    for (String collection : CallNumberTools.getCollectionFlags(
+        CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)) )
+      doc.addField("collection",collection);
 
     System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
         changes)+" priority:"+priority);
