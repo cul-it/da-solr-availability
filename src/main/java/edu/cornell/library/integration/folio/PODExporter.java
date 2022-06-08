@@ -115,6 +115,7 @@ public class PODExporter {
         return false;
       }
 
+    cleanUnwantedBibFields( bibRec );
     HoldingsAndItems holdingsAndItems = collateHoldingsAndItemsData(bibRec);
     boolean podActiveHoldings = false;
     for (Holding h : holdingsAndItems.holdings.values())
@@ -141,6 +142,19 @@ public class PODExporter {
     System.out.println(instanceHrid+" active but contains no substantive changes.");
     updatePodInventoryForActiveInstance(instance,bibRec.moddate,instanceModdate,holdingsAndItems);
     return false;//podActive, but no substantive change. Don't write to output
+  }
+
+  private static void cleanUnwantedBibFields(MarcRecord bibRec) {
+    Set<DataField> unwanted = new HashSet<>();
+    for (DataField f : bibRec.dataFields)
+      if ( f.tag.equals("853") ||
+          f.tag.equals("866") ||
+          f.tag.equals("867") ||
+          f.tag.equals("868") ||
+          f.tag.equals("890") )
+        unwanted.add(f);
+    for (DataField f : unwanted)
+      bibRec.dataFields.remove(f);
   }
 
   private boolean areActiveHoldingsChanged(String instanceHrid, HoldingsAndItems holdingsAndItems)
