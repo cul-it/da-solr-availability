@@ -78,6 +78,11 @@ public class LoanTypes {
       this.shortLoan = shortLoan;
     }
 
+    public LoanType(@JsonProperty("id") String uuid,@JsonProperty("name") String name) {
+      this.uuid = uuid;
+      this.name = name;
+      this.shortLoan = false;
+    }
   }
 
   private static void populateLoanTypes( OkapiClient okapi ) throws IOException {

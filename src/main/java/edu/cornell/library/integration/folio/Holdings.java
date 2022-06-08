@@ -232,11 +232,15 @@ public class Holdings {
       throws IOException {
 
     Holding onlineHolding = null;
+    Holding suppressedOnlineHolding = null;
     Holding hathiHolding = null;
 
     for ( Holding h : holdings.values() )
-      if ( h.online != null && h.online )
-        onlineHolding = h;
+      if ( h.online != null && h.online ) {
+        if ( h.active ) onlineHolding = h; else suppressedOnlineHolding = h;
+      }
+    if ( onlineHolding == null && suppressedOnlineHolding != null )
+      onlineHolding = suppressedOnlineHolding;
     for ( Object linkJson : linkJsons ) {
       Link l = Link.fromJson((String)linkJson);
       if (l.desc != null && (l.url.contains("hathitrust") || l.url.contains("handle.net/2027/"))) {

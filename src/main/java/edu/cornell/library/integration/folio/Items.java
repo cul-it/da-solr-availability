@@ -243,9 +243,9 @@ public class Items {
     @JsonProperty("chron")     public final String chron;
     @JsonProperty("location")  public Location location = null;
     @JsonProperty("permLocation") public String permLocation = null;
-    @JsonProperty("loanType")  public LoanType loanType;
-    @JsonProperty("matType")   public Map<String,String> matType;
-    @JsonProperty("rmc")       public Map<String,String> rmc;
+    @JsonProperty("loanType")  public LoanType loanType = null;
+    @JsonProperty("matType")   public Map<String,String> matType = null;
+    @JsonProperty("rmc")       public Map<String,String> rmc = null;
     @JsonProperty("status")    public ItemStatus status;
     @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public Integer date;
@@ -345,16 +345,16 @@ public class Items {
     }
 
     Item(
-        @JsonProperty("id")        String id,
-        @JsonProperty("hrid")      String hrid,
-        @JsonProperty("copy")      String copy,
-        @JsonProperty("call")      String callNumber,
-        @JsonProperty("enum")      String enumeration,
-        @JsonProperty("location")  Location location,
-        @JsonProperty("permLocation") String permLocation,
-        @JsonProperty("loanType")  LoanType loanType,
-        @JsonProperty("matType")   Map<String,String> matType,
-        @JsonProperty("status")    ItemStatus status
+        String id,
+        String hrid,
+        String copy,
+        String callNumber,
+        String enumeration,
+        Location location,
+        String permLocation,
+        LoanType loanType,
+        Map<String,String> matType,
+        ItemStatus status
         ) {
       this.id = id;
       this.hrid = hrid;
