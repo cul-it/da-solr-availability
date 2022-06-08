@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -46,7 +47,7 @@ public class PODIncrementalExport {
 
       PODExporter exporter = new PODExporter( inventory, okapi );
 
-      Set<String> bibs = identifyChangedRecords(inventory);
+ //     Set<String> bibs = identifyChangedRecords(inventory);
       Calendar cal = Calendar.getInstance();
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
       String today = sdf.format(cal.getTime());
@@ -60,7 +61,7 @@ public class PODIncrementalExport {
       BufferedWriter deletes = Files.newBufferedWriter(Paths.get(
           String.format("cornell-deletes-%s.txt", today)));
 
-      for ( String bibId : bibs )
+      for ( String bibId : Arrays.asList("2") )
         if (exporter.exportBib(bibId, writer, deletes)) records++;
 
       if ( records > 0 ) {

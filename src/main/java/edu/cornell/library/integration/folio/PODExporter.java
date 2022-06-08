@@ -157,9 +157,9 @@ public class PODExporter {
         oldActiveHoldings.put(rs.getString("hrid"), rs.getString("content"));
     }
     if (oldActiveHoldings.size() != newActiveHoldings.size()) return true;
-    for ( String holdingUuid : oldActiveHoldings.keySet() ) {
-      if ( ! newActiveHoldings.containsKey(holdingUuid) ) return true;
-      if ( ! oldActiveHoldings.get(holdingUuid).equals(newActiveHoldings.get(holdingUuid)) )
+    for ( String holdingHrid : oldActiveHoldings.keySet() ) {
+      if ( ! newActiveHoldings.containsKey(holdingHrid) ) return true;
+      if ( ! oldActiveHoldings.get(holdingHrid).equals(newActiveHoldings.get(holdingHrid)) )
         return true;
     }
     return false;
