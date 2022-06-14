@@ -3,6 +3,7 @@ package edu.cornell.library.integration.folio;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -20,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.zip.GZIPOutputStream;
 
 public class PODIncrementalExport {
 
@@ -51,14 +53,14 @@ public class PODIncrementalExport {
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
       String today = sdf.format(cal.getTime());
 
-      BufferedWriter writer = Files.newBufferedWriter(Paths.get(
-          String.format("cornell-incr-%s.xml", today)));
+      String updatesFile = String.format("cornell-incr-%s.xml", today);
+      BufferedWriter writer = Files.newBufferedWriter(Paths.get(updatesFile));
       writer.write("<?xml version='1.0' encoding='UTF-8'?>"
           + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
       int records = 0;
 
-      BufferedWriter deletes = Files.newBufferedWriter(Paths.get(
-          String.format("cornell-deletes-%s.txt", today)));
+      String deletesFile = String.format("cornell-deletes-%s.txt", today);
+      BufferedWriter deletes = Files.newBufferedWriter(Paths.get(deletesFile));
 
       for ( String bibId : bibs )
         if (exporter.exportBib(bibId, writer, deletes)) records++;
@@ -67,6 +69,7 @@ public class PODIncrementalExport {
         writer.write("</collection>\n");
         writer.flush();
         writer.close();
+        String gzipFile = gzip( updatesFile );
       }
       deletes.flush();
       deletes.close();
@@ -74,10 +77,26 @@ public class PODIncrementalExport {
 
   }
 
+  private static String gzip(String file) throws IOException {
+    String gzipFile = file+".gz";
+    try (
+        FileInputStream fis = new FileInputStream(file);
+        FileOutputStream fos = new FileOutputStream(gzipFile);
+        GZIPOutputStream gzipOS = new GZIPOutputStream(fos);
+        ){
+
+        byte[] buffer = new byte[1024];
+        int len;
+        while((len=fis.read(buffer)) != -1){ gzipOS.write(buffer, 0, len); }
+    }
+    return gzipFile;
+}
+
+
   private static Set<String> identifyChangedRecords(Connection inventory) throws SQLException {
 
     Set<String> changedInstances = new HashSet<>();
-    String dateCursor = "2022-05-11";
+    String dateCursor = "2022-06-11";
 
     // NEWER IN FOLIO CACHE
 
