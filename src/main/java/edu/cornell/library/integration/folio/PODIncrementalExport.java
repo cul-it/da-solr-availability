@@ -113,7 +113,7 @@ public class PODIncrementalExport {
 
     String newerInstanceQuery =
     "SELECT p.instanceHrid"+
-    "  FROM bibPod p,"+
+    "  FROM instancePod p,"+
     "       (SELECT f.hrid, f.moddate"+
     "          FROM instanceFolio f"+
     "         WHERE f.moddate > ?) AS f1"+
@@ -123,12 +123,12 @@ public class PODIncrementalExport {
 
     String newerBibQuery =
     "SELECT p.instanceHrid"+
-    "  FROM bibPod p,"+
+    "  FROM instancePod p,"+
     "       (SELECT f.instanceHrid, f.moddate"+
     "          FROM bibFolio f"+
     "         WHERE f.moddate > ?) AS f1"+
     " WHERE p.instanceHrid = f1.instanceHrid"+
-    "   AND f1.moddate > p.moddate";
+    "   AND f1.moddate > p.bibModdate";
     changedInstances.addAll(getChanged(inventory,newerBibQuery,dateCursor));
 
     String newerHoldingQuery =
@@ -168,8 +168,8 @@ public class PODIncrementalExport {
 
     try ( Statement stmt = inventory.createStatement() ) {
       BIBS: {
-        Set<String> allFolioBibs = getAll( stmt, "SELECT instanceHrid FROM bibFolio");
-        Set<String> allPodBibs = getAll( stmt, "SELECT instanceHrid FROM bibPod");
+        Set<String> allFolioBibs = getAll( stmt, "SELECT hrid FROM instanceFolio");
+        Set<String> allPodBibs = getAll( stmt, "SELECT instanceHrid FROM instancePod");
         Set<String> newBibs = new HashSet<>(allFolioBibs);
         newBibs.removeAll(allPodBibs);
         System.out.println("total new bibs: "+newBibs.size());

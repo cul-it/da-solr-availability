@@ -35,10 +35,10 @@ public class PODExporter {
   private final ReferenceData callNumberTypes;
 
   private final Connection inventory;
-  private final PreparedStatement insertBibPodStmt;
+  private final PreparedStatement insertInstancePodStmt;
   private final PreparedStatement insertHoldingPodStmt;
   private final PreparedStatement insertItemPodStmt;
-  private final PreparedStatement getPreviousBibStatusStmt;
+  private final PreparedStatement getPreviousInstanceStatusStmt;
   private final PreparedStatement getHoldingPodStmt;
   private final PreparedStatement getItemPodStmt;
   private final PreparedStatement getHoldingFolioStmt;
@@ -56,16 +56,16 @@ public class PODExporter {
     LoanTypes.initialize(okapi);
 
     this.inventory = inventory;
-    this.insertBibPodStmt = inventory.prepareStatement(
-        "REPLACE INTO bibPod( instanceHrid, moddate, instanceModdate, podActive) VALUES (?,?,?,?)");
+    this.insertInstancePodStmt = inventory.prepareStatement(
+        "REPLACE INTO instancePod(instanceHrid,bibModdate,instanceModdate,podActive) VALUES(?,?,?,?)");
     this.insertHoldingPodStmt = inventory.prepareStatement(
         "INSERT INTO holdingPod(hrid, instanceHrid, moddate, podActive, content) VALUES (?,?,?,?,?)");
     this.insertItemPodStmt = inventory.prepareStatement(
         "INSERT INTO itemPod(hrid, holdingHrid, moddate, podActive) VALUES (?,?,?,?)");
     this.getHoldingPodStmt = inventory.prepareStatement(
         "SELECT * FROM holdingPod WHERE instanceHrid = ?");
-    this.getPreviousBibStatusStmt = inventory.prepareStatement(
-        "SELECT * FROM bibPod WHERE instanceHrid = ?");
+    this.getPreviousInstanceStatusStmt = inventory.prepareStatement(
+        "SELECT * FROM instancePod WHERE instanceHrid = ?");
     this.getItemPodStmt = inventory.prepareStatement(
         "SELECT * FROM itemPod WHERE holdingHrid = ?");
     this.getHoldingFolioStmt = inventory.prepareStatement(
@@ -359,17 +359,18 @@ public class PODExporter {
   }
 
   private void updatePodInventoryForInactiveInstance(
-      Map<String,Object> instance, Timestamp bibModdate, Timestamp instanceModdate) throws SQLException {
+      Map<String,Object> instance, Timestamp bibModdate, Timestamp instanceModdate)
+          throws SQLException {
 
     String instanceHrid = (String)instance.get("hrid");
     removeOldHoldingAndItemPodExportData(instanceHrid);
 
     // add various fields flagged as inactive
-    this.insertBibPodStmt.setString(1,instanceHrid);
-    this.insertBibPodStmt.setTimestamp(2, bibModdate);
-    this.insertBibPodStmt.setTimestamp(3, instanceModdate);
-    this.insertBibPodStmt.setBoolean(4, false);
-    this.insertBibPodStmt.executeUpdate();
+    this.insertInstancePodStmt.setString(1,instanceHrid);
+    this.insertInstancePodStmt.setTimestamp(2, bibModdate);
+    this.insertInstancePodStmt.setTimestamp(3, instanceModdate);
+    this.insertInstancePodStmt.setBoolean(4, false);
+    this.insertInstancePodStmt.executeUpdate();
 
     // pipe inactive holding and item data
     this.getHoldingFolioStmt.setString(1, instanceHrid);
@@ -398,15 +399,15 @@ public class PODExporter {
 
   }
 
-  private void updatePodInventoryForActiveInstance(Map<String, Object> instance, Timestamp moddate,
+  private void updatePodInventoryForActiveInstance(Map<String, Object> instance, Timestamp bibModdate,
       Timestamp instanceModdate, HoldingsAndItems holdingsAndItems) throws SQLException {
     String instanceHrid = (String)instance.get("hrid");
 
-    this.insertBibPodStmt.setString(1,instanceHrid);
-    this.insertBibPodStmt.setTimestamp(2, moddate);
-    this.insertBibPodStmt.setTimestamp(3, instanceModdate);
-    this.insertBibPodStmt.setBoolean(4, true);
-    this.insertBibPodStmt.executeUpdate();
+    this.insertInstancePodStmt.setString(1,instanceHrid);
+    this.insertInstancePodStmt.setTimestamp(2, bibModdate);
+    this.insertInstancePodStmt.setTimestamp(3, instanceModdate);
+    this.insertInstancePodStmt.setBoolean(4, true);
+    this.insertInstancePodStmt.executeUpdate();
 
     removeOldHoldingAndItemPodExportData(instanceHrid);
 
@@ -444,12 +445,12 @@ public class PODExporter {
     Timestamp moddate;
   }
   private PreviousBibStatus getPrevPodStatus(String instanceHrid) throws SQLException {
-    this.getPreviousBibStatusStmt.setString(1, instanceHrid);
-    try ( ResultSet rs = this.getPreviousBibStatusStmt.executeQuery()) {
+    this.getPreviousInstanceStatusStmt.setString(1, instanceHrid);
+    try ( ResultSet rs = this.getPreviousInstanceStatusStmt.executeQuery()) {
       while (rs.next()) {
         PreviousBibStatus p = new PreviousBibStatus();
         p.active = rs.getBoolean("podActive");
-        p.moddate = rs.getTimestamp("moddate");
+        p.moddate = rs.getTimestamp("bibModdate");
         return p;
       }
     }
