@@ -23,6 +23,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
+import edu.cornell.library.integration.folio.PODExporter.UpdateType;
+
 public class PODIncrementalExport {
 
   public static void main(String[] args) throws IOException, SQLException {
@@ -57,15 +59,22 @@ public class PODIncrementalExport {
       BufferedWriter writer = Files.newBufferedWriter(Paths.get(updatesFile));
       writer.write("<?xml version='1.0' encoding='UTF-8'?>"
           + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
-      int records = 0;
+      int updateRecords = 0;
 
       String deletesFile = String.format("cornell-deletes-%s.txt", today);
       BufferedWriter deletes = Files.newBufferedWriter(Paths.get(deletesFile));
+      int deleteRecords = 0;
 
-      for ( String bibId : bibs )
-        if (exporter.exportBib(bibId, writer, deletes)) records++;
+      for ( String bibId : bibs ) {
+        UpdateType isUpdate = exporter.exportBib(bibId, writer, deletes);
+        switch (isUpdate) {
+        case UPDATE: updateRecords++; break;
+        case DELETE: deleteRecords++; break;
+        default: continue;
+        }
+      }
 
-      if ( records > 0 ) {
+      if ( updateRecords > 0 ) {
         writer.write("</collection>\n");
         writer.flush();
         writer.close();
@@ -73,6 +82,8 @@ public class PODIncrementalExport {
       }
       deletes.flush();
       deletes.close();
+      System.out.printf("Updates and new MARC: %d\n", updateRecords);
+      System.out.printf("Deletes: %d\n", deleteRecords);
     }
 
   }

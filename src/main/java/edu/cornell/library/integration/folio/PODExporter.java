@@ -78,7 +78,8 @@ public class PODExporter {
         "DELETE FROM itemPod WHERE holdingHrid = ? AND hrid = ?");
   }
 
-  public boolean exportBib(
+  public enum UpdateType { UPDATE, DELETE, NONE; }
+  public UpdateType exportBib(
       String instanceHrid, BufferedWriter recordWriter, BufferedWriter deleteWriter)
           throws SQLException, IOException {
 
@@ -93,8 +94,11 @@ public class PODExporter {
     if ( bibRec == null ) {
       System.out.printf("Skipping non-MARC instance #%s\n",instanceHrid);
       updatePodInventoryForInactiveInstance(instance,null,instanceModdate);
-      if (prevStatus.active) deleteWriter.write(instanceHrid+'\n');
-      return false;
+      if (prevStatus.active) {
+        deleteWriter.write(instanceHrid+'\n');
+        return UpdateType.DELETE;
+      }
+      return UpdateType.NONE;
     }
 
     // if the bib(instance) is suppressed, we don't want to send to POD.
@@ -102,8 +106,11 @@ public class PODExporter {
         || (instance.containsKey("staffSuppress") && (boolean)instance.get("staffSuppress")) ) {
       System.out.println(instanceHrid+" inactive due to suppression.");
       updatePodInventoryForInactiveInstance(instance,bibRec.moddate,instanceModdate);
-      if (prevStatus.active) deleteWriter.write(instanceHrid+'\n');
-      return false;
+      if (prevStatus.active) {
+        deleteWriter.write(instanceHrid+'\n');
+        return UpdateType.DELETE;
+      }
+      return UpdateType.NONE;
     }
 
     // if not suppressed, confirm the record isn't NoEx.
@@ -111,8 +118,11 @@ public class PODExporter {
       for (Subfield sf : f.subfields) if (sf.value.contains("NoEx")) {
         System.out.println(instanceHrid+" inactive due NoEx.");
         updatePodInventoryForInactiveInstance(instance,bibRec.moddate,instanceModdate);
-        if (prevStatus.active) deleteWriter.write(instanceHrid+'\n');
-        return false;
+        if (prevStatus.active) {
+          deleteWriter.write(instanceHrid+'\n');
+          return UpdateType.DELETE;
+        }
+        return UpdateType.NONE;
       }
 
     cleanUnwantedBibFields( bibRec );
@@ -124,8 +134,11 @@ public class PODExporter {
     if ( ! podActiveHoldings ) {
       System.out.println(instanceHrid+" inactive due to no active holdings.");
       updatePodInventoryForInactiveInstance(instance,bibRec.moddate,instanceModdate);
-      if (prevStatus.active) deleteWriter.write(instanceHrid+'\n');
-      return false;
+      if (prevStatus.active) {
+        deleteWriter.write(instanceHrid+'\n');
+        return UpdateType.DELETE;
+      }
+      return UpdateType.NONE;
     }
 
     if ( ! prevStatus.active
@@ -136,12 +149,12 @@ public class PODExporter {
       updatePodInventoryForActiveInstance(instance,bibRec.moddate,instanceModdate,holdingsAndItems);
       recordWriter.write(bibRec.toString("xml").replace("<?xml version='1.0' encoding='UTF-8'?>", "")
           .replace(" xmlns=\"http://www.loc.gov/MARC21/slim\"","")+"\n");
-      return true;
+      return UpdateType.UPDATE;
     }
 
     System.out.println(instanceHrid+" active but contains no substantive changes.");
     updatePodInventoryForActiveInstance(instance,bibRec.moddate,instanceModdate,holdingsAndItems);
-    return false;//podActive, but no substantive change. Don't write to output
+    return UpdateType.NONE;//podActive, but no substantive change. Don't write to output
   }
 
   private static void cleanUnwantedBibFields(MarcRecord bibRec) {

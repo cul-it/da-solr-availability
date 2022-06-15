@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.Items.ItemList;
+import edu.cornell.library.integration.folio.PODExporter.UpdateType;
 import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.MarcRecord;
 import edu.cornell.library.integration.marc.Subfield;
@@ -72,7 +73,7 @@ public class PODFullExport {
               + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
         }
 
-        if  (exporter.exportBib( bibId,writer,null) ) {
+        if  (exporter.exportBib( bibId,writer,null).equals(UpdateType.UPDATE) ) {
           recordsInFile++;
         }
 
