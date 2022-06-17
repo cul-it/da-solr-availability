@@ -33,6 +33,7 @@ public class PODExporter {
   private final Locations locations;
   private final ReferenceData holdingsNoteTypes;
   private final ReferenceData callNumberTypes;
+  public boolean verbose = false;
 
   private final Connection inventory;
   private final PreparedStatement insertInstancePodStmt;
@@ -140,7 +141,12 @@ public class PODExporter {
       }
       return UpdateType.NONE;
     }
-
+    if ( this.verbose ) {
+      if ( ! prevStatus.active )
+        System.out.println("Sending because not previously active.");
+      else if ( bibRec.moddate.after(prevStatus.moddate) )
+        System.out.println("Sending because bib newer.");
+    }
     if ( ! prevStatus.active
         || bibRec.moddate.after(prevStatus.moddate)
         || areActiveHoldingsChanged(instanceHrid,holdingsAndItems) ) {
@@ -183,11 +189,25 @@ public class PODExporter {
       while ( rs.next() ) if ( rs.getBoolean("podActive") )
         oldActiveHoldings.put(rs.getString("hrid"), rs.getString("content"));
     }
-    if (oldActiveHoldings.size() != newActiveHoldings.size()) return true;
+    if (oldActiveHoldings.size() != newActiveHoldings.size()) {
+      if (this.verbose)
+        System.out.printf("Holdings changed. Previously %d (%s) active, now %d (%s).\n",
+            oldActiveHoldings.size(),String.join(", ", oldActiveHoldings.keySet()),
+            newActiveHoldings.size(),String.join(", ", newActiveHoldings.keySet()));
+      return true;
+    }
     for ( String holdingHrid : oldActiveHoldings.keySet() ) {
-      if ( ! newActiveHoldings.containsKey(holdingHrid) ) return true;
-      if ( ! oldActiveHoldings.get(holdingHrid).equals(newActiveHoldings.get(holdingHrid)) )
+      if ( ! newActiveHoldings.containsKey(holdingHrid) ) {
+        if (this.verbose)
+          System.out.printf("Holding changed. %s previously active, not currently.\n",holdingHrid);
         return true;
+      }
+      if ( ! oldActiveHoldings.get(holdingHrid).equals(newActiveHoldings.get(holdingHrid)) ) {
+        if (this.verbose)
+          System.out.printf("Holdings details for %s have changed.\nbefore:[%s]\nafter:[%s]\n",
+              holdingHrid,oldActiveHoldings.get(holdingHrid),newActiveHoldings.get(holdingHrid));
+        return true;
+      }
     }
     return false;
   }

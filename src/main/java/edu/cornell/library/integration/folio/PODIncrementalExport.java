@@ -49,6 +49,7 @@ public class PODIncrementalExport {
           prop.getProperty("okapiTenantFolio"));
 
       PODExporter exporter = new PODExporter( inventory, okapi );
+      exporter.verbose = true;
 
       Set<String> bibs = identifyChangedRecords(inventory);
       Calendar cal = Calendar.getInstance();
