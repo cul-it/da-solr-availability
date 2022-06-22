@@ -55,7 +55,10 @@ public class Items {
     Map<Integer,String> dueDates = new TreeMap<>();
     Map<Integer,String> requests = new TreeMap<>();
     if (itemByHolding == null)
-      itemByHolding = inventory.prepareStatement("SELECT * FROM itemFolio WHERE holdingHrid = ?");
+      itemByHolding = inventory.prepareStatement(
+          "SELECT i.id, i.content, s.sequence"+
+          "  FROM itemFolio i LEFT JOIN itemSequence s ON i.hrid = s.hrid" +
+          " WHERE i.holdingHrid = ?");
     for (String holdingId : holdings.getUuids()) {
       Holding h = holdings.get(holdingId);
       if (h.online != null && h.online) continue;
