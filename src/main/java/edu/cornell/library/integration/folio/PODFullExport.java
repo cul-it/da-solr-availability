@@ -7,30 +7,16 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import edu.cornell.library.integration.folio.Holdings.HoldingSet;
-import edu.cornell.library.integration.folio.Items.Item;
-import edu.cornell.library.integration.folio.Items.ItemList;
 import edu.cornell.library.integration.folio.PODExporter.UpdateType;
-import edu.cornell.library.integration.marc.DataField;
-import edu.cornell.library.integration.marc.MarcRecord;
-import edu.cornell.library.integration.marc.Subfield;
 
 public class PODFullExport {
 
@@ -52,37 +38,28 @@ public class PODFullExport {
       Set<String> bibs = getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
 
-      int fileNum = 1;
-      BufferedWriter writer = Files.newBufferedWriter(Paths.get(
-          String.format("cornell-full-%02d.xml", fileNum)));
-      int recordsInFile = 0;
-      writer.write("<?xml version='1.0' encoding='UTF-8'?>"
-          + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
 
-      for (String bibId : bibs) {
+      Calendar cal = Calendar.getInstance();
+      SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+      String today = sdf.format(cal.getTime());
+      try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(
+          String.format("cornell-full-%s.xml", today)))) {
 
-        if ( recordsInFile >= 500_000 ) {
-          writer.write("</collection>\n");
-          writer.flush();
-          writer.close();
-          System.out.printf("Closing file %02d\n", fileNum);
-          writer = new BufferedWriter(Files.newBufferedWriter(
-              Paths.get(String.format("cornell-full-%02d.xml",++fileNum))));
-          recordsInFile = 0;
-          writer.write( "<?xml version='1.0' encoding='UTF-8'?>"
-              + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
+        writer.write("<?xml version='1.0' encoding='UTF-8'?>"
+            + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
+        int records = 0;
+
+        for (String bibId : bibs) {
+
+          if  (exporter.exportBib( bibId,writer,null).equals(UpdateType.UPDATE) )
+            records++;
+          if ( records % 100_000 == 0 ) System.out.printf("%d records: %s\n",records,bibId);
+
         }
-
-        if  (exporter.exportBib( bibId,writer,null).equals(UpdateType.UPDATE) ) {
-          recordsInFile++;
-        }
-
-      }
-      if ( recordsInFile > 0 ) {
         writer.write("</collection>\n");
         writer.flush();
         writer.close();
-        System.out.printf("Closing file %02d\n", fileNum);
+        System.out.printf("%d records total\n",records);
       }
     }
   }
