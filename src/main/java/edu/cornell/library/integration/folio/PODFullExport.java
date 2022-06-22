@@ -55,7 +55,7 @@ public class PODFullExport {
           recordsProcessed++;
           if  (exporter.exportBib( bibId,writer,null).equals(UpdateType.UPDATE) )
             recordsExported++;
-          if ( recordsExported % 100_000 == 0 )
+          if ( recordsProcessed % 100_000 == 0 )
             System.out.printf("%d of %d records: (%s)\n",recordsExported,recordsProcessed,bibId);
 
         }
