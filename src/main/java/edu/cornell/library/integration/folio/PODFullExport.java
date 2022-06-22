@@ -47,19 +47,22 @@ public class PODFullExport {
 
         writer.write("<?xml version='1.0' encoding='UTF-8'?>"
             + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
-        int records = 0;
+        int recordsExported = 0;
+        int recordsProcessed = 0;
 
         for (String bibId : bibs) {
 
+          recordsProcessed++;
           if  (exporter.exportBib( bibId,writer,null).equals(UpdateType.UPDATE) )
-            records++;
-          if ( records % 100_000 == 0 ) System.out.printf("%d records: %s\n",records,bibId);
+            recordsExported++;
+          if ( recordsExported % 100_000 == 0 )
+            System.out.printf("%d of %d records: (%s)\n",recordsExported,recordsProcessed,bibId);
 
         }
         writer.write("</collection>\n");
         writer.flush();
         writer.close();
-        System.out.printf("%d records total\n",records);
+        System.out.printf("%d of %d total records exported\n",recordsExported,recordsProcessed);
       }
     }
   }
