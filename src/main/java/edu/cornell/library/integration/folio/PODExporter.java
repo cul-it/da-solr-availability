@@ -145,7 +145,8 @@ public class PODExporter {
       if ( ! prevStatus.active )
         System.out.println("Sending because not previously active.");
       else if ( bibRec.moddate.after(prevStatus.moddate) )
-        System.out.println("Sending because bib newer.");
+        System.out.printf("Sending %s because bib marc newer. (%s => %s)\n",
+            instanceHrid, prevStatus.moddate, bibRec.moddate);
     }
     if ( ! prevStatus.active
         || bibRec.moddate.after(prevStatus.moddate)
