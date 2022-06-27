@@ -160,7 +160,8 @@ public class PODExporter {
     }
 
     if ( this.verbose )
-      System.out.println(instanceHrid+" active but contains no substantive changes.");
+      System.out.printf("%s active but contains no substantive changes. (%s => %s)",
+          instanceHrid, prevStatus.moddate, bibRec.moddate);
     updatePodInventoryForActiveInstance(instance,bibRec.moddate,instanceModdate,holdingsAndItems);
     return UpdateType.NONE;//podActive, but no substantive change. Don't write to output
   }
