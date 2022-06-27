@@ -100,7 +100,7 @@ public class Holding {
       callNumberParts.add((String)raw.get("callNumberPrefix"));
     if ( raw.containsKey("callNumber") ) {
       String callNumber = ((String)raw.get("callNumber")).trim();
-      if ( ! callNumber.isEmpty() ) {
+      if ( ! callNumber.isEmpty() && ! callNumber.equalsIgnoreCase("no call number")) {
         callNumberParts.add(callNumber);
         mainCallNumberPresent = true;
       }
