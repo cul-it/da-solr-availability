@@ -34,15 +34,20 @@ public class DownloadMARC {
           "Folio only contains Bibliographic MARC. Request for (%s, %s) invalid\n",type,hrid));
 
     String marc = null;
+    Timestamp moddate = null;
     try ( PreparedStatement bibByInstanceHrid = inventory.prepareStatement(
         "SELECT * FROM bibFolio WHERE instanceHrid = ?") ) {
       bibByInstanceHrid.setString(1, hrid);
       try ( ResultSet rs = bibByInstanceHrid.executeQuery() ) {
-        while (rs.next()) marc = rs.getString("content").replaceAll("\\s*\\n\\s*", " ");
+        while (rs.next()) {
+          marc = rs.getString("content").replaceAll("\\s*\\n\\s*", " ");
+          moddate = rs.getTimestamp("moddate");
+        }
       }
     }
     if ( marc != null ) {
       MarcRecord marcRec = jsonToMarcRec( marc );
+      if ( moddate != null ) marcRec.moddate = moddate;
       return marcRec;
     }
     return null;
