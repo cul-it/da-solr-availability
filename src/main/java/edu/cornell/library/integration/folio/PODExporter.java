@@ -114,7 +114,7 @@ public class PODExporter {
     DataOutputStream writer = new DataOutputStream(c.getOutputStream());
     writer.writeBytes("--"+boundary+"\r\n");
     writer.writeBytes("Content-Disposition: form-data; name=\"upload[name]\"\r\n\r\n");
-    writer.writeBytes(filename+"\r\n");
+    writer.writeBytes("["+filename+"]\r\n");
     writer.writeBytes("--"+boundary+"\r\n");
     writer.writeBytes("Content-Disposition: form-data; name=\"upload[files]\"\r\n\r\n");
     writer.write(FileUtils.readFileToByteArray(new File(filename)));
