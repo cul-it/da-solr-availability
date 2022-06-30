@@ -33,7 +33,7 @@ public class PODFullExport {
           prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),
           prop.getProperty("okapiTenantFolio"));
 
-      PODExporter exporter = new PODExporter( inventory, okapi );
+      PODExporter exporter = new PODExporter( inventory, okapi , prop);
 
       Set<String> bibs = getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());

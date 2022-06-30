@@ -1,7 +1,12 @@
 package edu.cornell.library.integration.folio;
 
 import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,10 +20,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.apache.commons.io.FileUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
@@ -47,7 +56,11 @@ public class PODExporter {
   private final PreparedStatement deleteHoldingPodStmt;
   private final PreparedStatement deleteItemPodStmt;
 
-  public PODExporter ( Connection inventory, OkapiClient okapi ) throws IOException, SQLException {
+  private final String podUrl;
+  private final String podToken;
+
+  public PODExporter ( Connection inventory, OkapiClient okapi, Properties prop )
+      throws IOException, SQLException {
     
     this.locations = new Locations(okapi);
     this.holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
@@ -77,6 +90,45 @@ public class PODExporter {
         "DELETE FROM holdingPod WHERE instanceHrid = ? AND hrid = ?");
     this.deleteItemPodStmt = inventory.prepareStatement(
         "DELETE FROM itemPod WHERE holdingHrid = ? AND hrid = ?");
+
+    if ( prop.containsKey("podUrl") )
+      this.podUrl = prop.getProperty("podUrl");
+    else
+      throw new IllegalArgumentException("podUrl required in config.");
+    if ( prop.containsKey("podToken") )
+      this.podToken = prop.getProperty("podToken");
+    else
+      throw new IllegalArgumentException("podToken required in config.");
+  }
+
+  public void pushFileToPod( String filename ) throws IOException {
+    String contentType = (filename.endsWith(".txt"))?"text/plain":"application/gzip";
+    String boundary = UUID.randomUUID().toString();
+    final URL fullPath = new URL(this.podUrl);
+    final HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();
+    c.setRequestMethod("POST");
+    c.setDoOutput(true);
+    c.setDoInput(true);
+    c.setRequestProperty("Content-Type","multipart/form-data;boundary=\""+boundary+"\"");
+    c.setRequestProperty("Authorization", "Bearer "+this.podToken);
+    DataOutputStream writer = new DataOutputStream(c.getOutputStream());
+    writer.writeBytes("--"+boundary+"\r\n");
+    writer.writeBytes("Content-Disposition: form-data; name=\"upload[name]\"\r\n\r\n");
+    writer.writeBytes(filename+"\r\n");
+    writer.writeBytes("--"+boundary+"\r\n");
+    writer.writeBytes("Content-Disposition: form-data; name=\"upload[files]\"\r\n\r\n");
+    writer.write(FileUtils.readFileToByteArray(new File(filename)));
+    writer.writeBytes(";"+contentType+"\r\n");
+    writer.writeBytes("--"+boundary+"\r\n");
+    writer.flush();
+    int respCode = c.getResponseCode();
+    System.out.println(respCode);
+    try (InputStream is = c.getInputStream();
+         Scanner s = new Scanner(is)) {
+      s.useDelimiter("\\A");
+      if ( s.hasNext() ) System.out.println(s.next());
+    }
+    
   }
 
   public enum UpdateType { UPDATE, DELETE, NONE; }

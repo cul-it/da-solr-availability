@@ -48,8 +48,9 @@ public class PODIncrementalExport {
           prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),
           prop.getProperty("okapiTenantFolio"));
 
-      PODExporter exporter = new PODExporter( inventory, okapi );
+      PODExporter exporter = new PODExporter( inventory, okapi, prop );
       exporter.verbose = true;
+
 
       Set<String> bibs = identifyChangedRecords(inventory);
       Calendar cal = Calendar.getInstance();
@@ -80,11 +81,14 @@ public class PODIncrementalExport {
         writer.flush();
         writer.close();
         String gzipFile = gzip( updatesFile );
+        exporter.pushFileToPod(gzipFile);
       }
       deletes.flush();
       deletes.close();
       System.out.printf("Updates and new MARC: %d\n", updateRecords);
       System.out.printf("Deletes: %d\n", deleteRecords);
+      if ( deleteRecords > 0 )
+        exporter.pushFileToPod( deletesFile );
     }
 
   }
