@@ -101,8 +101,7 @@ public class PODExporter {
       throw new IllegalArgumentException("podToken required in config.");
   }
 
-  public void pushFileToPod( String filename ) throws IOException {
-    String contentType = (filename.endsWith(".txt"))?"text/plain":"application/gzip";
+  public void pushFileToPod( String filename, String contentType ) throws IOException {
     String boundary = UUID.randomUUID().toString();
     final URL fullPath = new URL(this.podUrl);
     final HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();

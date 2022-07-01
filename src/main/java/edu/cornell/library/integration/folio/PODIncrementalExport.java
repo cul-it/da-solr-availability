@@ -81,14 +81,14 @@ public class PODIncrementalExport {
         writer.flush();
         writer.close();
         String gzipFile = gzip( updatesFile );
-        exporter.pushFileToPod(gzipFile);
+        exporter.pushFileToPod( gzipFile, "application/gzip");
       }
       deletes.flush();
       deletes.close();
       System.out.printf("Updates and new MARC: %d\n", updateRecords);
       System.out.printf("Deletes: %d\n", deleteRecords);
       if ( deleteRecords > 0 )
-        exporter.pushFileToPod( deletesFile );
+        exporter.pushFileToPod( deletesFile, "text/plain");
     }
 
   }
