@@ -115,9 +115,11 @@ public class PODExporter {
     writer.writeBytes("Content-Disposition: form-data; name=\"upload[name]\"\r\n\r\n");
     writer.writeBytes("["+filename+"]\r\n");
     writer.writeBytes("--"+boundary+"\r\n");
-    writer.writeBytes("Content-Disposition: form-data; name=\"upload[files]\"\r\n\r\n");
+    writer.writeBytes("Content-Disposition: form-data; name=\"upload[files][]\"; filename=\""
+        +filename+"\"\r\n");
+    writer.writeBytes("Content-Type: "+contentType+"\r\n\r\n");
     writer.write(FileUtils.readFileToByteArray(new File(filename)));
-    writer.writeBytes(";"+contentType+"\r\n");
+    writer.writeBytes("\r\n");
     writer.writeBytes("--"+boundary+"\r\n");
     writer.flush();
     int respCode = c.getResponseCode();
