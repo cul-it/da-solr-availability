@@ -24,7 +24,6 @@ import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 
@@ -102,13 +101,13 @@ public class PODExporter {
   }
 
   public void pushFileToPod( String filename, String contentType ) throws IOException {
-    String boundary = UUID.randomUUID().toString();
+    String boundary = "----------------------------a3344f84e744";
     final URL fullPath = new URL(this.podUrl);
     final HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();
     c.setRequestMethod("POST");
     c.setDoOutput(true);
     c.setDoInput(true);
-    c.setRequestProperty("Content-Type","multipart/form-data;boundary=\""+boundary+"\"");
+    c.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary+"");
     c.setRequestProperty("Authorization", "Bearer "+this.podToken);
     DataOutputStream writer = new DataOutputStream(c.getOutputStream());
     writer.writeBytes("--"+boundary+"\r\n");
