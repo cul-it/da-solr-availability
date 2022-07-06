@@ -107,7 +107,7 @@ public class PODExporter {
     c.setRequestMethod("POST");
     c.setDoOutput(true);
     c.setDoInput(true);
-    c.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary+"");
+    c.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary);
     c.setRequestProperty("Authorization", "Bearer "+this.podToken);
     DataOutputStream writer = new DataOutputStream(c.getOutputStream());
     writer.writeBytes("--"+boundary+"\r\n");
@@ -123,6 +123,13 @@ public class PODExporter {
     writer.flush();
     int respCode = c.getResponseCode();
     System.out.println(respCode);
+    if ( respCode >= 400 ) {
+      try ( InputStream is = c.getErrorStream();
+            Scanner s = new Scanner(is) ) {
+        s.useDelimiter("\\A");
+        if ( s.hasNext() ) System.out.println(s.next());
+      }
+    } else
     try (InputStream is = c.getInputStream();
          Scanner s = new Scanner(is)) {
       s.useDelimiter("\\A");
