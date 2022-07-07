@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -109,33 +110,46 @@ public class PODExporter {
     c.setDoInput(true);
     c.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary);
     c.setRequestProperty("Authorization", "Bearer "+this.podToken);
+    StringBuilder logBuilder = new StringBuilder();
     DataOutputStream writer = new DataOutputStream(c.getOutputStream());
+    logBuilder.append("--"+boundary+"\r\n");
     writer.writeBytes("--"+boundary+"\r\n");
+    logBuilder.append("Content-Disposition: form-data; name=\"upload[name]\"\r\n\r\n");
     writer.writeBytes("Content-Disposition: form-data; name=\"upload[name]\"\r\n\r\n");
+    logBuilder.append("["+filename+"]\r\n");
     writer.writeBytes("["+filename+"]\r\n");
+    logBuilder.append("--"+boundary+"\r\n");
     writer.writeBytes("--"+boundary+"\r\n");
+    logBuilder.append("Content-Disposition: form-data; name=\"upload[files][]\"; filename=\""
+        +filename+"\"\r\n");
     writer.writeBytes("Content-Disposition: form-data; name=\"upload[files][]\"; filename=\""
         +filename+"\"\r\n");
+    logBuilder.append("Content-Type: "+contentType+"\r\n\r\n");
     writer.writeBytes("Content-Type: "+contentType+"\r\n\r\n");
+    logBuilder.append(new String(FileUtils.readFileToByteArray(new File(filename)),StandardCharsets.UTF_8));
     writer.write(FileUtils.readFileToByteArray(new File(filename)));
+    logBuilder.append("\r\n");
     writer.writeBytes("\r\n");
+    logBuilder.append("--"+boundary+"\r\n");
     writer.writeBytes("--"+boundary+"\r\n");
+    System.out.println("["+logBuilder.toString()+"]");
     writer.flush();
     int respCode = c.getResponseCode();
     System.out.println(respCode);
-    if ( respCode >= 400 ) {
-      try ( InputStream is = c.getErrorStream();
-            Scanner s = new Scanner(is) ) {
+    try (InputStream is = c.getInputStream() ){
+      if ( is != null ) try ( Scanner s = new Scanner(is)) {
         s.useDelimiter("\\A");
         if ( s.hasNext() ) System.out.println(s.next());
       }
-    } else
-    try (InputStream is = c.getInputStream();
-         Scanner s = new Scanner(is)) {
-      s.useDelimiter("\\A");
-      if ( s.hasNext() ) System.out.println(s.next());
+    } catch ( IOException e ) {
+      e.printStackTrace();
     }
-    
+    try (InputStream is = c.getErrorStream()) {
+      if ( is != null ) try ( Scanner s = new Scanner(is) ) {
+        s.useDelimiter("\\A");
+        if ( s.hasNext() ) System.out.println("Error message: "+s.next());
+      }
+    }
   }
 
   public enum UpdateType { UPDATE, DELETE, NONE; }
