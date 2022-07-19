@@ -17,11 +17,13 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
@@ -101,15 +103,24 @@ public class PODExporter {
       throw new IllegalArgumentException("podToken required in config.");
   }
 
+
+  public static String hexdigits = "0123456789abcdef";
   public void pushFileToPod( String filename, String contentType ) throws IOException {
-    String boundary = "----------------------------a3344f84e744";
+    Random generator = new Random();
+    StringBuilder boundaryBuilder = new StringBuilder();
+    boundaryBuilder.append("----------------------------");
+    for (int i = 0; i < 12; i++) boundaryBuilder.append(hexdigits.charAt(generator.nextInt(16)));
+    String boundary = boundaryBuilder.toString();
     final URL fullPath = new URL(this.podUrl);
     final HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();
     c.setRequestMethod("POST");
     c.setDoOutput(true);
     c.setDoInput(true);
-    c.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary);
+    c.setRequestProperty("User-Agent", "curl/7.29.0");
+    c.setRequestProperty("Host", getHostFromUrl(this.podUrl));
+    c.setRequestProperty("Accept", "*/*");
     c.setRequestProperty("Authorization", "Bearer "+this.podToken);
+    c.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary);
     StringBuilder logBuilder = new StringBuilder();
     DataOutputStream writer = new DataOutputStream(c.getOutputStream());
     logBuilder.append("--"+boundary+"\r\n");
@@ -132,7 +143,8 @@ public class PODExporter {
     writer.writeBytes("\r\n");
     logBuilder.append("--"+boundary+"\r\n");
     writer.writeBytes("--"+boundary+"\r\n");
-    System.out.println("["+logBuilder.toString()+"]");
+    if ( contentType.equals("text/plain") )
+      System.out.println("["+logBuilder.toString()+"]");
     writer.flush();
     int respCode = c.getResponseCode();
     System.out.println(respCode);
@@ -150,6 +162,14 @@ public class PODExporter {
         if ( s.hasNext() ) System.out.println("Error message: "+s.next());
       }
     }
+  }
+
+  static String getHostFromUrl(String url) {
+
+    String[] parts = url.split("/");
+    if ( parts.length > 2 )
+      return parts[2];
+    return null;
   }
 
   public enum UpdateType { UPDATE, DELETE, NONE; }
