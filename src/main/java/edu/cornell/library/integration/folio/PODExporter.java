@@ -116,19 +116,13 @@ public class PODExporter {
     c.setRequestMethod("POST");
     c.setDoOutput(true);
     c.setDoInput(true);
-    c.setRequestProperty("User-Agent", "curl/7.29.0");
-    c.setRequestProperty("Host", getHostFromUrl(this.podUrl));
+//    c.setRequestProperty("User-Agent", "curl/7.29.0");
+//    c.setRequestProperty("Host", getHostFromUrl(this.podUrl));
     c.setRequestProperty("Accept", "*/*");
     c.setRequestProperty("Authorization", "Bearer "+this.podToken);
     c.setRequestProperty("Content-Type","multipart/form-data;boundary="+boundary);
     StringBuilder logBuilder = new StringBuilder();
     DataOutputStream writer = new DataOutputStream(c.getOutputStream());
-    logBuilder.append("--"+boundary+"\r\n");
-    writer.writeBytes("--"+boundary+"\r\n");
-    logBuilder.append("Content-Disposition: form-data; name=\"upload[name]\"\r\n\r\n");
-    writer.writeBytes("Content-Disposition: form-data; name=\"upload[name]\"\r\n\r\n");
-    logBuilder.append("["+filename+"]\r\n");
-    writer.writeBytes("["+filename+"]\r\n");
     logBuilder.append("--"+boundary+"\r\n");
     writer.writeBytes("--"+boundary+"\r\n");
     logBuilder.append("Content-Disposition: form-data; name=\"upload[files][]\"; filename=\""
@@ -141,8 +135,8 @@ public class PODExporter {
     writer.write(FileUtils.readFileToByteArray(new File(filename)));
     logBuilder.append("\r\n");
     writer.writeBytes("\r\n");
-    logBuilder.append("--"+boundary+"\r\n");
-    writer.writeBytes("--"+boundary+"\r\n");
+    logBuilder.append("--"+boundary+"--\r\n");
+    writer.writeBytes("--"+boundary+"--\r\n");
     if ( contentType.equals("text/plain") )
       System.out.println("["+logBuilder.toString()+"]");
     writer.flush();
