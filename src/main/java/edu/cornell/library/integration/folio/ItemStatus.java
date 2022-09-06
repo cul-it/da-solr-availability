@@ -6,11 +6,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -45,7 +48,7 @@ public class ItemStatus {
       }
       for (Map<String,Object> loan : loans) {
         if ( ! ((Map<String,String>)loan.get("status")).get("name").equals("Open") ) continue;
-        this.due = Instant.parse(((String)loan.get("dueDate")).replace("+00:00","Z")).getEpochSecond();
+        this.due = isoDT.parse((String)loan.get("dueDate"),Instant::from).getEpochSecond();
       }
       if ( item.loanType.shortLoan ) this.shortLoan = true;
       return;
@@ -71,7 +74,7 @@ public class ItemStatus {
       Map<String,String> lastCheckIn = (Map<String,String>)rawItem.get("lastCheckIn");
       if ( ! lastCheckIn.containsKey("dateTime") )
         return;
-      Instant returned = Instant.parse(lastCheckIn.get("dateTime").replace("+00:00","Z"));
+      Instant returned = isoDT.parse(lastCheckIn.get("dateTime"),Instant::from);
       ServicePoint servicePoint = ServicePoints.getByUuid(item.location.primaryServicePoint);
       int lagMinutes = (servicePoint.shelvingLagTime == null)?4320:servicePoint.shelvingLagTime;
       Instant returnedUntil = returned.plusSeconds(lagMinutes*60);
@@ -84,9 +87,12 @@ public class ItemStatus {
     }
 
     if ( statusData.containsKey("date") )
-      this.date = Instant.parse(statusData.get("date").replace("+00:00","Z")).getEpochSecond();
+      this.date = isoDT.parse(statusData.get("date"),Instant::from).getEpochSecond();
   }
-  public ItemStatus(String status) { this.status = status; }
+  public ItemStatus(
+      @JsonProperty("status") String status) {
+    this.status = status;
+  }
 
   public static ItemStatus AVAIL = new ItemStatus("Available");
   static PreparedStatement loansByItem = null;
@@ -94,4 +100,5 @@ public class ItemStatus {
   static {
     mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
+  private static DateTimeFormatter isoDT = DateTimeFormatter.ISO_DATE_TIME;
 }

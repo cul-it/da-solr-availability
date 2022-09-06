@@ -5,7 +5,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.Normalizer;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -30,15 +34,20 @@ public class DownloadMARC {
           "Folio only contains Bibliographic MARC. Request for (%s, %s) invalid\n",type,hrid));
 
     String marc = null;
+    Timestamp moddate = null;
     try ( PreparedStatement bibByInstanceHrid = inventory.prepareStatement(
         "SELECT * FROM bibFolio WHERE instanceHrid = ?") ) {
       bibByInstanceHrid.setString(1, hrid);
       try ( ResultSet rs = bibByInstanceHrid.executeQuery() ) {
-        while (rs.next()) marc = rs.getString("content").replaceAll("\\s*\\n\\s*", " ");
+        while (rs.next()) {
+          marc = rs.getString("content").replaceAll("\\s*\\n\\s*", " ");
+          moddate = rs.getTimestamp("moddate");
+        }
       }
     }
     if ( marc != null ) {
       MarcRecord marcRec = jsonToMarcRec( marc );
+      if ( moddate != null ) marcRec.moddate = moddate;
       return marcRec;
     }
     return null;
@@ -90,11 +99,16 @@ public class DownloadMARC {
 						f.linkNumber = Integer.valueOf(sf.value.substring(4,6));
 						continue F;
 					}
-
+		if ( parsedResults.containsKey("metadata") ) {
+			Map<String,String> metadata = (Map<String,String>)parsedResults.get("metadata");
+			rec.moddate = Timestamp.from(isoDT.parse(metadata.get("updatedDate")
+					.replace("+0000",""),Instant::from));
+		}
 		return rec;
 	}
 	private static ObjectMapper mapper = new ObjectMapper();
 
+	private static DateTimeFormatter isoDT = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("Z"));
 	private static Pattern subfield6Pattern = Pattern.compile("[0-9]{3}-[0-9]{2}.*");
 
 }

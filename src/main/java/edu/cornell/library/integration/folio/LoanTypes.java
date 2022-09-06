@@ -42,7 +42,17 @@ public class LoanTypes {
     CIRC  ("Circulating"),
     NOCIRC("Non-circulating"),
     RES   ("Reserves"),
-    ILL   ("ILL LOAN");
+    ILL   ("ILL LOAN"),
+    ILL1WK("ILL LOAN 1 Week"),
+    ILL2WK("ILL LOAN 2 Weeks"),
+    ILL4WK("ILL LOAN 4 Weeks"),
+    ILL6WK("ILL LOAN 6 Weeks"),
+    EQ_X  ("Equipment extended loan"),
+    EQ_L  ("Equipment long term"),
+    EQ_S  ("Equipment short term"),
+    KEY_X ("Keys extended loan"),
+    KEY_L ("Keys long term"),
+    KEY_S ("Keys short term");
 
     final private String label;
     private ExpectedLoanType(String label) { this.label = label; }
@@ -62,7 +72,9 @@ public class LoanTypes {
       ExpectedLoanType.HOUR4,
       ExpectedLoanType.HOUR5,
       ExpectedLoanType.HOUR8,
-      ExpectedLoanType.RES);
+      ExpectedLoanType.RES,
+      ExpectedLoanType.EQ_S,
+      ExpectedLoanType.KEY_S);
 
   private static final Map<String,LoanType> _byUuid = new HashMap<>();
   private static final Map<String,LoanType> _byName = new HashMap<>();
@@ -78,6 +90,11 @@ public class LoanTypes {
       this.shortLoan = shortLoan;
     }
 
+    public LoanType(@JsonProperty("id") String uuid,@JsonProperty("name") String name) {
+      this.uuid = uuid;
+      this.name = name;
+      this.shortLoan = false;
+    }
   }
 
   private static void populateLoanTypes( OkapiClient okapi ) throws IOException {

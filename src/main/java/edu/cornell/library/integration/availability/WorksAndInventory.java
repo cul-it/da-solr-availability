@@ -37,21 +37,21 @@ public class WorksAndInventory {
       " (bib_id,record_date,linking_mod_date,title,oclc,format,pub_date,language,edition,online,print,active)"+
       " VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?)" ;
   private final static String updateBRS = "UPDATE bibRecsSolr SET record_date = ? WHERE bib_id = ?";
-  private final static String selectB2W = "SELECT * FROM bib2work WHERE bib_id = ? AND active = 1";
+  private final static String selectB2W = "SELECT * FROM bib2work WHERE hrid = ? AND active = 1";
   private final static String selectB2W2 =
-      "SELECT bib2work.bib_id "+
+      "SELECT bib2work.hrid "+
       "  FROM bib2work, processedMarcData, bibRecsSolr"+
       " WHERE work_id = ?"+
-      "   AND bib2work.bib_id = processedMarcData.bib_id"+
+      "   AND bib2work.hrid = processedMarcData.hrid"+
       "   AND recordtype_solr_fields LIKE '%type: Catalog%'"+
-      "   AND bib2work.bib_id = bibRecsSolr.bib_id"+
+      "   AND bib2work.hrid = bibRecsSolr.bib_id"+
       "   AND bibRecsSolr.active = 1";
   private final static String insertB2W =
-      "REPLACE INTO bib2work ( bib_id, oclc_id, work_id, active) VALUES (?,?,?,1)";
+      "REPLACE INTO bib2work ( hrid, oclc_id, work_id, active) VALUES (?,?,?,1)";
   private final static String selectW2O = "SELECT oclc_id, work_id from workids.work2oclc WHERE oclc_id = ?";
   private final static String updateB2W =
       "UPDATE bib2work SET active = 0"+
-      " WHERE bib_id = ? AND oclc_id = ? AND work_id = ?";
+      " WHERE hrid = ? AND oclc_id = ? AND work_id = ?";
   private final static String insertAvailQ = "INSERT INTO availabilityQueue (hrid, priority, cause, record_date) VALUES (?,?,?,NOW())";
   private final static String selectMRS = "SELECT mfhd_id, record_date FROM mfhdRecsSolr WHERE bib_id = ?";
   private final static String updateMRS = "REPLACE INTO mfhdRecsSolr (bib_id, mfhd_id, record_date) VALUES (?,?,?)";
@@ -61,12 +61,12 @@ public class WorksAndInventory {
   public static void updateInventory(Connection inventory, SolrInputDocument doc)
       throws SQLException, JsonParseException, JsonMappingException, IOException {
 
-    int bibId = Integer.valueOf( ((String) doc.getFieldValue("id")).replaceAll("[^\\d]", "") );
+    String bibId = ((String) doc.getFieldValue("id")).replaceAll("[^\\d]", "");
     Versions recordDates = getRecordDates( doc );
 
     // Get old and new linking metadata (metadata needed for "other forms" links
     if (! pstmts.containsKey("selectBRS")) pstmts.put("selectBRS", inventory.prepareStatement(selectBRS));
-    pstmts.get("selectBRS").setInt(1,bibId);
+    pstmts.get("selectBRS").setInt(1,Integer.valueOf(bibId));
 
     boolean newBib;
     LinkingMetadata oldMeta = null;
@@ -82,7 +82,7 @@ public class WorksAndInventory {
 
     // Get old and new OCLC work associations
     if (! pstmts.containsKey("selectB2W")) pstmts.put("selectB2W", inventory.prepareStatement(selectB2W));
-    pstmts.get("selectB2W").setInt(1,bibId);
+    pstmts.get("selectB2W").setString(1,bibId);
 
     Set<WorkLink> oldWorks = new HashSet<>();
     try (ResultSet rs = pstmts.get("selectB2W").executeQuery()) {
@@ -110,36 +110,35 @@ public class WorksAndInventory {
 
   public static void deleteWorkRelationships ( Connection inventory, List<String> bibIds ) throws SQLException {
     try ( PreparedStatement getWorkLinkedBibs = inventory.prepareStatement
-            ("SELECT o.bib_id FROM bib2work as t, bib2work as o"+
-             " WHERE t.bib_id = ?"+
+            ("SELECT o.hrid FROM bib2work as t, bib2work as o"+
+             " WHERE t.hrid = ?"+
              "   AND t.work_id = o.work_id"+
-             "   AND t.bib_id != o.bib_id"+
+             "   AND t.hrid != o.hrid"+
              "   AND o.active = 1" );
-        PreparedStatement deactiveB2W = inventory.prepareStatement("UPDATE bib2work SET active = 0 WHERE bib_id = ?") ){
+        PreparedStatement deactiveB2W = inventory.prepareStatement("UPDATE bib2work SET active = 0 WHERE hrid = ?") ){
 
       for (String bibString : bibIds) {
-        Integer bibInt = Integer.valueOf(bibString);
-        Set<Integer> connectedBibs = new HashSet<>();
-        getWorkLinkedBibs.setInt(1, bibInt);
+        Set<String> connectedBibs = new HashSet<>();
+        getWorkLinkedBibs.setString(1, bibString);
         try ( ResultSet rs = getWorkLinkedBibs.executeQuery() ) {
           while ( rs.next() ) {
-            connectedBibs.add( rs.getInt(1) );
+            connectedBibs.add( rs.getString(1) );
           }
         }
-        deactiveB2W.setInt(1, bibInt);
+        deactiveB2W.setString(1, bibString);
         deactiveB2W.addBatch();
-        insertConnectedBibsToAvailQueue( connectedBibs, bibInt, inventory );
+        insertConnectedBibsToAvailQueue( connectedBibs, bibString, inventory );
       }
       deactiveB2W.executeBatch();
     }
     
   }
 
-  private static void updateHoldingsInInventory(int bibId, Versions recordDates, Connection inventory) throws SQLException {
+  private static void updateHoldingsInInventory(String bibId, Versions recordDates, Connection inventory) throws SQLException {
     if (! pstmts.containsKey("selectMRS")) pstmts.put("selectMRS", inventory.prepareStatement(selectMRS));
 
     Map<Integer,Timestamp> previousHoldings = new HashMap<>();
-    pstmts.get("selectMRS").setInt(1, bibId);
+    pstmts.get("selectMRS").setInt(1, Integer.valueOf(bibId));
     try ( ResultSet rs = pstmts.get("selectMRS").executeQuery()) {
       while (rs.next())
         previousHoldings.put(rs.getInt(1), rs.getTimestamp(2));
@@ -160,7 +159,7 @@ public class WorksAndInventory {
         if ( ! update ) continue;
   
         if (! pstmts.containsKey("updateMRS")) pstmts.put("updateMRS", inventory.prepareStatement(updateMRS));
-        pstmts.get("updateMRS").setInt(1, bibId);
+        pstmts.get("updateMRS").setInt(1, Integer.valueOf(bibId));
         pstmts.get("updateMRS").setInt(2, mfhdId);
         pstmts.get("updateMRS").setTimestamp(3, e.getValue());
         pstmts.get("updateMRS").executeUpdate();
@@ -168,7 +167,7 @@ public class WorksAndInventory {
 
     if ( previousHoldings.isEmpty()) return;
     if (! pstmts.containsKey("deleteMRS")) pstmts.put("deleteMRS", inventory.prepareStatement(deleteMRS));
-    pstmts.get("deleteMRS").setInt(1, bibId);
+    pstmts.get("deleteMRS").setInt(1, Integer.valueOf(bibId));
     for (Integer mfhdId : previousHoldings.keySet()) {
       pstmts.get("deleteMRS").setInt(2, mfhdId);
       pstmts.get("deleteMRS").addBatch();
@@ -176,21 +175,21 @@ public class WorksAndInventory {
     pstmts.get("deleteMRS").executeBatch();
   }
 
-  private static void insertWorksFieldstoSolrDoc( Integer thisBibId, Set<WorkLink> works, SolrInputDocument doc, Connection inventory )
+  private static void insertWorksFieldstoSolrDoc( String thisBibId, Set<WorkLink> works, SolrInputDocument doc, Connection inventory )
       throws SQLException, JsonGenerationException, JsonMappingException, IOException {
 
     if (works.isEmpty()) return;
 
-    Set<Integer> bibIds = getBibsForWorks( works, inventory );
+    Set<String> bibIds = getBibsForWorks( works, inventory );
     bibIds.remove(thisBibId);
     if (bibIds.isEmpty()) return;
 
-    for( Integer bibId : bibIds ) {
-      pstmts.get("selectBRS").setInt(1,bibId);
+    for( String bibId : bibIds ) {
+      pstmts.get("selectBRS").setInt(1,Integer.valueOf(bibId));
       try ( ResultSet rs = pstmts.get("selectBRS").executeQuery() ) {
         while (rs.next()) {
           Map<String,Object> json = new HashMap<>();
-          json.put("bibid", bibId);
+          json.put("bibid", Integer.valueOf(bibId));
           String s = rs.getString("title");    if (s != null) json.put("title", s);
                  s = rs.getString("format");   if (s != null) json.put("format", s);
                  s = rs.getString("pub_date"); if (s != null) json.put("pub_date", s);
@@ -211,7 +210,7 @@ public class WorksAndInventory {
   }
 
   private static void triggerOtherWorksReindex(
-      int bibId, Set<WorkLink> works, Set<WorkLink> oldWorks, boolean linkingUpdate, Connection inventory) throws SQLException {
+      String bibId, Set<WorkLink> works, Set<WorkLink> oldWorks, boolean linkingUpdate, Connection inventory) throws SQLException {
 
     // if updates to linking, trigger all works.
     if (linkingUpdate)
@@ -229,7 +228,7 @@ public class WorksAndInventory {
     if (works.isEmpty()) return;
 
     // identify bibs for selected works
-    Set<Integer> bibs = getBibsForWorks( works, inventory );
+    Set<String> bibs = getBibsForWorks( works, inventory );
     bibs.remove(bibId);
 
     if (bibs.isEmpty()) return;
@@ -237,38 +236,38 @@ public class WorksAndInventory {
     insertConnectedBibsToAvailQueue( bibs, bibId, inventory );
   }
 
-  private static void insertConnectedBibsToAvailQueue( Set<Integer> bibIds, int origBib, Connection inventory) throws SQLException {
+  private static void insertConnectedBibsToAvailQueue( Set<String> bibs, String origBib, Connection inventory) throws SQLException {
     if (! pstmts.containsKey("insertAvailQ")) pstmts.put("insertAvailQ", inventory.prepareStatement(insertAvailQ));
     pstmts.get("insertAvailQ").setInt(2, 7);
     pstmts.get("insertAvailQ").setString(3, "Title Link from b"+origBib);
-    for ( Integer bib : bibIds ) {
-      pstmts.get("insertAvailQ").setInt(1, bib);
+    for ( String bib : bibs ) {
+      pstmts.get("insertAvailQ").setString(1, bib);
       pstmts.get("insertAvailQ").addBatch();
     }
     pstmts.get("insertAvailQ").executeBatch();
 
   }
 
-  private static Set<Integer> getBibsForWorks(Set<WorkLink> works, Connection inventory) throws SQLException {
-    Set<Integer> bibs = new HashSet<>();
+  private static Set<String> getBibsForWorks(Set<WorkLink> works, Connection inventory) throws SQLException {
+    Set<String> bibs = new HashSet<>();
     if (! pstmts.containsKey("selectB2W2")) pstmts.put("selectB2W2", inventory.prepareStatement(selectB2W2));
     for ( WorkLink w : works ) {
       pstmts.get("selectB2W2").setLong(1, w.workId);
       try ( ResultSet rs = pstmts.get("selectB2W2").executeQuery() ) {
         while (rs.next())
-          bibs.add(rs.getInt(1));
+          bibs.add(rs.getString(1));
       }
     }
     return bibs;
   }
 
-  private static void pushWorksChanges(int bibId, Set<WorkLink> works, Set<WorkLink> oldWorks, Connection inventory) throws SQLException {
+  private static void pushWorksChanges(String bibId, Set<WorkLink> works, Set<WorkLink> oldWorks, Connection inventory) throws SQLException {
 
     // De-activate old works associations
     for ( WorkLink w : oldWorks )
       if ( ! works.contains(w)) {
         if (! pstmts.containsKey("updateB2W")) pstmts.put("updateB2W", inventory.prepareStatement(updateB2W));
-        pstmts.get("updateB2W").setInt(1, bibId);
+        pstmts.get("updateB2W").setString(1, bibId);
         pstmts.get("updateB2W").setLong(2, w.oclcId);
         pstmts.get("updateB2W").setLong(3, w.workId);
         pstmts.get("updateB2W").executeUpdate();
@@ -278,27 +277,27 @@ public class WorksAndInventory {
     for ( WorkLink w : works )
       if ( ! oldWorks.contains(w)) {
         if (! pstmts.containsKey("insertB2W")) pstmts.put("insertB2W", inventory.prepareStatement(insertB2W));
-        pstmts.get("insertB2W").setInt(1, bibId);
+        pstmts.get("insertB2W").setString(1, bibId);
         pstmts.get("insertB2W").setLong(2, w.oclcId);
         pstmts.get("insertB2W").setLong(3, w.workId);
         pstmts.get("insertB2W").executeUpdate();
       }
   }
 
-  private static void updateIndexDate(int bibId, Timestamp recordDate, Connection inventory) throws SQLException {
+  private static void updateIndexDate(String bibId, Timestamp recordDate, Connection inventory) throws SQLException {
 
     if (! pstmts.containsKey("updateBRS")) pstmts.put("updateBRS", inventory.prepareStatement(updateBRS));
     pstmts.get("updateBRS").setTimestamp(1, recordDate);
-    pstmts.get("updateBRS").setInt(2, bibId);
+    pstmts.get("updateBRS").setInt(2, Integer.valueOf(bibId));
     pstmts.get("updateBRS").executeUpdate();
   }
 
-  private static void pushLinkingUpdate(LinkingMetadata meta, int bibId, Timestamp recordDate, Connection inventory) throws SQLException {
+  private static void pushLinkingUpdate(LinkingMetadata meta, String bibId, Timestamp recordDate, Connection inventory) throws SQLException {
 
     if (! pstmts.containsKey("replaceBRS")) pstmts.put("replaceBRS", inventory.prepareStatement(replaceBRS));
     @SuppressWarnings("resource")
     PreparedStatement p = pstmts.get("replaceBRS");
-    p.setInt(1, bibId);
+    p.setInt(1, Integer.valueOf(bibId));
     p.setTimestamp(2, recordDate);
     p.setString(3, meta.title);
     p.setString(4, meta.oclc);

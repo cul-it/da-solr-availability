@@ -128,14 +128,20 @@ public class CallNumberTools {
     return callnum;
   }
 
-  public static boolean hasMathCallNumber(Set<String> callNumbers) throws IOException {
+  public static List<String> getCollectionFlags(Set<String> callNumbers)
+      throws IOException {
+    List<String> flags = new ArrayList<>();
 
+    // Math Library
     for ( String callNumber : callNumbers ) {
       String sortCall = CallNumberTools.sortForm(callNumber);
       if (! sortCall.startsWith("qa")) continue;
 //    exclude cs ranges: QA 75-76, QA 155.7, QA 267-268, QA276.4, QA 402.3, QA 402.35, QA 402.37
       String number = CallNumberTools.getNumberAfterFirstLetters(sortCall);
-      if (number == null || number.isEmpty()) return true; //include plain QA call numbers
+      if (number == null || number.isEmpty()) { //include plain QA call numbers
+        flags.add("Math Library");
+        break;
+      }
       Integer i = null;
       String decimal = null;
       if (number.contains(".")) {
@@ -150,9 +156,41 @@ public class CallNumberTools {
       if ( i == 276 && decimal != null && decimal.startsWith("4") ) continue;
       if ( i == 402 && decimal != null &&
           ( decimal.equals("3") || decimal.equals("35") || decimal.equals("37") )) continue;
-      return true;
+      flags.add("Math Library");
+      break;
     }
-    return false;
+
+    // Engineering Library T, TA- TP, QA 75-76, QA267-268, QC320-999, QE
+    ENG: for ( String callNumber : callNumbers ) {
+      String[] callParts = CallNumberTools.sortForm(callNumber).split(" ");
+      if ( callParts.length == 0 ) continue;
+      String letters = callParts[0].toUpperCase();
+      switch (letters) {
+      case "T":  case "TA": case "TB": case "TC": case "TD": case "TE": case "TF": case "TG":
+      case "TH": case "TI": case "TJ": case "TK": case "TL": case "TM": case "TN": case "TO":
+      case "TP": case "QE":
+        flags.add("Engineering Library");
+        break ENG;
+      case "QA": case "QC":
+        break;
+      default:
+        continue;
+      }
+      if ( callParts.length == 1 ) continue;
+      String number = callParts[1];
+      Integer i = null;
+      if (number.contains(".")) {
+        int dotPos = number.indexOf('.');
+        i = Integer.valueOf(number.substring(0, dotPos));
+      } else
+        i = Integer.valueOf(number);
+      if ( ( letters.equals("QA") && ( i == 75 || i == 76 || i == 267 || i == 268 ) ) 
+          || ( letters.equals("QC") &&  i >= 320 && i <= 999 ) ) {
+        flags.add("Engineering Library");
+        break;
+      }
+    }
+    return flags;
   }
 
 }

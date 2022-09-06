@@ -16,6 +16,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -34,6 +35,14 @@ public class Items {
   static ReferenceData materialTypes = null;
   static ReferenceData itemNoteTypes = null;
 
+  public static void initialize(OkapiClient okapi, Locations locs) throws IOException {
+    if (locations == null) {
+      locations = locs;
+      materialTypes = new ReferenceData( okapi, "/material-types", "name");
+      itemNoteTypes = new ReferenceData( okapi, "/item-note-types", "name");
+    }
+  }
+
   public static ItemList retrieveItemsForHoldings(
       OkapiClient okapi, Connection inventory, String bibId, HoldingSet holdings)
           throws SQLException, IOException {
@@ -46,7 +55,10 @@ public class Items {
     Map<Integer,String> dueDates = new TreeMap<>();
     Map<Integer,String> requests = new TreeMap<>();
     if (itemByHolding == null)
-      itemByHolding = inventory.prepareStatement("SELECT * FROM itemFolio WHERE holdingHrid = ?");
+      itemByHolding = inventory.prepareStatement(
+          "SELECT i.id, i.content, s.sequence"+
+          "  FROM itemFolio i LEFT JOIN itemSequence s ON i.hrid = s.hrid" +
+          " WHERE i.holdingHrid = ?");
     for (String holdingId : holdings.getUuids()) {
       Holding h = holdings.get(holdingId);
       if (h.online != null && h.online) continue;
@@ -78,14 +90,14 @@ public class Items {
   }
   private static PreparedStatement itemByHolding = null;
 
-  static Item retrieveItemByBarcode ( Connection inventory, String barcode )
+  static Item retrieveItemByBarcode ( Connection inventory, String barcode, Holding holding )
       throws SQLException, JsonParseException, JsonMappingException, IOException {
     try ( PreparedStatement pstmt = inventory.prepareStatement(
         "SELECT * FROM itemFolio WHERE barcode = ?")) {
       pstmt.setString(1, barcode);
       try ( ResultSet rs = pstmt.executeQuery() ) {
         while (rs.next()) {
-          Item i = new Item(inventory, mapper.readValue(rs.getString("content"),Map.class),null);
+          Item i = new Item(inventory, mapper.readValue(rs.getString("content"),Map.class),holding);
           i.id = rs.getString("id");
           return i;
         }
@@ -205,6 +217,21 @@ public class Items {
             barcodes.add(i.barcode);
       return barcodes;
     }
+
+    public Object getStatCodes(ReferenceData statCodesRefData) {
+      Set<String> statcodes = new HashSet<>();
+      for (TreeSet<Item> items : this.items.values())
+        for ( Item i : items) {
+          if ( i.rawFolioItem.containsKey("statisticalCodeIds")) {
+            List<String> codeUuids = (List<String>)i.rawFolioItem.get("statisticalCodeIds");
+            for (String uuid : codeUuids) {
+              String code = statCodesRefData.getName(uuid);
+              if ( code != null ) statcodes.add("item_"+code);
+            }
+          }
+        }
+      return statcodes;
+    }
   }
 
   public static class Item implements Comparable<Item> {
@@ -219,17 +246,20 @@ public class Items {
     @JsonProperty("chron")     public final String chron;
     @JsonProperty("location")  public Location location = null;
     @JsonProperty("permLocation") public String permLocation = null;
-    @JsonProperty("loanType")  public LoanType loanType;
-    @JsonProperty("matType")   public Map<String,String> matType;
-    @JsonProperty("rmc")       public Map<String,String> rmc;
+    @JsonProperty("loanType")  public LoanType loanType = null;
+    @JsonProperty("matType")   public Map<String,String> matType = null;
+    @JsonProperty("rmc")       public Map<String,String> rmc = null;
     @JsonProperty("status")    public ItemStatus status;
     @JsonProperty("empty")     public Boolean empty;
     @JsonProperty("date")      public Integer date;
     @JsonProperty("active")    public boolean active = true;
 
+    @JsonIgnore public Map<String,Object> rawFolioItem = null;
+
     Item(Connection inventory, Map<String,Object> raw, Holding holding)
         throws SQLException, IOException {
 
+      this.rawFolioItem = raw;
       this.id = (String)raw.get("id");
       this.hrid = (String)raw.get("hrid");
       String barcode = (String)raw.get("barcode");
@@ -241,10 +271,10 @@ public class Items {
       this.enumeration = (String)raw.get("enumeration");
       this.chron = (String)raw.get("chronology");
 
-      if ( raw.containsKey("effectiveLocationId") )
-        this.location = locations.getByUuid( (String)raw.get("effectiveLocationId") );
-      else if ( raw.containsKey("temporaryLocationId") )
+      if ( raw.containsKey("temporaryLocationId") )
         this.location = locations.getByUuid( (String)raw.get("temporaryLocationId") );
+      else if ( raw.containsKey("permanentLocationId") )
+        this.location = locations.getByUuid( (String)raw.get("permanentLocationId") );
       else if (holding != null)
         this.location = holding.location;
       if ( holding != null ) {
@@ -318,16 +348,16 @@ public class Items {
     }
 
     Item(
-        @JsonProperty("id")        String id,
-        @JsonProperty("hrid")      String hrid,
-        @JsonProperty("copy")      String copy,
-        @JsonProperty("call")      String callNumber,
-        @JsonProperty("enum")      String enumeration,
-        @JsonProperty("location")  Location location,
-        @JsonProperty("permLocation") String permLocation,
-        @JsonProperty("loanType")  LoanType loanType,
-        @JsonProperty("matType")   Map<String,String> matType,
-        @JsonProperty("status")    ItemStatus status
+        String id,
+        String hrid,
+        String copy,
+        String callNumber,
+        String enumeration,
+        Location location,
+        String permLocation,
+        LoanType loanType,
+        Map<String,String> matType,
+        ItemStatus status
         ) {
       this.id = id;
       this.hrid = hrid;

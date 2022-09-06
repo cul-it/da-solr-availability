@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.LoanTypes.ExpectedLoanType;
 import edu.cornell.library.integration.folio.Locations.Location;
+import edu.cornell.library.integration.marc.MarcRecord;
 
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Holding {
@@ -55,6 +56,7 @@ public class Holding {
 
 
   @JsonIgnore public Map<String,Object> rawFolioHolding = null;
+  @JsonIgnore public MarcRecord marc = null;
   @JsonIgnore public List<String> donors = null;
   @JsonIgnore public String callNumberSuffix = null;
   @JsonIgnore public boolean lcCallNum = false;
@@ -90,13 +92,19 @@ public class Holding {
         this.location = l;
     }
 
+    boolean mainCallNumberPresent = false;
     if ( raw.containsKey("callNumberSuffix") )
       this.callNumberSuffix = (String) raw.get("callNumberSuffix");
     List<String> callNumberParts = new ArrayList<>();
     if ( raw.containsKey("callNumberPrefix") )
       callNumberParts.add((String)raw.get("callNumberPrefix"));
-    if ( raw.containsKey("callNumber") )
-      callNumberParts.add((String)raw.get("callNumber"));
+    if ( raw.containsKey("callNumber") ) {
+      String callNumber = ((String)raw.get("callNumber")).trim();
+      if ( ! callNumber.isEmpty() && ! callNumber.equalsIgnoreCase("no call number")) {
+        callNumberParts.add(callNumber);
+        mainCallNumberPresent = true;
+      }
+    }
     if ( this.callNumberSuffix != null )
       callNumberParts.add(this.callNumberSuffix);
     if ( ! callNumberParts.isEmpty() ) {
@@ -106,7 +114,7 @@ public class Holding {
         if (! call.isEmpty() ) this.call = call;
       }
     }
-    if ( raw.containsKey("callNumberTypeId") ) {
+    if ( raw.containsKey("callNumberTypeId") && mainCallNumberPresent ) {
       String type = callNumberTypes.getName((String)raw.get("callNumberTypeId"));
       if ( type != null &&
           ( type.equals("Library of Congress classification") || type.equals("LC Modified") ) )
@@ -125,9 +133,9 @@ public class Holding {
 
         if ( type.equals("Bound with item data") ) {
           if (this.boundWiths == null)
-            this.boundWiths = BoundWith.fromNote(inventory,(String)note.get("note"));
+            this.boundWiths = BoundWith.fromNote(inventory,(String)note.get("note"),this);
           else
-            this.boundWiths.putAll(BoundWith.fromNote(inventory,(String)note.get("note")));
+            this.boundWiths.putAll(BoundWith.fromNote(inventory,(String)note.get("note"),this));
           continue;
         }
 

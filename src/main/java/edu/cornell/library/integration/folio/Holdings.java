@@ -12,9 +12,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -191,42 +193,7 @@ public class Holdings {
     public String toJson() throws JsonProcessingException {
       return mapper.writeValueAsString(this.holdings);
     }
-/*TODO
-    public void getRecentIssues(Connection voyager, Connection inventory, Integer bibId) throws SQLException {
-      Map<Integer,List<String>> issues = RecentIssues.getByBibId(voyager, bibId);
-      for (Entry<Integer,List<String>> e : issues.entrySet())
-        if (this.holdings.containsKey(e.getKey()))
-          this.holdings.get(e.getKey()).recentIssues = e.getValue();
 
-      if ( inventory == null ) return;
-
-      if ( issues.isEmpty() ) {
-        try (PreparedStatement delStmt = inventory.prepareStatement("DELETE FROM recentIssues WHERE bib_id = ?")) {
-          delStmt.setInt(1, bibId);
-          delStmt.executeUpdate();
-        }
-        return;
-      }
-
-      String json;
-      try { json = mapper.writeValueAsString(issues);  } catch (JsonProcessingException e) { e.printStackTrace(); return; }
-      String oldJson = null;
-      try (PreparedStatement selStmt = inventory.prepareStatement("SELECT json FROM recentIssues WHERE bib_id = ?")) {
-        selStmt.setInt(1, bibId);
-        try (ResultSet rs = selStmt.executeQuery()) {
-          while (rs.next()) oldJson = rs.getString(1);
-        }
-      }
-
-      if ( json.equals(oldJson) ) return;
-
-      try (PreparedStatement updStmt = inventory.prepareStatement("REPLACE INTO recentIssues (bib_id, json) VALUES (?,?)")) {
-        updStmt.setInt(1, bibId);
-        updStmt.setString(2, json);
-        updStmt.executeUpdate();
-      }
-    }
-*/
     public boolean hasRecent() {
       for ( Holding h : this.holdings.values() )
         if ( h.recentIssues != null )
@@ -244,17 +211,36 @@ public class Holdings {
       }
       return barcodes;
     }
+
+    public Set<String> getStatCodes(ReferenceData statCodesReferenceData) {
+      Set<String> statcodes = new TreeSet<>();
+
+      for (Holding h : this.holdings.values()) {
+        if ( h.rawFolioHolding.containsKey("statisticalCodeIds") ) {
+          List<String> codeUuids = (List<String>)h.rawFolioHolding.get("statisticalCodeIds");
+          for ( String uuid : codeUuids ) {
+            String code= statCodesReferenceData.getName(uuid);
+            if ( code != null ) statcodes.add("holding_"+code);
+          }
+        }
+      }
+      return statcodes;
+    }
   }
 
   public static void mergeAccessLinksIntoHoldings(HoldingSet holdings, Collection<Object> linkJsons)
       throws IOException {
 
     Holding onlineHolding = null;
+    Holding suppressedOnlineHolding = null;
     Holding hathiHolding = null;
 
     for ( Holding h : holdings.values() )
-      if ( h.online != null && h.online )
-        onlineHolding = h;
+      if ( h.online != null && h.online ) {
+        if ( h.active ) onlineHolding = h; else suppressedOnlineHolding = h;
+      }
+    if ( onlineHolding == null && suppressedOnlineHolding != null )
+      onlineHolding = suppressedOnlineHolding;
     for ( Object linkJson : linkJsons ) {
       Link l = Link.fromJson((String)linkJson);
       if (l.desc != null && (l.url.contains("hathitrust") || l.url.contains("handle.net/2027/"))) {

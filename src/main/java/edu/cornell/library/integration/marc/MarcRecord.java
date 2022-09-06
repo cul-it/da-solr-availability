@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,6 +43,7 @@ public class MarcRecord implements Comparable<MarcRecord> {
   public RecordType type;
   public String id;
   public String bib_id;
+  public Timestamp moddate = null;
   public TreeSet<MarcRecord> marcHoldings = null;
   public List<Map<String, Object>> folioHoldings = null;
   public Map<String, Object> instance = null;
