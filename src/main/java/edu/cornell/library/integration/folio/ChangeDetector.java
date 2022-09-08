@@ -21,7 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ChangeDetector {
 
   public static Map<String,Set<Change>> detectChangedInstances(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+      Connection inventory, OkapiClient okapi, Timestamp since )
+          throws SQLException, IOException, InterruptedException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -95,18 +96,15 @@ public class ChangeDetector {
         try {
           marc = okapi.query(srsQuery).replaceAll("\\s*\\n\\s*", " ");
         } catch (IOException e) {
-          if ( e.getMessage().equals("Not Found") ) {
-            // If MARC not found, wait 3 seconds and try one more time.
-            System.out.printf("MARC Record Not Found in SRS: %s %s\n",hrid,id);
-            try {
-              marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
-                  .replaceAll("\\s*\\n\\s*", " ");
-            } catch (IOException e2) {
-              if ( e2.getMessage().equals("Not Found") ) {
-                System.out.printf("MARC Record Not Found in SRS: %s %s\n",hrid,id);
-                continue INSTANCE;
-              }
-            }
+          // If MARC not found, wait 3 seconds and try one more time.
+          System.out.printf("Error retrieving MARC from SRS (%s): %s %s\n",e.getMessage(),hrid,id);
+          Thread.sleep(3_000);
+          try {
+            marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
+                .replaceAll("\\s*\\n\\s*", " ");
+          } catch (IOException e2) {
+            System.out.printf("Error retrieving MARC from SRS (%s): %s %s\n",e2.getMessage(),hrid,id);
+            continue INSTANCE;
           }
         }
         if ( getPreviousBib == null )
