@@ -117,7 +117,7 @@ public class ChangeDetector {
 
         Matcher m = modDateP.matcher(marc);
         Timestamp marcTimestamp = (m.matches())
-            ? Timestamp.from(Instant.parse(m.group(1).replace("+0000","Z"))): null;
+            ? Timestamp.from(Instant.parse(m.group(1).replace("+00:00","Z"))): null;
         if ( replaceBib == null )
           replaceBib = inventory.prepareStatement(
               "REPLACE INTO bibFolio (instanceHrid,moddate,content) VALUES (?,?,?)");
