@@ -70,6 +70,8 @@ public class MonitorFolioChanges {
             queueAvail, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedLoans( inventory, okapi, since ),
             queueAvail, getTitle, getUserChangeTotals );
+        queueForIndex( ChangeDetector.detectChangedRequests( inventory, okapi, since ),
+            queueAvail, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedOrderLines( inventory, okapi, since ),
             queueAvail, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedOrders( inventory, okapi, since ),

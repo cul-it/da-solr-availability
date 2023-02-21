@@ -60,14 +60,23 @@ public class OpenOrder {
                 case "Cancelled":
                   note = "Order cancelled"; break;
                 case "Awaiting Receipt":
-                  Timestamp approvalDate = Timestamp.from(
-                      isoDT.parse(((String)order.get("approvalDate")),Instant::from));
+                  Timestamp approvalDate = null;
+                  if (order.containsKey("approvalDate"))
+                    approvalDate = Timestamp.from(
+                        isoDT.parse(((String)order.get("approvalDate")),Instant::from));
                   int quantity = (int)location.get("quantity");
-                  if ( quantity == 1 )
-                    note = "On order as of "+format.format(approvalDate);
-                  else
-                    note = String.format(
-                        "%d copies ordered as of %s", quantity, format.format(approvalDate));
+                  if ( quantity == 1 ) {
+                    if ( approvalDate == null ) 
+                      note = "On order";
+                    else
+                      note = "On order as of "+format.format(approvalDate);
+                  } else {
+                    if ( approvalDate == null ) 
+                      note = String.format("%d copies ordered", quantity);
+                    else
+                      note = String.format(
+                          "%d copies ordered as of %s", quantity, format.format(approvalDate));
+                  }
                   break;
                 default:
                   System.out.println("Unexpected pol receipt status: "+receiptStatus);
