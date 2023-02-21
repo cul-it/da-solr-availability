@@ -29,9 +29,7 @@ public class PODFullExport {
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("inventoryDBUrl"),
         prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass")); ){
 
-      OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),
-          prop.getProperty("okapiTenantFolio"));
+      OkapiClient okapi = new OkapiClient(prop,"Folio");
 
       PODExporter exporter = new PODExporter( inventory, okapi , prop);
 

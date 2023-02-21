@@ -40,10 +40,7 @@ public class LocationMonitor {
             "DELETE FROM locationFolio WHERE code = ?");
         ){
 
-      OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),
-          prop.getProperty("okapiTokenFolio"),
-          prop.getProperty("okapiTenantFolio"));
+      OkapiClient okapi = new OkapiClient(prop,"Folio");
 
       Map<String,String> cachedLocations = new HashMap<>();
       try (ResultSet rs = selectAllStmt.executeQuery()) {
