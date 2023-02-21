@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -166,11 +167,21 @@ public final class Locations {
     }
   }
 
+  public static enum Sort { CODE, UUID }
+
+  public static Collection<Location> allLocations(Sort sortOrder) {
+    switch (sortOrder) {
+    case CODE: return _byCode.values();
+    case UUID: return _byUuid.values();
+    }
+    return null;
+  }
+
   // PRIVATE RESOURCES
 
-  private static final Map<String, Location> _byCode = new HashMap<>();
-  private static final Map<String, Location> _byUuid = new HashMap<>();
-  private static final Map<Location, List<FacetMapRule>> _facetsByLocation = new HashMap<>();
+  private static final Map<String, Location> _byCode = new TreeMap<>();
+  private static final Map<String, Location> _byUuid = new TreeMap<>();
+  private static final Map<Location, List<FacetMapRule>> _facetsByLocation = new TreeMap<>();
 
   private static void populateLocationMaps(final OkapiClient okapi) throws IOException {
     Map<String,Map<String,String>> libraryPatterns = loadPatternMap("library_names.txt");
@@ -221,7 +232,7 @@ public final class Locations {
         String[] parts = site.split("\\t", 3);
         if (parts.length < 2)
           continue;
-        Map<String,String> l = new HashMap<>();
+        Map<String,String> l = new TreeMap<>();
         l.put(parts[1],(parts.length == 2)?null:parts[2]);
         patternMap.put(parts[0].toLowerCase(), l);
       }

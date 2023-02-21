@@ -109,9 +109,7 @@ public class ProcessAvailabilityQueue {
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
-      OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),
-          prop.getProperty("okapiTenantFolio"));
+      OkapiClient okapi = new OkapiClient(prop,"Folio");
       Locations locations = new Locations(okapi);
       ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
       ReferenceData callNumberTypes = new ReferenceData(okapi, "/call-number-types","name");

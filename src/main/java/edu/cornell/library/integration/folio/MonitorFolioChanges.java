@@ -42,10 +42,7 @@ public class MonitorFolioChanges {
         PreparedStatement getUserChangeTotals = inventory.prepareStatement
             ("SELECT id, COUNT(*) FROM userChanges GROUP BY 1")) {
 
-      OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),
-          prop.getProperty("okapiTokenFolio"),
-          prop.getProperty("okapiTenantFolio"));
+      OkapiClient okapi = new OkapiClient( prop, "Folio" );
 
       Timestamp time = Change.getCurrentToDate( inventory, CURRENT_TO_KEY );
       if (time == null) {

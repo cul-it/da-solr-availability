@@ -36,8 +36,7 @@ public class RefreshAvailability {
         SolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL"))) {
 
-      OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),prop.getProperty("okapiTenantFolio"));
+      OkapiClient okapi = new OkapiClient(prop,"Folio");
 
       int rows = 50;
       SolrQuery q = new SolrQuery().setQuery("*:*").addSort("timestamp", ORDER.asc)
