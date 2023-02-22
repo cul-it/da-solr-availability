@@ -1,4 +1,4 @@
-package edu.cornell.library.integration.folio;
+package edu.cornell.library.integration.exports;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,7 +23,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
-import edu.cornell.library.integration.folio.PODExporter.UpdateType;
+import edu.cornell.library.integration.exports.PODExporter.UpdateType;
+import edu.cornell.library.integration.folio.OkapiClient;
 
 public class PODIncrementalExport {
 

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,7 +14,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +36,6 @@ import edu.cornell.library.integration.folio.Locations;
 import edu.cornell.library.integration.folio.OkapiClient;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
-import edu.cornell.library.integration.folio.GoogleExport.Format;
-import edu.cornell.library.integration.folio.GoogleExport.HoldingsAndItems;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.Items.ItemList;
@@ -64,69 +66,148 @@ public class GoogleExport {
 
       Set<String> bibs = getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
-      try (BufferedWriter writer = Files.newBufferedWriter(Paths.get("google-sample.xml"))) {
-        writer.write("<?xml version='1.0' encoding='UTF-8'?>"
-            + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
-        int monoCount = 0, serialCount = 0;
+      int fileCount = 0;
+      Path outputFile = Paths.get(String.format("cornell-export-%02d.xml",++fileCount));
+      BufferedWriter writer = Files.newBufferedWriter(outputFile);
+      writer.write("<?xml version='1.0' encoding='UTF-8'?>"
+          + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
 
-        for (String bibid : bibs) {
+      for (String bibid : bibs) {
 
-          Map<String,Object> instance = getInstance( inventory, bibid);
-          MarcRecord bibRec = DownloadMARC.getMarc(
-              inventory,MarcRecord.RecordType.BIBLIOGRAPHIC,bibid);
-          if (bibRec == null) {
-            System.out.printf("Skipping non-MARC instance #%s.\n",bibid);
-            continue;
-          }
-          Format format = getFormat(bibRec);
-          if ( format.equals(Format.MONO) ) {
-            if ( monoCount == 100 ) continue;
-          } else if ( format.equals(Format.SERIAL) ) {
-            if ( serialCount == 100 ) continue;
-          } else {
-            System.out.printf("Skipping non mono/serial instance #%s\n",bibid);
-            continue;
-          }
+        Map<String,Object> instance = getInstance( inventory, bibid);
 
-          // if the bib(instance) is suppressed, we don't want to send to Google.
-          if ((instance.containsKey("discoverySuppress") && (boolean)instance.get("discoverySuppress"))
-              || (instance.containsKey("staffSuppress") && (boolean)instance.get("staffSuppress")) ) {
-            System.out.println(bibid+" inactive due to suppression.");
-            continue;
-          }
-
-          // if not suppressed, confirm the record isn't NoEx.
-          for (DataField f : bibRec.dataFields) if (f.tag.equals("995"))
-            for (Subfield sf : f.subfields) if (sf.value.contains("NoEx")) {
-              System.out.println(bibid+" inactive due NoEx.");
-              continue;
-            }
-
-          int itemCount = collateHoldingsAndItemsData(
-              okapi, inventory, bibRec, locations, holdingsNoteTypes, callNumberTypes);
-          if ( itemCount == 0 ) {
-            System.out.printf("Skipping Zero Item instance #%s\n",bibid);
-            continue;
-          }
-
-          if ( format.equals(Format.MONO) ) monoCount++;
-          if ( format.equals(Format.SERIAL) ) serialCount++;
-          System.out.printf("%s: ( m %d / s %d )\n",bibid,monoCount,serialCount);
-          writer.write(bibRec.toString("xml").replace("<?xml version='1.0' encoding='UTF-8'?>", "")
-              .replace(" xmlns=\"http://www.loc.gov/MARC21/slim\"","")+"\n");
-          if ( serialCount == 100 ) break;
+        // if the bib(instance) is suppressed, we don't want to send to Google.
+        if ((instance.containsKey("discoverySuppress") && (boolean)instance.get("discoverySuppress"))
+            || (instance.containsKey("staffSuppress") && (boolean)instance.get("staffSuppress")) ) {
+          System.out.printf("Skipping %8s: bib suppressed\n",bibid);
+          continue;
         }
-        writer.write("</collection>\n");
-        writer.flush();
-        writer.close();
+
+        MarcRecord bibRec = DownloadMARC.getMarc(
+            inventory,MarcRecord.RecordType.BIBLIOGRAPHIC,bibid);
+        if (bibRec == null) {
+          System.out.printf("Skipping %8s: non-MARC instance\n",bibid);
+          continue;
+        }
+        Format format = getFormat(bibRec);
+        if ( format.equals(Format.OTHER) ) {
+          System.out.printf("Skipping %8s: bib format not on list\n",bibid);
+          continue;
+        }
+
+        // if not suppressed, confirm the record isn't NoEx.
+        for (DataField f : bibRec.dataFields) if (f.tag.equals("995"))
+          for (Subfield sf : f.subfields) if (sf.value.contains("NoEx")) {
+            System.out.printf("Skipping %8s: NoEx\n",bibid);
+            continue;
+          }
+
+        cleanUp995(bibRec);
+
+        Map<String,Integer> itemStats = collateHoldingsAndItemsData(
+            okapi, inventory, bibRec, locations, holdingsNoteTypes, callNumberTypes);
+        int items = itemStats.get("items");
+        int masterBWs = itemStats.get("master BW items");
+        if ( items == 0 ) {
+          if ( masterBWs == 0)
+            System.out.printf("Skipping %8s: no candidate items\n",bibid);
+          else
+            System.out.printf(
+                "Skipping %8s: no candidate items after elimination of %s master bound-withs\n",
+                bibid, masterBWs);
+          continue;
+        }
+
+        cleanUp041(bibRec);
+
+        if ( masterBWs == 0 )
+          System.out.printf("Exporting %8s\n",bibid);
+        else
+          System.out.printf(
+              "Exporting %8s with %s items after elimination of %s master bound-withs\n",
+              bibid, items, masterBWs);
+
+        writer.write(bibRec.toString("xml").replace("<?xml version='1.0' encoding='UTF-8'?>", "")
+            .replace(" xmlns=\"http://www.loc.gov/MARC21/slim\"","")+"\n");
+        if ( Files.size(outputFile) > 3113851290L /*2.9GB*/ ) {
+          writer.write("</collection>\n");
+          writer.flush();
+          writer.close();
+          outputFile = Paths.get(String.format("cornell-export-%02d.xml",++fileCount));
+          writer = Files.newBufferedWriter(outputFile);
+          writer.write("<?xml version='1.0' encoding='UTF-8'?>"
+              + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
+        }
       }
+      writer.write("</collection>\n");
+      writer.flush();
+      writer.close();
 
     }
   }
-  
+
+  private static void cleanUp995(MarcRecord rec) {
+    Set<DataField> deletes = new HashSet<>();
+    for (DataField f : rec.dataFields) if (f.tag.equals("955")) deletes.add(f);
+    for (DataField f : deletes) rec.dataFields.remove(f);
+  }
+
+  private static void cleanUp041(MarcRecord rec) {
+    Set<DataField> deletes = new HashSet<>();
+    Set<DataField> adds = new HashSet<>();
+    for (DataField f : rec.dataFields) {
+      if ( ! f.tag.equals("041") ) continue;
+      boolean fieldNeedsAdjustment = false;
+      for (Subfield sf : f.subfields) {
+        if (sf.value.length() > 3 && Character.isAlphabetic(sf.code)) {
+          fieldNeedsAdjustment = true;
+          break;
+        }
+      }
+      if ( ! fieldNeedsAdjustment ) continue;
+      DataField newF = new DataField(f.id,f.tag);
+      newF.ind1 = f.ind1;
+      newF.ind2 = f.ind2;
+      int sfId = 0;
+      for (Subfield sf : f.subfields) {
+        if ( ! Character.isAlphabetic(sf.code) || sf.value.length() == 3) {
+          newF.subfields.add(new Subfield(++sfId,sf.code,sf.value));
+          continue;
+        }
+        if ( sf.value.length() % 3 == 0 ) {
+          boolean mapToH = sf.code.equals('a') && f.ind1.equals('1') && ! fieldContainsCode(f,'h');
+          List<String> langCodes = splitString(sf.value,3);
+          for ( int i = 0; i < langCodes.size() ; i++ )
+            newF.subfields.add(new Subfield(++sfId,(mapToH && i > 0)?'h':sf.code,langCodes.get(i)));
+          continue;
+        }
+        System.out.println("Non-standard 041: "+f.toString());
+        newF.subfields.add(new Subfield(++sfId,sf.code,sf.value));//copying over the bad field
+      }
+      deletes.add(f);
+      adds.add(newF);
+      System.out.println(rec.id+": "+f.toString()+" ==> "+newF.toString());
+    }
+    for (DataField f : deletes) rec.dataFields.remove(f);
+    for (DataField newF: adds) rec.dataFields.add(newF);
+  }
+
+  private static boolean fieldContainsCode(DataField f, char c) {
+    for (Subfield sf : f.subfields) if (sf.code.equals(c)) return true;
+    return false;
+  }
+
+  private static List<String> splitString ( String s, int lengths ) {
+    List<String> chunks = new ArrayList<>((s.length()+lengths-1)/lengths);
+    for (int start = 0; start < s.length(); start += lengths) {
+      chunks.add(s.substring(start, Math.min(s.length(), start + lengths)));
+    }
+    return chunks;
+  }
+
   private static Format getFormat(MarcRecord rec) {
-    String recordType =          rec.leader.substring(6,7);
-    String bibLevel =  rec.leader.substring(7,8);
+    String recordType = rec.leader.substring(6,7);
+    String bibLevel = rec.leader.substring(7,8);
     String category = "";
     String typeOfContinuingResource = "";
     for (ControlField f : rec.controlFields)
@@ -155,21 +236,21 @@ public class GoogleExport {
         else if (typeOfContinuingResource.equals("n") || typeOfContinuingResource.equals("p"))
           return Format.SERIAL;
       }
-    } else if (recordType.equals("t") && bibLevel.equals("a") ) {
-      return Format.MONO;
+    } else if (recordType.equals("t")) {
+      if ( bibLevel.equals("a") ) return Format.MONO;
+      return Format.MANUSCRIPT;
     } else if ((recordType.equals("c")) || (recordType.equals("d"))) {
       return Format.SCORE;
     }
     return Format.OTHER;
   }
-  private static enum Format { MONO , SERIAL , SCORE,  OTHER}
+  private static enum Format { MONO , SERIAL , SCORE,  OTHER, MANUSCRIPT }
 
   private static Set<String> getBibsToExport(Connection inventory) throws SQLException {
     Set<String> bibs = new LinkedHashSet<>();
     try ( Statement stmt = inventory.createStatement() ){
       stmt.setFetchSize(1_000_000);
-      try ( ResultSet rs = stmt.executeQuery(
-          "SELECT instanceHrid FROM bibFolio ORDER BY RAND() LIMIT 30000")) {
+      try ( ResultSet rs = stmt.executeQuery("SELECT instanceHrid FROM bibFolio ORDER BY RAND()")) {
         while ( rs.next() ) bibs.add(rs.getString(1));
       }
     }
@@ -196,11 +277,13 @@ public class GoogleExport {
   }
 
 
-  private static int collateHoldingsAndItemsData(
+  private static Map<String,Integer> collateHoldingsAndItemsData(
       OkapiClient okapi, Connection inventory, MarcRecord bibRec, Locations locations,
       ReferenceData holdingsNoteTypes, ReferenceData callNumberTypes)
       throws SQLException, IOException {
     int maxBibFieldId = bibRec.dataFields.last().id;
+    Map<String,Integer> output = new HashMap<>();
+    output.put("master BW items", 0);
     HoldingsAndItems values = new HoldingsAndItems();
     values.holdings = Holdings.retrieveHoldingsByInstanceHrid(
         inventory, locations, holdingsNoteTypes, callNumberTypes, bibRec.id);
@@ -215,8 +298,14 @@ public class GoogleExport {
 
       for ( Item item : values.items.getItems().get(holdingUuid) ) {
         if ( ! item.active ) continue;
-        if ( suppressedItemStatuses.contains( item.status.status ) ) continue;
+        if ( suppressedItemStatuses.contains(item.status.status) ) continue;
+        if ( suppressedMaterialTypes.contains(item.matType.get("name")) ) continue;
         if ( item.empty != null && item.empty ) continue;
+        if ( item.enumeration != null && item.enumeration.toLowerCase().contains("box") ) continue;
+        if ( isBoundWith(inventory,bibRec.id,item) ) {
+          output.put("master BW items", output.get("master BW items")+1);
+          continue;
+        }
         DataField f955 = new DataField(++maxBibFieldId, "955");
         f955.subfields.add(new Subfield(1,'h',h.hrid));
         f955.subfields.add(new Subfield(2,'i',item.hrid));
@@ -231,16 +320,35 @@ public class GoogleExport {
         itemFields.add(f955);
       }
       bibRec.dataFields.addAll(itemFields);
-      for (DataField f : itemFields)
-        System.out.println(f.toString());
     }
-    return itemFields.size();
+    output.put("items", itemFields.size());
+    return output;
   }
+
+  private static boolean isBoundWith(Connection inventory, String bibid, Item item)
+      throws SQLException {
+    if ( boundWithStmt == null ) boundWithStmt = inventory.prepareStatement(
+        "SELECT GROUP_CONCAT(DISTINCT boundWithInstanceHrid) FROM boundWith WHERE masterItemId = ?");
+    boundWithStmt.setString(1, item.id);
+    try ( ResultSet rs = boundWithStmt.executeQuery() ) {
+      while ( rs.next() ) {
+        String otherBibs = rs.getString(1);
+        if ( otherBibs == null ) return false;
+//        System.out.printf("Skipping item %8s (instance %8s): master bound-with; Other bibs (%s)\n",
+//            item.hrid, bibid, otherBibs);
+        return true;
+      }
+    }
+    return false; // execution cannot get here
+  }
+  private static PreparedStatement boundWithStmt = null;
 
   private static List<String> suppressedItemStatuses = Arrays.asList(
       "Aged to lost","Declared lost","Long missing","Lost and paid","Withdrawn");
   private static List<String> suppressedMaterialTypes = Arrays.asList(
-      "BD MATERIAL","Carrel Keys","Computfile");
+      "BD MATERIAL","Carrel Keys","Computfile","Equipment","ILL MATERIAL","Laptop","Locker Keys",
+      "Microform","Object","Peripherals","Room Keys","Soundrec","Supplies","Umbrella","Unbound",
+      "Visual");
 
 
 }
