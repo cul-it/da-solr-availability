@@ -170,19 +170,20 @@ public class GoogleExport {
       newF.ind2 = f.ind2;
       int sfId = 0;
       for (Subfield sf : f.subfields) {
-        if ( ! Character.isAlphabetic(sf.code) || sf.value.length() == 3) {
-          newF.subfields.add(new Subfield(++sfId,sf.code,sf.value));
+        String sfvalue = sf.value.trim();
+        if ( ! Character.isAlphabetic(sf.code) || sfvalue.length() == 3) {
+          newF.subfields.add(new Subfield(++sfId,sf.code,sfvalue));
           continue;
         }
-        if ( sf.value.length() % 3 == 0 ) {
+        if ( sfvalue.length() % 3 == 0 ) {
           boolean mapToH = sf.code.equals('a') && f.ind1.equals('1') && ! fieldContainsCode(f,'h');
-          List<String> langCodes = splitString(sf.value,3);
+          List<String> langCodes = splitString(sfvalue,3);
           for ( int i = 0; i < langCodes.size() ; i++ )
             newF.subfields.add(new Subfield(++sfId,(mapToH && i > 0)?'h':sf.code,langCodes.get(i)));
           continue;
         }
-        System.out.println("Non-standard 041: "+f.toString());
-        newF.subfields.add(new Subfield(++sfId,sf.code,sf.value));//copying over the bad field
+        System.out.println("Non-standard 041 (b"+rec.id+"): "+f.toString());
+        newF.subfields.add(new Subfield(++sfId,sf.code,sfvalue));//copying over the bad field
       }
       deletes.add(f);
       adds.add(newF);
