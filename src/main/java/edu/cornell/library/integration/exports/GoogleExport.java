@@ -67,12 +67,12 @@ public class GoogleExport {
       Set<String> bibs = getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
       int fileCount = 0;
-      Path outputFile = Paths.get(String.format("cornell-export-%02d.xml",++fileCount));
+      Path outputFile = Paths.get(String.format("cornell-export-%d.xml",++fileCount));
       BufferedWriter writer = Files.newBufferedWriter(outputFile);
       writer.write("<?xml version='1.0' encoding='UTF-8'?>"
           + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
 
-      for (String bibid : bibs) {
+      BIB: for (String bibid : bibs) {
 
         Map<String,Object> instance = getInstance( inventory, bibid);
 
@@ -80,27 +80,20 @@ public class GoogleExport {
         if ((instance.containsKey("discoverySuppress") && (boolean)instance.get("discoverySuppress"))
             || (instance.containsKey("staffSuppress") && (boolean)instance.get("staffSuppress")) ) {
           System.out.printf("Skipping %8s: bib suppressed\n",bibid);
-          continue;
+          continue BIB;
         }
 
         MarcRecord bibRec = DownloadMARC.getMarc(
             inventory,MarcRecord.RecordType.BIBLIOGRAPHIC,bibid);
         if (bibRec == null) {
           System.out.printf("Skipping %8s: non-MARC instance\n",bibid);
-          continue;
+          continue BIB;
         }
         Format format = getFormat(bibRec);
         if ( format.equals(Format.OTHER) ) {
           System.out.printf("Skipping %8s: bib format not on list\n",bibid);
-          continue;
+          continue BIB;
         }
-
-        // if not suppressed, confirm the record isn't NoEx.
-        for (DataField f : bibRec.dataFields) if (f.tag.equals("995"))
-          for (Subfield sf : f.subfields) if (sf.value.contains("NoEx")) {
-            System.out.printf("Skipping %8s: NoEx\n",bibid);
-            continue;
-          }
 
         cleanUp995(bibRec);
 
@@ -115,8 +108,15 @@ public class GoogleExport {
             System.out.printf(
                 "Skipping %8s: no candidate items after elimination of %s master bound-withs\n",
                 bibid, masterBWs);
-          continue;
+          continue BIB;
         }
+
+        // confirm the record isn't NoEx.
+        for (DataField f : bibRec.dataFields) if (f.tag.equals("995"))
+          for (Subfield sf : f.subfields) if (sf.value.contains("NoEx")) {
+            System.out.printf("Skipping %8s: NoEx\n",bibid);
+            continue BIB;
+          }
 
         cleanUp041(bibRec);
 
@@ -133,7 +133,7 @@ public class GoogleExport {
           writer.write("</collection>\n");
           writer.flush();
           writer.close();
-          outputFile = Paths.get(String.format("cornell-export-%02d.xml",++fileCount));
+          outputFile = Paths.get(String.format("cornell-export-%d.xml",++fileCount));
           writer = Files.newBufferedWriter(outputFile);
           writer.write("<?xml version='1.0' encoding='UTF-8'?>"
               + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
@@ -250,7 +250,7 @@ public class GoogleExport {
     Set<String> bibs = new LinkedHashSet<>();
     try ( Statement stmt = inventory.createStatement() ){
       stmt.setFetchSize(1_000_000);
-      try ( ResultSet rs = stmt.executeQuery("SELECT instanceHrid FROM bibFolio ORDER BY RAND()")) {
+      try ( ResultSet rs = stmt.executeQuery("SELECT hrid FROM instanceFolio ORDER BY RAND()")) {
         while ( rs.next() ) bibs.add(rs.getString(1));
       }
     }
