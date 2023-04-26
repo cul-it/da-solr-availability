@@ -48,7 +48,8 @@ public class ItemStatus {
       }
       for (Map<String,Object> loan : loans) {
         if ( ! ((Map<String,String>)loan.get("status")).get("name").equals("Open") ) continue;
-        this.due = isoDT.parse((String)loan.get("dueDate"),Instant::from).getEpochSecond();
+        if (loan.containsKey("dueDate"))
+          this.due = isoDT.parse((String)loan.get("dueDate"),Instant::from).getEpochSecond();
       }
       if ( item.loanType.shortLoan ) this.shortLoan = true;
       return;
