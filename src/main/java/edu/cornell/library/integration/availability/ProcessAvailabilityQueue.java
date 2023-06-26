@@ -327,6 +327,7 @@ public class ProcessAvailabilityQueue {
     ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
     doc.addField("statcode_facet", holdings.getStatCodes(statCodes));
     doc.addField("statcode_facet", items.getStatCodes(statCodes));
+    doc.addField("item_count_i", items.itemCount());
     if ( Items.applyDummyRMCItems(holdings,items) )
       doc.addField("availability_facet","RMC Dummy Item");
     boolean active = doc.getFieldValue("type").equals("Catalog");
