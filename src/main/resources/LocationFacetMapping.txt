@@ -28,7 +28,7 @@ ILR Library Reserve 				ILR Library > Reserve
 ILR Multi-Copy Storage				ILR Library > Main Collection
 ILR Library Kheel Center				ILR Library Kheel Center > Main Collection
 ILR Library Kheel Center (Non-Circulating)				ILR Library Kheel Center > Main Collection
-ILR Library Kheel Center (Request in advance)				ILR Library Kheel Center > Main Collection
+ILR Library Kheel Center (Request in advance)				ILR Library Kheel Center > Request in advance
 ILR Library Kheel Center Reference 				ILR Library Kheel Center > Reference
 ILR Library Kheel Center Reference (Non-Circulating)				ILR Library Kheel Center > Reference
 "Asia Reserve, Severinghouse Reading Rm., Kroch Library"				Kroch Library Asia > Reserve
