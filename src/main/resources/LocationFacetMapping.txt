@@ -86,6 +86,9 @@ Olin Library Room 404 (Non-Circulating)				Olin Library > Room 404
 Olin Library Room 405 (Non-Circulating)				Olin Library > Room 405
 Olin Library Room 602 (Non-Circulating)				Olin Library > Room 602
 Olin Library Room 604-605 (Non-Circulating)				Olin Library > Room 604-605
+Olin Library Room 303				Olin Library > Room 303
+Olin Library Room 403				Olin Library > Room 403
+Olin Library Room 603				Olin Library > Room 603
 OKU Processing	X			Olin Library > OKU Processing
 Library Tech Services	X			Olin Library > Technical Services
 Library Technical Services Review Shelves	X			Olin Library > Technical Services Review Shelves
