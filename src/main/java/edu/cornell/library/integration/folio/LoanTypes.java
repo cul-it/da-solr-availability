@@ -47,6 +47,8 @@ public class LoanTypes {
     ILL2WK("ILL LOAN 2 Weeks"),
     ILL4WK("ILL LOAN 4 Weeks"),
     ILL6WK("ILL LOAN 6 Weeks"),
+    ILL8WK("ILL LOAN 8 Weeks"),
+   ILL10WK("ILL LOAN 10 Weeks"),
     EQ_X  ("Equipment extended loan"),
     EQ_L  ("Equipment long term"),
     EQ_S  ("Equipment short term"),
