@@ -1,0 +1,280 @@
+{
+  "mtypes": [
+    {
+      "id": "71fbd940-1027-40a6-8a48-49b44d795e46",
+      "name": "unspecified",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2020-06-16T00:17:07.115+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2020-06-16T00:17:07.115+00:00",
+        "updatedByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02"
+      }
+    },
+    {
+      "id": "629eda76-57f9-45d1-8b42-5178c1077589",
+      "name": "Archivman",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:20:19.598+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:20:19.598+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "f8eff06c-a1ac-4fe6-afec-2ecb181d7933",
+      "name": "BD MATERIAL",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:21:25.029+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:21:25.029+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "1a54b431-2e4f-452d-9cae-9cee66c9a892",
+      "name": "Book",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2020-06-16T00:17:07.351+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2021-06-17T19:21:32.001+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "2b079609-eec8-48f4-b7f1-19f9934b912b",
+      "name": "Carrel Keys",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:21:41.168+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:21:41.168+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "50d07dff-b5e0-48df-8dfd-d83f6bf4ae6b",
+      "name": "Computfile",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:21:48.028+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:21:48.028+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "77ac530d-3d90-44c0-8b4a-2ba4a25e3915",
+      "name": "Equipment",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:22:09.216+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:22:09.216+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "3ce0918e-ff65-4004-9c3a-da2cc5e2e002",
+      "name": "ILL MATERIAL",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:22:20.754+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:22:20.754+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "8824a357-f8b4-4c34-937e-63b6b1cffc23",
+      "name": "Laptop",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:22:28.570+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:22:28.570+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "2321c93a-a51c-4ea2-b3e9-1bbc6c5a761f",
+      "name": "Locker Keys",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:22:39.881+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:22:39.881+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "914e716f-f95c-4124-b300-e7340a68aeeb",
+      "name": "Map",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:22:49.930+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:22:49.930+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "fd6c6515-d470-4561-9c32-3e3290d4ca98",
+      "name": "Microform",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2020-06-16T00:17:05.905+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2021-06-17T19:22:57.245+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "d5dd238b-dcdb-421d-b2a7-4f004091466b",
+      "name": "Music (score)",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:23:12.608+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:23:12.608+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "cd9e54bc-d3c0-45d9-818d-0de1ec57a6e7",
+      "name": "Newspaper",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:23:19.355+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:23:19.355+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "9a2cbc6f-fd52-4de3-8ba8-4c0c08000745",
+      "name": "Object",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:23:27.090+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:23:27.090+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "a0a83d6c-2898-4e42-9aff-999c1fdd7c8f",
+      "name": "Periodical",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:23:35.015+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:23:35.015+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "d9acad2f-2aac-4b48-9097-e6ab85906b25",
+      "name": "Textual resource",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2020-06-16T00:17:06.387+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2021-06-17T19:24:26.938+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "30b3e36a-d3b2-415e-98c2-47fbdf878862",
+      "name": "Visual",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2020-06-16T00:17:06.623+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2021-06-17T19:24:49.290+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "1ed05412-049e-4d75-b031-f8975418b70c",
+      "name": "Unbound",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:25:06.153+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:25:06.153+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "67a73a18-e728-4176-b639-49d79a651b30",
+      "name": "Peripherals",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:23:45.552+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:23:45.552+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "dfbaaf45-c8c1-4a13-a3a7-cf308f394cd7",
+      "name": "Room Keys",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:23:51.242+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:23:51.242+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "14a1925d-148e-46a6-ada3-4cbcfad810e5",
+      "name": "Serial",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:23:57.378+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:23:57.378+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "dd0bf600-dbd9-44ab-9ff2-e2a61a6539f1",
+      "name": "Soundrec",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2020-06-16T00:17:06.865+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2021-06-17T19:24:09.085+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "f7275914-bd18-468a-825a-6a8a22c92d56",
+      "name": "Supplies",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:24:33.016+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:24:33.016+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "9a1dc533-68df-46e9-a461-320ed7d5773c",
+      "name": "Umbrella",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:24:59.304+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:24:59.304+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    }
+  ],
+  "totalRecords": 25
+}
