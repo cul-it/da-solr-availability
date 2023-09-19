@@ -1,0 +1,107 @@
+{
+    "expectedJson-263a48a0-7067-4a3a-a034-8275ac46850f": {
+        "263a48a0-7067-4a3a-a034-8275ac46850f": {
+            "hrid": "1184953",
+            "copy": "",
+            "location": {
+                "code": "ilr,anx",
+                "name": "Library Annex",
+                "library": "Library Annex",
+                "hoursCode": "annex",
+                "id": "533a86fb-0451-46c6-ab6c-6e421d48de9c",
+                "primaryServicePoint": "91f726ff-cbb1-4d60-821e-543ec1e91cc5"
+            },
+            "call": "HC59.7 .B16 1977",
+            "active": true
+        },
+        "fc2579de-91b2-4e70-8205-3cab8e04b7aa": {
+            "hrid": "1184954",
+            "copy": "2",
+            "location": {
+                "code": "ilr",
+                "name": "ILR Library (Ives Hall)",
+                "library": "ILR Library",
+                "hoursCode": "ilr",
+                "id": "09815433-2339-4a23-af2e-9272ac793e27",
+                "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
+            },
+            "call": "HC59.7 .B16 1977",
+            "active": false
+        }
+    },
+    "expectedJson-9f82a250-ebf9-4d65-b7ff-c7c145edab47": {
+        "9f82a250-ebf9-4d65-b7ff-c7c145edab47": {
+            "hrid": "1016218",
+            "copy": "",
+            "notes": [
+                "Bound with: Fifty Oxyrhynchus Papyri."
+            ],
+            "location": {
+                "code": "olin,anx",
+                "name": "Library Annex",
+                "library": "Library Annex",
+                "hoursCode": "annex",
+                "id": "509e4237-bae6-4cfe-aab9-ce3bbe8b8440",
+                "primaryServicePoint": "91f726ff-cbb1-4d60-821e-543ec1e91cc5"
+            },
+            "call": "P9 .F5 t.64",
+            "items": {
+                "count": 1,
+                "unavail": [
+                    {
+                        "id": "352f3f3e-af4a-4642-a585-fdbc96e2ab8a",
+                        "enum": "Bound with",
+                        "status": {
+                            "status": "Checked out",
+                            "due": 1693108799
+                        }
+                    }
+                ]
+            },
+            "active": true
+        }
+    },
+    "expectedJson-66fe0529-6316-4377-81ac-0d776b0c50ab": {
+        "66fe0529-6316-4377-81ac-0d776b0c50ab": {
+            "hrid": "10170557",
+            "copy": "",
+            "online": true,
+            "active": false
+        }
+    },
+    "expectedJson-48e0a7f7-0100-4285-8327-25282dc5d1b5": {
+        "48e0a7f7-0100-4285-8327-25282dc5d1b5": {
+            "hrid": "10290464",
+            "copy": "",
+            "online": true,
+            "active": true,
+            "links": [{
+                "url": "http://proxy.library.cornell.edu/login?url=http://univportal.naxosmusiclibrary.com/catalogue/item.asp?cid=ALCD-7066",
+                "description": "Available at Naxos Music Library",
+                "dbcode": "CZN",
+                "providercode": "PRVAQU"
+            }]
+        }
+    },
+    "expectedJson-f26ba953-b4b6-486b-8113-1cffc3f3c3f8": {
+        "f26ba953-b4b6-486b-8113-1cffc3f3c3f8": {
+            "hrid": "10368366",
+            "copy": "",
+            "location": {
+                "code": "mann",
+                "name": "Mann Library",
+                "library": "Mann Library",
+                "hoursCode": "mann",
+                "id": "025a9b7a-afba-47ca-82dd-11f91c56e4be",
+                "primaryServicePoint": "872beba0-1bdf-4870-95f3-8781baddc02e"
+            },
+            "call": "SF98.A5 M35 2017",
+            "items": {
+                "count": 1,
+                "avail": 1
+            },
+            "circ": true,
+            "active": true
+        }
+    }
+}
