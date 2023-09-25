@@ -36,66 +36,58 @@ Kheel Center Reference (Non-Circulating)				Kheel Center > Reference
 Kroch Library Asia				Kroch Library Asia > Main Collection
 Kroch Library Asia Reference (Non-Circulating)				Kroch Library Asia > Reference
 RMC Technical Services	X			Kroch Library Rare & Manuscripts > Technical Services
-Kroch Library Rare & Manuscripts (Non-Circulating)				Kroch Library Rare & Manuscripts > Main Collection
-Kroch Library Rare & Manuscripts (Request in advance)				Kroch Library Rare & Manuscripts > Request in Advance
-Kroch Library Rare & Manuscripts Reference (Non-Circulating)				Kroch Library Rare & Manuscripts > Reference
-Law Library (Myron Taylor Hall)				Law Library > Main Collection
-Law Library (Myron Taylor Hall) Rare Books				Law Library > Rare Books
+Rare and Manuscript Collections (Non-Circulating)				Kroch Library Rare & Manuscripts > Main Collection
+Rare and Manuscript Collections (Request in advance)				Kroch Library Rare & Manuscripts > Request in Advance
+Rare and Manuscript Collections Reference (Non-Circulating)				Kroch Library Rare & Manuscripts > Reference
+Law Library				Law Library > Main Collection
+Law Library Special Collections (Non-Circulating)				Law Library > Special Collections
 Law Library Rare--Request in advance at Law Circulation Desk				Law Library > Request in Advance
 Law Library Reference (Non-Circulating)				Law Library > Reference
 Law Library Reserve				Law Library > Reserve
-Law Library Technical Services 				Law Library > Technical Services
-Legal Aid Clinic				Law Library > Legal Aid Clinic
+Law Library Technical Services (Non-Circulating)				Law Library > Technical Services
+Law Library Legal Aid Clinic				Law Library > Legal Aid Clinic
 Library Annex				Library Annex
 Mann Circulation				Mann Library > Circulation
+Mann Library Ellis Collection				Mann Library > Ellis Collection
 Mann Library		Ellis		Mann Library > Ellis Collection
 Mann Library		Curriculum Material		Mann Library > Curriculum Materials Collection
 Mann Library				Mann Library > Main Collection
 Mann Library Collection Development (Non-Circulating)				Mann Library > Collection Development
-Mann Library New Book Shelf				Mann Library > New Book Shelf
+Mann Library New and Noteworthy				Mann Library > New and Noteworthy
 Mann Library Reference (Non-Circulating)				Mann Library > Reference
 Mann Library Reserve				Mann Library > Reserve
 Mann Library Special Collections (Non-Circulating)				Mann Library > Special Collections
-Mann Special Collections (Request in advance)				Mann Library > Special Collections
-Mann Serials				Mann Library > Serials
-Mathematics Library (Circulation Desk)				Mathematics Library > Circulation Desk
-Mathematics Library (Malott Hall)				Mathematics Library > Main Collection
-Mathematics Library Locked Press				Mathematics Library > Locked Press
+Mathematics Library Main Desk				Mathematics Library > Main Desk
+Mathematics Library				Mathematics Library > Main Collection
+Mathematics Library Permanent Reserve				Mathematics Library > Reference
 Mathematics Library Reference (Non-Circulating)				Mathematics Library > Reference
 Mathematics Library Reserve				Mathematics Library > Reserve
-Music Library (Lincoln Hall)				Music Library > Main Collection
-Cox Library of Music (Lincoln Hall)				Music Library > Main Collection
+Cox Library of Music and Dance				Music Library > Main Collection
 Music Circulation				Music Library > Circulation
-Music Library A/V (Non-Circulating)				Music Library > A/V
-Music Library Locked Press (Reference Desk)				Music Library > Reference
-Music Library Reference (Non-Circulating) 				Music Library > Reference
-Music Library Reserve 				Music Library > Reserve
-Nestle Library Permanent Reserve				Nestle Library > Permanent Reserve
-Nestle Library Reserve 				Nestle Library > Reserve
-Olin Library		New & Noteworthy		Olin Library > New & Noteworthy Books Shelf
+Cox Library of Music and Dance A/V (Non-Circulating)				Music Library > A/V
+Cox Library of Music and Dance Locked Press (Reference Desk)				Music Library > Reference
+Cox Library of Music and Dance Reference (Non-Circulating)				Music Library > Reference
+Cox Library of Music and Dance Permanent Reserve				Music Library > Reserve
+Cox Library of Music and Dance Reserve				Music Library > Reserve
+Cox Library of Music and Dance Special Collections (Non-Circulating)				Music Library > Special Collections
+Nestlé Library Reference (Non-Circulating)				Nestle Library > Reference
+Nestlé Library Main Desk				Nestle Library > Main Desk
+Olin Library New and Noteworthy				Olin Library > New & Noteworthy
+Olin Library		New & Noteworthy		Olin Library > New & Noteworthy
 Olin Library				Olin Library > Main Collection
-DCAPS (106G Olin)				Olin Library > DCAPS (106G Olin)
-"Map Storage (Request in Advance at Map Room, Olin Library)"				Olin Library > Map Storage
+Olin Library DCAPS				Olin Library > DCAPS (106G Olin)
+Olin Library Map Storage (Request in Advance via olinmaps@cornell.edu)				Olin Library > Map Storage
 Olin Library Maps (Non-Circulating)				Olin Library > Maps
-"Olin Library Graduate Study Room 501, Request at Circulation"				Olin Library > Graduate Study Room 501
 Olin Library Reference (Non-Circulating)				Olin Library > Reference
 Olin Library Reserve				Olin Library > Reserve
-Olin Library Room 301 (Non-Circulating)				Olin Library > Room 301
-Olin Library Room 305 (Non-Circulating)				Olin Library > Room 305
-Olin Library Room 401 (Non-Circulating)				Olin Library > Room 401
-Olin Library Room 404 (Non-Circulating)				Olin Library > Room 404
-Olin Library Room 405 (Non-Circulating)				Olin Library > Room 405
-Olin Library Room 602 (Non-Circulating)				Olin Library > Room 602
+"Olin Library Graduate Study Room 501, Request at Circulation Area"				Olin Library > Graduate Study Room 501
+Olin Library Room 303				Olin Library > Reserve
+Olin Library Room 403				Olin Library > Reserve
+Olin Library Room 603				Olin Library > Reserve
 Olin Library Room 604-605 (Non-Circulating)				Olin Library > Room 604-605
-Olin Library Room 303				Olin Library > Room 303
-Olin Library Room 403				Olin Library > Room 403
-Olin Library Room 603				Olin Library > Room 603
-OKU Processing	X			Olin Library > OKU Processing
 Library Tech Services	X			Olin Library > Technical Services
-Library Technical Services Review Shelves	X			Olin Library > Technical Services Review Shelves
 LTS E-Resources and Serials Management	X			Olin Library > Technical Services
-Preservation Department (B32 Olin)				Olin Library > Preservation Department
-Request at Olin Circulation Desk				Olin Library > Circulation Desk
+Olin Library Preservation Department				Olin Library > Preservation Department
 Sage Hall Management Library Reference (Non-Circulating)				Sage Hall Management Library > Reference
 Sage Hall Management Library Reserve				Sage Hall Management Library > Reserve
 Spacecraft Planetary Imaging Facility (Non-Circulating)				Space Sciences Building
