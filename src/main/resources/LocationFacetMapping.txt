@@ -22,17 +22,16 @@ Mui Ho Fine Arts Library Permanent Reserve				Fine Arts Library > Permanent Rese
 Mui Ho Fine Arts Library Reserve				Fine Arts Library > Reserve
 Mui Ho Fine Arts Library New and Noteworthy				Fine Arts Library > New and Noteworthy
 Mui Ho Fine Arts Library Flats				Fine Arts Library > Flats
-ILR Library (Ives Hall)				ILR Library > Main Collection
-ILR Library Reference (Non-Circulating)		Labor Law		ILR Library > Labor Law Reference
-ILR Library Reference (Non-Circulating)				ILR Library > Reference
-ILR Permanent Reserve 				ILR Library > Reserve
-ILR Library Reserve 				ILR Library > Reserve
-ILR Multi-Copy Storage				ILR Library > Main Collection
-ILR Library Kheel Center				ILR Library Kheel Center > Main Collection
-ILR Library Kheel Center (Non-Circulating)				ILR Library Kheel Center > Main Collection
-ILR Library Kheel Center (Request in advance)				ILR Library Kheel Center > Request in advance
-ILR Library Kheel Center Reference 				ILR Library Kheel Center > Reference
-ILR Library Kheel Center Reference (Non-Circulating)				ILR Library Kheel Center > Reference
+Catherwood Library				Catherwood Library > Main Collection
+Catherwood Library Multi-Copy Storage				Catherwood Library > Main Collection
+Catherwood Library Labor Law Reference (Non-Circulating)				Catherwood Library > Labor Law Reference
+Catherwood Library Reference (Non-Circulating)		Labor Law		Catherwood Library > Labor Law Reference
+Catherwood Library Reference (Non-Circulating)				Catherwood Library > Reference
+Catherwood Library Permanent Reserve				Catherwood Library > Reserve
+Catherwood Library Main Desk				Catherwood Library > Main Desk
+Kheel Center (Non-Circulating)				Kheel Center > Main Collection
+Kheel Center (Request in advance)				Kheel Center > Request in advance
+Kheel Center Reference (Non-Circulating)				Kheel Center > Reference
 "Asia Reserve, Severinghouse Reading Rm., Kroch Library"				Kroch Library Asia > Reserve
 Kroch Library Asia				Kroch Library Asia > Main Collection
 Kroch Library Asia Reference (Non-Circulating)				Kroch Library Asia > Reference
