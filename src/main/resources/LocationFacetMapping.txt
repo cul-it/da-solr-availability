@@ -31,8 +31,8 @@ Catherwood Library Main Desk				Catherwood Library > Main Desk
 Kheel Center (Non-Circulating)				Kheel Center > Main Collection
 Kheel Center (Request in advance)				Kheel Center > Request in advance
 Kheel Center Reference (Non-Circulating)				Kheel Center > Reference
-Kroch Asia Collections				Kroch Library Asia > Main Collection
-Kroch Asia Collections Reference (Non-Circulating)				Kroch Library Asia > Reference
+Kroch Asia Collections				Asia Collections > Main Collection
+Kroch Asia Collections Reference (Non-Circulating)				Asia Collections > Reference
 RMC Technical Services	X			Kroch Library Rare & Manuscripts > Technical Services
 Rare and Manuscript Collections (Non-Circulating)				Kroch Library Rare & Manuscripts > Main Collection
 Rare and Manuscript Collections (Request in advance)				Kroch Library Rare & Manuscripts > Request in Advance
@@ -91,7 +91,7 @@ Olin Library Preservation Department				Olin Library > Preservation Department
 Management Library Reference (Non-Circulating)				Management Library > Reference
 Management Library Reserve				Management Library > Reserve
 Management Library New and Noteworthy				Management Library > New and Noteworthy
-Spacecraft Planetary Imaging Facility (Non-Circulating)				Space Sciences Building
+Spacecraft Planetary Imaging Facility (Non-Circulating)				Spacecraft Planetary Imaging
 Uris Library				Uris Library > Main Collection
 Uris Library Asia A/V		(SEA)		Uris Library > Asia A/V > Southeast Asia
 Uris Library Asia A/V		(SA)		Uris Library > Asia A/V > South Asia
