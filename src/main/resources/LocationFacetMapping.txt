@@ -1,15 +1,16 @@
 Hierarchical Location Facet Mapping; v.1.1				
 Voyager Display Name	Suppress	Call# (852$khim)	Holding Note (852$z)	Facet Display Name
-Adelson Library (Lab of Ornithology)				Adelson Library > Main Collection
-Adelson Library Reference (Lab of Ornithology)				Adelson Library > Reference
-Museum of Vertebrates (Lab of Ornithology) (non-circulating)				Adelson Library > Museum of Vertebrates
-Macaulay Library (Lab of Ornithology) (Non-circulating)				Adelson Library > Macaulay Library
-Ornithology Circulation				Adelson Library > Circulation
-Africana A/V				Africana Library > A/V
-Africana Library (Africana Center)			new book	Africana Library > New Books Shelf
-Africana Library (Africana Center)				Africana Library > Main Collection
-Africana Library Reference ( Non-Circulating)				Africana Library > Reference
-Africana Library Reserve 				Africana Library > Reserve
+Adelson Library				Adelson Library > Main Collection
+Adelson Library Reference (Non-Circulating)				Adelson Library > Reference
+Museum of Vertebrates (Non-Circulating)				Adelson Library > Museum of Vertebrates
+Macaulay Library (Non-Circulating)				Adelson Library > Macaulay Library
+Clarke Africana Library A/V				Africana Library > A/V
+Clarke Africana Library New and Noteworthy				Africana Library > New Books Shelf
+Clarke Africana Library			new book	Africana Library > New Books Shelf
+Clarke Africana Library				Africana Library > Main Collection
+Clarke Africana Library Reference ( Non-Circulating)				Africana Library > Reference
+Clarke Africana Library Reserve				Africana Library > Reserve
+Clarke Africana Library Permanent Reserve				Africana Library > Reserve
 Bailey Hortorium (ask at Mann Library Circulation)				Bailey Hortorium > Main Collection
 Bailey Hortorium Reference (Non-Circulating)				Bailey Hortorium > Reference
 CISER Data Archive				CISER Data Archive
