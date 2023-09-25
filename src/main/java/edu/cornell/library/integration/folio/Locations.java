@@ -249,7 +249,7 @@ public final class Locations {
 
     List<FacetMapRule> patternMap = new ArrayList<>();
     try (BufferedReader in = new BufferedReader(new InputStreamReader( 
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename), StandardCharsets.UTF_16
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename), StandardCharsets.UTF_8
         ))) {
       String site;
       while ((site = in.readLine()) != null) {
