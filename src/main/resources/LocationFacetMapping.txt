@@ -13,14 +13,15 @@ Clarke Africana Library Reserve				Africana Library > Reserve
 Clarke Africana Library Permanent Reserve				Africana Library > Reserve
 Bailey Hortorium (ask at Mann Library Circulation)				Bailey Hortorium > Main Collection
 Bailey Hortorium Reference (Non-Circulating)				Bailey Hortorium > Reference
-CISER Data Archive				CISER Data Archive
-Fine Arts Circulation 				Fine Arts Library > Circulation
-Fine Arts Library (Rand Hall)				Fine Arts Library > Main Collection
-Fine Arts Library Reference (Non-Circulating)		Artist		Fine Arts Library > Artists' Books
-Fine Arts Library Reference (Non-Circulating)				Fine Arts Library > Reference
-Fine Arts Library Permanent Reserve				Fine Arts Library > Reserve
-Fine Arts Course Reserve (Ask at Circulation)				Fine Arts Library > Reserve
-Fine Arts Library Reserve				Fine Arts Library > Reserve
+Cornell Center for Social Sciences Data Archive				CCSS Data Archive
+Mui Ho Fine Arts Library				Fine Arts Library > Main Collection
+Mui Ho Fine Arts Library Artists' Books				Fine Arts Library > Artists' Books
+Mui Ho Fine Arts Library Reference (Non-Circulating)		Artist		Fine Arts Library > Artists' Books
+Mui Ho Fine Arts Library Reference (Non-Circulating)				Fine Arts Library > Reference
+Mui Ho Fine Arts Library Permanent Reserve				Fine Arts Library > Permanent Reserve
+Mui Ho Fine Arts Library Reserve				Fine Arts Library > Reserve
+Mui Ho Fine Arts Library New and Noteworthy				Fine Arts Library > New and Noteworthy
+Mui Ho Fine Arts Library Flats				Fine Arts Library > Flats
 ILR Library (Ives Hall)				ILR Library > Main Collection
 ILR Library Reference (Non-Circulating)		Labor Law		ILR Library > Labor Law Reference
 ILR Library Reference (Non-Circulating)				ILR Library > Reference
