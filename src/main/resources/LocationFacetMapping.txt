@@ -71,6 +71,8 @@ Cox Library of Music and Dance Reserve				Music Library > Reserve
 Cox Library of Music and Dance Special Collections (Non-Circulating)				Music Library > Special Collections
 Nestlé Library Reference (Non-Circulating)				Nestlé Library > Reference
 Nestlé Library Main Desk				Nestlé Library > Main Desk
+Nestle Library Permanent Reserve				Nestlé Library > Reserve
+Nestle Library Reserve				Nestlé Library > Reserve
 Olin Library New and Noteworthy				Olin Library > New & Noteworthy
 Olin Library		New & Noteworthy		Olin Library > New & Noteworthy
 Olin Library				Olin Library > Main Collection
