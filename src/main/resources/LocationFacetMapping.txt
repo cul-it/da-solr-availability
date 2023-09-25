@@ -32,9 +32,8 @@ Catherwood Library Main Desk				Catherwood Library > Main Desk
 Kheel Center (Non-Circulating)				Kheel Center > Main Collection
 Kheel Center (Request in advance)				Kheel Center > Request in advance
 Kheel Center Reference (Non-Circulating)				Kheel Center > Reference
-"Asia Reserve, Severinghouse Reading Rm., Kroch Library"				Kroch Library Asia > Reserve
-Kroch Library Asia				Kroch Library Asia > Main Collection
-Kroch Library Asia Reference (Non-Circulating)				Kroch Library Asia > Reference
+Kroch Asia Collections				Kroch Library Asia > Main Collection
+Kroch Asia Collections Reference (Non-Circulating)				Kroch Library Asia > Reference
 RMC Technical Services	X			Kroch Library Rare & Manuscripts > Technical Services
 Rare and Manuscript Collections (Non-Circulating)				Kroch Library Rare & Manuscripts > Main Collection
 Rare and Manuscript Collections (Request in advance)				Kroch Library Rare & Manuscripts > Request in Advance
@@ -88,11 +87,11 @@ Olin Library Room 604-605 (Non-Circulating)				Olin Library > Room 604-605
 Library Tech Services	X			Olin Library > Technical Services
 LTS E-Resources and Serials Management	X			Olin Library > Technical Services
 Olin Library Preservation Department				Olin Library > Preservation Department
-Sage Hall Management Library Reference (Non-Circulating)				Sage Hall Management Library > Reference
-Sage Hall Management Library Reserve				Sage Hall Management Library > Reserve
+Management Library Reference (Non-Circulating)				Management Library > Reference
+Management Library Reserve				Management Library > Reserve
+Management Library New and Noteworthy				Management Library > New and Noteworthy
 Spacecraft Planetary Imaging Facility (Non-Circulating)				Space Sciences Building
 Uris Library				Uris Library > Main Collection
-Uris Circulation				Uris Library > Circulation
 Uris Library Asia A/V		(SEA)		Uris Library > Asia A/V > Southeast Asia
 Uris Library Asia A/V		(SA)		Uris Library > Asia A/V > South Asia
 Uris Library Asia A/V		(KOR)		Uris Library > Asia A/V > Korea
@@ -100,16 +99,12 @@ Uris Library Asia A/V		(Jpn)		Uris Library > Asia A/V > Japan
 Uris Library Asia A/V		(Chi)		Uris Library > Asia A/V > China
 Uris Library Asia A/V				Uris Library > Asia A/V
 Uris Library Reference (Non-Circulating)				Uris Library > Reference
+Uris Library Permanent Reserve				Uris Library > Permanent Reserve
 Uris Library Reserve				Uris Library > Reserve
-Uris Library Reserve Willis Room 				Uris Library > Reserve Willis Room 
-Veterinary Library (Schurman Hall)				Veterinary Library > Main Collection
-Veterinary Library Core Resource (5 hour loan)				Veterinary Library > Core Textbooks
+Uris Library A.D. White Collection				Uris Library > A.D. White Library
+Flower-Sprecher Veterinary Library				Veterinary Library > Main Collection
+Flower-Sprecher Veterinary Library Core Resource				Veterinary Library > Core Textbooks
 Veterinary Library Rare Books (Non-Circulating)				Veterinary Library > Rare Books
 Veterinary Library Reference (Non-Circulating)				Veterinary Library > Reference
-Veterinary Library Reserve 				Veterinary Library > Reserve 
-Anatomic Pathology Collection (Departmental use only)	X			Veterinary Library > Anatomic Pathology Collection
-Equine Farm Animal Collection (Departmental use only)	X			Veterinary Library > Equine Farm Animal Collection
-Center for Animal Resources and Education (Dept. use only)	X			XXX
-Companion Animal Hospital Collection (Departmental use only)	X			XXX
-Clinical Ophthalmology Collection (Departmental use only)	X			XXX
+Flower-Sprecher Veterinary Library Reserve				Veterinary Library > Reserve 
 Networked Resource	X			XXX
