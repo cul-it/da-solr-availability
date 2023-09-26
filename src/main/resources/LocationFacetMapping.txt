@@ -1,4 +1,5 @@
-Hierarchical Location Facet Mapping; v.1.1				Voyager Display Name	Suppress	Call# (852$khim)	Holding Note (852$z)	Facet Display Name
+Hierarchical Location Facet Mapping; v.1.1				
+Voyager Display Name	Suppress	Call# (852$khim)	Holding Note (852$z)	Facet Display Name
 Adelson Library				Adelson Library > Main Collection
 Adelson Library Reference (Non-Circulating)				Adelson Library > Reference
 Museum of Vertebrates (Non-Circulating)				Adelson Library > Museum of Vertebrates
@@ -33,10 +34,10 @@ Kheel Center (Request in advance)				Kheel Center > Request in advance
 Kheel Center Reference (Non-Circulating)				Kheel Center > Reference
 Kroch Asia Collections				Asia Collections > Main Collection
 Kroch Asia Collections Reference (Non-Circulating)				Asia Collections > Reference
-RMC Technical Services	X			Kroch Library Rare & Manuscripts > Technical Services
-Rare and Manuscript Collections (Non-Circulating)				Kroch Library Rare & Manuscripts > Main Collection
-Rare and Manuscript Collections (Request in advance)				Kroch Library Rare & Manuscripts > Request in Advance
-Rare and Manuscript Collections Reference (Non-Circulating)				Kroch Library Rare & Manuscripts > Reference
+RMC Technical Services	X			Rare & Manuscript > Technical Services
+Rare and Manuscript Collections (Non-Circulating)				Rare & Manuscript > Main Collection
+Rare and Manuscript Collections (Request in advance)				Rare & Manuscript > Request in Advance
+Rare and Manuscript Collections Reference (Non-Circulating)				Rare & Manuscript > Reference
 Law Library				Law Library > Main Collection
 Law Library Special Collections (Non-Circulating)				Law Library > Special Collections
 Law Library Rare--Request in advance at Law Circulation Desk				Law Library > Request in Advance
