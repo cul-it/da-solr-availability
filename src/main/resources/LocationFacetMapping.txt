@@ -1,5 +1,4 @@
-Hierarchical Location Facet Mapping; v.1.1				
-Voyager Display Name	Suppress	Call# (852$khim)	Holding Note (852$z)	Facet Display Name
+Hierarchical Location Facet Mapping; v.1.1				Voyager Display Name	Suppress	Call# (852$khim)	Holding Note (852$z)	Facet Display Name
 Adelson Library				Adelson Library > Main Collection
 Adelson Library Reference (Non-Circulating)				Adelson Library > Reference
 Museum of Vertebrates (Non-Circulating)				Adelson Library > Museum of Vertebrates
@@ -44,6 +43,7 @@ Law Library Rare--Request in advance at Law Circulation Desk				Law Library > Re
 Law Library Reference (Non-Circulating)				Law Library > Reference
 Law Library Reserve				Law Library > Reserve
 Law Library Technical Services (Non-Circulating)				Law Library > Technical Services
+Law Library Special Reserve				Law Library > Special Reserve
 Law Library Legal Aid Clinic				Law Library > Legal Aid Clinic
 Library Annex				Library Annex
 Mann Circulation				Mann Library > Circulation
