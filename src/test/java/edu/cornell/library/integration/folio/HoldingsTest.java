@@ -1,6 +1,6 @@
 package edu.cornell.library.integration.folio;
 
-import static edu.cornell.library.integration.voyager.TestUtil.convertStreamToString;
+import static edu.cornell.library.integration.db_test.TestUtil.loadResourceFile;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -55,11 +55,9 @@ public class HoldingsTest extends DbBaseTest {
     // voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
 
     // Load expected result JSON for tests
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("folio_holdings_examples.json")){
-      ObjectMapper mapper = new ObjectMapper();
-      examples = mapper.readValue(convertStreamToString(in).replaceAll("(?m)^#.*$" , ""),
-          new TypeReference<HashMap<String,HoldingSet>>() {});
-    }
+    ObjectMapper mapper = new ObjectMapper();
+    examples = mapper.readValue(loadResourceFile("folio_holdings_examples.json").replaceAll("(?m)^#.*$" , ""),
+        new TypeReference<HashMap<String,HoldingSet>>() {});
 
     testOkapiClient = new StaticOkapiClient();
 
