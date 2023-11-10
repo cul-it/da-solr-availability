@@ -3,6 +3,7 @@ package edu.cornell.library.integration.folio;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -260,7 +261,8 @@ public final class Locations {
 
     List<FacetMapRule> patternMap = new ArrayList<>();
     try (BufferedReader in = new BufferedReader(new InputStreamReader( 
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)))) {
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename), StandardCharsets.UTF_8
+        ))) {
       String site;
       while ((site = in.readLine()) != null) {
         String[] parts = site.split("\\t", 5);
@@ -269,7 +271,6 @@ public final class Locations {
         FacetMapRule rule = new FacetMapRule(
             parts[0],parts[1].contains("X"),parts[2].toLowerCase(),parts[3].toLowerCase(),parts[4]);
         patternMap.add(rule);
-            
       }
     } catch (IOException e) {
       System.out.println("Couldn't read config file for site identifications.");

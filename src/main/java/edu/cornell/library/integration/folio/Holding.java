@@ -84,8 +84,15 @@ public class Holding {
     else
       this.active = true;
 
-    if ( raw.containsKey("permanentLocationId") ) {
-      Location l = locations.getByUuid((String)raw.get("permanentLocationId"));
+    String locationId = null;
+    if ( raw.containsKey("temporaryLocationId") ) {
+      locationId = (String)raw.get("temporaryLocationId");
+    } else if ( raw.containsKey("permanentLocationId") ) {
+      locationId = (String)raw.get("permanentLocationId");
+    }
+
+    if ( locationId != null ) {
+      Location l = locations.getByUuid(locationId);
       if (l.equals(locations.getByCode("serv,remo")))
         this.online = true;
       else
