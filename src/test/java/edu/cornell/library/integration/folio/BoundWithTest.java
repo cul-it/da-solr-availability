@@ -19,6 +19,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class BoundWithTest {
 
   static Connection inventory = null;
+  static Locations locations = null;
+  static OkapiClient testOkapiClient = null;
 
   @BeforeClass
   public static void connect() throws SQLException, IOException {
@@ -30,6 +32,9 @@ public class BoundWithTest {
 
     inventory = DriverManager.getConnection(
         prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+
+    testOkapiClient = new StaticOkapiClient();
+    locations = new Locations(testOkapiClient);
   }
 
   @Test
