@@ -1,0 +1,148 @@
+{
+  "holdingsNoteTypes": [
+    {
+      "id": "a9db29f8-cca5-4b80-a4db-070c7783a398",
+      "name": "Staff Restriction Note",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2023-03-28T14:27:41.245+00:00",
+        "createdByUserId": "93933f60-ca01-4170-92ad-9dbd07f9f1fb",
+        "updatedDate": "2023-03-28T14:27:41.245+00:00",
+        "updatedByUserId": "93933f60-ca01-4170-92ad-9dbd07f9f1fb"
+      }
+    },
+    {
+      "id": "88914775-f677-4759-b57b-1a33b90b24e0",
+      "name": "Electronic bookplate",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:18.932+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T18:56:18.932+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "d6510242-5ec3-42ed-b593-3585d2e48fd6",
+      "name": "Action note",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:18.932+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T18:56:18.932+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "c4407cc7-d79f-4609-95bd-1cefb2e2b5c5",
+      "name": "Copy note",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:18.936+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T18:56:18.936+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "e19eabab-a85c-4aef-a7b2-33bd9acef24e",
+      "name": "Binding",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:18.936+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T18:56:18.936+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "b160f13a-ddba-4053-b9c4-60ec5ea45d56",
+      "name": "Note",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:18.941+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T18:56:18.941+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "6a41b714-8574-4084-8d64-a9373c3fbb59",
+      "name": "Reproduction",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:18.946+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T18:56:18.946+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "db9b4787-95f0-4e78-becf-26748ce6bdeb",
+      "name": "Provenance",
+      "source": "folio",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:18.946+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T18:56:18.946+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "09536ac5-0c9b-49d6-b31e-532b97ffff0f",
+      "name": "Bound with item data",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:12:37.161+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:12:37.161+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "da97ff07-fe09-4af5-9523-f6af6a793edd",
+      "name": "Local Statistical Note",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:12:52.973+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:12:52.973+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "c0572041-01e3-48b5-b0d6-30ab3b2cc0eb",
+      "name": "Restriction",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:13:07.589+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:13:07.589+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "d81240db-0da7-437e-a073-76112b84c270",
+      "name": "Source of acquisition",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:13:16.747+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:13:16.747+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "7dbe8fc4-f567-4bd2-90d3-dc566a6b0996",
+      "name": "Transaction data",
+      "source": "local",
+      "metadata": {
+        "createdDate": "2021-06-17T19:13:24.254+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:13:24.254+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    }
+  ],
+  "totalRecords": 13
+}

@@ -38,6 +38,18 @@ public final class Locations {
   }
 
   /**
+   * Give access to location data by code or number. This must not be the first
+   * instantiation of a Locations() object in the current process, or an IOException
+   * will be thrown.
+   * @throws IOException 
+   */
+  public Locations() throws IOException {
+
+    if (_byCode.isEmpty())
+      throw new IOException("Locations must be instantiated before this point");
+  }
+
+  /**
    * Retrieve Location object based on <b>code</b>. The value will already have
    * been loaded into memory. The method cannot be called statically to ensure
    * that the instantiation has been able to load the data.
