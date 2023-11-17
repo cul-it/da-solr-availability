@@ -428,6 +428,10 @@ public class ProcessAvailabilityQueue {
       doc.addField(solrField, true);
     }
 
+    // TODO REMOVE THIS WORKAROUND WHEN WE HAVE A BETTER MODEL FOR SUPPRESSING GOOGLE COVERS DACCESS-53
+    if ( bibId.equals("8930429") ) doc.removeField("oclc_id_display");
+
+
     WorksAndInventory.updateInventory( inventory, doc );
 
     List<SolrInputDocument> thisDocsCallNumberDocs =
