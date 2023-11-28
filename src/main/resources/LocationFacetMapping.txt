@@ -86,6 +86,7 @@ Olin Library Room 303				Olin Library > Room 303
 Olin Library Room 403				Olin Library > Room 403
 Olin Library Room 603				Olin Library > Room 603
 Olin Library Room 604-605 (Non-Circulating)				Olin Library > Room 604-605
+Olin Library Digital CoLab				Olin Library > Digital CoLab Room 701
 Library Tech Services	X			Olin Library > Technical Services
 LTS E-Resources and Serials Management	X			Olin Library > Technical Services
 Olin Library Preservation Department				Olin Library > Preservation Department
