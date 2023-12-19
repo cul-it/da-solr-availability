@@ -84,8 +84,15 @@ public class Holding {
     else
       this.active = true;
 
-    if ( raw.containsKey("permanentLocationId") ) {
-      Location l = locations.getByUuid((String)raw.get("permanentLocationId"));
+    String locationId = null;
+    if ( raw.containsKey("temporaryLocationId") ) {
+      locationId = (String)raw.get("temporaryLocationId");
+    } else if ( raw.containsKey("permanentLocationId") ) {
+      locationId = (String)raw.get("permanentLocationId");
+    }
+
+    if ( locationId != null ) {
+      Location l = locations.getByUuid(locationId);
       if (l.equals(locations.getByCode("serv,remo")))
         this.online = true;
       else
@@ -128,6 +135,10 @@ public class Holding {
       for ( Map<String,Object> note : notes ) {
         String type = holdingsNoteTypes.getName((String) note.get("holdingsNoteTypeId"));
         String text = (String) note.get("note");
+        if ( type == null || type.isEmpty() || text == null || text.isEmpty() ) {
+          System.out.printf("Skipping invalid holding note on holding hrid%s.\n", this.hrid);
+          continue;
+        }
         Object so = note.get("staffOnly");
         boolean staffOnly = (String.class.isInstance(so)) ? Boolean.valueOf((String)so): (boolean) so;
 

@@ -12,6 +12,7 @@ Fine	Fine Arts Library	finearts
 Food	Food Science Library
 Geneva	Geneva Library	geneva
 ILR	ILR Library	ilr
+Catherwood	Catherwood Library	ilr
 Kroch	Kroch Library Asia	asia
 Law	Law Library	law
 Legal	Law Library	law

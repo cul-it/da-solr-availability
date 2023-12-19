@@ -1,10 +1,9 @@
-package edu.cornell.library.integration.voyager;
+package edu.cornell.library.integration.folio;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Set;
 
@@ -12,18 +11,23 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.cornell.library.integration.folio.Locations.Location;
+import edu.cornell.library.integration.voyager.VoyagerDBConnection;
+
 public class LocationsTest {
 
   static VoyagerDBConnection testDB = null;
-  static Connection voyagerTest = null;
   static Locations locations = null;
+  static OkapiClient testOkapiClient = null;
 
   @BeforeClass
   public static void connect() throws SQLException, IOException {
 
+    testOkapiClient = new StaticOkapiClient();
+    locations = new Locations(testOkapiClient);
+
     testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
-    voyagerTest = testDB.connection;
-    locations = new Locations(voyagerTest);
+
   }
 
   @AfterClass
@@ -34,10 +38,9 @@ public class LocationsTest {
   @Test
   public void locationsPopulated() {
 
-    edu.cornell.library.integration.voyager.Locations.Location l = locations.getByNumber(99);
-    assertEquals("code: olin; number: 99; name: Olin Library; library: Olin Library; hoursCode: olin",l.toString());
+    Location l = locations.getByCode("olin");
+    assertEquals("code: olin; name: Olin Library; library: Olin Library; hoursCode: olin",l.toString());
     assertEquals("Olin Library",l.library);
-    l = locations.getByCode("olin");
     assertEquals("olin",l.hoursCode);
   }
 
@@ -74,7 +77,7 @@ public class LocationsTest {
         locations.getByCode("olin"), "New & Noteworthy Books HK1234 .R56", null);
     assertEquals(2,facetValues.size());
     assertTrue(facetValues.contains("Olin Library"));
-    assertTrue(facetValues.contains("Olin Library > New & Noteworthy Books Shelf"));
+    assertTrue(facetValues.contains("Olin Library > New & Noteworthy"));
 
     facetValues = Locations.facetValues(
         locations.getByCode("mann"), "ELLIS HK1234 .R56", null);
@@ -95,6 +98,7 @@ public class LocationsTest {
 
     Set<String> facetValues = Locations.facetValues(
         locations.getByCode("afr"), "HK1234 .R56", "New Books Shelf");
+    System.out.println(locations.getByCode("afr").toString());
     assertEquals(2,facetValues.size());
     assertTrue(facetValues.contains("Africana Library"));
     assertTrue(facetValues.contains("Africana Library > New Books Shelf"));

@@ -26,6 +26,12 @@ public class OkapiClient {
   private final String url;
   private final String token;
   private final String tenant;
+  
+  protected OkapiClient() {
+    this.url = "BOGUS_URL";
+    this.token = "BOGUS_TOKEN";
+    this.tenant = "BOGUS_TENANT";
+  }
 
   public OkapiClient(Properties prop, String identifier) throws IOException {
     this.url = prop.getProperty("okapiUrl"+identifier);
@@ -274,5 +280,5 @@ public class OkapiClient {
     }
   }
 
-  private static ObjectMapper mapper = new ObjectMapper();
+  protected static ObjectMapper mapper = new ObjectMapper();
 }

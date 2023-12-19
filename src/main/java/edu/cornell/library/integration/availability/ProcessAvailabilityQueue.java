@@ -327,6 +327,7 @@ public class ProcessAvailabilityQueue {
     ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
     doc.addField("statcode_facet", holdings.getStatCodes(statCodes));
     doc.addField("statcode_facet", items.getStatCodes(statCodes));
+    doc.addField("item_count_i", items.itemCount());
     if ( Items.applyDummyRMCItems(holdings,items) )
       doc.addField("availability_facet","RMC Dummy Item");
     boolean active = doc.getFieldValue("type").equals("Catalog");
@@ -426,6 +427,10 @@ public class ProcessAvailabilityQueue {
       if ( doc.containsKey(solrField) ) doc.remove(solrField);
       doc.addField(solrField, true);
     }
+
+    // TODO REMOVE THIS WORKAROUND WHEN WE HAVE A BETTER MODEL FOR SUPPRESSING GOOGLE COVERS DACCESS-53
+    if ( bibId.equals("8930429") ) doc.removeField("oclc_id_display");
+
 
     WorksAndInventory.updateInventory( inventory, doc );
 

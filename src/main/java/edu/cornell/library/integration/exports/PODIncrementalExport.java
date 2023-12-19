@@ -111,7 +111,7 @@ public class PODIncrementalExport {
   private static Set<String> identifyChangedRecords(Connection inventory) throws SQLException {
 
     Set<String> changedInstances = new HashSet<>();
-    String dateCursor = "2022-07-21";
+    String dateCursor = "2023-04-01";
 
     // NEWER IN FOLIO CACHE
 

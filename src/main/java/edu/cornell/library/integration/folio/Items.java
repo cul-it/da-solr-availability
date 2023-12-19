@@ -259,6 +259,8 @@ public class Items {
     Item(Connection inventory, Map<String,Object> raw, Holding holding)
         throws SQLException, IOException {
 
+      if (locations == null)
+        locations = new Locations();
       this.rawFolioItem = raw;
       this.id = (String)raw.get("id");
       this.hrid = (String)raw.get("hrid");
