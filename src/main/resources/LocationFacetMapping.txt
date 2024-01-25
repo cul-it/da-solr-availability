@@ -28,6 +28,7 @@ Catherwood Library Reference (Non-Circulating)		Labor Law		Catherwood Library > 
 Catherwood Library Reference (Non-Circulating)				Catherwood Library > Reference
 Catherwood Library Permanent Reserve				Catherwood Library > Reserve
 Catherwood Library Main Desk				Catherwood Library > Main Desk
+Catherwood Library Reserve				Catherwood Library > Reserve
 Kheel Center (Non-Circulating)				Kheel Center > Main Collection
 Kheel Center (Request in advance)				Kheel Center > Request in advance
 Kheel Center Reference (Non-Circulating)				Kheel Center > Reference
