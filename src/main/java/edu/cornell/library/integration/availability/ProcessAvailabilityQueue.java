@@ -388,8 +388,10 @@ public class ProcessAvailabilityQueue {
 
     for ( Holding h : holdings.values()) {
       if (h.donors != null)
-        for (String donor : h.donors)
+        for (String donor : h.donors) {
           doc.addField("donor_display", donor);
+          doc.addField("donor_t", donor);
+        }
       if (h.call != null && h.call.matches(".*In Process.*"))
         doc.addField("availability_facet","In Process");
       if (h.itemSummary != null && h.itemSummary.unavail != null)
