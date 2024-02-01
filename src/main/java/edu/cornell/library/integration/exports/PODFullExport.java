@@ -1,4 +1,4 @@
-package edu.cornell.library.integration.folio;
+package edu.cornell.library.integration.exports;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -16,7 +16,8 @@ import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import edu.cornell.library.integration.folio.PODExporter.UpdateType;
+import edu.cornell.library.integration.exports.PODExporter.UpdateType;
+import edu.cornell.library.integration.folio.OkapiClient;
 
 public class PODFullExport {
 
