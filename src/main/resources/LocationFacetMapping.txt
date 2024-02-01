@@ -82,6 +82,7 @@ Olin Library Map Storage (Request in Advance via olinmaps@cornell.edu)				Olin L
 Olin Library Maps (Non-Circulating)				Olin Library > Maps
 Olin Library Reference (Non-Circulating)				Olin Library > Reference
 Olin Library Reserve				Olin Library > Reserve
+"Olin Library Reserve, Circulation Desk"				Olin Library > Reserve
 "Olin Library Graduate Study Room 501, Request at Circulation Area"				Olin Library > Graduate Study Room 501
 Olin Library Room 303				Olin Library > Room 303
 Olin Library Room 403				Olin Library > Room 403
