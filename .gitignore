@@ -4,3 +4,4 @@ database.properties
 /target/
 
 .classpath
+/.settings/

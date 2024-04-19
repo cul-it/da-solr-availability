@@ -51,9 +51,8 @@ public class MonitorFolioChanges {
       }
       System.out.println(time);
 
-//          new ItemStatuses(), new Items(), new OpenOrder(), new RecentIssues()));
       while ( true ) {
-        Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
+        Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-10_000);//now minus 10 seconds
         final Timestamp since = time;
 
         trimUserChangeLog.executeUpdate();
@@ -74,7 +73,7 @@ public class MonitorFolioChanges {
         queueForIndex( ChangeDetector.detectChangedOrders( inventory, okapi, since ),
             queueAvail, getTitle, getUserChangeTotals );
 
-        Thread.sleep(10_000);
+        Thread.sleep(12_000); //12 seconds
         time = newTime;
         Change.setCurrentToDate( time, inventory, CURRENT_TO_KEY );
       }
