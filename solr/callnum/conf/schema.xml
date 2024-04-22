@@ -44,6 +44,7 @@
     <field name="pub_date_display"       type="string" indexed="false"  stored="true"  multiValued="false"/>
     <field name="oclc_id_display"        type="string" indexed="false"  stored="true"  multiValued="true"/>
     <field name="isbn_display"           type="string" indexed="false"  stored="true"  multiValued="true"/>
+    <field name="no_google_img_b"       type="boolean" indexed="false"  stored="true"  multiValued="false"/>
 
 
     <!-- Fields duplicated from Blacklight index, filtered to particular holdings -->
