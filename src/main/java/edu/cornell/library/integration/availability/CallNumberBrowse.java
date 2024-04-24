@@ -32,7 +32,8 @@ class CallNumberBrowse {
       "fulltitle_vern_display",
       "pub_date_display",
       "isbn_display",
-      "oclc_id_display") ;
+      "oclc_id_display",
+      "no_google_img_b") ;
 
   private static final String lcCallNumberField = "lc_bib_display";
   private static final String urlField = "url_access_json";
