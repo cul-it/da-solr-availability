@@ -3,9 +3,11 @@ package edu.cornell.library.integration.folio;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collection;
+import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -33,6 +35,18 @@ public final class Locations {
 
     if (_byCode.isEmpty())
       populateLocationMaps(okapi);
+  }
+
+  /**
+   * Give access to location data by code or number. This must not be the first
+   * instantiation of a Locations() object in the current process, or an IOException
+   * will be thrown.
+   * @throws IOException 
+   */
+  public Locations() throws IOException {
+
+    if (_byCode.isEmpty())
+      throw new IOException("Locations must be instantiated before this point");
   }
 
   /**
@@ -166,11 +180,21 @@ public final class Locations {
     }
   }
 
+  public static enum Sort { CODE, UUID }
+
+  public static Collection<Location> allLocations(Sort sortOrder) {
+    switch (sortOrder) {
+    case CODE: return _byCode.values();
+    case UUID: return _byUuid.values();
+    }
+    return null;
+  }
+
   // PRIVATE RESOURCES
 
-  private static final Map<String, Location> _byCode = new HashMap<>();
-  private static final Map<String, Location> _byUuid = new HashMap<>();
-  private static final Map<Location, List<FacetMapRule>> _facetsByLocation = new HashMap<>();
+  private static final Map<String, Location> _byCode = new TreeMap<>();
+  private static final Map<String, Location> _byUuid = new TreeMap<>();
+  private static final Map<Location, List<FacetMapRule>> _facetsByLocation = new TreeMap<>();
 
   private static void populateLocationMaps(final OkapiClient okapi) throws IOException {
     Map<String,Map<String,String>> libraryPatterns = loadPatternMap("library_names.txt");
@@ -221,7 +245,7 @@ public final class Locations {
         String[] parts = site.split("\\t", 3);
         if (parts.length < 2)
           continue;
-        Map<String,String> l = new HashMap<>();
+        Map<String,String> l = new TreeMap<>();
         l.put(parts[1],(parts.length == 2)?null:parts[2]);
         patternMap.put(parts[0].toLowerCase(), l);
       }
@@ -237,7 +261,8 @@ public final class Locations {
 
     List<FacetMapRule> patternMap = new ArrayList<>();
     try (BufferedReader in = new BufferedReader(new InputStreamReader( 
-        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename)))) {
+        Thread.currentThread().getContextClassLoader().getResourceAsStream(filename), StandardCharsets.UTF_8
+        ))) {
       String site;
       while ((site = in.readLine()) != null) {
         String[] parts = site.split("\\t", 5);
@@ -246,7 +271,6 @@ public final class Locations {
         FacetMapRule rule = new FacetMapRule(
             parts[0],parts[1].contains("X"),parts[2].toLowerCase(),parts[3].toLowerCase(),parts[4]);
         patternMap.add(rule);
-            
       }
     } catch (IOException e) {
       System.out.println("Couldn't read config file for site identifications.");

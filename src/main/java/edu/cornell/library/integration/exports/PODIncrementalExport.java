@@ -1,4 +1,4 @@
-package edu.cornell.library.integration.folio;
+package edu.cornell.library.integration.exports;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -23,7 +23,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
-import edu.cornell.library.integration.folio.PODExporter.UpdateType;
+import edu.cornell.library.integration.exports.PODExporter.UpdateType;
+import edu.cornell.library.integration.folio.OkapiClient;
 
 public class PODIncrementalExport {
 
@@ -44,9 +45,7 @@ public class PODIncrementalExport {
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("inventoryDBUrl"),
         prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass")) ){
 
-      OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),
-          prop.getProperty("okapiTenantFolio"));
+      OkapiClient okapi = new OkapiClient(prop,"Folio");
 
       PODExporter exporter = new PODExporter( inventory, okapi, prop );
       exporter.verbose = true;
@@ -112,7 +111,7 @@ public class PODIncrementalExport {
   private static Set<String> identifyChangedRecords(Connection inventory) throws SQLException {
 
     Set<String> changedInstances = new HashSet<>();
-    String dateCursor = "2022-07-21";
+    String dateCursor = "2023-04-01";
 
     // NEWER IN FOLIO CACHE
 

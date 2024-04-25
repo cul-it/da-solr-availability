@@ -42,10 +42,7 @@ public class MonitorFolioChanges {
         PreparedStatement getUserChangeTotals = inventory.prepareStatement
             ("SELECT id, COUNT(*) FROM userChanges GROUP BY 1")) {
 
-      OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),
-          prop.getProperty("okapiTokenFolio"),
-          prop.getProperty("okapiTenantFolio"));
+      OkapiClient okapi = new OkapiClient( prop, "Folio" );
 
       Timestamp time = Change.getCurrentToDate( inventory, CURRENT_TO_KEY );
       if (time == null) {
@@ -54,9 +51,8 @@ public class MonitorFolioChanges {
       }
       System.out.println(time);
 
-//          new ItemStatuses(), new Items(), new OpenOrder(), new RecentIssues()));
       while ( true ) {
-        Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-6000);
+        Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-10_000);//now minus 10 seconds
         final Timestamp since = time;
 
         trimUserChangeLog.executeUpdate();
@@ -70,12 +66,14 @@ public class MonitorFolioChanges {
             queueAvail, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedLoans( inventory, okapi, since ),
             queueAvail, getTitle, getUserChangeTotals );
+        queueForIndex( ChangeDetector.detectChangedRequests( inventory, okapi, since ),
+            queueAvail, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedOrderLines( inventory, okapi, since ),
             queueAvail, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedOrders( inventory, okapi, since ),
             queueAvail, getTitle, getUserChangeTotals );
 
-        Thread.sleep(10_000);
+        Thread.sleep(12_000); //12 seconds
         time = newTime;
         Change.setCurrentToDate( time, inventory, CURRENT_TO_KEY );
       }

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -25,28 +26,45 @@ public class OkapiClient {
   private final String url;
   private final String token;
   private final String tenant;
+  
+  protected OkapiClient() {
+    this.url = "BOGUS_URL";
+    this.token = "BOGUS_TOKEN";
+    this.tenant = "BOGUS_TENANT";
+  }
 
-  public OkapiClient(final String okapiUrl, final String accessToken, final String tenant) {
-    this.url = okapiUrl;
-    this.token = accessToken;
-    this.tenant = tenant;
+  public OkapiClient(Properties prop, String identifier) throws IOException {
+    this.url = prop.getProperty("okapiUrl"+identifier);
+    this.tenant = prop.getProperty("okapiTenant"+identifier);
+    if ( prop.containsKey("okapiToken"+identifier))
+      this.token = prop.getProperty("okapiToken"+identifier);
+    else {
+      this.token = post("/authn/login",
+          String.format("{\"username\":\"%s\",\"password\":\"%s\"}",
+              prop.getProperty("okapiUser"+identifier),prop.getProperty("okapiPass"+identifier)));
+      prop.setProperty("okapiToken"+identifier, this.token);
+      System.out.println(this.token);
+    }
   }
 
   public String post(final String endPoint, final String json) throws IOException {
 
-    // TODO Improve error detection and handling
+    System.out.println("About to post " + endPoint);
 
-    System.out.println("About to post " + endPoint + " " + json);
-    final HttpURLConnection c = commonConnectionSetup(endPoint);
+    final URL fullPath = new URL(this.url + endPoint);
+    final HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();
+    c.setRequestProperty("Content-Type", "application/json;charset=utf-8");
+    c.setRequestProperty("X-Okapi-Tenant", this.tenant);
+
     c.setRequestMethod("POST");
     c.setDoOutput(true);
     c.setDoInput(true);
     final OutputStreamWriter writer = new OutputStreamWriter(c.getOutputStream());
     writer.write(json);
     writer.flush();
-    //      int responseCode = httpConnection.getResponseCode();
-    //      if (responseCode != 200)
-    //          throw new IOException(httpConnection.getResponseMessage());
+
+    String token = c.getHeaderField("x-okapi-token");
+
     final StringBuilder sb = new StringBuilder();
     try (BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), "utf-8"))) {
       String line = null;
@@ -54,7 +72,10 @@ public class OkapiClient {
         sb.append(line + "\n");
       }
     }
-    return sb.toString();
+    String response = sb.toString();
+    if ( token != null )
+      return token;
+    return response;
   }
 
   public String put(final String endPoint, final Map<String, Object> object) throws IOException {
@@ -151,11 +172,18 @@ public class OkapiClient {
     System.out.println(sb.toString());
     final HttpURLConnection c = commonConnectionSetup(sb.toString());
     final int responseCode = c.getResponseCode();
-    if (responseCode != 200)
-      throw new IOException(c.getResponseMessage());
 
+    if (responseCode != 200) {
+      try (InputStream is = c.getErrorStream()) {
+        String response = convertStreamToString(is);
+        System.out.println(response);
+      }
+      throw new IOException(c.getResponseMessage());
+    }
     try (InputStream is = c.getInputStream()) {
-      return convertStreamToString(is);
+      String response = convertStreamToString(is);
+//      System.out.println(response);
+      return response;
     }
   }
 
@@ -252,5 +280,5 @@ public class OkapiClient {
     }
   }
 
-  private static ObjectMapper mapper = new ObjectMapper();
+  protected static ObjectMapper mapper = new ObjectMapper();
 }

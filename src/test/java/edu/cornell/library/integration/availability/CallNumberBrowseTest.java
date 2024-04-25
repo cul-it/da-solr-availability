@@ -41,8 +41,7 @@ public class CallNumberBrowseTest {
       prop.load(in);
     }
 
-    okapi = new OkapiClient(
-        prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),prop.getProperty("okapiTenantFolio"));
+    okapi = new OkapiClient(prop,"Folio");
     inventory = DriverManager.getConnection(
         prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
 //  voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");

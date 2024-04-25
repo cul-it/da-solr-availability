@@ -109,9 +109,7 @@ public class ProcessAvailabilityQueue {
         SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
         ) {
 
-      OkapiClient okapi = new OkapiClient(
-          prop.getProperty("okapiUrlFolio"),prop.getProperty("okapiTokenFolio"),
-          prop.getProperty("okapiTenantFolio"));
+      OkapiClient okapi = new OkapiClient(prop,"Folio");
       Locations locations = new Locations(okapi);
       ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
       ReferenceData callNumberTypes = new ReferenceData(okapi, "/call-number-types","name");
@@ -329,6 +327,7 @@ public class ProcessAvailabilityQueue {
     ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
     doc.addField("statcode_facet", holdings.getStatCodes(statCodes));
     doc.addField("statcode_facet", items.getStatCodes(statCodes));
+    doc.addField("item_count_i", items.itemCount());
     if ( Items.applyDummyRMCItems(holdings,items) )
       doc.addField("availability_facet","RMC Dummy Item");
     boolean active = doc.getFieldValue("type").equals("Catalog");
@@ -389,8 +388,10 @@ public class ProcessAvailabilityQueue {
 
     for ( Holding h : holdings.values()) {
       if (h.donors != null)
-        for (String donor : h.donors)
+        for (String donor : h.donors) {
           doc.addField("donor_display", donor);
+          doc.addField("donor_t", donor);
+        }
       if (h.call != null && h.call.matches(".*In Process.*"))
         doc.addField("availability_facet","In Process");
       if (h.itemSummary != null && h.itemSummary.unavail != null)
@@ -428,6 +429,10 @@ public class ProcessAvailabilityQueue {
       if ( doc.containsKey(solrField) ) doc.remove(solrField);
       doc.addField(solrField, true);
     }
+
+    // TODO REMOVE THIS WORKAROUND WHEN WE HAVE A BETTER MODEL FOR SUPPRESSING GOOGLE COVERS DACCESS-53
+    if ( bibId.equals("8930429") ) doc.removeField("oclc_id_display");
+
 
     WorksAndInventory.updateInventory( inventory, doc );
 

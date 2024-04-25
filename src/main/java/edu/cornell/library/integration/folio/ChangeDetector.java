@@ -38,7 +38,7 @@ public class ChangeDetector {
 
         String hrid = (String)instance.get("hrid");
         String instanceJson = mapper.writeValueAsString(instance);
-        Map<String,String> metadata = (Map<String,String>) instance.get("metadata");
+        Map<String,String> metadata = Map.class.cast(instance.get("metadata"));
         Timestamp modDate = Timestamp.from(Instant.parse(
             metadata.get("updatedDate").replace("+00:00","Z")));
         modDateCursor = modDate;
@@ -117,7 +117,7 @@ public class ChangeDetector {
 
         Matcher m = modDateP.matcher(marc);
         Timestamp marcTimestamp = (m.matches())
-            ? Timestamp.from(Instant.parse(m.group(1).replace("+0000","Z"))): null;
+            ? Timestamp.from(Instant.parse(m.group(1).replace("+00:00","Z"))): null;
         if ( replaceBib == null )
           replaceBib = inventory.prepareStatement(
               "REPLACE INTO bibFolio (instanceHrid,moddate,content) VALUES (?,?,?)");
@@ -148,7 +148,7 @@ public class ChangeDetector {
         
         String hrid = (String)holding.get("hrid");
         String holdingJson = mapper.writeValueAsString(holding);
-        Map<String,String> metadata = (Map<String,String>) holding.get("metadata");
+        Map<String,String> metadata = Map.class.cast(holding.get("metadata"));
         Timestamp modDate = Timestamp.from(Instant.parse(
             metadata.get("updatedDate").replace("+00:00","Z")));
         modDateCursor = modDate;
@@ -227,7 +227,7 @@ public class ChangeDetector {
         
         String hrid = (String)item.get("hrid");
         String itemJson = mapper.writeValueAsString(item);
-        Map<String,String> metadata = (Map<String,String>) item.get("metadata");
+        Map<String,String> metadata = Map.class.cast(item.get("metadata"));
         Timestamp modDate = Timestamp.from(Instant.parse(
             metadata.get("updatedDate").replace("+00:00","Z")));
         modDateCursor = modDate;
@@ -311,7 +311,7 @@ public class ChangeDetector {
         String id = (String)loan.get("id");
         String itemId = (String)loan.get("itemId");
         String loanJson = mapper.writeValueAsString(loan);
-        Map<String,String> metadata = (Map<String,String>) loan.get("metadata");
+        Map<String,String> metadata = Map.class.cast(loan.get("metadata"));
         Timestamp modDate = Timestamp.from(Instant.parse(
             metadata.get("updatedDate").replace("+00:00","Z")));
         modDateCursor = modDate;
@@ -366,6 +366,97 @@ public class ChangeDetector {
     return changes;
   }
 
+  public static Map<String,Set<Change>> detectChangedRequests(
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+
+    Map<String,Set<Change>> changes = new HashMap<>();
+
+    int limit = 5000;
+    Timestamp modDateCursor = since;
+    List<Map<String, Object>> changedRequests;
+
+    do {
+      changedRequests = okapi.queryAsList("/request-storage/requests",
+          "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
+          " sortBy metadata.updatedDate",limit);
+      REQUEST: for (Map<String,Object> request : changedRequests) {
+
+        String id = (String)request.get("id");
+        String itemId = (String)request.get("itemId");
+        String requestJson = mapper.writeValueAsString(request);
+        boolean open = ((String)request.get("status")).startsWith("Open");
+        Map<String,String> metadata = Map.class.cast(request.get("metadata"));
+        Timestamp modDate = Timestamp.from(Instant.parse(
+            metadata.get("updatedDate").replace("+00:00","Z")));
+        modDateCursor = modDate;
+
+        boolean previouslyCached = false;
+        if ( getPreviousRequest == null )
+          getPreviousRequest = inventory.prepareStatement(
+              "SELECT content FROM requestFolio WHERE id = ?");
+        getPreviousRequest.setString(1, id);
+        try ( ResultSet rs = getPreviousRequest.executeQuery() ) {
+          while (rs.next()) {
+            if (rs.getString("content").equals(requestJson))
+              continue REQUEST;
+            previouslyCached = true;
+          }
+        }
+
+        if (getRequestParentage == null)
+          getRequestParentage = inventory.prepareStatement(
+              "SELECT instanceHrid, itemFolio.hrid FROM holdingFolio, itemFolio"+
+              " WHERE itemFolio.id = ? AND itemFolio.holdingHrid = holdingFolio.hrid");
+        getRequestParentage.setString(1, itemId);
+        String instanceHrid = null;
+        String itemHrid = null;
+        try (ResultSet rs = getRequestParentage.executeQuery() ) {
+          while (rs.next()) {
+            instanceHrid = rs.getString(1);
+            itemHrid = rs.getString(2);
+          }
+        }
+        if ( instanceHrid == null ) {
+          System.out.printf("Request %s (item %s) can't be tracked to instance,"
+              + " not queueing for index.\n", id, itemHrid);
+          continue;
+        }
+
+        if ( open ) {
+
+          if (replaceRequest == null)
+            replaceRequest = inventory.prepareStatement(
+                "REPLACE INTO requestFolio (id, itemId, itemHrid, moddate, content) VALUES (?,?,?,?,?)");
+          replaceRequest.setString(1, id);
+          replaceRequest.setString(2, itemId);
+          replaceRequest.setString(3, itemHrid);
+          replaceRequest.setTimestamp(4, modDate);
+          replaceRequest.setString(5, requestJson);
+          replaceRequest.executeUpdate();
+
+        } else { //not open
+
+          if ( ! previouslyCached ) continue REQUEST;
+          if (deleteRequest == null)
+            deleteRequest = inventory.prepareStatement("DELETE FROM requestFolio WHERE id = ?");
+          deleteRequest.setString(1, id);
+          deleteRequest.executeUpdate();
+        }
+
+        Change c = new Change(Change.Type.CIRC,id,"Request modified",
+            modDate,null,trackUserChange( inventory, requestJson ));
+        if ( ! changes.containsKey(instanceHrid)) {
+          Set<Change> t = new HashSet<>();
+          t.add(c);
+          changes.put(instanceHrid,t);
+        }
+        changes.get(instanceHrid).add(c);
+      }
+    } while (changedRequests.size() == limit);
+
+    return changes;
+  }
+
   public static Map<String,Set<Change>> detectChangedOrderLines(
       Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
 
@@ -382,7 +473,7 @@ public class ChangeDetector {
       POL: for (Map<String,Object> pol : changedPols) {
 
         String id = (String)pol.get("id");
-        Map<String,String> metadata = (Map<String,String>) pol.get("metadata");
+        Map<String,String> metadata = Map.class.cast(pol.get("metadata"));
         Timestamp modDate = Timestamp.from(Instant.parse(
             metadata.get("updatedDate").replace("+00:00","Z")));
         modDateCursor = modDate;
@@ -455,7 +546,7 @@ public class ChangeDetector {
       ORDER: for (Map<String,Object> order : changedOrders) {
 
         String id = (String)order.get("id");
-        Map<String,String> metadata = (Map<String,String>) order.get("metadata");
+        Map<String,String> metadata = Map.class.cast(order.get("metadata"));
         Timestamp modDate = Timestamp.from(Instant.parse(
             metadata.get("updatedDate").replace("+00:00","Z")));
         modDateCursor = modDate;
@@ -524,6 +615,7 @@ public class ChangeDetector {
   static PreparedStatement getPreviousHolding = null;
   static PreparedStatement getPreviousItem = null;
   static PreparedStatement getPreviousLoan = null;
+  static PreparedStatement getPreviousRequest = null;
   static PreparedStatement getPreviousOrder = null;
   static PreparedStatement getPreviousOrderLine = null;
   static PreparedStatement replaceInstance = null;
@@ -531,13 +623,16 @@ public class ChangeDetector {
   static PreparedStatement replaceHolding = null;
   static PreparedStatement replaceItem = null;
   static PreparedStatement replaceLoan = null;
+  static PreparedStatement replaceRequest = null;
   static PreparedStatement replaceOrder = null;
   static PreparedStatement replaceOrderLine = null;
   static PreparedStatement getInstanceHridByInstanceId = null;
   static PreparedStatement getItemParentage = null;
   static PreparedStatement getLoanParentage = null;
+  static PreparedStatement getRequestParentage = null;
   static PreparedStatement getOrderParentage = null;
   static PreparedStatement trackUpdatesByUser = null;
+  static PreparedStatement deleteRequest = null;
 
   static ObjectMapper mapper = new ObjectMapper();
   static {

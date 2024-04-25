@@ -1,0 +1,1451 @@
+{
+  "servicepoints": [
+    {
+      "id": "f254e947-036e-4a60-96e7-ab8ae9a80ac1",
+      "name": "Meescan",
+      "code": "meescan",
+      "discoveryDisplayName": "MeeScan",
+      "description": "Service pt for our Meescan app",
+      "shelvingLagTime": 1440,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": false
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": false
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": false
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2023-06-13T17:49:05.193+00:00",
+        "createdByUserId": "02fb4a5d-311d-4914-b2b9-8cb56ad9a5bb",
+        "updatedDate": "2023-06-13T17:49:05.193+00:00",
+        "updatedByUserId": "02fb4a5d-311d-4914-b2b9-8cb56ad9a5bb"
+      }
+    },
+    {
+      "id": "91f726ff-cbb1-4d60-821e-543ec1e91cc5",
+      "name": "Annex Service Point",
+      "code": "anx,circ",
+      "discoveryDisplayName": "Annex Reading Room",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T18:57:18.151+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-02-07T12:20:28.450+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "bf122b9c-fcb8-4ee8-b35e-8327413d8235",
+      "name": "Olin/Kroch Carrel and Research Space",
+      "code": "remote,okcar",
+      "discoveryDisplayName": "Special Program Delivery: Olin/Kroch Carrel and Research Space",
+      "description": "Discovery display name must begin with \"Special Delivery Program:\" in order for location to appear as a pickup option in Blacklight only to users in Remote Delivery Database",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2022-08-16T16:08:22.884+00:00",
+        "createdByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7",
+        "updatedDate": "2022-08-16T16:08:22.884+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "7c5abc9f-f3d7-4856-b8d7-6712462ca007",
+      "name": "Africana Service Point",
+      "code": "afr,circ",
+      "discoveryDisplayName": "Africana Library",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2020-06-15T23:36:04.351+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2022-12-01T21:25:59.337+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "b232d619-3441-4fd0-b94c-210002e1fbec",
+      "name": "Annex Contactless Pickup",
+      "code": "anx,grab",
+      "discoveryDisplayName": "Contactless Pickup - Annex",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:34.029+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-08-23T02:29:08.407+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "3a40852d-49fd-4df2-a1f9-6e2641a6e91f",
+      "name": "AAP NYC Remote Program",
+      "code": "remote,aap",
+      "discoveryDisplayName": "Special Program Delivery: AAP-NYC Remote Program",
+      "description": "Discovery display name must begin with \"Special Delivery Program:\" in order for location to appear as a pickup option in Blacklight only to users in Remote Delivery Database",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2020-06-15T23:36:05.885+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2022-01-13T20:46:01.817+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "5e38cc90-3b7d-4253-b80b-43e342fecf09",
+      "name": "Bindery Circulation",
+      "code": "bind,circ",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "shelvingLagTime": 4320,
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T18:57:45.940+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:47:38.350+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "debc685c-e905-48d3-9571-bff4742e7249",
+      "name": "Ornithology Circulation",
+      "code": "orni,circ",
+      "discoveryDisplayName": "Adelson - Lab of O staff only",
+      "description": "\"Lab of O staff only\" added to Discovery display name on a temporary basis by request of Tobi Hines on 8/21/23",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": false
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": false
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": false
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:11:45.580+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2023-08-21T14:15:02.171+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "760beccd-362d-45b6-bfae-639565a877f2",
+      "name": "Olin Service Point",
+      "code": "olin,circ",
+      "discoveryDisplayName": "Olin Library",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:11:11.772+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:28:09.090+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "18103f4d-7655-42c6-90e0-c98831715d74",
+      "name": "Mann Special Collections Service Point",
+      "code": "mnsc,circ",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2023-01-12T17:39:08.009+00:00",
+        "createdByUserId": "b67d00c4-0fce-4ff6-97c2-ca6da7b4db19",
+        "updatedDate": "2023-01-12T17:39:08.009+00:00",
+        "updatedByUserId": "b67d00c4-0fce-4ff6-97c2-ca6da7b4db19"
+      }
+    },
+    {
+      "id": "b78c284a-b9c4-448a-b181-e913d39ebbd6",
+      "name": "Cornell Tech Remote Program",
+      "code": "remote,tech",
+      "discoveryDisplayName": "Special Program Delivery: Cornell Tech - Bloomberg Center",
+      "description": "Discovery display name must begin with \"Special Delivery Program:\" in order for location to appear as a pickup option in Blacklight only to users in Remote Delivery Database",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T18:59:21.223+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:46:24.384+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "a27d5cda-4810-4b58-874c-1fe1955829e3",
+      "name": "INACTIVE Faculty Department Office",
+      "code": "remote,fod",
+      "discoveryDisplayName": "Special Program Delivery: Faculty Department Office",
+      "description": "Deactivated in March, 2022",
+      "shelvingLagTime": 2880,
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:00:28.527+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-03-02T16:46:29.039+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "8d40f52a-02cf-4753-b423-0615d4c98479",
+      "name": "Law Service Point",
+      "code": "law,circ",
+      "discoveryDisplayName": "Law School community only",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:04:33.355+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:23:12.804+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "ab1fce49-e832-41a4-8afc-7179a62332e2",
+      "name": "ILR Service Point",
+      "code": "ilr,circ",
+      "discoveryDisplayName": "Catherwood",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:02:15.244+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:26:12.195+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "86932cca-3b71-4d29-b0e9-0680b1fffabf",
+      "name": "Fine Arts Service Point",
+      "code": "fine,circ",
+      "discoveryDisplayName": "Fine Arts Library",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:01:01.422+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:27:00.799+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "ebc71902-8d9a-4267-a67c-3cfbc0742415",
+      "name": "Kheel Center Service Point",
+      "code": "kheel,circ",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:03:10.162+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:48:30.880+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "23b28dd9-cd7b-4ac1-a19a-6f4d3fce77d8",
+      "name": "Vet Contactless Pickup",
+      "code": "vet,grab",
+      "discoveryDisplayName": "Contactless Pickup - Vet College community only",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:49.594+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-19T18:35:37.607+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "1eb3510f-c403-44bf-b3ce-cf693b20ba56",
+      "name": "Music Service Point",
+      "code": "mus,circ",
+      "discoveryDisplayName": "Music Library",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:09:20.101+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:28:00.110+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "4752a822-380b-446c-860f-bccf641d7118",
+      "name": "Mann Contactless Pickup",
+      "code": "mann,grab",
+      "discoveryDisplayName": "Contactless Pickup - Mann",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": false
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:05:18.436+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-08-23T02:29:58.320+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "bfd10253-450b-4eb3-ba5b-819c1c6b5d06",
+      "name": "Interlibrary Loan Mann Service Point",
+      "code": "ils,mann",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:05:49.944+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:48:16.233+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "7c4567de-a492-47aa-b444-0d86045743ee",
+      "name": "No Circulation",
+      "code": "void",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "shelvingLagTime": 1,
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:10:19.865+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:48:41.926+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "144a881c-55cb-4c29-9c8e-61312c935bf3",
+      "name": "INACTIVE Mann Remote Pickup",
+      "code": "mann, rmt",
+      "discoveryDisplayName": "Mann Remote Pickup",
+      "description": "To Be deleted, Not to be used.",
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": false
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": false
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": false
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:07:01.616+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-09-23T19:04:16.553+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "8e4f5d73-2f77-4906-8d6a-329fc79c5994",
+      "name": "Nestle Service Point",
+      "code": "nest,circ",
+      "discoveryDisplayName": "Nestlé",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:09:51.790+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-02-07T12:20:14.328+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "1a072083-330f-4e1b-afa6-1ef15e24e3c3",
+      "name": "Math Contactless Pickup",
+      "code": "math,grab",
+      "discoveryDisplayName": "Contactless Pickup - Math Library",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:07:51.793+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:26:29.261+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "d6756e21-b828-4a0f-9346-2a10633c3b7a",
+      "name": "Math Service Point",
+      "code": "math,circ",
+      "discoveryDisplayName": "Math Library",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:08:47.318+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:27:44.389+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "872beba0-1bdf-4870-95f3-8781baddc02e",
+      "name": "Mann Service Point",
+      "code": "mann,circ",
+      "discoveryDisplayName": "Mann",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": false
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:07:33.238+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-07-06T13:02:55.643+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "d2248b50-9388-4b40-83e2-b2d1200e112c",
+      "name": "INACTIVE Ornithology Contactless Pickup",
+      "code": "orni,grab",
+      "discoveryDisplayName": "Staff Use Only",
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": false
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": false
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": false
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:13:18.039+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-10-13T18:49:22.397+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "46548315-62f2-41ea-9dfc-a8dbb5ee145b",
+      "name": "System",
+      "code": "System",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "System-specific service point required for certain system features. Please do not delete. Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:16:27.024+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:49:28.772+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "041d6c8d-20a1-4fd7-8588-458286782aea",
+      "name": "Law Contactless Pickup",
+      "code": "law,grab",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Temporarily changed discovery display name for for Law Contactless Pickup FOLIO service point from \"Contactless Pickup - Law\" to \"Staff Use Only\" so that it does not appear as a pickup location in Blacklight per request from Cynthia Lange on 12/1/22. AH.",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:03:32.156+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:25:39.838+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "e2f7ad76-ef2a-454f-8fd4-712caaa0f72b",
+      "name": "Uris Tower Contactless Pickup",
+      "code": "uris,grab",
+      "discoveryDisplayName": "Contactless Pickup - Uris Library",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:28.081+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:26:43.181+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "b097fb3b-3323-4812-9bf9-ccd7f2ff973d",
+      "name": "Vet Service Point",
+      "code": "vet,circ",
+      "discoveryDisplayName": "Veterinary Library",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": false
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:18:18.989+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-12-01T21:28:21.481+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "f4b8e9e3-831b-44eb-aafe-20f583c555a1",
+      "name": "Management Service Point",
+      "code": "jgsm,circ",
+      "discoveryDisplayName": "Management Library",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:02:41.126+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2023-01-23T13:17:26.545+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "c4c90014-c8c9-4ade-8f24-b5e313319f4b",
+      "name": "INACTIVE Africana Contactless Pickup",
+      "code": "afr,grab",
+      "discoveryDisplayName": "Contactless Pickup - Africana",
+      "description": "Deactivated in August, 2021",
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2020-06-15T23:36:07.593+00:00",
+        "createdByUserId": "868ce4b8-07fd-4a93-b708-868037fc3e02",
+        "updatedDate": "2022-01-13T19:02:21.072+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "45f3d022-b9a0-42db-8dfe-b9986b1a9048",
+      "name": "Interlibrary Loan Law Service Point",
+      "code": "ils,law",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "pickupLocation": false,
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:03:51.520+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:48:09.084+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "c5429efe-3517-4489-ba0e-4e8cd5799919",
+      "name": "Interlibrary Loan Olin Service Point",
+      "code": "ils,olin",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": false
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": false
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": false
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:10:43.127+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:48:23.319+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "a6dfff30-65ef-47bb-abd6-d329367848df",
+      "name": "Cornell in Washington Remote Program",
+      "code": "remote,wash",
+      "discoveryDisplayName": "Special Program Delivery: Cornell in Washington",
+      "description": "Discovery display name must begin with \"Special Delivery Program:\" in order for location to appear as a pickup option in Blacklight only to users in Remote Delivery Database",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T18:58:40.781+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:46:18.043+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "bafe5eda-f61e-4c4f-a715-75e75ac564a3",
+      "name": "Cornell University Press Remote Program",
+      "code": "remote,cup",
+      "discoveryDisplayName": "Special Program Delivery: Cornell University Press",
+      "description": "Discovery display name must begin with \"Special Delivery Program:\" in order for location to appear as a pickup option in Blacklight only to users in Remote Delivery Database",
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T18:59:53.101+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:46:31.389+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "8eba8e43-90ae-4be5-b786-1282474301b0",
+      "name": "Geneva Remote Program",
+      "code": "remote,gnva",
+      "discoveryDisplayName": "Special Program Delivery: Geneva Delivery",
+      "description": "Discovery display name must begin with \"Special Delivery Program:\" in order for location to appear as a pickup option in Blacklight only to users in Remote Delivery Database",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:01:42.866+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:46:46.083+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "aadd4e4e-73fd-47f3-b8b5-7c8e06f73226",
+      "name": "Borrow Direct Service Point",
+      "code": "bd,circ",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": false
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": false
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": false
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": false
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T18:58:13.331+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:47:45.625+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    },
+    {
+      "id": "6e734d77-7cc6-4f24-9191-ce4a81968042",
+      "name": "Rare and Manuscript Collections Service Point",
+      "code": "rmc,circ",
+      "discoveryDisplayName": "Staff Use Only",
+      "description": "Discovery display name set to \"Staff Use Only\" to prevent location from appearing as a pickup location in Blacklight",
+      "shelvingLagTime": 4320,
+      "pickupLocation": true,
+      "holdShelfExpiryPeriod": {
+        "duration": 9,
+        "intervalId": "Days"
+      },
+      "holdShelfClosedLibraryDateManagement": "Keep_the_current_due_date",
+      "staffSlips": [
+        {
+          "id": "6a6e72f0-69da-4b4c-8254-7154679e9d88",
+          "printByDefault": true
+        },
+        {
+          "id": "8812bae1-2738-442c-bc20-fe4bb38a11f8",
+          "printByDefault": true
+        },
+        {
+          "id": "1ed55c5c-64d9-40eb-8b80-7438a262288b",
+          "printByDefault": true
+        },
+        {
+          "id": "f838cdaf-555a-473f-abf1-f35ef6ab8ae1",
+          "printByDefault": true
+        }
+      ],
+      "metadata": {
+        "createdDate": "2021-06-17T19:14:08.082+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2022-01-13T20:48:49.297+00:00",
+        "updatedByUserId": "f08ad172-3b8b-452e-8a18-a5c15bea75c7"
+      }
+    }
+  ],
+  "totalRecords": 40
+}

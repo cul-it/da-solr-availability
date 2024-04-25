@@ -1,8 +1,10 @@
-package edu.cornell.library.integration.folio;
+package edu.cornell.library.integration.exports;
 
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
+
+import edu.cornell.library.integration.exports.PODExporter;
 
 public class PODTests {
 
