@@ -121,7 +121,7 @@
       <str name="fl">
         bibid, callnum_display, shelfloc, availability_json, cite_preescaped_display, lc_b,
         online, format, fulltitle_display, fulltitle_vern_display, classification_display,
-        oclc_id_display, isbn_display
+        oclc_id_display, isbn_display, no_google_img_b
       </str>
       <str name="df">callnum_sort</str>
       <str name="sort">callnum_sort asc</str>
@@ -151,7 +151,7 @@
       <str name="fl">
         bibid, callnum_display, shelfloc, availability_json, cite_preescaped_display, lc_b,
         online, format, fulltitle_display, fulltitle_vern_display, classification_display,
-        oclc_id_display, isbn_display
+        oclc_id_display, isbn_display, no_google_img_b
       </str>
       <str name="df">callnum_sort</str>
       <str name="sort">callnum_sort desc</str>
