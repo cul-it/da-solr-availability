@@ -334,10 +334,9 @@ public class Holding {
         this.location = itemLoc;
     } else {
       tempLocs = new ArrayList<>();
-      for (Item i : items)
+      for (Item i : items) if ( i.active )
         if (i.location != null && ! i.location.equals(this.location))
           tempLocs.add(new ItemReference(i.id,null,i.concatEnum(),null,i.location));
-          
     }
     this.itemSummary = new HoldingsItemSummary(
         itemCount,
