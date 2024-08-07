@@ -14,7 +14,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -111,7 +113,7 @@ public class PODIncrementalExport {
   private static Set<String> identifyChangedRecords(Connection inventory) throws SQLException {
 
     Set<String> changedInstances = new HashSet<>();
-    String dateCursor = "2023-04-01";
+    Timestamp oneMonthAgo = Timestamp.valueOf(LocalDateTime.now().minusMonths(1));
 
     // NEWER IN FOLIO CACHE
 
@@ -123,7 +125,7 @@ public class PODIncrementalExport {
     "         WHERE f.moddate > ?) AS f1"+
     " WHERE p.instanceHrid = f1.hrid"+
     "   AND f1.moddate > p.instanceModdate";
-    changedInstances.addAll(getChanged(inventory,newerInstanceQuery,dateCursor));
+    changedInstances.addAll(getChanged(inventory,newerInstanceQuery,oneMonthAgo));
 
     String newerBibQuery =
     "SELECT p.instanceHrid"+
@@ -133,7 +135,7 @@ public class PODIncrementalExport {
     "         WHERE f.moddate > ?) AS f1"+
     " WHERE p.instanceHrid = f1.instanceHrid"+
     "   AND f1.moddate > p.bibModdate";
-    changedInstances.addAll(getChanged(inventory,newerBibQuery,dateCursor));
+    changedInstances.addAll(getChanged(inventory,newerBibQuery,oneMonthAgo));
 
     String newerHoldingQuery =
     "SELECT p.instanceHrid, f1.instanceHrid"+
@@ -143,7 +145,7 @@ public class PODIncrementalExport {
     "         WHERE f.moddate > ?) AS f1"+
     " WHERE p.hrid = f1.hrid"+
     "   AND f1.moddate > p.moddate";
-    changedInstances.addAll(getChanged(inventory,newerHoldingQuery,dateCursor));
+    changedInstances.addAll(getChanged(inventory,newerHoldingQuery,oneMonthAgo));
 
     String newerItemQuery =
     "SELECT p2.instanceHrid, f2.instanceHrid"+
@@ -157,7 +159,7 @@ public class PODIncrementalExport {
     "   AND f1.moddate > p.moddate"+
     "   AND p.holdingHrid = p2.hrid"+
     "   AND f1.holdingHrid = f2.hrid";
-    changedInstances.addAll(getChanged(inventory,newerItemQuery,dateCursor));
+    changedInstances.addAll(getChanged(inventory,newerItemQuery,oneMonthAgo));
     System.out.println("All updates: "+changedInstances.size());
 
     changedInstances.addAll(getNewAndDeleted(inventory));
@@ -225,10 +227,10 @@ public class PODIncrementalExport {
   }
 
   private static Set<String> getChanged(
-      Connection inventory, String query, String dateCursor) throws SQLException {
+      Connection inventory, String query, Timestamp since) throws SQLException {
     Set<String> changes = new HashSet<>();
     try (PreparedStatement stmt = inventory.prepareStatement(query)) {
-      stmt.setString(1, dateCursor);
+      stmt.setTimestamp(1, since);
       try (ResultSet rs = stmt.executeQuery()) {
         int columns = rs.getMetaData().getColumnCount();
         while (rs.next()) for (int i = 1; i <= columns; i++) changes.add(rs.getString(i));
