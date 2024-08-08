@@ -16,3 +16,8 @@ CREATE INDEX "idx_itemDueDates_bib_id" ON "itemDueDates" (`bib_id`);
 
 CREATE TABLE `itemRequests` (  `bib_id` integer NOT NULL, `change_date` timestamp NULL DEFAULT NULL, json TEXT);
 CREATE INDEX "idx_itemRequests_bib_id" ON "itemRequests" (`bib_id`);
+
+CREATE TABLE `loanFolio` (  `id` varchar(37) NOT NULL,  `holdingId` varchar(37) NOT NULL,  `itemHrid` varchar(12) NOT NULL,  `moddate` timestamp NULL DEFAULT NULL,  `content` longtext DEFAULT NULL)
+
+CREATE TABLE `classification` (`low_letters` char(3) NOT NULL collate nocase, `high_letters` char(3) NOT NULL collate nocase,  `low_numbers` float(9,4) NOT NULL,  `high_numbers` float(9,4) NOT NULL,  `label` varchar(256) NOT NULL )
+

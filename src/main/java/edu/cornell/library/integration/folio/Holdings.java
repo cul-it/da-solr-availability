@@ -76,9 +76,10 @@ public class Holdings {
   public static HoldingSet retrieveHoldingsByInstanceHrid(
       Connection inventory, Locations locations, ReferenceData holdingsNoteTypes,
       ReferenceData callNumberTypes, String instanceHrid ) throws SQLException,IOException {
-    if ( holdingsByInstance == null )
-      holdingsByInstance = inventory.prepareStatement(
-          "SELECT * FROM holdingFolio WHERE instanceHrid = ?");
+    try (
+      PreparedStatement holdingsByInstance = inventory.prepareStatement(
+          "SELECT * FROM holdingFolio WHERE instanceHrid = ?")){
+//    System.out.format("%s %s (%s)\n",inventory.isClosed(), holdingsByInstance.isClosed(), instanceHrid);
     holdingsByInstance.setString(1, instanceHrid);
     HoldingSet holdings = new HoldingSet();
     try (ResultSet rs = holdingsByInstance.executeQuery() ) {
@@ -89,6 +90,7 @@ public class Holdings {
       }
     }
     return holdings;
+    }
   }
 /*
   public static HoldingSet retrieveHoldingsByInstanceHrid(
@@ -111,7 +113,7 @@ public class Holdings {
   }
   static ObjectMapper mapper = new ObjectMapper();
   static {
-    mapper.setSerializationInclusion(Include.NON_NULL);
+    mapper.setSerializationInclusion(Include.NON_EMPTY);
   }
 
   public static class HoldingSet {

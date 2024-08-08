@@ -1,0 +1,285 @@
+{
+  "loantypes": [
+    {
+      "id": "a00b928e-39ef-4c32-aec9-f57dfb588456",
+      "name": "1 Day Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:16:51.294+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:16:51.294+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "861998f8-3cc8-42b0-85eb-ff147b9683b9",
+      "name": "12 Hour Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:16:54.834+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:16:54.834+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "3b102b62-90f9-4351-9d20-6f65714fc8a9",
+      "name": "14 Day Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:03.040+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:17:03.040+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "558f30ed-8def-4af6-bf89-c93a69dd51b9",
+      "name": "2 Day Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:11.096+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:17:11.096+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "05efc087-adb9-43b5-857d-9d8af62ba660",
+      "name": "2 Hour Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:18.645+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:17:18.645+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "23ed0bee-15c6-4043-923a-138b2e1cad8a",
+      "name": "3 Day Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:26.942+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:17:26.942+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "12326209-dd56-410c-8f02-1b7119b0c071",
+      "name": "3 Hour Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:35.022+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:17:35.022+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "fc69f8a6-1c5f-498c-9cec-7cca8ef740b8",
+      "name": "4 Hour Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:44.475+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:17:44.475+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "ae3214e1-8b4c-44ce-9c48-2e8a0cb8d928",
+      "name": "5 Hour Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:17:54.377+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:17:54.377+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "79b2aec0-2790-450a-930a-c37bd082653d",
+      "name": "7 Day Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:18:03.098+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:18:03.098+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "3dfe6532-e0af-4c72-b744-2bf035c49caf",
+      "name": "8 Hour Loan",
+      "metadata": {
+        "createdDate": "2021-06-17T19:18:11.515+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:18:11.515+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "35774526-2857-4962-924a-2bffb0afba05",
+      "name": "BD LOAN",
+      "metadata": {
+        "createdDate": "2021-06-17T19:18:18.072+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:18:18.072+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "2b94c631-fca9-4892-a730-03ee529ffe27",
+      "name": "Circulating",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:22.740+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:18:28.942+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "e8b311a6-3b21-43f2-a269-dd9310cb2d0e",
+      "name": "Reserves",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:22.752+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:18:40.076+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "2e48e713-17f3-4c13-a9f8-23845bb210a4",
+      "name": "Non-circulating",
+      "metadata": {
+        "createdDate": "2021-06-17T18:56:22.744+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2021-06-17T19:19:00.113+00:00",
+        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+      }
+    },
+    {
+      "id": "ebe63f7f-3cf1-4c12-85f5-6f1922c4decc",
+      "name": "ILL LOAN",
+      "metadata": {
+        "createdDate": "2021-07-01T22:58:51.137+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2021-07-01T22:58:51.137+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "246d070f-989e-4c67-a4d2-820c3f5d32f2",
+      "name": "Equipment short term",
+      "metadata": {
+        "createdDate": "2022-07-26T17:34:17.786+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-07-26T17:34:17.786+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "e25a2ced-45fd-4ee8-9460-2a62ced41ba8",
+      "name": "Equipment long term",
+      "metadata": {
+        "createdDate": "2022-07-26T17:34:27.454+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-07-26T17:34:27.454+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "804af259-c708-49da-a2a1-9efadacbe52a",
+      "name": "Equipment extended loan",
+      "metadata": {
+        "createdDate": "2022-07-26T17:34:39.508+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-07-26T17:34:39.508+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "ea675735-eb67-4f97-a6c2-80644130dfca",
+      "name": "Keys short term",
+      "metadata": {
+        "createdDate": "2022-07-26T17:34:51.907+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-07-26T17:34:51.907+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "e4e4fa25-9a79-4088-a124-b7ce6c38d9bb",
+      "name": "Keys long term",
+      "metadata": {
+        "createdDate": "2022-07-26T17:34:59.595+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-07-26T17:34:59.595+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "a3fa5b15-140f-4c52-97a3-c9e8bcd680c2",
+      "name": "Keys extended loan",
+      "metadata": {
+        "createdDate": "2022-07-26T17:35:13.707+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-07-26T17:35:13.707+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "6ace1abb-685f-440b-b665-27b7d0cc776b",
+      "name": "ILL LOAN 1 Week",
+      "metadata": {
+        "createdDate": "2022-08-25T18:07:25.806+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-08-25T18:07:25.806+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "e42aced2-e9c9-4935-a386-22a1164d92d9",
+      "name": "ILL LOAN 2 Weeks",
+      "metadata": {
+        "createdDate": "2022-08-25T18:07:38.596+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-08-25T18:07:38.596+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "601d0019-7a96-4b08-8c76-bb4527ae1039",
+      "name": "ILL LOAN 4 Weeks",
+      "metadata": {
+        "createdDate": "2022-08-25T18:07:48.133+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-08-25T18:07:48.133+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "74892abf-85be-4d4d-b8e4-a14b716df477",
+      "name": "ILL LOAN 6 Weeks",
+      "metadata": {
+        "createdDate": "2022-08-25T18:07:59.099+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2022-08-25T18:07:59.099+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "be689dad-c1de-4acc-9899-c742603d803f",
+      "name": "ILL LOAN 8 Weeks",
+      "metadata": {
+        "createdDate": "2023-09-11T15:27:46.653+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2023-09-11T15:27:46.653+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "9dbf06c3-ca6a-4296-8179-ef6bad1a3ccf",
+      "name": "ILL LOAN 10 Weeks",
+      "metadata": {
+        "createdDate": "2023-09-11T15:27:54.811+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2023-09-11T15:27:54.811+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    }
+  ],
+  "totalRecords": 28
+}

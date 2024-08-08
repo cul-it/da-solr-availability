@@ -83,6 +83,9 @@ public class ProcessAvailabilityQueue {
     try (Connection inventoryDB = DriverManager.getConnection(
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),
             prop.getProperty("inventoryDBPass"));
+        Connection classificationDB = DriverManager.getConnection(
+            prop.getProperty("classificationDBUrl"),prop.getProperty("classificationDBUser"),
+            prop.getProperty("classificationDBPass"));
         PreparedStatement readQStmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.hrid, priority"+
              "  FROM availabilityQueue"+
@@ -166,7 +169,7 @@ public class ProcessAvailabilityQueue {
           queueRecordsNotRecentlyUpdated(inventoryDB,solr);
         } else {
           UpdateResults updateSuccess = updateBibInSolr(
-              okapi,inventoryDB,solr,callNumberSolr,locations,
+              okapi,inventoryDB,classificationDB,solr,callNumberSolr,locations,
               holdingsNoteTypes, callNumberTypes, statCodes, bib, priority);
           if (priority != null && priority <= 5)
             solr.blockUntilFinished();
@@ -281,7 +284,7 @@ public class ProcessAvailabilityQueue {
       "  FROM processedMarcData"+
       " WHERE hrid = ?";
   static UpdateResults updateBibInSolr(
-      OkapiClient okapi, Connection inventory,
+      OkapiClient okapi, Connection inventory, Connection classificationDB,
       SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
       ReferenceData callNumberTypes, ReferenceData statCodes, BibToUpdate changedBib, Integer priority)
       throws SQLException, IOException, InterruptedException {
@@ -437,7 +440,7 @@ public class ProcessAvailabilityQueue {
     WorksAndInventory.updateInventory( inventory, doc );
 
     List<SolrInputDocument> thisDocsCallNumberDocs =
-        CallNumberBrowse.generateBrowseDocuments(inventory,doc, holdings);
+        CallNumberBrowse.generateBrowseDocuments(classificationDB,doc, holdings);
 
     callnumSolrDocs.addAll( thisDocsCallNumberDocs );
     Set<String> allCallNumbers =
