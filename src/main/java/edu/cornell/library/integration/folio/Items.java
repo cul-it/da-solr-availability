@@ -54,11 +54,10 @@ public class Items {
     ItemList il = new ItemList();
     Map<Integer,String> dueDates = new TreeMap<>();
     Map<Integer,String> requests = new TreeMap<>();
-    if (itemByHolding == null)
-      itemByHolding = inventory.prepareStatement(
+    try (PreparedStatement itemByHolding = inventory.prepareStatement(
           "SELECT i.id, i.content, s.sequence"+
           "  FROM itemFolio i LEFT JOIN itemSequence s ON i.hrid = s.hrid" +
-          " WHERE i.holdingHrid = ?");
+          " WHERE i.holdingHrid = ?")) {
     for (String holdingId : holdings.getUuids()) {
       Holding h = holdings.get(holdingId);
       if (h.online != null && h.online) continue;
@@ -87,6 +86,7 @@ public class Items {
       updateInInventory(inventory,bibId,TrackingTable.REQUESTS,requests);
     }
     return il;
+    }
   }
   private static PreparedStatement itemByHolding = null;
 

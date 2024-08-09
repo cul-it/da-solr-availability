@@ -33,16 +33,16 @@ public class CallNumberTools {
     }
   }
 
-  static String generateClassification(Connection inventory, String callNum) throws SQLException, IOException {
-    if (inventory == null) return null;
+  static String generateClassification(Connection classificationDB, String callNum) throws SQLException, IOException {
+    if (classificationDB == null) return null;
     if ( prefixes == null )
       loadPrefixes("callnumberprefixes.txt");
 
       Matcher m = lcClass.matcher(sortForm(callNum,prefixes));
     if (m.matches()) {
       if ( classificationQ == null )
-        classificationQ = inventory.prepareStatement(
-            "  select label from classifications.classification"
+        classificationQ = classificationDB.prepareStatement(
+            "  select label from classification"
             + " where ? between low_letters and high_letters"
             + "   and ? between low_numbers and high_numbers"
             + " order by high_letters desc, high_numbers desc");

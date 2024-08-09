@@ -1,16 +1,16 @@
 package edu.cornell.library.integration.availability;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static edu.cornell.library.integration.db_test.TestUtil.loadResourceFile;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.stream.XMLStreamException;
@@ -21,44 +21,63 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.cornell.library.integration.db_test.DbBaseTest;
 import edu.cornell.library.integration.folio.Holdings;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 import edu.cornell.library.integration.folio.Items;
 import edu.cornell.library.integration.folio.Items.ItemList;
+import edu.cornell.library.integration.folio.LoanTypes;
+import edu.cornell.library.integration.folio.Locations;
 import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.ReferenceData;
+import edu.cornell.library.integration.folio.ServicePoints;
+import edu.cornell.library.integration.folio.StaticOkapiClient;
 
-public class CallNumberBrowseTest {
+public class CallNumberBrowseTest extends DbBaseTest {
 
+  static Map<String,HoldingSet> examples;
   static OkapiClient okapi = null;
-  static Connection inventory = null;
+  static Connection testDB = null;
 //  static Connection voyagerLive = null;
+  static Locations locations = null;
+  static ReferenceData holdingsNoteTypes = null;
+  static ReferenceData callNumberTypes = null;
 
   @BeforeClass
   public static void connect() throws SQLException, IOException {
-
-    Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
-
-    okapi = new OkapiClient(prop,"Folio");
-    inventory = DriverManager.getConnection(
-        prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
-//  voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
+    setup();
+    testDB = getConnection();
+    ObjectMapper mapper = new ObjectMapper();
+    examples = mapper.readValue(loadResourceFile("folio_holdings_examples.json").replaceAll("(?m)^#.*$" , ""),
+        new TypeReference<HashMap<String,HoldingSet>>() {});
+    okapi = new StaticOkapiClient();
+    locations = new Locations(okapi);
+    holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types", "name");
+    callNumberTypes = new ReferenceData(okapi, "/call-number-types", "name");
+    LoanTypes.initialize(okapi);
+    ServicePoints.initialize(okapi);
   }
 
-/* TODO Fix all this 
+  @AfterClass
+  public static void cleanUp() throws SQLException {
+    if (testDB != null) {
+      testDB.close();
+    }
+  }
+
   @Test
   public void multipleCopies() throws SQLException, IOException, XMLStreamException {
-    HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(okapi, null,null, "4442869");
-    for (String holdingUuid : holdings.getUuids()) {
-      ItemList i = Items.retrieveItemsByHoldingId(okapi, holdingUuid, holdings.get(holdingUuid).active);
-      holdings.get(holdingUuid).summarizeItemAvailability(i.getItems().get(holdingUuid));
-    }
+    HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "4442869");
+    ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "4442869", holdings);
+    for (String holdingUuid : holdings.getUuids())
+      holdings.get(holdingUuid).summarizeItemAvailability(items.getItems().get(holdingUuid));
 
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "4442869");
-    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(testDB, mainDoc, holdings);
 
     assertEquals(3,docs.size());
     assertEquals(
@@ -70,12 +89,12 @@ public class CallNumberBrowseTest {
         + "<field name=\"callnum_display\">Rare Books PS3554.I3 D6 1996</field>"
         + "<field name=\"lc_b\">true</field>"
         + "<field name=\"availability_json\">{\"available\":true,"
-        +    "\"availAt\":{\"Kroch Library Rare &amp; Manuscripts (Non-Circulating)\":\"\"}}</field>"
+        +    "\"availAt\":{\"Rare and Manuscript Collections (Non-Circulating)\":\"\"}}</field>"
         + "<field name=\"classification_display\">P - Language &amp; Literature "
         +    "&gt; PS - Americal Literature &gt; PS1-3576 - American literature "
         +    "&gt; PS700-3576 - Individual authors &gt; PS3550-3576 - 1961-2000</field>"
-        + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts</field>"
-        + "<field name=\"location\">Kroch Library Rare &amp; Manuscripts &gt; Main Collection</field>"
+        + "<field name=\"location\">Rare &amp; Manuscript</field>"
+        + "<field name=\"location\">Rare &amp; Manuscript &gt; Main Collection</field>"
         + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
@@ -88,15 +107,15 @@ public class CallNumberBrowseTest {
         + "<field name=\"lc_b\">true</field>"
         + "<field name=\"availability_json\">{\"available\":true,"
         +    "\"availAt\":{\"Olin Library\":\"\","
-        +                 "\"ILR Library (Ives Hall)\":\"\","
+        +                 "\"Catherwood Library\":\"\","
         +                 "\"Mann Library\":\"\"}}</field>"
         + "<field name=\"classification_display\">P - Language &amp; Literature "
         +    "&gt; PS - Americal Literature &gt; PS1-3576 - American literature "
         +    "&gt; PS700-3576 - Individual authors &gt; PS3550-3576 - 1961-2000</field>"
         + "<field name=\"location\">Olin Library</field>"
         + "<field name=\"location\">Olin Library &gt; Main Collection</field>"
-        + "<field name=\"location\">ILR Library</field>"
-        + "<field name=\"location\">ILR Library &gt; Main Collection</field>"
+        + "<field name=\"location\">Catherwood Library</field>"
+        + "<field name=\"location\">Catherwood Library &gt; Main Collection</field>"
         + "<field name=\"location\">Mann Library</field>"
         + "<field name=\"location\">Mann Library &gt; Main Collection</field>"
         + "<field name=\"online\">At the Library</field></doc>",
@@ -125,18 +144,22 @@ public class CallNumberBrowseTest {
 
   @Test
   public void serial() throws SQLException, IOException, XMLStreamException {
-    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 329763);
-    for (int mfhdId : holdings.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
-      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
-    }
+    HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "329763");
+    ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "329763", holdings);
+    assertEquals(8,holdings.size());
+    Collection<Object> linkJsons = new HashSet<>();
+    linkJsons.add("{\"description\":\"HathiTrust (multiple volumes)\",\"url\":\"http://catalog.hathitrust.org/Record/000637680\"}");
+    Holdings.mergeAccessLinksIntoHoldings(holdings, linkJsons);
+    assertEquals(9,holdings.size());
+    for (String holdingUuid : holdings.getUuids()) if (items.getItems().containsKey(holdingUuid))
+      holdings.get(holdingUuid).summarizeItemAvailability(items.getItems().get(holdingUuid));
 
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "329763");
     mainDoc.addField("lc_callnum_full", "Q1 .N2");
     mainDoc.addField("lc_bib_display", "Q1 .N2");
-    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
-
+    mainDoc.addField("url_access_json","link json (just checking for presence at this point)");
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(testDB, mainDoc, holdings);
     assertEquals(2,docs.size());
     assertEquals(
         "<doc boost=\"1.0\">"
@@ -156,20 +179,20 @@ public class CallNumberBrowseTest {
         "<doc boost=\"1.0\">"
         + "<field name=\"bibid\">329763</field>"
         + "<field name=\"cite_preescaped_display\"></field>"
+        + "<field name=\"online\">Online</field>"
         + "<field name=\"id\">329763.2</field>"
         + "<field name=\"callnum_sort\">Q1 .N2 0 329763.2</field>"
         + "<field name=\"callnum_display\">Q1 .N2</field>"
         + "<field name=\"lc_b\">true</field>"
-        + "<field name=\"availability_json\">{\"available\":true,\"availAt\":"
-        +    "{\"Veterinary Library (Schurman Hall)\":\"\"}}</field>"
+        + "<field name=\"availability_json\">{\"online\":true}</field>"
         + "<field name=\"classification_display\">Q - Science &gt; Q - Science (General) "
         +    "&gt; Q1-295 - General</field>"
-        + "<field name=\"location\">Veterinary Library</field>"
-        + "<field name=\"location\">Veterinary Library &gt; Main Collection</field>"
-        + "<field name=\"online\">At the Library</field></doc>",
+        +"</doc>",
         ClientUtils.toXML(docs.get(1)));
 
   }
+
+  /* TODO Fix all this 
 
   @Test
   public void availableToPurchase() throws SQLException, IOException, XMLStreamException {
@@ -295,22 +318,21 @@ public class CallNumberBrowseTest {
     assertEquals("1082972111",docs.get(0).getFieldValue("oclc_id_display"));
 
   }
-
+*/
   @Test
   public void bibCallNumberForClosedStacksHoldingsWithNonLcHoldingCallNum()
       throws SQLException, IOException, XMLStreamException {
 
-    HoldingSet holdings = Holdings.retrieveHoldingsByBibId(voyagerTest, 1449673);
-    for (int mfhdId : holdings.getMfhdIds()) {
-      ItemList i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, holdings.get(mfhdId).active);
-      holdings.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
-    }
+    HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "1449673");
+    ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "1449673", holdings);
+    for (String holdingUuid : holdings.getUuids())
+      holdings.get(holdingUuid).summarizeItemAvailability(items.getItems().get(holdingUuid));
 
     SolrInputDocument mainDoc = new SolrInputDocument();
     mainDoc.addField("id", "1449673");
     mainDoc.addField("lc_bib_display", "Z340 .P58");
     mainDoc.addField("oclc_id_display", "63966981");
-    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(inventory, mainDoc, holdings);
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(testDB, mainDoc, holdings);
 
     assertEquals(3,docs.size());
     assertEquals("Z340 .P58",docs.get(0).getFieldValue("callnum_display"));
@@ -323,6 +345,35 @@ public class CallNumberBrowseTest {
     assertEquals("63966981",docs.get(0).getFieldValue("oclc_id_display"));
   }
 
+  @Test
+  public void bibCallNumberForOpenStacksHoldingsWithNonLcHoldingCallNum()
+      throws SQLException, IOException, XMLStreamException {
+
+    HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "3088531");
+    ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "3088531", holdings);
+    for (String holdingUuid : holdings.getUuids())
+      holdings.get(holdingUuid).summarizeItemAvailability(items.getItems().get(holdingUuid));
+    SolrInputDocument mainDoc = new SolrInputDocument();
+    mainDoc.addField("id", "3088531");
+    mainDoc.addField("lc_bib_display", "Z340 .P58"); // because open location, bib lc call number not in browse docs
+    List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(testDB, mainDoc, holdings);
+    assertEquals(1, docs.size());
+    assertEquals(
+        "<doc boost=\"1.0\">"
+        + "<field name=\"bibid\">3088531</field>"
+        + "<field name=\"cite_preescaped_display\"></field>"
+        + "<field name=\"id\">3088531.1</field>"
+        + "<field name=\"callnum_sort\">Film 2600 1851-1875 Reel H-31, no. 1253 0 3088531.1</field>"
+        + "<field name=\"callnum_display\">Film 2600 1851-1875 Reel H-31, no. 1253</field>"
+        + "<field name=\"lc_b\">false</field>"
+        + "<field name=\"availability_json\">{\"available\":true,\"availAt\":{\"Olin Library\":\"\"}}</field>"
+        + "<field name=\"location\">Olin Library</field>"
+        + "<field name=\"location\">Olin Library &gt; Main Collection</field>"
+        + "<field name=\"online\">At the Library</field></doc>",
+        ClientUtils.toXML(docs.get(0)));
+  }
+
+/*
   @Test
   public void letterOnlyCallNumber()
       throws SQLException, IOException, XMLStreamException {

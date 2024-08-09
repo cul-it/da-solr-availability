@@ -40,18 +40,18 @@ public class ItemStatus {
     if (this.status.equals("Checked out")) {
       List<Map<String, Object>> loans = new ArrayList<>();
 //          okapi.queryAsList("/loan-storage/loans", "itemId=="+item.id, null);
-      if ( loansByItem == null )
-        loansByItem = inventory.prepareStatement("SELECT * FROM loanFolio WHERE itemHrid = ?");
-      loansByItem.setString(1, item.hrid);
-      try ( ResultSet rs = loansByItem.executeQuery() ) {
-        while (rs.next()) loans.add(mapper.readValue(rs.getString("content"), Map.class));
+      try (PreparedStatement loansByItem = inventory.prepareStatement("SELECT * FROM loanFolio WHERE itemHrid = ?")){
+        loansByItem.setString(1, item.hrid);
+        try ( ResultSet rs = loansByItem.executeQuery() ) {
+          while (rs.next()) loans.add(mapper.readValue(rs.getString("content"), Map.class));
+        }
+        for (Map<String,Object> loan : loans) {
+          if ( ! ((Map<String,String>)loan.get("status")).get("name").equals("Open") ) continue;
+          if (loan.containsKey("dueDate"))
+            this.due = isoDT.parse((String)loan.get("dueDate"),Instant::from).getEpochSecond();
+        }
+        if ( item.loanType.shortLoan ) this.shortLoan = true;
       }
-      for (Map<String,Object> loan : loans) {
-        if ( ! ((Map<String,String>)loan.get("status")).get("name").equals("Open") ) continue;
-        if (loan.containsKey("dueDate"))
-          this.due = isoDT.parse((String)loan.get("dueDate"),Instant::from).getEpochSecond();
-      }
-      if ( item.loanType.shortLoan ) this.shortLoan = true;
       return;
     }
 
