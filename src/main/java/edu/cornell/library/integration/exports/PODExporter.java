@@ -17,6 +17,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -221,7 +222,7 @@ public class PODExporter {
         return UpdateType.NONE;
       }
 
-    cleanUnwantedBibFields( bibRec );
+    ExportUtils.cleanUnwantedDataFields( bibRec, Arrays.asList("853","866","867","868","890"), null, false );
     HoldingsAndItems holdingsAndItems = collateHoldingsAndItemsData(bibRec);
     boolean podActiveHoldings = false;
     for (Holding h : holdingsAndItems.holdings.values())
@@ -259,23 +260,6 @@ public class PODExporter {
           instanceHrid, prevStatus.moddate, bibRec.moddate);
     updatePodInventoryForActiveInstance(instance,bibRec.moddate,instanceModdate,holdingsAndItems);
     return UpdateType.NONE;//podActive, but no substantive change. Don't write to output
-  }
-
-
-
-
-
-  private static void cleanUnwantedBibFields(MarcRecord bibRec) {
-    Set<DataField> unwanted = new HashSet<>();
-    for (DataField f : bibRec.dataFields)
-      if ( f.tag.equals("853") ||
-          f.tag.equals("866") ||
-          f.tag.equals("867") ||
-          f.tag.equals("868") ||
-          f.tag.equals("890") )
-        unwanted.add(f);
-    for (DataField f : unwanted)
-      bibRec.dataFields.remove(f);
   }
 
   private boolean areActiveHoldingsChanged(String instanceHrid, HoldingsAndItems holdingsAndItems)
