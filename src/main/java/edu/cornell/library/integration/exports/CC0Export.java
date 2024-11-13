@@ -1,6 +1,8 @@
 package edu.cornell.library.integration.exports;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -25,7 +27,15 @@ public class CC0Export {
   public static void main(String[] args) throws IOException, SQLException {
 
     Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader()
+    String configFile = System.getenv("configFile");
+    if ( configFile != null ) {
+      System.out.println(configFile);
+      File f = new File(configFile);
+      if (f.exists()) {
+        try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+      } else System.out.println("File does not exist: "+configFile);
+    } else
+      try (InputStream in = Thread.currentThread().getContextClassLoader()
         .getResourceAsStream("database.properties")){ prop.load(in); }
 
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("inventoryDBUrl"),
