@@ -44,7 +44,8 @@ public class CC0Export {
       Set<String> bibs = ExportUtils.getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
       int fileCount = 0;
-      Path outputFile = Paths.get(String.format("cornell-export-200mb-chunks-%d.xml",++fileCount));
+      String filenamePattern = "cornell-export-200mb-chunks-%0d.xml";
+      Path outputFile = Paths.get(String.format(filenamePattern,++fileCount));
       BufferedWriter writer = Files.newBufferedWriter(outputFile);
       writer.write("<?xml version='1.0' encoding='UTF-8'?>"
           + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
@@ -82,7 +83,7 @@ public class CC0Export {
           writer.write("</collection>\n");
           writer.flush();
           writer.close();
-          outputFile = Paths.get(String.format("cornell-export-%d.xml",++fileCount));
+          outputFile = Paths.get(String.format(filenamePattern,++fileCount));
           writer = Files.newBufferedWriter(outputFile);
           writer.write("<?xml version='1.0' encoding='UTF-8'?>"
               + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
