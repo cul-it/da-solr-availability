@@ -44,7 +44,7 @@ public class CC0Export {
       Set<String> bibs = ExportUtils.getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
       int fileCount = 0;
-      String filenamePattern = "cornell-export-200mb-chunks-%2d.xml";
+      String filenamePattern = "cornell-export-200mb-chunks-%03d.xml";
       Path outputFile = Paths.get(String.format(filenamePattern,++fileCount));
       BufferedWriter writer = Files.newBufferedWriter(outputFile);
       writer.write("<?xml version='1.0' encoding='UTF-8'?>"
