@@ -46,7 +46,7 @@ class CallNumberBrowse {
   }
 
   static List<SolrInputDocument> generateBrowseDocuments(
-      Connection inventory, SolrInputDocument doc, HoldingSet holdings)
+      Connection classificationDB, SolrInputDocument doc, HoldingSet holdings)
       throws SQLException, IOException {
     List<SolrInputDocument> browseDocs = new ArrayList<>();
     if ( holdings.getUuids().isEmpty() ) return browseDocs;
@@ -71,10 +71,8 @@ class CallNumberBrowse {
     callNumDoc.addField("cite_preescaped_display", generateCitation(callNumDoc));
 
     String defaultCall = getBibCallNumber( doc.getFieldValues(lcCallNumberField) );
-//    System.out.println("bib call: "+defaultCall);
     if ( defaultCall == null || defaultCall.isEmpty() )
       defaultCall = selectDefaultHoldingCallNumber( holdings );
-//    System.out.println("default call: "+defaultCall);
     Map<String,HoldingSet> holdingsByCallNumber =
         divideUnsuppressedHoldingsByCallNumber( holdings, defaultCall );
 
@@ -119,7 +117,7 @@ class CallNumberBrowse {
       browseDoc.addField( "lc_b", isLc );
       browseDoc.addField( "availability_json", b.toJson() );
       if ( isLc ) {
-        String classificationDescription = CallNumberTools.generateClassification( inventory, callNum );
+        String classificationDescription = CallNumberTools.generateClassification( classificationDB, callNum );
         if ( classificationDescription != null && ! classificationDescription.isEmpty() )
           browseDoc.addField("classification_display", classificationDescription);
       }
@@ -194,7 +192,7 @@ class CallNumberBrowse {
 
   private static boolean isNonCallNumber( String call ) {
     String lc = call.toLowerCase().replaceAll("\\s+"," ");
-    return lc.contains("no call") || lc.contains("in proc") || lc.contains("on order") ;
+    return lc.contains("no call") || lc.contains("in proc") || lc.contains("on order") || lc.equals("online");
   }
 
   private static Map<String, HoldingSet> divideUnsuppressedHoldingsByCallNumber(HoldingSet holdings, String defaultCall) {
@@ -212,7 +210,8 @@ class CallNumberBrowse {
         holdingsByCallNumber.get(callnum).put(holdingId, h);
       }
 
-      if ( ( nonCallNumber || (h.lcCallNum == false && isClosedStackLocation(h)) )
+      if ( ( nonCallNumber || h.lcCallNum == false )
+          && isClosedStackLocation(h)
           && defaultCall != null && ! defaultCall.isEmpty() ) {
         if ( ! holdingsByCallNumber.containsKey(defaultCall) )
           holdingsByCallNumber.put(defaultCall, new HoldingSet());
@@ -227,15 +226,18 @@ class CallNumberBrowse {
 
   private static boolean isClosedStackLocation(Holding h) {
 
+    if ( h.online != null && h.online ) return true;
     if ( h.location == null ) return false;
     if ( h.location.library != null && 
-        ( h.location.library.equals("Kroch Library Rare & Manuscripts")
-            || h.location.library.equals("ILR Library Kheel Center")
-            || h.location.library.equals("Library Annex") ))
+        ( h.location.library.equals("Rare and Manuscript Collections")
+            || h.location.library.equals("Kheel Center")
+            || h.location.library.equals("Library Annex")
+            || h.location.library.equals("Bailey Hortorium") ))
       return true;
     if ( h.location.name != null &&
-        ( h.location.name.equals("Music Locked Press")
-            || h.location.name.equals("Mann Special Collections") ))
+        ( h.location.name.startsWith("Cox Library of Music and Dance Special Collections")
+            || h.location.name.startsWith("Mann Library Special Collections")
+            || h.location.name.contains("Storage") ))
       return true;
     return false;
   }

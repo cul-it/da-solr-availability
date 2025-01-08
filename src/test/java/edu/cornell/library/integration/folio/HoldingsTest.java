@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -52,7 +51,6 @@ public class HoldingsTest extends DbBaseTest {
   public static void connect() throws SQLException, IOException {
     setup();
     testConnection = getConnection();
-    // voyagerLive = VoyagerDBConnection.getLiveConnection("database.properties");
 
     // Load expected result JSON for tests
     ObjectMapper mapper = new ObjectMapper();
@@ -60,19 +58,13 @@ public class HoldingsTest extends DbBaseTest {
         new TypeReference<HashMap<String,HoldingSet>>() {});
 
     testOkapiClient = new StaticOkapiClient();
-
     locations = new Locations(testOkapiClient);
-
     Items.initialize(testOkapiClient, locations);
-
     ServicePoints.initialize(testOkapiClient);
-
+    LoanTypes.initialize(testOkapiClient);
     holdingsNoteTypes = new ReferenceData(testOkapiClient, "/holdings-note-types", "name");
-
     callNumberTypes = new ReferenceData(testOkapiClient, "/call-number-types", "name");
-
     materialTypes = new ReferenceData(testOkapiClient, "/material-types", "name");
-
     itemNoteTypes = new ReferenceData(testOkapiClient, "/item-note-types", "name");
   }
 
@@ -150,33 +142,25 @@ public class HoldingsTest extends DbBaseTest {
     TreeSet<Item> itemTreeSet = itemSet.get("f26ba953-b4b6-486b-8113-1cffc3f3c3f8");
     Instant availabilityInstant = h.summarizeItemAvailability(itemTreeSet);
     assertNull(availabilityInstant);
-    
-//    assertEquals(examples.get("expectedJson-f26ba953-b4b6-486b-8113-1cffc3f3c3f8").toJson(),hs.toJson());
-    
+    assertEquals(examples.get("expectedJson-f26ba953-b4b6-486b-8113-1cffc3f3c3f8").toJson(),hs.toJson());
+
     hs = Holdings.retrieveHoldingsByInstanceHrid(testConnection, locations, holdingsNoteTypes, callNumberTypes, "2805041");
-    System.out.println(hs.toJson());
     h = hs.get("fdac516c-91eb-438d-b784-0b99b19769d4");
-    System.out.println(h.toJson());
     il = Items.retrieveItemsForHoldings(testOkapiClient, testConnection, "2805041", hs);
     itemSet = il.getItems();
     for (String id : itemSet.keySet()) {
-      System.out.println("id: " + id);
       itemTreeSet = itemSet.get(id);
-      for (Item i : itemTreeSet) {
-        System.out.println(i.toJson());
-      }
       availabilityInstant = h.summarizeItemAvailability(itemTreeSet);
-      System.out.println("availabilityInstant: " + availabilityInstant);
     }
-    
-//    assertEquals(examples.get("expectedJsonWithAvailability1131911").toJson(),h.toJson());
+    assertEquals(examples.get("expectedJson-1cbded88-05d9-460d-b930-0427e4718e1b").toJson(),hs.toJson());
+
+    hs = Holdings.retrieveHoldingsByInstanceHrid(testConnection, locations, holdingsNoteTypes, callNumberTypes, "4442869");
+    il = Items.retrieveItemsForHoldings(testOkapiClient, testConnection, "4442869", hs);
+    for (String hId : hs.getUuids()) {
+      hs.get(hId).summarizeItemAvailability(il.getItems().get(hId));
+    }
+    assertEquals(examples.get("expectedJson-7d7cca49-d86c-425c-820e-d46b9f2ec998").toJson(),hs.toJson());
   }
-//    h = Holdings.retrieveHoldingsByBibId(voyagerTest, 4442869);
-//    for (int mfhdId : h.getMfhdIds()) {
-//      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);
-//      h.get(mfhdId).summarizeItemAvailability(i.getItems().get(mfhdId));
-//    }
-//    assertEquals(examples.get("expectedJsonWithAvailabilityELECTRICSHEEP").toJson(),h.toJson());
 //
 //    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1055);
 //    for (int mfhdId : h.getMfhdIds()) {
