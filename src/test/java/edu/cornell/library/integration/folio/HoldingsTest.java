@@ -160,6 +160,16 @@ public class HoldingsTest extends DbBaseTest {
       hs.get(hId).summarizeItemAvailability(il.getItems().get(hId));
     }
     assertEquals(examples.get("expectedJson-7d7cca49-d86c-425c-820e-d46b9f2ec998").toJson(),hs.toJson());
+
+    hs = Holdings.retrieveHoldingsByInstanceHrid(testConnection, locations, holdingsNoteTypes, callNumberTypes, "15607108");
+    il = Items.retrieveItemsForHoldings(testOkapiClient, testConnection, "15607108", hs);
+    for (String hId : hs.getUuids()) {
+      hs.get(hId).summarizeItemAvailability(il.getItems().get(hId));
+    }
+    assertEquals(examples.get("expected-15607108").toJson(),hs.toJson());
+
+
+
   }
 //
 //    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1055);
