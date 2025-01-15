@@ -1,15 +1,27 @@
 {
   "loclibs": [
     {
-      "id": "fd56a80d-e057-4ec5-891f-c58e19ea6d65",
-      "name": "Veterinary Library",
-      "code": "VET",
+      "id": "07a99e6f-e443-4a65-9a37-91593388555a",
+      "name": "Kheel Center",
+      "code": "KHL",
       "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
       "metadata": {
-        "createdDate": "2021-06-17T18:27:24.214+00:00",
+        "createdDate": "2021-06-17T18:31:57.828+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:27:24.214+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+        "updatedDate": "2023-09-23T12:14:35.938+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "ecaaf910-8606-4587-9584-061b922197eb",
+      "name": "Kroch Asia Collections",
+      "code": "ASIA",
+      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
+      "metadata": {
+        "createdDate": "2021-06-17T18:31:48.044+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2023-09-23T12:14:56.158+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
       }
     },
     {
@@ -21,30 +33,6 @@
         "createdDate": "2021-06-17T18:27:33.822+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
         "updatedDate": "2021-06-17T18:27:33.822+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
-      }
-    },
-    {
-      "id": "a957c196-5d74-4027-9f97-9418741b64d7",
-      "name": "Space Sciences Building",
-      "code": "SPC",
-      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
-      "metadata": {
-        "createdDate": "2021-06-17T18:27:44.735+00:00",
-        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:27:44.735+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
-      }
-    },
-    {
-      "id": "c5a5495c-c066-40b8-8537-549685e9d52c",
-      "name": "Sage Hall Management Library",
-      "code": "MGMT",
-      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
-      "metadata": {
-        "createdDate": "2021-06-17T18:27:55.121+00:00",
-        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:27:55.121+00:00",
         "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
       }
     },
@@ -69,30 +57,6 @@
         "createdDate": "2021-06-17T18:28:22.383+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
         "updatedDate": "2021-06-17T18:28:22.383+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
-      }
-    },
-    {
-      "id": "e50aa68e-d4b3-4951-83d8-ca0554a4c2d8",
-      "name": "Nestle Library",
-      "code": "HTL",
-      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
-      "metadata": {
-        "createdDate": "2021-06-17T18:28:48.072+00:00",
-        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:28:48.072+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
-      }
-    },
-    {
-      "id": "d1633c8c-21be-4754-903a-79ebc1af5455",
-      "name": "Music Library",
-      "code": "MUS",
-      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
-      "metadata": {
-        "createdDate": "2021-06-17T18:29:04.367+00:00",
-        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:29:04.367+00:00",
         "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
       }
     },
@@ -146,62 +110,110 @@
     },
     {
       "id": "b40188df-aab4-46b6-9afe-4b5001a47b93",
-      "name": "Kroch Library Rare & Manuscripts",
+      "name": "Rare and Manuscript Collections",
       "code": "RMC",
       "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
       "metadata": {
         "createdDate": "2021-06-17T18:31:34.005+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:31:34.005+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+        "updatedDate": "2023-09-23T12:15:12.358+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
       }
     },
     {
-      "id": "ecaaf910-8606-4587-9584-061b922197eb",
-      "name": "Kroch Library Asia",
-      "code": "ASIA",
+      "id": "d1633c8c-21be-4754-903a-79ebc1af5455",
+      "name": "Cox Library of Music and Dance",
+      "code": "MUS",
       "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
       "metadata": {
-        "createdDate": "2021-06-17T18:31:48.044+00:00",
+        "createdDate": "2021-06-17T18:29:04.367+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:31:48.044+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+        "updatedDate": "2023-09-23T12:15:29.220+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
       }
     },
     {
-      "id": "07a99e6f-e443-4a65-9a37-91593388555a",
-      "name": "ILR Library Kheel Center",
-      "code": " Kheel",
+      "id": "e50aa68e-d4b3-4951-83d8-ca0554a4c2d8",
+      "name": "Nestlé Library",
+      "code": "HTL",
       "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
       "metadata": {
-        "createdDate": "2021-06-17T18:31:57.828+00:00",
+        "createdDate": "2021-06-17T18:28:48.072+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:31:57.828+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+        "updatedDate": "2023-09-23T12:15:45.278+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
       }
     },
     {
-      "id": "15bb9972-9505-4929-9b5f-6834e3148338",
-      "name": "ILR Library",
-      "code": "IL",
+      "id": "c5a5495c-c066-40b8-8537-549685e9d52c",
+      "name": "Management Library",
+      "code": "MGMT",
       "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
       "metadata": {
-        "createdDate": "2021-06-17T18:47:35.554+00:00",
+        "createdDate": "2021-06-17T18:27:55.121+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:47:35.554+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+        "updatedDate": "2023-09-23T12:16:07.265+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "a957c196-5d74-4027-9f97-9418741b64d7",
+      "name": "Spacecraft Planetary Imaging Facility",
+      "code": "SPC",
+      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
+      "metadata": {
+        "createdDate": "2021-06-17T18:27:44.735+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2023-09-23T12:16:20.554+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "fd56a80d-e057-4ec5-891f-c58e19ea6d65",
+      "name": "Flower-Sprecher Veterinary Library",
+      "code": "VET",
+      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
+      "metadata": {
+        "createdDate": "2021-06-17T18:27:24.214+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2023-09-23T12:16:41.465+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
       }
     },
     {
       "id": "11b36bfa-754f-48d0-8027-a58ad4bccd58",
-      "name": "Fine Arts Library",
+      "name": "Mui Ho Fine Arts Library",
       "code": "FINE",
       "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
       "metadata": {
         "createdDate": "2021-06-17T18:49:30.742+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:49:30.742+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+        "updatedDate": "2023-09-23T12:13:21.201+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "15bb9972-9505-4929-9b5f-6834e3148338",
+      "name": "Catherwood Library",
+      "code": "IL",
+      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
+      "metadata": {
+        "createdDate": "2021-06-17T18:47:35.554+00:00",
+        "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
+        "updatedDate": "2023-09-23T12:13:35.758+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
+      }
+    },
+    {
+      "id": "97376a77-8d2e-4b7a-b7e9-a99f79ea71da",
+      "name": "Removed Locations",
+      "code": "DEL",
+      "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
+      "metadata": {
+        "createdDate": "2023-09-23T12:17:01.748+00:00",
+        "createdByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896",
+        "updatedDate": "2023-09-23T12:17:01.748+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
       }
     },
     {
@@ -230,14 +242,14 @@
     },
     {
       "id": "e299862b-3796-44d6-bca2-4de111198667",
-      "name": "Africana Library",
-      "code": " AFR",
+      "name": "Clarke Africana Library",
+      "code": "AFR",
       "campusId": "ee275fa1-0124-4c35-866e-fc0872f8d092",
       "metadata": {
         "createdDate": "2021-06-17T18:50:03.683+00:00",
         "createdByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de",
-        "updatedDate": "2021-06-17T18:50:03.683+00:00",
-        "updatedByUserId": "b6bfbac0-5cad-4ca1-aff7-0596a73128de"
+        "updatedDate": "2023-09-23T12:13:05.679+00:00",
+        "updatedByUserId": "0c15ffaf-02c8-4ed7-baa3-95b0a930c896"
       }
     },
     {
@@ -253,5 +265,5 @@
       }
     }
   ],
-  "totalRecords": 21
+  "totalRecords": 22
 }

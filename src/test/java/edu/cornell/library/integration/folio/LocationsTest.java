@@ -39,9 +39,9 @@ public class LocationsTest {
   public void locationsPopulated() {
 
     Location l = locations.getByCode("olin");
-    assertEquals("code: olin; name: Olin Library; library: Olin Library; hoursCode: olin",l.toString());
-    assertEquals("Olin Library",l.library);
-    assertEquals("olin",l.hoursCode);
+    assertEquals("Olin Library",l.library);    assertEquals("code: olin; name: Olin Library; library: Olin Library; hoursCode: olinuris",l.toString());
+
+    assertEquals("olinuris",l.hoursCode);
   }
 
   @Test
