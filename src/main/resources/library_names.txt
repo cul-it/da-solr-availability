@@ -1,6 +1,6 @@
 Annex	Library Annex	annex
 Bailey	Bailey Hortorium	mann
-Kheel	Kheel Center	ilr
+Kheel	Kheel Center	catherwood
 Manuscripts	Rare and Manuscript Collections	rare
 Adelson	Adelson Library	ornithology
 Africana	Africana Library	africana
@@ -8,8 +8,8 @@ Biochem	Biochem Reading Room (Biotech)
 CISER	CISER Data Archive	ciser
 Fine	Fine Arts Library	finearts
 Food	Food Science Library
-ILR	ILR Library	ilr
-Catherwood	Catherwood Library	ilr
+ILR	ILR Library	catherwood
+Catherwood	Catherwood Library	catherwood
 Kroch	Kroch Library Asia	asia
 Law	Law Library	law
 Legal	Law Library	law

@@ -96,7 +96,7 @@
 {"9957560":[
    {"id":10007450,"barcode":"31924122423662","copy":1,"sequence":1,"onReserve":true,
     "call":"HD31.2 .G95 2017",
-    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"ilr"},
+    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"catherwood"},
     "permLocation":"ILR Library (Ives Hall)",
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":26,"name":"2hrres"},
@@ -106,7 +106,7 @@
  "10287643":[
    {"id":10345845,"barcode":"31924124599691","copy":2,"sequence":1,"onReserve":true,
     "call":"HD31.2 .G95 2017",
-    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"ilr"},
+    "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"catherwood"},
     "permLocation":"ILR Library (Ives Hall)",
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":26,"name":"2hrres"},
@@ -226,7 +226,7 @@
  "7371302":[
    {"id":8764637,"barcode":"31924111784629","copy":1,"sequence":1,
     "call":"PS3554.I3 D6 1996",
-    "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+    "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
     "permLocation":"ILR Library (Ives Hall)",
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -286,7 +286,7 @@
  "7383965":[
    {"id":8771861,"barcode":"31924111773416","copy":1,"sequence":1,
     "call":"PS3554.I3 D6 1996",
-    "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+    "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
     "permLocation":"ILR Library (Ives Hall)",
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -296,7 +296,7 @@
  "7383966":[
    {"id":8771864,"barcode":"31924111773424","copy":2,"sequence":1,
     "call":"PS3554.I3 D6 1996",
-    "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+    "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
     "permLocation":"ILR Library (Ives Hall)",
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -316,7 +316,7 @@
  "7391702":[
    {"id":8780253,"barcode":"31924112180058","copy":1,"sequence":1,
     "call":"PS3554.I3 D6 1996",
-    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+    "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
     "permLocation":"ILR Library (Ives Hall)",
     "circGrp":{"13":"ILR Circ Group"},
     "type":{"id":3,"name":"book"},
@@ -437,7 +437,7 @@
    "barcode":"31924017242961",
    "copy":1,
    "sequence":1,
-   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
    "permLocation":"ILR Library (Ives Hall)",
    "circGrp":{"13":"ILR Circ Group"},
    "type":{"id":3,"name":"book"},

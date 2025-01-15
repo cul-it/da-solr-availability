@@ -21,7 +21,7 @@
                 "code": "ilr",
                 "name": "Catherwood Library",
                 "library": "Catherwood Library",
-                "hoursCode": "ilr",
+                "hoursCode": "catherwood",
                 "id": "09815433-2339-4a23-af2e-9272ac793e27",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
             },
@@ -293,7 +293,7 @@
                 "code": "ilr",
                 "name": "Catherwood Library",
                 "library": "Catherwood Library",
-                "hoursCode": "ilr",
+                "hoursCode": "catherwood",
                 "id": "09815433-2339-4a23-af2e-9272ac793e27",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
             },
@@ -371,7 +371,7 @@
                 "code": "hote",
                 "name": "Catherwood Library",
                 "library": "Catherwood Library",
-                "hoursCode": "ilr",
+                "hoursCode": "catherwood",
                 "id": "5e11c162-6ea6-44b1-a810-1d9b479be87f",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
             },
@@ -387,7 +387,7 @@
                 "code": "hote",
                 "name": "Catherwood Library",
                 "library": "Catherwood Library",
-                "hoursCode": "ilr",
+                "hoursCode": "catherwood",
                 "id": "5e11c162-6ea6-44b1-a810-1d9b479be87f",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
             },
@@ -418,7 +418,7 @@
                 "code": "jgsm",
                 "name": "Catherwood Library",
                 "library": "Catherwood Library",
-                "hoursCode": "ilr",
+                "hoursCode": "catherwood",
                 "id": "f24cceec-77b1-4712-a8fb-50d2d5827aeb",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
             },

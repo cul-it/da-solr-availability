@@ -9,7 +9,7 @@
    "active":true},
  "1184954":{
    "copy":2,
-   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
    "call":"HC59.7 .B16 1977",
    "date":959745600,
    "active":false}}
@@ -212,7 +212,7 @@
    "active":true,
    "items":{"count":1,"avail":1}},
  "7371302":{
-   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"ilr","number":51,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1275074667,
@@ -261,7 +261,7 @@
    "active":true,
    "items":{"count":1,"avail":1}},
  "7383965":{
-   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276884581,
@@ -269,7 +269,7 @@
    "items":{"count":1,"avail":1}},
  "7383966":{
    "copy":2,
-   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"hote","number":43,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1276884651,
@@ -284,7 +284,7 @@
    "active":true,
    "items":{"count":1,"avail":1}},
  "7391702":{
-   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1278703820,
@@ -298,7 +298,7 @@
 
 {"1055":{
    "holdings":["no.26, 28, 30-36 (1978-1982)"],
-   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
    "call":"JS39 .M95 Oversize",
    "circ":true,
    "date":959745600,
@@ -394,7 +394,7 @@
 
 
 {"9957560":{
-   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"catherwood"},
    "call":"HD31.2 .G95 2017",
    "circ":true,
    "date":1472212100,
@@ -404,7 +404,7 @@
       "returned":[{"id":10007450,"status":{"available":true,"code":{"11":"Discharged"},"date":1505328069}}]}},
  "10287643":{
    "copy":2,
-   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"ilr,res","number":58,"name":"ILR Library Reserve","library":"ILR Library","hoursCode":"catherwood"},
    "call":"HD31.2 .G95 2017",
    "circ":true,
    "date":1502385643,
@@ -470,7 +470,7 @@
    "notes":["Latest edition available in Sage Hall Management Library Reference; CD-Rom available at the ILR circulation desk."],
    "holdings":["2002, 2005-2016"],
    "supplements":["CD-Rom: 2002"],
-   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"ilr"},
+   "location":{"code":"jgsm","number":59,"name":"ILR Library (Ives Hall)","library":"ILR Library","hoursCode":"catherwood"},
    "call":"HD9710.A1 W38",
    "circ":true,
    "date":1493048691,
@@ -489,7 +489,7 @@
             "number":62,
             "name":"ILR Library Reference (Non-Circulating)",
             "library":"ILR Library",
-            "hoursCode":"ilr"}}]}}}
+            "hoursCode":"catherwood"}}]}}}
 
 
 
@@ -540,7 +540,7 @@
 # bib 1282748 (Second holdings/item has the circulating reserve item)
 
 {"1144751":{
-  "location":{"code":"ilr,circ","number":167,"name":"ILR Circulation","library":"ILR Library","hoursCode":"ilr"},
+  "location":{"code":"ilr,circ","number":167,"name":"ILR Circulation","library":"ILR Library","hoursCode":"catherwood"},
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1389364051,
@@ -556,7 +556,7 @@
   "items":{"count":1,"unavail":[{"id":2190222,"status":{"code":{"2":"Charged"},"due":1522350002,"date":1522342802,"shortLoan":true}}]}},
 "1144753":{
   "copy":3,
-  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"catherwood"},
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297825,
@@ -564,7 +564,7 @@
   "items":{"count":1,"avail":1}},
 "1144754":{
   "copy":4,
-  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"catherwood"},
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297823,
@@ -572,7 +572,7 @@
   "items":{"count":1,"avail":1}},
 "1144755":{
   "copy":5,
-  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"catherwood"},
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297820,
@@ -581,7 +581,7 @@
 "1144756":{
   "copy":6,
   "notes":["ILR Multi-copy Storage"],
-  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"catherwood"},
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297828,
@@ -589,7 +589,7 @@
   "items":{"count":1,"avail":1}},
 "1144757":{
   "copy":7,
-  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"ilr"},
+  "location":{"code":"ilr,mcs","number":147,"name":"ILR Multi-Copy Storage","library":"ILR Library","hoursCode":"catherwood"},
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297826,
