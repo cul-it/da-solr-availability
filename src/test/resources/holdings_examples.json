@@ -110,7 +110,7 @@
 
 
 {"9975971":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"New & Noteworthy Books AC8.5 .G74 2016",
    "circ":true,
    "date":1473796018,
@@ -125,7 +125,7 @@
 
 
 {"4977210":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6x 1996",
    "circ":true,
    "date":1275657369,
@@ -143,7 +143,7 @@
    "items":{"count":1,"avail":1}},
  "5860317":{
    "copy":3,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1278418987,
@@ -153,15 +153,15 @@
    "notes":["Signed by Joanna Cassidy, actress in Blade Runner, the film version of the book."],
    "location":{"code":"rmc","number":87,
                "name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
-               "library":"Kroch Library Rare & Manuscripts",
-               "hoursCode":"rmc"},
+               "library":"Rare and Manuscript Collections",
+               "hoursCode":"rare"},
    "call":"Rare Books PS3554.I3 D6 1996",
    "circ":false,
    "date":1274283600,
    "active":true,
    "items":{"count":1,"avail":1}},
  "7371275":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1305137497,
@@ -171,7 +171,7 @@
                         "status":{"code":{"2":"Charged"},"due":1517468400,"date":1505317642}}]}},
  "7371277":{
    "copy":2,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1410380685,
@@ -179,7 +179,7 @@
    "items":{"count":1,"avail":1}},
  "7371279":{
    "copy":3,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1307478334,
@@ -187,7 +187,7 @@
    "items":{"count":1,"avail":1}},
  "7371281":{
    "copy":4,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1309886750,
@@ -195,7 +195,7 @@
    "items":{"count":1,"avail":1}},
  "7371283":{
    "copy":5,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1305137472,
@@ -205,7 +205,7 @@
                         "status":{"code":{"2":"Charged"},"due":1512975600,"date":1481401648}}]}},
  "7371284":{
    "copy":6,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1310147166,
@@ -219,7 +219,7 @@
    "active":true,
    "items":{"count":1,"avail":1}},
  "7383225":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"PS3554.I3 D6 1996",
    "circ":true,
    "date":1306857113,
@@ -356,7 +356,7 @@
                         "enum":"v.515-516:no.7527-7531 - 2014",
                         "status":{"code":{"18":"At Bindery"},"date":1429839935}}]}},
  "398887":{
-   "location":{"code":"uris","number":129,"name":"Uris Library","library":"Uris Library","hoursCode":"uris"},
+   "location":{"code":"uris","number":129,"name":"Uris Library","library":"Uris Library","hoursCode":"olinuris"},
    "call":"Sixth Level Q1 .N282",
    "date":1253134548,
    "active":false},
@@ -499,7 +499,7 @@
 
 
 {"9631041":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"In Process",
    "circ":true,
    "date":1520460653,
@@ -548,7 +548,7 @@
   "items":{"count":1,"unavail":[{"id":2190221,"status":{"code":{"12":"Missing"},"date":1472486835}}]}},
 "1144752":{
   "copy":2,
-  "location":{"code":"uris,res","number":132,"name":"Uris Library Reserve","library":"Uris Library","hoursCode":"uris"},
+  "location":{"code":"uris,res","number":132,"name":"Uris Library Reserve","library":"Uris Library","hoursCode":"olinuris"},
   "call":"E806 .B78 1983",
   "circ":true,
   "date":1213297829,
@@ -651,7 +651,7 @@
              "sayi 771 (2016 Mart.)",
              "sayi 770 (2016 Subat)",
              "sayi 769 (2016 Ocak.)"],
-  "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+  "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
   "call":"PL101 .T905",
   "circ":true,
   "date":1476731692,
@@ -750,14 +750,14 @@
    "items":{"count":1,"avail":1}},
  "3333482":{
    "copy":2,
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"F 118 .N56",
    "date":959745600,
    "active":false},
  "3333483":{
    "notes":["Reproduction from digital master. Ithaca, N.Y. : Cornell University Library, 1995. 23 cm."],
    "location":{"code":"olin","number":99,"name":"Olin Library",
-   "library":"Olin Library","hoursCode":"olin"},
+   "library":"Olin Library","hoursCode":"olinuris"},
    "call":"F118 .N56 1860a",
    "circ":true,
    "date":959745600,
@@ -783,7 +783,7 @@
 
 {"1766925":{
    "location":{"code":"rmc","number":87,"name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
-               "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+               "library":"Rare and Manuscript Collections","hoursCode":"rare"},
    "call":"Dante Z340 .P58",
    "date":959745600,
    "active":true},
@@ -831,7 +831,7 @@
 {"50844":{
    "location":{"code":"rmc,anx","number":203,
                "name":"Kroch Library Rare & Manuscripts (Request in advance)",
-               "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+               "library":"Rare and Manuscript Collections","hoursCode":"rare"},
    "call":"Thesis 1951 B433",
    "date":1156884637,
    "active":true},
@@ -854,7 +854,7 @@
 ,"Olin copy active, not RMC copy":
 
 {"6002585":{
-   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olin"},
+   "location":{"code":"olin","number":99,"name":"Olin Library","library":"Olin Library","hoursCode":"olinuris"},
    "call":"Icelandic DL312 P66 2004 +",
    "date":1313478903,
    "active":true},
@@ -862,7 +862,7 @@
    "notes":["With dust jacket."],
    "location":{"code":"rmc,icer","number":121,
                "name":"Kroch Library Rare & Manuscripts (Non-Circulating)",
-               "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+               "library":"Rare and Manuscript Collections","hoursCode":"rare"},
    "call":"Icelandic DL312.P81 I7 2004 +",
    "date":1124828304,
    "active":false}}
@@ -880,7 +880,7 @@
  "4657637":{
    "location":{"code":"rmc,anx","number":203,
                "name":"Kroch Library Rare & Manuscripts (Request in advance)",
-               "library":"Kroch Library Rare & Manuscripts","hoursCode":"rmc"},
+               "library":"Rare and Manuscript Collections","hoursCode":"rare"},
    "call":"Thesis 1921 W855",
    "date":1185806836,
    "active":true},

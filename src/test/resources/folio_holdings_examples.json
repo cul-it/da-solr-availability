@@ -20,7 +20,7 @@
             "location": {
                 "code": "ilr",
                 "name": "Catherwood Library",
-                "library": "ILR Library",
+                "library": "Catherwood Library",
                 "hoursCode": "ilr",
                 "id": "09815433-2339-4a23-af2e-9272ac793e27",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
@@ -110,7 +110,7 @@
             "location":{
                 "code":"mus",
                 "name":"Cox Library of Music and Dance",
-                "library":"Music Library",
+                "library":"Cox Library of Music and Dance",
                 "hoursCode":"music",
                 "id":"3b5652de-37be-4fa7-b08f-c5c7b74a81ae",
                 "primaryServicePoint":"1eb3510f-c403-44bf-b3ce-cf693b20ba56"
@@ -128,7 +128,7 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
@@ -168,7 +168,7 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
@@ -183,7 +183,7 @@
             "location": {
                 "code": "rmc",
                 "name": "Rare and Manuscript Collections (Non-Circulating)",
-                "library": "Kroch Library Rare & Manuscripts",
+                "library": "Rare and Manuscript Collections",
                 "id": "79da8df2-7bd4-422c-b23c-b17daeb49b26",
                 "primaryServicePoint": "6e734d77-7cc6-4f24-9191-ce4a81968042"
             },
@@ -198,7 +198,7 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
@@ -214,7 +214,7 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
@@ -230,7 +230,7 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
@@ -246,7 +246,7 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
@@ -262,7 +262,7 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
@@ -278,7 +278,7 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
@@ -292,7 +292,7 @@
             "location": {
                 "code": "ilr",
                 "name": "Catherwood Library",
-                "library": "ILR Library",
+                "library": "Catherwood Library",
                 "hoursCode": "ilr",
                 "id": "09815433-2339-4a23-af2e-9272ac793e27",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
@@ -370,7 +370,7 @@
             "location": {
                 "code": "hote",
                 "name": "Catherwood Library",
-                "library": "ILR Library",
+                "library": "Catherwood Library",
                 "hoursCode": "ilr",
                 "id": "5e11c162-6ea6-44b1-a810-1d9b479be87f",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
@@ -386,7 +386,7 @@
             "location": {
                 "code": "hote",
                 "name": "Catherwood Library",
-                "library": "ILR Library",
+                "library": "Catherwood Library",
                 "hoursCode": "ilr",
                 "id": "5e11c162-6ea6-44b1-a810-1d9b479be87f",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
@@ -417,7 +417,7 @@
             "location": {
                 "code": "jgsm",
                 "name": "Catherwood Library",
-                "library": "ILR Library",
+                "library": "Catherwood Library",
                 "hoursCode": "ilr",
                 "id": "f24cceec-77b1-4712-a8fb-50d2d5827aeb",
                 "primaryServicePoint": "ab1fce49-e832-41a4-8afc-7179a62332e2"
@@ -433,12 +433,44 @@
                 "code": "olin",
                 "name": "Olin Library",
                 "library": "Olin Library",
-                "hoursCode": "olin",
+                "hoursCode": "olinuris",
                 "id": "c8e127a3-1d59-42e6-9600-bbdffc13b373",
                 "primaryServicePoint": "760beccd-362d-45b6-bfae-639565a877f2"
             },
             "call": "PS3554.I3 D6 1996",
             "active": false
+        }
+    },
+    "expected-15607108": {
+        "d5fd4af7-5e4c-459a-b711-3c9851eb519c": {
+            "hrid": "15614344",
+            "location": {
+                "code": "jgsm,res",
+                "name": "Management Library Reserve",
+                "library": "Management Library",
+                "hoursCode": "johnson",
+                "id": "8cd03278-ab07-472a-9c07-7f75b496d371",
+                    "primaryServicePoint": "f4b8e9e3-831b-44eb-aafe-20f583c555a1"
+            },
+            "call": "HV6770.L37 F78 2022",
+            "items": { "count": 1, "avail": 1 },
+            "circ": true,
+            "active": true
+        },
+        "44b080b0-3ca1-4c10-8748-eda75718160b": {
+            "hrid": "15642055",
+            "location": {
+                "code": "jgsm,res",
+                "name": "Management Library Reserve",
+                "library": "Management Library",
+                "hoursCode": "johnson",
+                "id": "8cd03278-ab07-472a-9c07-7f75b496d371",
+                "primaryServicePoint": "f4b8e9e3-831b-44eb-aafe-20f583c555a1"
+            },
+            "call": "HV6770.L37 F78 2021",
+            "items": { "count": 1, "avail": 1 },
+            "circ": true,
+            "active": true
         }
     }
 }
