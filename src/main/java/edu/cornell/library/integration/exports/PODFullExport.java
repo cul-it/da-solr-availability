@@ -16,12 +16,14 @@ import java.util.LinkedHashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.naming.AuthenticationException;
+
 import edu.cornell.library.integration.exports.PODExporter.UpdateType;
 import edu.cornell.library.integration.folio.OkapiClient;
 
 public class PODFullExport {
 
-  public static void main(String[] args) throws IOException, SQLException {
+  public static void main(String[] args) throws IOException, SQLException, AuthenticationException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader()

@@ -27,6 +27,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.naming.AuthenticationException;
+
 import org.apache.commons.io.FileUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -70,7 +72,7 @@ public class PODExporter {
   private final String podToken;
 
   public PODExporter ( Connection inventory, OkapiClient okapi, Properties prop )
-      throws IOException, SQLException {
+      throws IOException, SQLException, AuthenticationException {
     
     this.locations = new Locations(okapi);
     this.holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
@@ -177,7 +179,7 @@ public class PODExporter {
   public enum UpdateType { UPDATE, DELETE, NONE; }
   public UpdateType exportBib(
       String instanceHrid, BufferedWriter recordWriter, BufferedWriter deleteWriter)
-          throws SQLException, IOException {
+          throws SQLException, IOException, AuthenticationException {
 
     PreviousBibStatus prevStatus = getPrevPodStatus(instanceHrid);
 
@@ -319,7 +321,7 @@ public class PODExporter {
     public ItemList items;
   }
   private HoldingsAndItems collateHoldingsAndItemsData(MarcRecord bibRec)
-      throws SQLException, IOException {
+      throws SQLException, IOException, AuthenticationException {
     int maxBibFieldId = bibRec.dataFields.last().id;
     HoldingsAndItems values = new HoldingsAndItems();
     values.holdings = Holdings.retrieveHoldingsByInstanceHrid(

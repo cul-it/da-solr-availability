@@ -2,13 +2,14 @@ package edu.cornell.library.integration.folio;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.HttpURLConnection;
 
 import edu.cornell.library.integration.db_test.TestUtil;
 
 public class StaticOkapiClient extends OkapiClient {
   @Override
-  public String post(final String endPoint, final String json) throws IOException {
-    return "";
+  public HttpURLConnection post(final String endPoint, final String json) throws IOException {
+    return null;
   }
 
   @Override

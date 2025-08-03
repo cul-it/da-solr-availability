@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import javax.naming.AuthenticationException;
+
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -65,7 +67,7 @@ import edu.cornell.library.integration.folio.ServicePoints;
 public class ProcessAvailabilityQueue {
 
   public static void main(String[] args)
-      throws IOException, SQLException, InterruptedException, SolrServerException {
+      throws IOException, SQLException, InterruptedException, SolrServerException, AuthenticationException {
 
     Properties prop = new Properties();
     String configFile = System.getenv("configFile");
@@ -287,7 +289,7 @@ public class ProcessAvailabilityQueue {
       OkapiClient okapi, Connection inventory, Connection classificationDB,
       SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
       ReferenceData callNumberTypes, ReferenceData statCodes, BibToUpdate changedBib, Integer priority)
-      throws SQLException, IOException, InterruptedException {
+      throws SQLException, IOException, InterruptedException, AuthenticationException {
 
     Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
     String bibId = changedBib.bibId;

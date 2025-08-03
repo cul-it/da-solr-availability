@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.naming.AuthenticationException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ReferenceData {
@@ -22,7 +24,7 @@ public class ReferenceData {
    * level key fields, and those where the key field values are strings. If other
    * use cases arise, this can be expanded.
    */
-  public ReferenceData(OkapiClient okapi, String endPoint, String nameField) throws IOException {
+  public ReferenceData(OkapiClient okapi, String endPoint, String nameField) throws IOException, AuthenticationException {
     String json = okapi.query(endPoint , null, 4000);
     Map<String, Object> rawData = mapper.readValue(json, Map.class);
     Map<String, String> processedByName = new HashMap<>();
@@ -113,12 +115,11 @@ public class ReferenceData {
       System.out.printf("%s => %s\n", e.getKey(), e.getValue());
   }
 
-  // PRIVATE VALUES AND METHODS
+  final Map<String, String> dataByName;
+  final Map<String, String> dataByUuid;
+  final Map<String, Map<String,String>> entriesByUuid;
+  String defaultKey = null;
 
-  private final Map<String, String> dataByName;
-  private final Map<String, String> dataByUuid;
-  private final Map<String, Map<String,String>> entriesByUuid;
   private static ObjectMapper mapper = new ObjectMapper();
-  private String defaultKey = null;
 
 }

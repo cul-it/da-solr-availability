@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeMap;
+
+import javax.naming.AuthenticationException;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -30,8 +33,9 @@ public final class Locations {
    * attempt to connect to Voyager to retrieve and index the data. Otherwise,
    * the instance will simply give access to the already loaded data.
    * @throws IOException 
+   * @throws AuthenticationException 
    */
-  public Locations(final OkapiClient okapi) throws IOException {
+  public Locations(final OkapiClient okapi) throws IOException, AuthenticationException {
 
     if (_byCode.isEmpty())
       populateLocationMaps(okapi);
@@ -196,7 +200,7 @@ public final class Locations {
   private static final Map<String, Location> _byUuid = new TreeMap<>();
   private static final Map<Location, List<FacetMapRule>> _facetsByLocation = new TreeMap<>();
 
-  private static void populateLocationMaps(final OkapiClient okapi) throws IOException {
+  private static void populateLocationMaps(final OkapiClient okapi) throws IOException, AuthenticationException {
     Map<String,Map<String,String>> libraryPatterns = loadPatternMap("library_names.txt");
     List<FacetMapRule> facetPatterns = loadFacetPatternMap("LocationFacetMapping.txt");
 

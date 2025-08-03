@@ -6,12 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.AuthenticationException;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LoanTypes {
 
-  public static void initialize( OkapiClient okapi ) throws IOException { if (_byUuid.isEmpty()) populateLoanTypes(okapi); }
+  public static void initialize( OkapiClient okapi ) throws IOException, AuthenticationException {
+    if (_byUuid.isEmpty()) populateLoanTypes(okapi);
+  }
 
   public final static LoanType getByUuid( String uuid ) {
     if (_byUuid.containsKey(uuid)) return _byUuid.get(uuid);
@@ -99,7 +103,7 @@ public class LoanTypes {
     }
   }
 
-  private static void populateLoanTypes( OkapiClient okapi ) throws IOException {
+  private static void populateLoanTypes( OkapiClient okapi ) throws IOException, AuthenticationException {
     List<Map<String,Object>> okapiTypes = okapi.queryAsList("/loan-types",null,500 );
     EnumSet<ExpectedLoanType> expected = EnumSet.allOf(ExpectedLoanType.class);
     for ( Map<String,Object> okapiType : okapiTypes ) {
