@@ -1,5 +1,7 @@
 package edu.cornell.library.integration.availability;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -15,8 +17,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,14 +39,20 @@ class DeleteFromSolr {
 
   public static void main(String[] argv) throws Exception{
 
-    System.out.println( "Deleting records from Solr indexes at:" );
-    System.out.println(System.getenv("SOLR_URL"));
-    System.out.println(System.getenv("CALLNUMBER_SOLR_URL"));
-
+    Map<String, String> env = System.getenv();
+    String configFile = env.get("configFile");
+    if (configFile == null)
+      throw new IllegalArgumentException("configFile must be set in environment to valid file path.");
     Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
+    File f = new File(configFile);
+    if (f.exists()) {
+      try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+    } else System.out.println("File does not exist: "+configFile);
+
+    System.out.println( "Deleting records from Solr indexes at:" );
+    System.out.println(prop.getProperty("solrUrl")+"/"+prop.getProperty("blacklightSolrCore"));
+    System.out.println(prop.getProperty("solrUrl")+"/"+prop.getProperty("callnumSolrCore"));
+
 
     try ( Connection inventoryDB = DriverManager.getConnection(
         prop.getProperty("inventoryDBUrl"),
@@ -76,8 +83,13 @@ class DeleteFromSolr {
         PreparedStatement queueHeadingsUpdate = inventoryDB.prepareStatement
             ("INSERT INTO headingsQueue (hrid,priority,cause,record_date ) VALUES (?,5,'Delete all',now())");
         Statement stmt = inventoryDB.createStatement();
-        HttpSolrClient solr = new HttpSolrClient( System.getenv("SOLR_URL"));
-        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL")) ){
+        Http2SolrClient solr = new Http2SolrClient
+            .Builder(prop.getProperty("solrUrl")+"/"+prop.getProperty("blacklightSolrCore"))
+            .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
+        Http2SolrClient callNumberSolr = new Http2SolrClient
+            .Builder(prop.getProperty("solrUrl")+"/"+prop.getProperty("callnumSolrCore"))
+            .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
+        ) {
 
       int countFound = 0;
       do {

@@ -37,13 +37,15 @@ import javax.naming.AuthenticationException;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.BaseHttpSolrClient.RemoteSolrException;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
+
+//import org.eclipse.jetty.client.api.AuthenticationStore;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -69,25 +71,22 @@ public class ProcessAvailabilityQueue {
   public static void main(String[] args)
       throws IOException, SQLException, InterruptedException, SolrServerException, AuthenticationException {
 
+    Map<String, String> env = System.getenv();
+    String configFile = env.get("configFile");
+    if (configFile == null)
+      throw new IllegalArgumentException("configFile must be set in environment to valid file path.");
     Properties prop = new Properties();
-    String configFile = System.getenv("configFile");
-    if ( configFile != null ) {
-      System.out.println(configFile);
-      File f = new File(configFile);
-      if (f.exists()) {
-        try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
-      } else System.out.println("File does not exist: "+configFile);
-    } else try (InputStream in = Thread.currentThread().getContextClassLoader().
-        getResourceAsStream((configFile == null)?"database.properties":configFile)){
-      prop.load(in);
-    }
+    File f = new File(configFile);
+    if (f.exists()) {
+      try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+    } else System.out.println("File does not exist: "+configFile);
 
     try (Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),
-            prop.getProperty("inventoryDBPass"));
+            prop.getProperty("databaseURLCurrent"),prop.getProperty("databaseUserCurrent"),
+            prop.getProperty("databasePassCurrent"));
         Connection classificationDB = DriverManager.getConnection(
-            prop.getProperty("classificationDBUrl"),prop.getProperty("classificationDBUser"),
-            prop.getProperty("classificationDBPass"));
+            prop.getProperty("databaseURLCallNos"),prop.getProperty("databaseUserCallNos"),
+            prop.getProperty("databasePassCallNos"));
         PreparedStatement readQStmt = inventoryDB.prepareStatement
             ("SELECT availabilityQueue.hrid, priority"+
              "  FROM availabilityQueue"+
@@ -109,9 +108,12 @@ public class ProcessAvailabilityQueue {
         PreparedStatement queueGen = inventoryDB.prepareStatement
             ("INSERT INTO generationQueue ( hrid, priority, cause, record_date )"
                 + " VALUES (?,?,?,NOW())");
-        ConcurrentUpdateSolrClient solr = new
-            ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
-        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
+        Http2SolrClient solr = new Http2SolrClient
+            .Builder(prop.getProperty("solrUrl")+"/"+prop.getProperty("blacklightSolrCore"))
+            .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
+        Http2SolrClient callNumberSolr = new Http2SolrClient
+            .Builder(prop.getProperty("solrUrl")+"/"+prop.getProperty("callnumSolrCore"))
+            .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
         ) {
 
       OkapiClient okapi = new OkapiClient(prop,"Folio");
@@ -173,8 +175,8 @@ public class ProcessAvailabilityQueue {
           UpdateResults updateSuccess = updateBibInSolr(
               okapi,inventoryDB,classificationDB,solr,callNumberSolr,locations,
               holdingsNoteTypes, callNumberTypes, statCodes, bib, priority);
-          if (priority != null && priority <= 5)
-            solr.blockUntilFinished();
+//          if (priority != null && priority <= 5)
+//            solr.blockUntilFinished();
           if ( ! updateSuccess.equals(UpdateResults.FAILURE) ) {
             for (int id : ids) {
               clearFromQueueStmt.setInt(1, id);
@@ -198,9 +200,10 @@ public class ProcessAvailabilityQueue {
           }
         }
       }
-      solr.blockUntilFinished();
+//      solr.blockUntilFinished();
     }
   }
+
 
   private static void queueRecordsNotRecentlyUpdated(Connection inventory, SolrClient solr)
       throws SQLException, SolrServerException, IOException {
@@ -229,7 +232,8 @@ public class ProcessAvailabilityQueue {
     q.setRequestHandler("standard");
     q.setSort("random",ORDER.asc);
     Map<String,Timestamp> recordIds = new HashMap<>();
-    for (SolrDocument doc : solr.query(q).getResults()) {
+    for (SolrDocument doc : solr.query(q)
+        .getResults()) {
       Timestamp lastIndexDate = Timestamp.valueOf(((Date)doc
           .getFieldValue("timestamp")).toInstant().atZone(ZoneId.of("Z")).toLocalDateTime());
       recordIds.put((String)doc.getFieldValue("id"),lastIndexDate);
@@ -435,10 +439,6 @@ public class ProcessAvailabilityQueue {
       doc.addField(solrField, true);
     }
 
-    // TODO REMOVE THIS WORKAROUND WHEN WE HAVE A BETTER MODEL FOR SUPPRESSING GOOGLE COVERS DACCESS-53
-    if ( bibId.equals("8930429") ) doc.removeField("oclc_id_display");
-
-
     WorksAndInventory.updateInventory( inventory, doc );
 
     List<SolrInputDocument> thisDocsCallNumberDocs =
@@ -452,6 +452,12 @@ public class ProcessAvailabilityQueue {
     for (String collection : CallNumberTools.getCollectionFlags(
         CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)) )
       doc.addField("collection",collection);
+
+    if (doc.containsKey("notes")) {
+        doc.addField("notes_display", doc.getFieldValues("notes"));
+        doc.removeField("notes");
+    }
+
 
     System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
         changes)+" priority:"+priority);
@@ -495,7 +501,9 @@ public class ProcessAvailabilityQueue {
       for (String value : values) {
         if (value.isEmpty()) continue;
         if (value.startsWith("^")) {
-          doc.setDocumentBoost(Float.valueOf(value.substring(1)));
+          // solr no longer supports document level boosting. We could convert this
+          // to a boost on the main title field, but there's doesn't seem to be demand
+//          doc.setDocumentBoost(Float.valueOf(value.substring(1)));
           continue;
         }
         String[] parts = value.split(": ", 2);

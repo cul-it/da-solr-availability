@@ -11,7 +11,7 @@
 
     <fieldType name="callNumberSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
       <analyzer>
-        <tokenizer class="solr.KeywordTokenizerFactory"/>
+        <tokenizer name="keyword"/>
         <filter class="edu.cornell.library.integration.solr.CallNumberSortFilterFactory" prefixes="callnumberprefixes.txt"/>
       </analyzer>
     </fieldType>
