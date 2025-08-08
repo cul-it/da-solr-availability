@@ -9,7 +9,7 @@
     <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
     <fieldType name="date" class="solr.TrieDateField" omitNorms="true" precisionStep="0" positionIncrementGap="0"/>
 
-    <fieldType name="callNumberSort" class="solr.TextField" sortMissingLast="true" omitNorms="true">
+    <fieldType name="callNumberSort" class="solr.SortableTextField" sortMissingLast="true" omitNorms="true">
       <analyzer>
         <tokenizer name="keyword"/>
         <filter class="edu.cornell.library.integration.solr.CallNumberSortFilterFactory" prefixes="callnumberprefixes.txt"/>
@@ -22,38 +22,38 @@
   <fields>
 
     <!-- Call number browse functional fields -->
-    <field name="id"              type="string"         indexed="true"   stored="true"  required="true" multiValued="false" />
-    <field name="bibid"           type="int"            indexed="true"   stored="true"  required="true" multiValued="false" />
-    <field name="callnum_sort"    type="callNumberSort" indexed="true"   stored="false" required="true" multiValued="false" />
-    <field name="callnum_display" type="string"         indexed="false"  stored="true"  required="true" multiValued="false" />
-    <field name="shelfloc"        type="boolean"        indexed="true"   stored="true"                  multiValued="false" />
-    <field name="cite_preescaped_display" type="string" indexed="false"  stored="true"                  multiValued="false" />
-    <field name="classification_display"  type="string" indexed="false"  stored="true"                  multiValued="false" />
-    <field name="lc_b"            type="boolean"        indexed="true"   stored="true"                  multiValued="false" />
+    <field name="id"                      type="string"                   indexed="true"  stored="true"  required="true" multiValued="false" />
+    <field name="bibid"                   type="int"                      indexed="true"  stored="true"  required="true" multiValued="false" />
+    <field name="callnum_sort"            type="callNumberSort"           indexed="true"  stored="false" required="true" multiValued="false" />
+    <field name="callnum_display"         type="string" docValues="false" indexed="false" stored="true"  required="true" multiValued="false" />
+    <field name="shelfloc"                type="boolean"                  indexed="true"  stored="true"                  multiValued="false" />
+    <field name="cite_preescaped_display" type="string" docValues="false" indexed="false" stored="true"                  multiValued="false" />
+    <field name="classification_display"  type="string" docValues="false" indexed="false" stored="true"                  multiValued="false" />
+    <field name="lc_b"                    type="boolean"                  indexed="true"  stored="true"                  multiValued="false" />
 
 
     <!-- Fields duplicated from Blacklight index -->
-    <field name="format"                 type="string" indexed="false"  stored="true"  multiValued="true"/>
-    <field name="pub_date_facet"         type="int"    docValues="true" stored="false" multiValued="false"/>
-    <field name="language_facet"         type="string" docValues="true" stored="false" multiValued="true" />
-    <field name="acquired_dt"            type="date"   docValues="true" stored="true"  multiValued="false"/>
-    <field name="fulltitle_display"      type="string" indexed="false"  stored="true"  multiValued="false"/>
-    <field name="fulltitle_vern_display" type="string" indexed="false"  stored="true"  multiValued="false"/>
-    <field name="author_display"         type="string" indexed="false"  stored="true"  multiValued="false"/> <!-- combined with vern -->
-    <field name="publisher_display"      type="string" indexed="false"  stored="true"  multiValued="false"/>
-    <field name="pub_date_display"       type="string" indexed="false"  stored="true"  multiValued="false"/>
-    <field name="oclc_id_display"        type="string" indexed="false"  stored="true"  multiValued="true"/>
-    <field name="isbn_display"           type="string" indexed="false"  stored="true"  multiValued="true"/>
-    <field name="no_google_img_b"       type="boolean" indexed="false"  stored="true"  multiValued="false"/>
+    <field name="format"                 type="string" docValues="false" indexed="false"  stored="true"  multiValued="true"/>
+    <field name="pub_date_facet"         type="int"    docValues="true"                   stored="false" multiValued="false"/>
+    <field name="language_facet"         type="string" docValues="true"                   stored="false" multiValued="true" />
+    <field name="acquired_dt"            type="date"   docValues="true"                   stored="true"  multiValued="false"/>
+    <field name="fulltitle_display"      type="string" docValues="false" indexed="false"  stored="true"  multiValued="false"/>
+    <field name="fulltitle_vern_display" type="string" docValues="false" indexed="false"  stored="true"  multiValued="false"/>
+    <field name="author_display"         type="string" docValues="false" indexed="false"  stored="true"  multiValued="false"/> <!-- combined with vern -->
+    <field name="publisher_display"      type="string" docValues="false" indexed="false"  stored="true"  multiValued="false"/>
+    <field name="pub_date_display"       type="string" docValues="false" indexed="false"  stored="true"  multiValued="false"/>
+    <field name="oclc_id_display"        type="string" docValues="false" indexed="false"  stored="true"  multiValued="true"/>
+    <field name="isbn_display"           type="string" docValues="false" indexed="false"  stored="true"  multiValued="true"/>
+    <field name="no_google_img_b"        type="boolean" docValues="true" indexed="false"  stored="true"  multiValued="false"/>
 
 
     <!-- Fields duplicated from Blacklight index, filtered to particular holdings -->
-    <field name="availability_json"      type="string" indexed="false"  stored="true"  multiValued="false" />
-    <field name="location"               type="string" docValues="true" stored="true"  multiValued="true"/>
-    <field name="online"                 type="string" docValues="true" stored="true"  multiValued="true"/>
+    <field name="availability_json"      type="string" docValues="false" indexed="false"  stored="true"  multiValued="false" />
+    <field name="location"               type="string" docValues="true"                   stored="true"  multiValued="true"/>
+    <field name="online"                 type="string" docValues="true"                   stored="true"  multiValued="true"/>
 
     <!-- Debug flag field -->
-    <field name="flag"                   type="string" docValues="true" stored="true"  multiValued="true"/>
+    <field name="flag"                   type="string" docValues="true"                   stored="true"  multiValued="true"/>
 
     <!-- Administrivia -->
     <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
