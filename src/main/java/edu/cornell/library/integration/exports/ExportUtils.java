@@ -28,8 +28,8 @@ public class ExportUtils {
 
       if (f.tag.length() != 3 ||
           ! Character.isDigit(f.tag.charAt(0)) ||
-          ! Character.isDigit(f.tag.charAt(0)) ||
-          ! Character.isDigit(f.tag.charAt(0))) {
+          ! Character.isDigit(f.tag.charAt(1)) ||
+          ! Character.isDigit(f.tag.charAt(2))) {
         if (cleanNonNumeric) unwanted.add(f);
       }
       if (ids != null && ids.contains(f.tag)) {
