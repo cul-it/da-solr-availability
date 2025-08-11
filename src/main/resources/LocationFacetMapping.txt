@@ -1,8 +1,8 @@
 Hierarchical Location Facet Mapping; v.1.1				Voyager Display Name	Suppress	Call# (852$khim)	Holding Note (852$z)	Facet Display Name
-Adelson Library				Adelson Library > Main Collection
-Adelson Library Reference (Non-Circulating)				Adelson Library > Reference
-Museum of Vertebrates (Non-Circulating)				Adelson Library > Museum of Vertebrates
-Macaulay Library (Non-Circulating)				Adelson Library > Macaulay Library
+Lab of Ornithology				Lab of Ornithology > Main Collection
+Lab of Ornithology Reference (Non-Circulating)				Lab of Ornithology > Reference
+Museum of Vertebrates (Non-Circulating)				Lab of Ornithology > Museum of Vertebrates
+Macaulay Library (Non-Circulating)				Lab of Ornithology > Macaulay Library
 Clarke Africana Library A/V				Africana Library > A/V
 Clarke Africana Library New and Noteworthy				Africana Library > New Books Shelf
 Clarke Africana Library			new book	Africana Library > New Books Shelf
