@@ -10,6 +10,9 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
+
+import javax.naming.AuthenticationException;
+
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -23,7 +26,7 @@ import edu.cornell.library.integration.folio.OkapiClient;
 
 public class RefreshAvailability {
   public static void main(String[] args)
-      throws IOException, SQLException, SolrServerException {
+      throws IOException, SQLException, SolrServerException, AuthenticationException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){

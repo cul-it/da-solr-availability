@@ -25,6 +25,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 
+import javax.naming.AuthenticationException;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.DownloadMARC;
@@ -46,7 +48,7 @@ import edu.cornell.library.integration.marc.Subfield;
 
 public class GoogleExport {
 
-  public static void main(String[] args) throws IOException, SQLException {
+  public static void main(String[] args) throws IOException, SQLException, AuthenticationException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader()
@@ -281,7 +283,7 @@ public class GoogleExport {
   private static Map<String,Integer> collateHoldingsAndItemsData(
       OkapiClient okapi, Connection inventory, MarcRecord bibRec, Locations locations,
       ReferenceData holdingsNoteTypes, ReferenceData callNumberTypes)
-      throws SQLException, IOException {
+      throws SQLException, IOException, AuthenticationException {
     int maxBibFieldId = bibRec.dataFields.last().id;
     Map<String,Integer> output = new HashMap<>();
     output.put("master BW items", 0);

@@ -9,6 +9,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.rmi.NoSuchObjectException;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,37 +21,98 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
+import javax.naming.AuthenticationException;
+
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class OkapiClient {
 
+  private final String name;
   private final String url;
-  private final String token;
   private final String tenant;
+  private final String username;
+  private final String password;
+  private String accessToken = null;
+  private Instant accessExpires = null;
+  private String refreshToken = null;
+  private Instant refreshExpires = null;
+
   
   protected OkapiClient() {
+    this.name = "BOGUS_FOLIO";
     this.url = "BOGUS_URL";
-    this.token = "BOGUS_TOKEN";
+    this.username = "BOGUS_USER";
+    this.password = "BOGUS_PASSWORD";
     this.tenant = "BOGUS_TENANT";
   }
 
-  public OkapiClient(Properties prop, String identifier) throws IOException {
+  public OkapiClient(Properties prop, String identifier) throws IOException, AuthenticationException {
+    this.name = identifier;
     this.url = prop.getProperty("okapiUrl"+identifier);
     this.tenant = prop.getProperty("okapiTenant"+identifier);
-    if ( prop.containsKey("okapiToken"+identifier))
-      this.token = prop.getProperty("okapiToken"+identifier);
-    else {
-      this.token = post("/authn/login",
-          String.format("{\"username\":\"%s\",\"password\":\"%s\"}",
-              prop.getProperty("okapiUser"+identifier),prop.getProperty("okapiPass"+identifier)));
-      prop.setProperty("okapiToken"+identifier, this.token);
-      System.out.println(this.token);
-    }
+    this.username = prop.getProperty("okapiUser"+identifier);
+    this.password = prop.getProperty("okapiPass"+identifier);
+    HttpURLConnection c = this.post("/authn/login-with-expiry",String.format(
+        "{\"username\":\"%s\",\"password\":\"%s\"}",this.username,this.password));
+    if (201 != c.getResponseCode())
+      throw new AuthenticationException(String.format("%s:%s %s",this.name,this.username,c.getResponseMessage()));
+    parseLoginResponse(c);
   }
 
-  public String post(final String endPoint, final String json) throws IOException {
+  public void confirmTokensCurrent() throws AuthenticationException, IOException {
+    Instant inTwoMinutes = Instant.now().plus(2, ChronoUnit.MINUTES);
+    if (this.accessToken != null && this.accessExpires != null) {
+      
+        // access token has at least 2 minutes left, so use it.
+        if (this.accessExpires.isAfter(inTwoMinutes))
+            return;
+
+        // access token is old, but refresh token is still good, so refresh
+        if (this.refreshToken != null && this.refreshExpires != null
+            && this.refreshExpires.isAfter(inTwoMinutes)) {
+            refreshTokens();
+            return;
+        }
+}
+
+    // login again
+    HttpURLConnection c = this.post("/authn/login-with-expiry",String.format(
+        "{\"username\":\"%s\",\"password\":\"%s\"}",this.username,this.password));
+    if (201 != c.getResponseCode())
+      throw new AuthenticationException(String.format("%s:%s %s",this.name,this.username,c.getResponseMessage()));
+    parseLoginResponse(c);
+}
+
+  public void refreshTokens() throws IOException, AuthenticationException {
+    Map<String,String> headers = new HashMap<>();
+    headers.put("Cookie", String.format("folioRefreshToken=%s; folioAccessToken=%s", this.refreshToken,this.accessToken));
+    
+    HttpURLConnection c = post("/authn/refresh","", headers);
+    if (201 != c.getResponseCode())
+        throw new AuthenticationException(c.getResponseMessage());
+    parseLoginResponse(c);
+  }
+
+  private void parseLoginResponse(HttpURLConnection c) throws IOException {
+    for (String cookie : c.getHeaderFields().get("Set-Cookie")) {
+      if (cookie.startsWith("folioAccessToken"))
+          this.accessToken = cookie.substring(17,cookie.indexOf(';'));
+      if (cookie.startsWith("folioRefreshToken"))
+          this.refreshToken = cookie.substring(18,cookie.indexOf(';'));
+    }
+    Map<String,Object> response = mapper.readValue(convertStreamToString(c.getInputStream()), Map.class);
+    this.accessExpires = isoDT.parse((String)response.get("accessTokenExpiration"), Instant::from);
+    this.refreshExpires = isoDT.parse((String)response.get("refreshTokenExpiration"), Instant::from);
+  }
+  private static final DateTimeFormatter isoDT = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("Z"));
+
+  public HttpURLConnection post(final String endPoint, final String json) throws IOException {
+    return post(endPoint,json,null);
+  }
+
+  public HttpURLConnection post(final String endPoint, final String json, Map<String,String> headers) throws IOException {
 
     System.out.println("About to post " + endPoint);
 
@@ -55,6 +120,11 @@ public class OkapiClient {
     final HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();
     c.setRequestProperty("Content-Type", "application/json;charset=utf-8");
     c.setRequestProperty("X-Okapi-Tenant", this.tenant);
+    if (this.accessToken != null)
+      c.setRequestProperty("X-Okapi-Token", this.accessToken);
+    if (headers != null)
+      for (String headerName : headers.keySet())
+        c.setRequestProperty(headerName, headers.get(headerName));
 
     c.setRequestMethod("POST");
     c.setDoOutput(true);
@@ -63,27 +133,16 @@ public class OkapiClient {
     writer.write(json);
     writer.flush();
 
-    String token = c.getHeaderField("x-okapi-token");
-
-    final StringBuilder sb = new StringBuilder();
-    try (BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), "utf-8"))) {
-      String line = null;
-      while ((line = br.readLine()) != null) {
-        sb.append(line + "\n");
-      }
-    }
-    String response = sb.toString();
-    if ( token != null )
-      return token;
-    return response;
+    return c;
   }
 
-  public String put(final String endPoint, final Map<String, Object> object) throws IOException {
+  public String put(final String endPoint, final Map<String, Object> object) throws IOException, AuthenticationException {
     return put(endPoint, (String) object.get("id"), mapper.writeValueAsString(object));
   }
 
-  public String put(final String endPoint, final String uuid, final String json) throws IOException {
+  public String put(final String endPoint, final String uuid, final String json) throws IOException, AuthenticationException {
 
+    confirmTokensCurrent();
     final HttpURLConnection c = commonConnectionSetup(endPoint + "/" + uuid);
     c.setRequestMethod("PUT");
     c.setDoOutput(true);
@@ -104,18 +163,19 @@ public class OkapiClient {
     return sb.toString();
   }
 
-  public String delete(final String endPoint, final String uuid) throws IOException {
+  public String delete(final String endPoint, final String uuid) throws IOException, AuthenticationException {
     final StringBuilder sb = delete(endPoint, uuid, new StringBuilder());
     return sb.toString();
   }
 
-  public String deleteAll(final String endPoint, final boolean verbose) throws IOException {
+  public String deleteAll(final String endPoint, final boolean verbose) throws IOException, AuthenticationException {
 
     return deleteAll(endPoint, null, verbose);
   }
 
-  public String deleteAll(final String endPoint, final String notDeletedQuery, final boolean verbose) throws IOException {
+  public String deleteAll(final String endPoint, final String notDeletedQuery, final boolean verbose) throws IOException, AuthenticationException {
 
+    confirmTokensCurrent();
     final StringBuilder sb = new StringBuilder();
 
     Map<String, Map<String, Object>> existing = queryAsMap(endPoint, notDeletedQuery, null);
@@ -136,7 +196,8 @@ public class OkapiClient {
     return sb.toString();
   }
 
-  public String getRecord(final String endPoint, final String uuid) throws IOException {
+  public String getRecord(final String endPoint, final String uuid) throws IOException, AuthenticationException {
+    confirmTokensCurrent();
     final HttpURLConnection c = commonConnectionSetup(endPoint + "/" + uuid);
     final int responseCode = c.getResponseCode();
     if (responseCode != 200)
@@ -147,15 +208,17 @@ public class OkapiClient {
     }
   }
 
-  public List<Map<String, Object>> queryAsList(final String endPoint, final String query, final Integer limit) throws IOException {
+  public List<Map<String, Object>> queryAsList(final String endPoint, final String query, final Integer limit) throws IOException, AuthenticationException {
     return resultsToList(query(endPoint, query, limit));
   }
 
-  public Map<String, Map<String, Object>> queryAsMap(final String endPoint, final String query, final Integer limit) throws IOException {
+  public Map<String, Map<String, Object>> queryAsMap(final String endPoint, final String query, final Integer limit) throws IOException, AuthenticationException {
     return resultsToMap(query(endPoint, query, limit));
   }
 
-  public String query(final String endPoint, final String query, final Integer limit) throws IOException {
+  public String query(final String endPoint, final String query, final Integer limit) throws IOException, AuthenticationException {
+
+    confirmTokensCurrent();
     final StringBuilder sb = new StringBuilder();
     sb.append(endPoint);
     if (query != null) {
@@ -187,7 +250,9 @@ public class OkapiClient {
     }
   }
 
-  public String query(final String endPointQuery) throws IOException {
+  public String query(final String endPointQuery) throws IOException, AuthenticationException {
+
+    confirmTokensCurrent();
     final StringBuilder sb = new StringBuilder();
     sb.append(endPointQuery);
     System.out.println(sb.toString());
@@ -253,12 +318,13 @@ public class OkapiClient {
     final HttpURLConnection c = (HttpURLConnection) fullPath.openConnection();
     c.setRequestProperty("Content-Type", "application/json;charset=utf-8");
     c.setRequestProperty("X-Okapi-Tenant", this.tenant);
-    c.setRequestProperty("X-Okapi-Token", this.token);
+    c.setRequestProperty("X-Okapi-Token", this.accessToken);
     return c;
 
   }
 
-  private StringBuilder delete(final String endPoint, final String uuid, final StringBuilder sb) throws IOException {
+  private StringBuilder delete(final String endPoint, final String uuid, final StringBuilder sb) throws IOException, AuthenticationException {
+    confirmTokensCurrent();
     final HttpURLConnection c = commonConnectionSetup(endPoint + "/" + uuid);
     c.setRequestMethod("DELETE");
     //      int responseCode = httpConnection.getResponseCode();
@@ -281,4 +347,32 @@ public class OkapiClient {
   }
 
   protected static ObjectMapper mapper = new ObjectMapper();
+
+
+  public void printLoginStatus(OkapiClient folio) {
+    Instant now = Instant.now();
+    System.out.format("%s:%s; ACCESS: %s; REFRESH: %s\n",
+        this.name,this.username,
+        humanReadableTimespan(now.until(accessExpires,ChronoUnit.SECONDS)),
+        humanReadableTimespan(now.until(refreshExpires,ChronoUnit.SECONDS)));
+  }
+
+  private String humanReadableTimespan(long seconds) {
+    int minuteLen = 60, hourLen = 3600, dayLen = 86_400;
+    if (seconds > dayLen) {
+      long days = seconds / (dayLen);
+      long hours = (seconds-(dayLen*days))/(hourLen);
+      return String.format("%d days, %d hours", days, hours);
+    }
+    if (seconds > hourLen) {
+      long hours = seconds / (hourLen);
+      long minutes = (seconds-(hourLen*hours))/minuteLen;
+      return String.format("%d hours, %d minutes", hours, minutes);
+    }
+    if (seconds > 60) {
+      long minutes = seconds / minuteLen;
+      return String.format("%d minutes, %d seconds", minutes, seconds - (minuteLen*minutes));
+    }
+    return seconds + " seconds";
+  }
 }

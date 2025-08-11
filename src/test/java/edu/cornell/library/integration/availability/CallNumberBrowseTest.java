@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.naming.AuthenticationException;
 import javax.xml.stream.XMLStreamException;
 
 import org.apache.solr.client.solrj.util.ClientUtils;
@@ -47,7 +48,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
   static ReferenceData callNumberTypes = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, IOException {
+  public static void connect() throws SQLException, IOException, AuthenticationException {
     setup();
     testDB = getConnection();
     ObjectMapper mapper = new ObjectMapper();
@@ -69,7 +70,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
   }
 
   @Test
-  public void multipleCopies() throws SQLException, IOException, XMLStreamException {
+  public void multipleCopies() throws SQLException, IOException, XMLStreamException, AuthenticationException {
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "4442869");
     ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "4442869", holdings);
     for (String holdingUuid : holdings.getUuids())
@@ -143,7 +144,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
   }
 
   @Test
-  public void serial() throws SQLException, IOException, XMLStreamException {
+  public void serial() throws SQLException, IOException, XMLStreamException, AuthenticationException {
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "329763");
     ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "329763", holdings);
     assertEquals(8,holdings.size());
@@ -321,7 +322,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
 */
   @Test
   public void bibCallNumberForClosedStacksHoldingsWithNonLcHoldingCallNum()
-      throws SQLException, IOException, XMLStreamException {
+      throws SQLException, IOException, XMLStreamException, AuthenticationException {
 
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "1449673");
     ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "1449673", holdings);
@@ -347,7 +348,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
 
   @Test
   public void bibCallNumberForOpenStacksHoldingsWithNonLcHoldingCallNum()
-      throws SQLException, IOException, XMLStreamException {
+      throws SQLException, IOException, XMLStreamException, AuthenticationException {
 
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "3088531");
     ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "3088531", holdings);
