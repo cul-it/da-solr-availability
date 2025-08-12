@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.naming.AuthenticationException;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -22,7 +24,7 @@ public class ChangeDetector {
 
   public static Map<String,Set<Change>> detectChangedInstances(
       Connection inventory, OkapiClient okapi, Timestamp since )
-          throws SQLException, IOException, InterruptedException {
+          throws SQLException, IOException, InterruptedException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -132,7 +134,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedHoldings(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -211,7 +213,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedItems(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -294,7 +296,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedLoans(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -367,7 +369,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedRequests(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -458,7 +460,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedOrderLines(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -531,7 +533,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedOrders(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException {
+      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 

@@ -17,11 +17,13 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.naming.AuthenticationException;
+
 public class MonitorFolioChanges {
 
   private static final String CURRENT_TO_KEY = "avail";
 
-  public static void main(String[] args) throws IOException, SQLException, InterruptedException {
+  public static void main(String[] args) throws IOException, SQLException, InterruptedException, AuthenticationException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){

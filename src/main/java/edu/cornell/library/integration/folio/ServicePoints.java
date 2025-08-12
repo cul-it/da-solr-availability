@@ -5,9 +5,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.naming.AuthenticationException;
+
 public class ServicePoints {
 
-  public static void initialize( OkapiClient okapi ) throws IOException {
+  public static void initialize( OkapiClient okapi ) throws IOException, AuthenticationException {
     if (_byUuid.isEmpty()) populateServicePoints(okapi);
   }
 
@@ -27,7 +29,7 @@ public class ServicePoints {
     }
   }
 
-  private static void populateServicePoints( OkapiClient okapi ) throws IOException {
+  private static void populateServicePoints( OkapiClient okapi ) throws IOException, AuthenticationException {
     List<Map<String,Object>> servicePoints = okapi.queryAsList("/service-points",null,500 );
     for ( Map<String,Object> sp : servicePoints ) {
       String id = (String)sp.get("id");

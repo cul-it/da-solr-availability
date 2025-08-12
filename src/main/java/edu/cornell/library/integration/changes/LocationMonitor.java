@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.AuthenticationException;
+
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,7 +23,7 @@ import edu.cornell.library.integration.folio.Locations.Sort;
 
 public class LocationMonitor {
 
-  public static void main(String[] args) throws IOException, SQLException {
+  public static void main(String[] args) throws IOException, SQLException, AuthenticationException {
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
       prop.load(in);

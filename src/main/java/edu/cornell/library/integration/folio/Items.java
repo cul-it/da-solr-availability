@@ -15,6 +15,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import javax.naming.AuthenticationException;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -35,7 +37,7 @@ public class Items {
   static ReferenceData materialTypes = null;
   static ReferenceData itemNoteTypes = null;
 
-  public static void initialize(OkapiClient okapi, Locations locs) throws IOException {
+  public static void initialize(OkapiClient okapi, Locations locs) throws IOException, AuthenticationException {
     if (locations == null) {
       locations = locs;
       materialTypes = new ReferenceData( okapi, "/material-types", "name");
@@ -45,7 +47,7 @@ public class Items {
 
   public static ItemList retrieveItemsForHoldings(
       OkapiClient okapi, Connection inventory, String bibId, HoldingSet holdings)
-          throws SQLException, IOException {
+          throws SQLException, IOException, AuthenticationException {
     if (locations == null) {
       locations = new Locations( okapi );
       materialTypes = new ReferenceData( okapi, "/material-types", "name");

@@ -25,12 +25,14 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.zip.GZIPOutputStream;
 
+import javax.naming.AuthenticationException;
+
 import edu.cornell.library.integration.exports.PODExporter.UpdateType;
 import edu.cornell.library.integration.folio.OkapiClient;
 
 public class PODIncrementalExport {
 
-  public static void main(String[] args) throws IOException, SQLException {
+  public static void main(String[] args) throws IOException, SQLException, AuthenticationException {
 
     Properties prop = new Properties();
     String configFile = System.getenv("configFile");

@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
+import javax.naming.AuthenticationException;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -48,7 +50,7 @@ public class HoldingsTest extends DbBaseTest {
   static OkapiClient testOkapiClient = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, IOException {
+  public static void connect() throws SQLException, IOException, AuthenticationException {
     setup();
     testConnection = getConnection();
 
@@ -134,7 +136,7 @@ public class HoldingsTest extends DbBaseTest {
   }
 
   @Test
-  public void summarizeAvailability() throws SQLException, IOException {
+  public void summarizeAvailability() throws SQLException, IOException, AuthenticationException {
     HoldingSet hs = Holdings.retrieveHoldingsByInstanceHrid(testConnection, locations, holdingsNoteTypes, callNumberTypes, "10055679");
     Holding h = hs.get("f26ba953-b4b6-486b-8113-1cffc3f3c3f8");
     ItemList il = Items.retrieveItemsForHoldings(testOkapiClient, testConnection, "10055679", hs);
