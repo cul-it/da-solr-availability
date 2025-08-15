@@ -45,8 +45,6 @@ import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
-//import org.eclipse.jetty.client.api.AuthenticationStore;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
@@ -88,15 +86,15 @@ public class ProcessAvailabilityQueue {
             prop.getProperty("databaseURLCallNos"),prop.getProperty("databaseUserCallNos"),
             prop.getProperty("databasePassCallNos"));
         PreparedStatement readQStmt = inventoryDB.prepareStatement
-            ("SELECT availabilityQueue.hrid, priority"+
-             "  FROM availabilityQueue"+
-             "  LEFT JOIN bibLock ON availabilityQueue.hrid = bibLock.hrid"+
+            ("SELECT availQueue.hrid, priority"+
+             "  FROM availQueue"+
+             "  LEFT JOIN bibLock ON availQueue.hrid = bibLock.hrid"+
              " WHERE bibLock.date IS NULL"+
              " ORDER BY priority, record_date LIMIT 1");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
-            ("DELETE FROM availabilityQueue WHERE hrid = ?");
+            ("DELETE FROM availQueue WHERE hrid = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
-            ("SELECT id, cause, record_date FROM availabilityQueue WHERE hrid = ?");
+            ("SELECT id, cause, record_date FROM availQueue WHERE hrid = ?");
         PreparedStatement createLockStmt = inventoryDB.prepareStatement
             ("INSERT INTO bibLock (hrid) values (?)",Statement.RETURN_GENERATED_KEYS);
         PreparedStatement unlockStmt = inventoryDB.prepareStatement
@@ -104,7 +102,7 @@ public class ProcessAvailabilityQueue {
         PreparedStatement oldLocksCleanupStmt = inventoryDB.prepareStatement
             ("DELETE FROM bibLock WHERE date < DATE_SUB( NOW(), INTERVAL 15 MINUTE)");
         PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
-            ("DELETE FROM availabilityQueue WHERE id = ?");
+            ("DELETE FROM availQueue WHERE id = ?");
         PreparedStatement queueGen = inventoryDB.prepareStatement
             ("INSERT INTO generationQueue ( hrid, priority, cause, record_date )"
                 + " VALUES (?,?,?,NOW())");
@@ -211,7 +209,7 @@ public class ProcessAvailabilityQueue {
     // Confirm that queue is actually empty
     try ( Statement stmt = inventory.createStatement();
         ResultSet rs = stmt.executeQuery(
-            "SELECT COUNT(*) FROM availabilityQueue")) {
+            "SELECT COUNT(*) FROM availQueue")) {
       while (rs.next()) if ( rs.getInt(1) > 10 ) return;
     }
 
@@ -242,7 +240,7 @@ public class ProcessAvailabilityQueue {
     // Queue results
     if (! recordIds.isEmpty()) {
       try ( PreparedStatement insert = inventory.prepareStatement(
-          "INSERT INTO availabilityQueue(hrid, priority, cause, record_date)"
+          "INSERT INTO availQueue(hrid, priority, cause, record_date)"
           + " VALUES (?,9,'Age of Record',?)")) {
         for ( Entry<String,Timestamp> e : recordIds.entrySet() ) {
           insert.setString(1, e.getKey());
@@ -456,6 +454,14 @@ public class ProcessAvailabilityQueue {
     if (doc.containsKey("notes")) {
         doc.addField("notes_display", doc.getFieldValues("notes"));
         doc.removeField("notes");
+    }
+    if (doc.containsKey("lc_callnum_facet")) {
+      List<String> modified = new ArrayList<>();
+      for (Object value : doc.getFieldValues("lc_callnum_facet")) {
+        modified.add(  ((String)value).replaceAll(":", " > "));
+      }
+      doc.removeField("lc_callnum_facet");
+      doc.addField("lc_callnum_facet", modified);
     }
 
 

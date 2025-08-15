@@ -67,7 +67,7 @@ class DeleteFromSolr {
         PreparedStatement deleteFromGenQ = inventoryDB.prepareStatement
             ("DELETE FROM generationQueue WHERE hrid = ?");
         PreparedStatement deleteFromAvailQ = inventoryDB.prepareStatement
-            ("DELETE FROM availabilityQueue WHERE hrid = ?");
+            ("DELETE FROM availQueue WHERE hrid = ?");
         PreparedStatement getTitle = inventoryDB.prepareStatement
             ("SELECT title FROM bibRecsSolr WHERE bib_id = ?");
         PreparedStatement deleteFromBRS = inventoryDB.prepareStatement
