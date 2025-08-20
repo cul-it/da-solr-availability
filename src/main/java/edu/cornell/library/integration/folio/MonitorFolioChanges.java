@@ -44,7 +44,7 @@ public class MonitorFolioChanges {
         PreparedStatement queueAvail = inventory.prepareStatement
             ("INSERT INTO availQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement queueAvail2 = inventory.prepareStatement
-            ("INSERT INTO availabiltyQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
+            ("INSERT INTO availabilityQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement queueGen = inventory.prepareStatement
             ("INSERT INTO generationQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement getTitle = inventory.prepareStatement
