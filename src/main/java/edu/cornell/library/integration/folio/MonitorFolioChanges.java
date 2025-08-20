@@ -40,7 +40,7 @@ public class MonitorFolioChanges {
 
     try (
         Connection inventory = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+            prop.getProperty("databaseURLCurrent"),prop.getProperty("databaseUserCurrent"),prop.getProperty("databasePassCurrent"));
         PreparedStatement queueAvail = inventory.prepareStatement
             ("INSERT INTO availQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement queueAvail2 = inventory.prepareStatement
