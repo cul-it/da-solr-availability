@@ -164,6 +164,7 @@ public class MonitorFolioChanges {
       if (i == 100) { q2.executeBatch(); i=0; }
     }
     q.executeBatch();
+    if (q2 != null) q2.executeBatch();
   }
 
   private static Timestamp getMinChangeDate(Set<Change> changes) {
