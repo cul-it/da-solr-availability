@@ -35,6 +35,8 @@ public class MonitorFolioChanges {
             prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
         PreparedStatement queueAvail = inventory.prepareStatement
             ("INSERT INTO availQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
+        PreparedStatement queueAvail2 = inventory.prepareStatement
+            ("INSERT INTO availabiltyQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement queueGen = inventory.prepareStatement
             ("INSERT INTO generationQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement getTitle = inventory.prepareStatement
@@ -59,21 +61,21 @@ public class MonitorFolioChanges {
 
         trimUserChangeLog.executeUpdate();
         queueForIndex( ChangeDetector.detectChangedInstances( inventory, okapi, since ),
-            queueGen, getTitle, getUserChangeTotals );
+            queueGen, null, getTitle, getUserChangeTotals );
         Map<String, Set<Change>> changedBibs =
             ChangeDetector.detectChangedHoldings( inventory, okapi, since );
-        queueForIndex(changedBibs,queueGen,getTitle, getUserChangeTotals);
-        queueForIndex(changedBibs,queueAvail,getTitle, getUserChangeTotals);
+        queueForIndex(changedBibs,queueGen,null, getTitle, getUserChangeTotals);
+        queueForIndex(changedBibs,queueAvail,queueAvail2, getTitle, getUserChangeTotals);
         queueForIndex(ChangeDetector.detectChangedItems( inventory, okapi, since ),
-            queueAvail, getTitle, getUserChangeTotals );
+            queueAvail, queueAvail2, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedLoans( inventory, okapi, since ),
-            queueAvail, getTitle, getUserChangeTotals );
+            queueAvail, queueAvail2, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedRequests( inventory, okapi, since ),
-            queueAvail, getTitle, getUserChangeTotals );
+            queueAvail, queueAvail2, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedOrderLines( inventory, okapi, since ),
-            queueAvail, getTitle, getUserChangeTotals );
+            queueAvail, queueAvail2, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedOrders( inventory, okapi, since ),
-            queueAvail, getTitle, getUserChangeTotals );
+            queueAvail, queueAvail2, getTitle, getUserChangeTotals );
 
         Thread.sleep(12_000); //12 seconds
         time = newTime;
@@ -105,7 +107,7 @@ public class MonitorFolioChanges {
 
 
   private static void queueForIndex( Map<String, Set<Change>> changedBibs,
-      PreparedStatement q, PreparedStatement getTitle, PreparedStatement getUserTotals)
+      PreparedStatement q, PreparedStatement q2, PreparedStatement getTitle, PreparedStatement getUserTotals)
           throws SQLException {
 
     if ( changedBibs.isEmpty() ) return;
@@ -145,6 +147,13 @@ public class MonitorFolioChanges {
       q.setTimestamp(4,getMinChangeDate( e.getValue() ));
       q.addBatch();
       if (++i == 100) { q.executeBatch(); i=0; }
+      if (q2 == null) continue;
+      q2.setInt(1, bibId);
+      q2.setInt(2,priority);
+      q2.setString(3, causes);
+      q2.setTimestamp(4,getMinChangeDate( e.getValue() ));
+      q2.addBatch();
+      if (i == 100) { q2.executeBatch(); i=0; }
     }
     q.executeBatch();
   }
