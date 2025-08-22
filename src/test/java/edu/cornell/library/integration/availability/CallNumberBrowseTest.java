@@ -82,7 +82,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
 
     assertEquals(3,docs.size());
     assertEquals(
-        "<doc boost=\"1.0\">"
+        "<doc>"
         + "<field name=\"bibid\">4442869</field>"
         + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">4442869.1</field>"
@@ -99,7 +99,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
         + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
-        "<doc boost=\"1.0\">"
+        "<doc>"
         + "<field name=\"bibid\">4442869</field>"
         + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">4442869.2</field>"
@@ -122,7 +122,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
         + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(1)));
     assertEquals(
-        "<doc boost=\"1.0\">"
+        "<doc>"
         + "<field name=\"bibid\">4442869</field>"
         + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">4442869.3</field>"
@@ -163,7 +163,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(testDB, mainDoc, holdings);
     assertEquals(2,docs.size());
     assertEquals(
-        "<doc boost=\"1.0\">"
+        "<doc>"
         + "<field name=\"bibid\">329763</field>"
         + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">329763.1</field>"
@@ -177,7 +177,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
         + "<field name=\"online\">At the Library</field></doc>",
         ClientUtils.toXML(docs.get(0)));
     assertEquals(
-        "<doc boost=\"1.0\">"
+        "<doc>"
         + "<field name=\"bibid\">329763</field>"
         + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"online\">Online</field>"
@@ -360,7 +360,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
     List<SolrInputDocument> docs = CallNumberBrowse.generateBrowseDocuments(testDB, mainDoc, holdings);
     assertEquals(1, docs.size());
     assertEquals(
-        "<doc boost=\"1.0\">"
+        "<doc>"
         + "<field name=\"bibid\">3088531</field>"
         + "<field name=\"cite_preescaped_display\"></field>"
         + "<field name=\"id\">3088531.1</field>"
