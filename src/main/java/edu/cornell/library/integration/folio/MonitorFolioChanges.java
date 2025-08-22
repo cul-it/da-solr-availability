@@ -161,7 +161,7 @@ public class MonitorFolioChanges {
       q2.setString(3, causes);
       q2.setTimestamp(4,getMinChangeDate( e.getValue() ));
       q2.addBatch();
-      if (i == 100) { q2.executeBatch(); i=0; }
+      if (i % 100 == 0) { q2.executeBatch(); }
     }
     q.executeBatch();
     if (q2 != null) q2.executeBatch();
