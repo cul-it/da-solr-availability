@@ -377,6 +377,8 @@ public class ProcessAvailabilityQueue {
       Holdings.mergeAccessLinksIntoHoldings( holdings,doc.getFieldValues("url_access_json"));
     if ( holdings.size() > 0 )
       doc.addField("holdings_json", holdings.toJson());
+    else doc.addField("availability_facet", "No Unsuppressed Holdings");
+
     for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
       for ( Item i : itemsForHolding )
         if (i.status != null && i.loanType.shortLoan == true)
