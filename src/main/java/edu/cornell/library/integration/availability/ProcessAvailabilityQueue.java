@@ -377,6 +377,9 @@ public class ProcessAvailabilityQueue {
       Holdings.mergeAccessLinksIntoHoldings( holdings,doc.getFieldValues("url_access_json"));
     if ( holdings.size() > 0 )
       doc.addField("holdings_json", holdings.toJson());
+    else
+      doc.addField("availability_facet", "No Unsuppressed Holdings");
+
     for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
       for ( Item i : itemsForHolding )
         if (i.status != null && i.loanType.shortLoan == true)
@@ -468,12 +471,26 @@ public class ProcessAvailabilityQueue {
     System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
         changes)+" priority:"+priority);
 
-    try {
+    try (PreparedStatement bibStmt = inventory.prepareStatement(
+           "REPLACE INTO bibSolrDoc (instanceHrid, content) VALUES (?,?)");
+         PreparedStatement callnumStmt = inventory.prepareStatement(
+           "REPLACE INTO callnumSolrDoc (id, content) VALUES (?,?)");
+        ) {
 
       solr.add(doc);
+      bibStmt.setString(1, bibId);
+      bibStmt.setString(2, ClientUtils.toXML(doc));
+      bibStmt.executeUpdate();
       callNumberSolr.deleteByQuery("bibid:"+bibId);
-      if ( ! callnumSolrDocs.isEmpty() && active )
-        callNumberSolr.add(callnumSolrDocs);
+      if ( ! callnumSolrDocs.isEmpty() && active ) {
+          callNumberSolr.add(callnumSolrDocs);
+          for (SolrInputDocument cd : callnumSolrDocs) {
+              callnumStmt.setString(1, (String)cd.getFieldValue("id"));
+              callnumStmt.setString(2, ClientUtils.toXML(cd));
+              callnumStmt.addBatch();
+          }
+          callnumStmt.executeBatch();
+      }
     } catch (SolrServerException | RemoteSolrException e) {
       System.out.printf("Error communicating with Solr server after processing.");
       e.printStackTrace();
