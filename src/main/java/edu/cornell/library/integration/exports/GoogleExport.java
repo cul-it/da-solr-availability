@@ -11,14 +11,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -32,15 +30,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cornell.library.integration.folio.DownloadMARC;
 import edu.cornell.library.integration.folio.Holding;
 import edu.cornell.library.integration.folio.Holdings;
+import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 import edu.cornell.library.integration.folio.Items;
+import edu.cornell.library.integration.folio.Items.Item;
+import edu.cornell.library.integration.folio.Items.ItemList;
 import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
 import edu.cornell.library.integration.folio.OkapiClient;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
-import edu.cornell.library.integration.folio.Holdings.HoldingSet;
-import edu.cornell.library.integration.folio.Items.Item;
-import edu.cornell.library.integration.folio.Items.ItemList;
 import edu.cornell.library.integration.marc.ControlField;
 import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.MarcRecord;
@@ -66,7 +64,7 @@ public class GoogleExport {
       ServicePoints.initialize(okapi);
       Items.initialize(okapi, locations);
 
-      Set<String> bibs = getBibsToExport(inventory);
+      Set<String> bibs = ExportUtils.getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
       int fileCount = 0;
       Path outputFile = Paths.get(String.format("cornell-export-%d.xml",++fileCount));
@@ -76,7 +74,7 @@ public class GoogleExport {
 
       BIB: for (String bibid : bibs) {
 
-        Map<String,Object> instance = getInstance( inventory, bibid);
+        Map<String,Object> instance = ExportUtils.getInstance( inventory, bibid);
 
         // if the bib(instance) is suppressed, we don't want to send to Google.
         if ((instance.containsKey("discoverySuppress") && (boolean)instance.get("discoverySuppress"))
@@ -97,7 +95,7 @@ public class GoogleExport {
           continue BIB;
         }
 
-        cleanUp995(bibRec);
+        ExportUtils.cleanUnwantedDataFields(bibRec, Arrays.asList("995"), null, false);
 
         Map<String,Integer> itemStats = collateHoldingsAndItemsData(
             okapi, inventory, bibRec, locations, holdingsNoteTypes, callNumberTypes);
@@ -146,12 +144,6 @@ public class GoogleExport {
       writer.close();
 
     }
-  }
-
-  private static void cleanUp995(MarcRecord rec) {
-    Set<DataField> deletes = new HashSet<>();
-    for (DataField f : rec.dataFields) if (f.tag.equals("955")) deletes.add(f);
-    for (DataField f : deletes) rec.dataFields.remove(f);
   }
 
   private static void cleanUp041(MarcRecord rec) {
@@ -249,30 +241,7 @@ public class GoogleExport {
   }
   private static enum Format { MONO , SERIAL , SCORE,  OTHER, MANUSCRIPT }
 
-  private static Set<String> getBibsToExport(Connection inventory) throws SQLException {
-    Set<String> bibs = new LinkedHashSet<>();
-    try ( Statement stmt = inventory.createStatement() ){
-      stmt.setFetchSize(1_000_000);
-      try ( ResultSet rs = stmt.executeQuery("SELECT hrid FROM instanceFolio ORDER BY RAND()")) {
-        while ( rs.next() ) bibs.add(rs.getString(1));
-      }
-    }
-    return bibs;
-  }
-
-  private static Map<String, Object> getInstance(Connection inventory, String bibId)
-      throws SQLException, IOException {
-    try ( PreparedStatement instanceByHrid = inventory.prepareStatement
-            ("SELECT * FROM instanceFolio WHERE hrid = ?") ) {
-      instanceByHrid.setString(1, bibId);
-      try ( ResultSet rs1 = instanceByHrid.executeQuery() ) {
-        while (rs1.next()) return mapper.readValue( rs1.getString("content"), Map.class);
-      }
-    }
-    return null;
-  }
   private static DateTimeFormatter isoDT = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("Z"));
-  private static ObjectMapper mapper = new ObjectMapper();
 
   private static class HoldingsAndItems {
     public HoldingSet holdings;
