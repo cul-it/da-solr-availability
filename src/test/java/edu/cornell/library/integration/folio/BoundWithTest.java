@@ -10,6 +10,8 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.naming.AuthenticationException;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -23,7 +25,7 @@ public class BoundWithTest {
   static OkapiClient testOkapiClient = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, IOException {
+  public static void connect() throws SQLException, IOException, AuthenticationException {
 
     Properties prop = new Properties();
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){

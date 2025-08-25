@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Set;
 
+import javax.naming.AuthenticationException;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -21,7 +23,7 @@ public class LocationsTest {
   static OkapiClient testOkapiClient = null;
 
   @BeforeClass
-  public static void connect() throws SQLException, IOException {
+  public static void connect() throws SQLException, IOException, AuthenticationException {
 
     testOkapiClient = new StaticOkapiClient();
     locations = new Locations(testOkapiClient);
