@@ -73,8 +73,8 @@ public class CC0Export {
         }
 
         // confirm the record isn't NoEx.
-        for (DataField f : bibRec.dataFields) if (f.tag.equals("995"))
-          for (Subfield sf : f.subfields) if (sf.value.contains("NoEx")) {
+        for (DataField df : bibRec.dataFields) if (df.tag.equals("995"))
+          for (Subfield sf : df.subfields) if (sf.value.contains("NoEx")) {
             System.out.printf("Skipping %8s: NoEx\n",bibid);
             continue BIB;
           }
