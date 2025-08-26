@@ -28,17 +28,15 @@ public class CC0Export {
 
   public static void main(String[] args) throws IOException, SQLException {
 
+    Map<String, String> env = System.getenv();
+    String configFile = env.get("configFile");
+    if (configFile == null)
+      throw new IllegalArgumentException("configFile must be set in environment to valid file path.");
     Properties prop = new Properties();
-    String configFile = System.getenv("configFile");
-    if ( configFile != null ) {
-      System.out.println(configFile);
-      File f = new File(configFile);
-      if (f.exists()) {
-        try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
-      } else System.out.println("File does not exist: "+configFile);
-    } else
-      try (InputStream in = Thread.currentThread().getContextClassLoader()
-        .getResourceAsStream("database.properties")){ prop.load(in); }
+    File f = new File(configFile);
+    if (f.exists()) {
+      try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+    } else System.out.println("File does not exist: "+configFile);
 
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("inventoryDBUrl"),
         prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass")); ){
@@ -75,8 +73,8 @@ public class CC0Export {
         }
 
         // confirm the record isn't NoEx.
-        for (DataField f : bibRec.dataFields) if (f.tag.equals("995"))
-          for (Subfield sf : f.subfields) if (sf.value.contains("NoEx")) {
+        for (DataField df : bibRec.dataFields) if (df.tag.equals("995"))
+          for (Subfield sf : df.subfields) if (sf.value.contains("NoEx")) {
             System.out.printf("Skipping %8s: NoEx\n",bibid);
             continue BIB;
           }
