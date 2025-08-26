@@ -37,11 +37,11 @@ import javax.naming.AuthenticationException;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.impl.ConcurrentUpdateSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.BaseHttpSolrClient.RemoteSolrException;
+import org.apache.solr.client.solrj.impl.Http2SolrClient;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -69,35 +69,32 @@ public class ProcessAvailabilityQueue {
   public static void main(String[] args)
       throws IOException, SQLException, InterruptedException, SolrServerException, AuthenticationException {
 
+    Map<String, String> env = System.getenv();
+    String configFile = env.get("configFile");
+    if (configFile == null)
+      throw new IllegalArgumentException("configFile must be set in environment to valid file path.");
     Properties prop = new Properties();
-    String configFile = System.getenv("configFile");
-    if ( configFile != null ) {
-      System.out.println(configFile);
-      File f = new File(configFile);
-      if (f.exists()) {
-        try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
-      } else System.out.println("File does not exist: "+configFile);
-    } else try (InputStream in = Thread.currentThread().getContextClassLoader().
-        getResourceAsStream((configFile == null)?"database.properties":configFile)){
-      prop.load(in);
-    }
+    File f = new File(configFile);
+    if (f.exists()) {
+      try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+    } else System.out.println("File does not exist: "+configFile);
 
     try (Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),
-            prop.getProperty("inventoryDBPass"));
+            prop.getProperty("databaseURLCurrent"),prop.getProperty("databaseUserCurrent"),
+            prop.getProperty("databasePassCurrent"));
         Connection classificationDB = DriverManager.getConnection(
-            prop.getProperty("classificationDBUrl"),prop.getProperty("classificationDBUser"),
-            prop.getProperty("classificationDBPass"));
+            prop.getProperty("databaseURLCallNos"),prop.getProperty("databaseUserCallNos"),
+            prop.getProperty("databasePassCallNos"));
         PreparedStatement readQStmt = inventoryDB.prepareStatement
-            ("SELECT availabilityQueue.hrid, priority"+
-             "  FROM availabilityQueue"+
-             "  LEFT JOIN bibLock ON availabilityQueue.hrid = bibLock.hrid"+
+            ("SELECT availQueue.hrid, priority"+
+             "  FROM availQueue"+
+             "  LEFT JOIN bibLock ON availQueue.hrid = bibLock.hrid"+
              " WHERE bibLock.date IS NULL"+
              " ORDER BY priority, record_date LIMIT 1");
         PreparedStatement deqStmt = inventoryDB.prepareStatement
-            ("DELETE FROM availabilityQueue WHERE hrid = ?");
+            ("DELETE FROM availQueue WHERE hrid = ?");
         PreparedStatement allForBib = inventoryDB.prepareStatement
-            ("SELECT id, cause, record_date FROM availabilityQueue WHERE hrid = ?");
+            ("SELECT id, cause, record_date FROM availQueue WHERE hrid = ?");
         PreparedStatement createLockStmt = inventoryDB.prepareStatement
             ("INSERT INTO bibLock (hrid) values (?)",Statement.RETURN_GENERATED_KEYS);
         PreparedStatement unlockStmt = inventoryDB.prepareStatement
@@ -105,13 +102,16 @@ public class ProcessAvailabilityQueue {
         PreparedStatement oldLocksCleanupStmt = inventoryDB.prepareStatement
             ("DELETE FROM bibLock WHERE date < DATE_SUB( NOW(), INTERVAL 15 MINUTE)");
         PreparedStatement clearFromQueueStmt = inventoryDB.prepareStatement
-            ("DELETE FROM availabilityQueue WHERE id = ?");
+            ("DELETE FROM availQueue WHERE id = ?");
         PreparedStatement queueGen = inventoryDB.prepareStatement
             ("INSERT INTO generationQueue ( hrid, priority, cause, record_date )"
                 + " VALUES (?,?,?,NOW())");
-        ConcurrentUpdateSolrClient solr = new
-            ConcurrentUpdateSolrClient( System.getenv("SOLR_URL"),50,1);
-        SolrClient callNumberSolr = new HttpSolrClient( System.getenv("CALLNUMBER_SOLR_URL") )
+        Http2SolrClient solr = new Http2SolrClient
+            .Builder(prop.getProperty("solrUrl")+"/"+prop.getProperty("blacklightSolrCore"))
+            .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
+        Http2SolrClient callNumberSolr = new Http2SolrClient
+            .Builder(prop.getProperty("solrUrl")+"/"+prop.getProperty("callnumSolrCore"))
+            .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
         ) {
 
       OkapiClient okapi = new OkapiClient(prop,"Folio");
@@ -173,8 +173,8 @@ public class ProcessAvailabilityQueue {
           UpdateResults updateSuccess = updateBibInSolr(
               okapi,inventoryDB,classificationDB,solr,callNumberSolr,locations,
               holdingsNoteTypes, callNumberTypes, statCodes, bib, priority);
-          if (priority != null && priority <= 5)
-            solr.blockUntilFinished();
+//          if (priority != null && priority <= 5)
+//            solr.blockUntilFinished();
           if ( ! updateSuccess.equals(UpdateResults.FAILURE) ) {
             for (int id : ids) {
               clearFromQueueStmt.setInt(1, id);
@@ -198,9 +198,10 @@ public class ProcessAvailabilityQueue {
           }
         }
       }
-      solr.blockUntilFinished();
+//      solr.blockUntilFinished();
     }
   }
+
 
   private static void queueRecordsNotRecentlyUpdated(Connection inventory, SolrClient solr)
       throws SQLException, SolrServerException, IOException {
@@ -208,7 +209,7 @@ public class ProcessAvailabilityQueue {
     // Confirm that queue is actually empty
     try ( Statement stmt = inventory.createStatement();
         ResultSet rs = stmt.executeQuery(
-            "SELECT COUNT(*) FROM availabilityQueue")) {
+            "SELECT COUNT(*) FROM availQueue")) {
       while (rs.next()) if ( rs.getInt(1) > 10 ) return;
     }
 
@@ -229,7 +230,8 @@ public class ProcessAvailabilityQueue {
     q.setRequestHandler("standard");
     q.setSort("random",ORDER.asc);
     Map<String,Timestamp> recordIds = new HashMap<>();
-    for (SolrDocument doc : solr.query(q).getResults()) {
+    for (SolrDocument doc : solr.query(q)
+        .getResults()) {
       Timestamp lastIndexDate = Timestamp.valueOf(((Date)doc
           .getFieldValue("timestamp")).toInstant().atZone(ZoneId.of("Z")).toLocalDateTime());
       recordIds.put((String)doc.getFieldValue("id"),lastIndexDate);
@@ -238,7 +240,7 @@ public class ProcessAvailabilityQueue {
     // Queue results
     if (! recordIds.isEmpty()) {
       try ( PreparedStatement insert = inventory.prepareStatement(
-          "INSERT INTO availabilityQueue(hrid, priority, cause, record_date)"
+          "INSERT INTO availQueue(hrid, priority, cause, record_date)"
           + " VALUES (?,9,'Age of Record',?)")) {
         for ( Entry<String,Timestamp> e : recordIds.entrySet() ) {
           insert.setString(1, e.getKey());
@@ -375,6 +377,8 @@ public class ProcessAvailabilityQueue {
       Holdings.mergeAccessLinksIntoHoldings( holdings,doc.getFieldValues("url_access_json"));
     if ( holdings.size() > 0 )
       doc.addField("holdings_json", holdings.toJson());
+    else doc.addField("availability_facet", "No Unsuppressed Holdings");
+
     for ( TreeSet<Item> itemsForHolding : items.getItems().values() )
       for ( Item i : itemsForHolding )
         if (i.status != null && i.loanType.shortLoan == true)
@@ -435,10 +439,6 @@ public class ProcessAvailabilityQueue {
       doc.addField(solrField, true);
     }
 
-    // TODO REMOVE THIS WORKAROUND WHEN WE HAVE A BETTER MODEL FOR SUPPRESSING GOOGLE COVERS DACCESS-53
-    if ( bibId.equals("8930429") ) doc.removeField("oclc_id_display");
-
-
     WorksAndInventory.updateInventory( inventory, doc );
 
     List<SolrInputDocument> thisDocsCallNumberDocs =
@@ -452,6 +452,20 @@ public class ProcessAvailabilityQueue {
     for (String collection : CallNumberTools.getCollectionFlags(
         CallNumberBrowse.allCallNumbers(thisDocsCallNumberDocs)) )
       doc.addField("collection",collection);
+
+    if (doc.containsKey("notes")) {
+        doc.addField("notes_display", doc.getFieldValues("notes"));
+        doc.removeField("notes");
+    }
+    if (doc.containsKey("lc_callnum_facet")) {
+      List<String> modified = new ArrayList<>();
+      for (Object value : doc.getFieldValues("lc_callnum_facet")) {
+        modified.add(  ((String)value).replaceAll(":", " > "));
+      }
+      doc.removeField("lc_callnum_facet");
+      doc.addField("lc_callnum_facet", modified);
+    }
+
 
     System.out.println(bibId+" ("+doc.getFieldValue("title_display")+"): "+String.join("; ",
         changes)+" priority:"+priority);
@@ -495,7 +509,9 @@ public class ProcessAvailabilityQueue {
       for (String value : values) {
         if (value.isEmpty()) continue;
         if (value.startsWith("^")) {
-          doc.setDocumentBoost(Float.valueOf(value.substring(1)));
+          // solr no longer supports document level boosting. We could convert this
+          // to a boost on the main title field, but there's doesn't seem to be demand
+//          doc.setDocumentBoost(Float.valueOf(value.substring(1)));
           continue;
         }
         String[] parts = value.split(": ", 2);

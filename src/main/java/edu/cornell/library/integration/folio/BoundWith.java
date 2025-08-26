@@ -270,7 +270,7 @@ public class BoundWith {
     }
     if ( otherBibs.isEmpty() ) return;
     try (PreparedStatement pstmt = inventory.prepareStatement(
-        "INSERT INTO availabilityQueue (hrid, priority, cause, record_date) VALUES (?,3,?,NOW())")) {
+        "INSERT INTO availQueue (hrid, priority, cause, record_date) VALUES (?,3,?,NOW())")) {
       for ( Entry<String,Set<String>> e : otherBibs.entrySet() ) {
         pstmt.setString(1, e.getKey());
         pstmt.setString(2, "Bound with update from b"+bibId+" and i"+String.join(", i", e.getValue()));

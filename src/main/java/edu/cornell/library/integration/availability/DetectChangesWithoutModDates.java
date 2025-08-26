@@ -25,7 +25,7 @@ import edu.cornell.library.integration.voyager.RecentIssues;
 public class DetectChangesWithoutModDates {
 
   private final static String insertAvailQ =
-      "INSERT INTO availabilityQueue (bib_id, priority, cause, record_date) VALUES (?,6,?,NOW())";
+      "INSERT INTO availQueue (bib_id, priority, cause, record_date) VALUES (?,6,?,NOW())";
   
   public static void main(String[] args) throws IOException, SQLException {
 
