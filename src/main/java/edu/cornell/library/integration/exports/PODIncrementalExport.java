@@ -34,17 +34,15 @@ public class PODIncrementalExport {
 
   public static void main(String[] args) throws IOException, SQLException, AuthenticationException {
 
+    Map<String, String> env = System.getenv();
+    String configFile = env.get("configFile");
+    if (configFile == null)
+      throw new IllegalArgumentException("configFile must be set in environment to valid file path.");
     Properties prop = new Properties();
-    String configFile = System.getenv("configFile");
-    if ( configFile != null ) {
-      System.out.println(configFile);
-      File f = new File(configFile);
-      if (f.exists()) {
-        try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
-      } else System.out.println("File does not exist: "+configFile);
-    } else
-      try (InputStream in = Thread.currentThread().getContextClassLoader()
-         .getResourceAsStream("database.properties")){ prop.load(in); }
+    File f = new File(configFile);
+    if (f.exists()) {
+      try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+    } else System.out.println("File does not exist: "+configFile);
 
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("inventoryDBUrl"),
         prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass")) ){
