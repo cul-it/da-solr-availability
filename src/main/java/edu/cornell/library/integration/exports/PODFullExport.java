@@ -1,6 +1,8 @@
 package edu.cornell.library.integration.exports;
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -13,6 +15,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
@@ -25,12 +28,18 @@ public class PODFullExport {
 
   public static void main(String[] args) throws IOException, SQLException, AuthenticationException {
 
+    Map<String, String> env = System.getenv();
+    String configFile = env.get("configFile");
+    if (configFile == null)
+      throw new IllegalArgumentException("configFile must be set in environment to valid file path.");
     Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader()
-        .getResourceAsStream("database.properties")){ prop.load(in); }
+    File f = new File(configFile);
+    if (f.exists()) {
+      try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+    } else System.out.println("File does not exist: "+configFile);
 
-    try (Connection inventory = DriverManager.getConnection(prop.getProperty("inventoryDBUrl"),
-        prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass")); ){
+    try (Connection inventory = DriverManager.getConnection(prop.getProperty("databaseURLCurrent"),
+                   prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent")); ){
 
       OkapiClient okapi = new OkapiClient(prop,"Folio");
 

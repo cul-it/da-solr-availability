@@ -23,23 +23,21 @@ public class ProcessBrowseQueue {
 
   public static void main(String[] args) throws IOException, SQLException, InterruptedException {
 
+    Map<String, String> env = System.getenv();
+    String configFile = env.get("configFile");
+    if (configFile == null)
+      throw new IllegalArgumentException("configFile must be set in environment to valid file path.");
     Properties prop = new Properties();
-    System.out.println(System.getenv("CONFIG_FILE"));
-    File f = new File(System.getenv("CONFIG_FILE"));
+    File f = new File(configFile);
     if (f.exists()) {
-      try ( InputStream in = new FileInputStream(f) ) {
-        prop.load( in );
-      }
-    } else {
-      System.out.println("File at "+System.getenv("CONFIG_FILE")+" is missing or unreadable.");
-      System.exit(1);
-    }
+      try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+    } else System.out.println("File does not exist: "+configFile);
 
     try (
         Connection inventory = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+            prop.getProperty("databaseURLCurrent"),prop.getProperty("databaseUserCurrent"),prop.getProperty("databasePassCurrent"));
         Connection headings = DriverManager.getConnection(
-            prop.getProperty("headingsDBUrl"),prop.getProperty("headingsDBUser"),prop.getProperty("headingsDBPass"));
+            prop.getProperty("databaseURLHeadings"),prop.getProperty("databaseUserHeadings"),prop.getProperty("databasePassHeadings"));
         Statement stmt = inventory.createStatement();
         PreparedStatement nextInQueue = inventory.prepareStatement(
             "SELECT heading_id FROM browseQueue ORDER BY priority LIMIT 1");

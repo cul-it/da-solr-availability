@@ -29,8 +29,8 @@ public class LoadStaticRecordFiles {
     }
     String directory = prop.getProperty("staticRecordFileDirectory");
 
-    try (Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+    try (Connection inventoryDB = DriverManager.getConnection(prop.getProperty("databaseURLCurrent"),
+                     prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent"));
         PreparedStatement insertInstance = inventoryDB.prepareStatement(
             "INSERT INTO instanceFolio ( id, hrid, active, content) VALUES (?, ?, ?, ?)");
         PreparedStatement insertHolding = inventoryDB.prepareStatement(
