@@ -40,8 +40,8 @@ public class LocationMonitor {
 
     StringBuilder log = new StringBuilder();
     try (
-        Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+        Connection inventoryDB = DriverManager.getConnection( prop.getProperty("databaseURLCurrent"),
+                     prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent"));
         PreparedStatement selectAllStmt = inventoryDB.prepareStatement(
             "SELECT * FROM locationFolio");
         PreparedStatement updateStmt = inventoryDB.prepareStatement(
