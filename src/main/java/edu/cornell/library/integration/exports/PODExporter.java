@@ -252,7 +252,9 @@ public class PODExporter {
 
       if ( this.verbose ) System.out.println("Writing "+instanceHrid+" to export.");
       updatePodInventoryForActiveInstance(instance,bibRec.moddate,instanceModdate,holdingsAndItems);
-      recordWriter.write(bibRec.toString("xml").replace("<?xml version='1.0' encoding='UTF-8'?>", "")
+      recordWriter.write(bibRec.toString("xml")
+          .replace("<?xml version='1.0' encoding='UTF-8'?>", "")
+          .replace("<?xml version=\"1.0\" encoding=\"UTF-8\"?>", "")
           .replace(" xmlns=\"http://www.loc.gov/MARC21/slim\"","")+"\n");
       return UpdateType.UPDATE;
     }
