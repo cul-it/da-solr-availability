@@ -52,8 +52,8 @@ public class GoogleExport {
     try (InputStream in = Thread.currentThread().getContextClassLoader()
         .getResourceAsStream("database.properties")){ prop.load(in); }
 
-    try (Connection inventory = DriverManager.getConnection(prop.getProperty("inventoryDBUrl"),
-        prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass")); ){
+    try (Connection inventory = DriverManager.getConnection(prop.getProperty("databaseURLCurrent"),
+                   prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent")); ){
 
       OkapiClient okapi = new OkapiClient(prop,"Folio");
 
