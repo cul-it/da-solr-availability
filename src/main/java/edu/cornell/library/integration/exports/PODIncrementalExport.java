@@ -44,8 +44,8 @@ public class PODIncrementalExport {
       try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
     } else System.out.println("File does not exist: "+configFile);
 
-    try (Connection inventory = DriverManager.getConnection(prop.getProperty("inventoryDBUrl"),
-        prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass")) ){
+    try (Connection inventory = DriverManager.getConnection(prop.getProperty("databaseURLCurrent"),
+        prop.getProperty("databaseUserCurrent"),prop.getProperty("databasePassCurrent")) ){
 
       OkapiClient okapi = new OkapiClient(prop,"Folio");
 
