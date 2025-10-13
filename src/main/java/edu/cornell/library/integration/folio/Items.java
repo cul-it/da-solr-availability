@@ -83,7 +83,7 @@ public class Items {
           while (requestsRS.next())
             requests.add(mapper.readValue(requestsRS.getString("content"), Map.class));
         }
-        if ( ! requests.isEmpty()) rawItem.put("requests", requestsByItem);
+        if ( ! requests.isEmpty()) rawItem.put("requests", requests);
         Item i = new Item(inventory,rawItem,h);
         i.callNumber = h.call;
         items.add(i);
