@@ -54,12 +54,12 @@ public class Items {
       itemNoteTypes = new ReferenceData( okapi, "/item-note-types", "name");
     }
     ItemList il = new ItemList();
-    Map<Integer,String> dueDates = new TreeMap<>();
-    Map<Integer,String> requests = new TreeMap<>();
     try (PreparedStatement itemByHolding = inventory.prepareStatement(
           "SELECT i.id, i.content, s.sequence"+
           "  FROM itemFolio i LEFT JOIN itemSequence s ON i.hrid = s.hrid" +
-          " WHERE i.holdingHrid = ?")) {
+          " WHERE i.holdingHrid = ?");
+        PreparedStatement requestsByItem = inventory.prepareStatement(
+            "SELECT content FROM requestFolio where itemHRid = ?")) {
     for (String holdingId : holdings.getUuids()) {
       Holding h = holdings.get(holdingId);
       if (h.online != null && h.online) continue;
@@ -77,20 +77,23 @@ public class Items {
 
       TreeSet<Item> items = new TreeSet<>();
       for (Map<String, Object> rawItem : rawItems) {
+        requestsByItem.setString(1,(String)rawItem.get("hrid"));
+        List<Map<String, Object>> requests = new ArrayList<>();
+        try (ResultSet requestsRS = requestsByItem.executeQuery()) {
+          while (requestsRS.next())
+            requests.add(mapper.readValue(requestsRS.getString("content"), Map.class));
+        }
+        if ( ! requests.isEmpty()) rawItem.put("requests", requestsByItem);
         Item i = new Item(inventory,rawItem,h);
         i.callNumber = h.call;
         items.add(i);
       }
       il.put(holdingId, items);
     }
-    if (inventory != null) {
-      updateInInventory(inventory,bibId,TrackingTable.DUEDATES,dueDates);
-      updateInInventory(inventory,bibId,TrackingTable.REQUESTS,requests);
-    }
+
     return il;
     }
   }
-  private static PreparedStatement itemByHolding = null;
 
   static Item retrieveItemByBarcode ( Connection inventory, String barcode, Holding holding )
       throws SQLException, JsonParseException, JsonMappingException, IOException {
@@ -106,52 +109,6 @@ public class Items {
       }
     }
     return null;
-  }
-
-  private static enum TrackingTable {
-    DUEDATES("itemDueDates"),
-    REQUESTS("itemRequests");
-    private String tableName;
-    private TrackingTable( String tableName ) {
-      this.tableName = tableName;
-    }
-    @Override
-    public String toString() { return this.tableName; }
-  }
-  private static void updateInInventory(
-      Connection inventory, String bibId,TrackingTable table, Map<Integer, String> details)
-          throws SQLException {
-
-    if ( details.isEmpty() ) {
-      try (PreparedStatement delStmt = inventory.prepareStatement(
-          "DELETE FROM "+table+" WHERE bib_id = ?")) {
-        delStmt.setString(1, bibId);
-        delStmt.executeUpdate();
-      }
-      return;      
-    }
-
-    String oldJson = null;
-    try (PreparedStatement selStmt = inventory.prepareStatement(
-        "SELECT json FROM "+table+" WHERE bib_id = ?")) {
-      selStmt.setString(1, bibId);
-      try (ResultSet rs = selStmt.executeQuery()) {
-        while (rs.next()) oldJson = rs.getString(1);
-      }
-    }
-    String json;
-    try { json = mapper.writeValueAsString(details);  }
-    catch (JsonProcessingException e) { e.printStackTrace(); return; }
-
-    if (json.equals(oldJson)) return;
-
-    try (PreparedStatement updStmt = inventory.prepareStatement(
-        "REPLACE INTO "+table+" (bib_id, json) VALUES (?,?)")) {
-      updStmt.setString(1, bibId);
-      updStmt.setString(2, json);
-      updStmt.executeUpdate();
-    }
-
   }
 
   static Item extractItemFromJson( String json ) throws IOException {
@@ -249,6 +206,9 @@ public class Items {
     @JsonProperty("location")  public Location location = null;
     @JsonProperty("permLocation") public String permLocation = null;
     @JsonProperty("loanType")  public LoanType loanType = null;
+    @JsonProperty("holds")     public Integer holds = null;
+    @JsonProperty("pages")     public Integer pages = null;
+    @JsonProperty("recalls")   public Integer recalls = null;
     @JsonProperty("matType")   public Map<String,String> matType = null;
     @JsonProperty("rmc")       public Map<String,String> rmc = null;
     @JsonProperty("status")    public ItemStatus status;
@@ -294,6 +254,8 @@ public class Items {
       if ( materialTypes != null )
         this.matType = materialTypes.getEntryHashByUuid((String)raw.get("materialTypeId"));
       this.status = new ItemStatus(inventory,raw,this);
+      if ( raw.containsKey("requests"))
+        tabulateRequestTypes((List<Map<String,Object>>)raw.get("requests"));
       if ( ! raw.containsKey("notes") ) return;
       List<Map<String,String>> notes = (List<Map<String,String>>)raw.get("notes");
       Map<String,String> rmcnotes = new HashMap<>();
@@ -313,6 +275,24 @@ public class Items {
       }
       if ( rmcnotes.size() > 0 )
         this.rmc = rmcnotes;
+    }
+
+    private void tabulateRequestTypes(List<Map<String, Object>> requests) {
+      int holds = 0;
+      int recalls = 0;
+      int pages = 0;
+      for (Map<String,Object> request : requests) {
+        String status = (String) request.get("status");
+        if ( ! status.startsWith("Open") ) continue;
+        switch ((String) request.get("requestType")) {
+        case "Hold":   holds++;   break;
+        case "Recall": recalls++; break;
+        case "Page":   pages++;   break;
+        }
+      }
+      if (holds > 0)   this.holds =   holds;
+      if (pages > 0)   this.pages =   pages;
+      if (recalls > 0) this.recalls = recalls;
     }
 
     Item(
