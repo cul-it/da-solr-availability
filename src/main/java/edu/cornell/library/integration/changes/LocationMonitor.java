@@ -1,5 +1,7 @@
 package edu.cornell.library.integration.changes;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -24,14 +26,22 @@ import edu.cornell.library.integration.folio.Locations.Sort;
 public class LocationMonitor {
 
   public static void main(String[] args) throws IOException, SQLException, AuthenticationException {
+
+    Map<String, String> env = System.getenv();
+    String configFile = env.get("configFile");
+    if (configFile == null)
+      throw new IllegalArgumentException("configFile must be set in environment to valid file path.");
     Properties prop = new Properties();
-    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties")){
-      prop.load(in);
-    }
+    File f = new File(configFile);
+    if (f.exists()) {
+      try ( InputStream is = new FileInputStream(f) ) { prop.load( is ); }
+    } else System.out.println("File does not exist: "+configFile);
+
+
     StringBuilder log = new StringBuilder();
     try (
-        Connection inventoryDB = DriverManager.getConnection(
-            prop.getProperty("inventoryDBUrl"),prop.getProperty("inventoryDBUser"),prop.getProperty("inventoryDBPass"));
+        Connection inventoryDB = DriverManager.getConnection( prop.getProperty("databaseURLCurrent"),
+                     prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent"));
         PreparedStatement selectAllStmt = inventoryDB.prepareStatement(
             "SELECT * FROM locationFolio");
         PreparedStatement updateStmt = inventoryDB.prepareStatement(

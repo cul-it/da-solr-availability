@@ -55,9 +55,9 @@ class DeleteFromSolr {
 
 
     try ( Connection inventoryDB = DriverManager.getConnection(
-        prop.getProperty("inventoryDBUrl"),
-        prop.getProperty("inventoryDBUser"),
-        prop.getProperty("inventoryDBPass"));
+        prop.getProperty("databaseURLCurrent"),
+        prop.getProperty("databaseUserCurrent"),
+        prop.getProperty("databasePassCurrent"));
         PreparedStatement queryQ = inventoryDB.prepareStatement
             ("SELECT hrid FROM deleteQueue ORDER BY priority LIMIT 100");
         PreparedStatement folioCacheCheck = inventoryDB.prepareStatement

@@ -22,9 +22,9 @@ public class PopulateColumnDataToDBForFolioCache {
     }
 
     try (Connection inventory = DriverManager.getConnection(
-        prop.getProperty("inventoryDBUrl"),
-        prop.getProperty("inventoryDBUser"),
-        prop.getProperty("inventoryDBPass"));
+        prop.getProperty("databaseURLCurrent"),
+        prop.getProperty("databaseUserCurrent"),
+        prop.getProperty("databasePassCurrent"));
         PreparedStatement q = inventory.prepareStatement(
             "SELECT * FROM instanceFolio WHERE source IS NULL LIMIT 1000");
         PreparedStatement u = inventory.prepareStatement(
