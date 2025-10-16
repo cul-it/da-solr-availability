@@ -2,6 +2,7 @@ package edu.cornell.library.integration.availability;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.Http2SolrClient;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -35,9 +37,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * in Solr by adding entries to the CurrentDBTable.QUEUE with
  * DataChangeUpdateType.TITLELINK.
  */
-class DeleteFromSolr {
+public class DeleteFromSolr {
 
-  public static void main(String[] argv) throws Exception{
+  public static void main(String[] argv) throws IOException, SQLException, SolrServerException{
 
     Map<String, String> env = System.getenv();
     String configFile = env.get("configFile");
