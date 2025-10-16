@@ -7,16 +7,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Items.Item;
@@ -47,8 +46,10 @@ public class ItemStatus {
         }
         for (Map<String,Object> loan : loans) {
           if ( ! ((Map<String,String>)loan.get("status")).get("name").equals("Open") ) continue;
-          if (loan.containsKey("dueDate"))
-            this.due = isoDT.parse((String)loan.get("dueDate"),Instant::from).getEpochSecond();
+          if (loan.containsKey("dueDate")) {
+            Instant instant = isoDT.parse((String)loan.get("dueDate"),Instant::from);
+            this.due = easternOffsetAdjustedEpochSecond(instant);
+          }
         }
         if ( item.loanType.shortLoan ) this.shortLoan = true;
       }
@@ -80,19 +81,38 @@ public class ItemStatus {
       int lagMinutes = (servicePoint.shelvingLagTime == null)?4320:servicePoint.shelvingLagTime;
       Instant returnedUntil = returned.plusSeconds(lagMinutes*60);
       if ( returnedUntil.isAfter(Instant.now()) ) {
-        this.returned = returned.getEpochSecond();
+        this.returned = easternOffsetAdjustedEpochSecond(returned);
         this.returnedUntil = returnedUntil;
         if ( item.loanType.shortLoan ) this.shortLoan = true;
       }
       return;
     }
 
-    if ( statusData.containsKey("date") )
-      this.date = isoDT.parse(statusData.get("date"),Instant::from).getEpochSecond();
+    this.date = getStatusDate(statusData);
   }
+
   public ItemStatus(
       @JsonProperty("status") String status) {
     this.status = status;
+  }
+
+  /*
+   * Adjust epoch seconds of given instant with offset between UTC and America/New_York in seconds
+   * While Eastern Daylight Time is in effect, the offset will be -14400
+   * Otherwise, it will be -18000
+   */
+  public static long easternOffsetAdjustedEpochSecond(Instant instant) {
+    ZoneId nyZone = ZoneId.of("America/New_York");
+    ZoneOffset offset = nyZone.getRules().getOffset(instant);
+    return instant.getEpochSecond() + offset.getTotalSeconds();
+  }
+
+  protected Long getStatusDate(Map<String,String> statusData) {
+    if ( statusData.containsKey("date") ) {
+      Instant instant = isoDT.parse(statusData.get("date"),Instant::from);
+      return easternOffsetAdjustedEpochSecond(instant);
+    }
+    return null;
   }
 
   public static ItemStatus AVAIL = new ItemStatus("Available");
