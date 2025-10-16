@@ -76,8 +76,8 @@ class DeleteFromSolr {
             ("DELETE FROM mfhdRecsSolr WHERE mfhd_id = ?");
         PreparedStatement deleteFromIRS = inventoryDB.prepareStatement
             ("DELETE FROM itemRecsSolr WHERE mfhd_id = ?");
-        PreparedStatement deleteFromSFD = inventoryDB.prepareStatement
-            ("DELETE FROM processedMarcData WHERE bib_id = ?");
+        PreparedStatement deleteFromPMD = inventoryDB.prepareStatement
+            ("DELETE FROM processedMarcData WHERE hrid = ?");
         PreparedStatement getHoldingIds = inventoryDB.prepareStatement
             ("SELECT mfhd_id FROM mfhdRecsSolr WHERE bib_id = ?");
         PreparedStatement queueHeadingsUpdate = inventoryDB.prepareStatement
@@ -124,8 +124,8 @@ class DeleteFromSolr {
           // Delete from Inventory tables
           deleteFromBRS.setInt(1, Integer.valueOf(bibId));
           deleteFromBRS.addBatch();
-          deleteFromSFD.setInt(1, Integer.valueOf(bibId));
-          deleteFromSFD.addBatch();
+          deleteFromPMD.setString(1, bibId);
+          deleteFromPMD.addBatch();
           Set<Integer> holdingIds = new HashSet<>();
           getHoldingIds.setInt(1,Integer.valueOf(bibId));
           try (ResultSet rs1 = getHoldingIds.executeQuery()) {
@@ -138,8 +138,8 @@ class DeleteFromSolr {
           }
 
           // Delete solr Fields Data
-          deleteFromSFD.setInt(1, Integer.valueOf(bibId));
-          deleteFromSFD.addBatch();
+          deleteFromPMD.setString(1, bibId);
+          deleteFromPMD.addBatch();
 
           // Delete from Delete Queue
           deleteFromQ.setString(1,bibId);
@@ -162,10 +162,10 @@ class DeleteFromSolr {
         deleteFromGenQ.executeBatch();
         deleteFromAvailQ.executeBatch();
         deleteFromBRS.executeBatch();
-        deleteFromSFD.executeBatch();
+        deleteFromPMD.executeBatch();
         deleteFromMRS.executeBatch();
         deleteFromIRS.executeBatch();
-        deleteFromSFD.executeBatch();
+        deleteFromPMD.executeBatch();
         queueHeadingsUpdate.executeBatch();
         System.out.println( countFound+" deleted");
       } while ( countFound > 0 );
