@@ -126,8 +126,6 @@ public class DeleteFromSolr {
           // Delete from Inventory tables
           deleteFromBRS.setInt(1, Integer.valueOf(bibId));
           deleteFromBRS.addBatch();
-          deleteFromPMD.setString(1, bibId);
-          deleteFromPMD.addBatch();
           Set<Integer> holdingIds = new HashSet<>();
           getHoldingIds.setInt(1,Integer.valueOf(bibId));
           try (ResultSet rs1 = getHoldingIds.executeQuery()) {
@@ -164,7 +162,6 @@ public class DeleteFromSolr {
         deleteFromGenQ.executeBatch();
         deleteFromAvailQ.executeBatch();
         deleteFromBRS.executeBatch();
-        deleteFromPMD.executeBatch();
         deleteFromMRS.executeBatch();
         deleteFromIRS.executeBatch();
         deleteFromPMD.executeBatch();
