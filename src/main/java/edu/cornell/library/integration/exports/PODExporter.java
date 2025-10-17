@@ -66,6 +66,7 @@ public class PODExporter {
   private final PreparedStatement getItemPodStmt;
   private final PreparedStatement getHoldingFolioStmt;
   private final PreparedStatement getItemFolioStmt;
+  private final PreparedStatement deleteInstancePodStmt;
   private final PreparedStatement deleteHoldingPodStmt;
   private final PreparedStatement deleteItemPodStmt;
 
@@ -99,6 +100,8 @@ public class PODExporter {
         "SELECT * FROM holdingFolio WHERE instanceHrid = ?");
     this.getItemFolioStmt = inventory.prepareStatement(
         "SELECT * FROM itemFolio WHERE holdingHrid = ?");
+    this.deleteInstancePodStmt = inventory.prepareStatement(
+        "DELETE FROM instancePod WHERE instanceHrid = ?");
     this.deleteHoldingPodStmt = inventory.prepareStatement(
         "DELETE FROM holdingPod WHERE instanceHrid = ? AND hrid = ?");
     this.deleteItemPodStmt = inventory.prepareStatement(
@@ -184,7 +187,17 @@ public class PODExporter {
 
     PreviousBibStatus prevStatus = getPrevPodStatus(instanceHrid);
 
-    Map<String,Object> instance = getInstance( this.inventory, instanceHrid);
+    Map<String,Object> instance = getInstance( this.inventory, instanceHrid );
+    if (instance == null) {
+      if (this.verbose) System.out.printf("Instance Has been deleted #%s\n",instanceHrid);
+      deletePodInventoryForDeletedInstance(instanceHrid);
+      if (prevStatus.active) {
+        deleteWriter.write(instanceHrid+'\n');
+        return UpdateType.DELETE;
+      }
+      return UpdateType.NONE;
+    }
+
     Map<String,String> instanceMetadata = (Map<String,String>)instance.get("metadata");
     Timestamp instanceModdate = Timestamp.from(
         isoDT.parse(instanceMetadata.get("updatedDate"),Instant::from));
@@ -467,6 +480,13 @@ public class PODExporter {
     }
     return values;
   }
+
+  private void deletePodInventoryForDeletedInstance(String instanceHrid) throws SQLException {
+    removeOldHoldingAndItemPodExportData(instanceHrid);
+    this.deleteInstancePodStmt.setString(1, instanceHrid);
+    this.deleteInstancePodStmt.executeUpdate();
+  }
+
 
   private void updatePodInventoryForInactiveInstance(
       Map<String,Object> instance, Timestamp bibModdate, Timestamp instanceModdate)
