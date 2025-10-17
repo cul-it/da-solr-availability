@@ -27,7 +27,7 @@ public class AbstractContainerBaseTest {
   protected static boolean initialized = false;
 
   static {
-    mysqlContainer = new MySQLContainer<>("mysql:latest")
+    mysqlContainer = new MySQLContainer<>("mysql:9.2.0")
       .withDatabaseName(DBNAME)
       .withUsername(DBUID)
       .withPassword(DBPWD)
@@ -42,7 +42,7 @@ public class AbstractContainerBaseTest {
             Statement stmt = conn.createStatement() ) {
         for (String sql : sqlFiles)
           for (String line : Files.readAllLines(Paths.get(sql)))
-            if (!StringUtils.isBlank(line))
+            if (!StringUtils.isBlank(line) && !line.startsWith("--"))
               stmt.executeUpdate(line);
       }
 
