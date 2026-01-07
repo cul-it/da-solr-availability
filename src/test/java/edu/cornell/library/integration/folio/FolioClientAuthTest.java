@@ -34,7 +34,7 @@ public class FolioClientAuthTest {
       throw new IllegalArgumentException("target_folio must be set in environment to name of target Folio instance.");
 
     FolioClient folio = new FolioClient(prop, folioConfig);
-    folio.printLoginStatus(folio);
+    folio.printLoginStatus();
 
     Instant testCompletedAt = Instant.now().plus(17, ChronoUnit.MINUTES);
     System.out.println("\nWe're logged in. The access tokens are meant to last 10 minutes, so we will make"
@@ -42,14 +42,19 @@ public class FolioClientAuthTest {
         + " require two refreshes of the access token.");
     System.out.println("We'll just be retrieving statistical codes each time. The values won't be verified,"
         + " just that they are retrievable.");
-    
+
     Random generator = new Random();
     retrieveStatCodes(folio, generator);
+    boolean doneLongWait = false;
     while (Instant.now().isBefore(testCompletedAt)) {
       int seconds = 30 + generator.nextInt(30);
+      if ( ! doneLongWait && 175 > folio.getRemainingAuthSeconds()) {
+        seconds = 180;
+        doneLongWait = true;
+      }
       System.out.format("\nWaiting %d seconds\n", seconds);
       Thread.sleep(seconds*1000);
-      folio.printLoginStatus(folio);
+      folio.printLoginStatus();
       retrieveStatCodes(folio, generator);
     }
   }

@@ -349,13 +349,18 @@ public class FolioClient {
   protected static ObjectMapper mapper = new ObjectMapper();
 
 
-  public void printLoginStatus(FolioClient folio) {
+  public void printLoginStatus() {
     Instant now = Instant.now();
     System.out.format("%s:%s; ACCESS: %s; REFRESH: %s\n",
         this.name,this.username,
         humanReadableTimespan(now.until(accessExpires,ChronoUnit.SECONDS)),
         humanReadableTimespan(now.until(refreshExpires,ChronoUnit.SECONDS)));
   }
+
+  public long getRemainingAuthSeconds() {
+    Instant now = Instant.now();
+    return now.until(accessExpires,ChronoUnit.SECONDS);
+}
 
   private String humanReadableTimespan(long seconds) {
     int minuteLen = 60, hourLen = 3600, dayLen = 86_400;
