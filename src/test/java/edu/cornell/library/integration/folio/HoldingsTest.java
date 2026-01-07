@@ -47,7 +47,7 @@ public class HoldingsTest extends DbBaseTest {
   static ReferenceData callNumberTypes = null;
   static ReferenceData materialTypes = null;
   static ReferenceData itemNoteTypes = null;
-  static OkapiClient testOkapiClient = null;
+  static FolioClient testFolioClient = null;
 
   @BeforeClass
   public static void connect() throws SQLException, IOException, AuthenticationException {
@@ -59,15 +59,15 @@ public class HoldingsTest extends DbBaseTest {
     examples = mapper.readValue(loadResourceFile("folio_holdings_examples.json").replaceAll("(?m)^#.*$" , ""),
         new TypeReference<HashMap<String,HoldingSet>>() {});
 
-    testOkapiClient = new StaticOkapiClient();
-    locations = new Locations(testOkapiClient);
-    Items.initialize(testOkapiClient, locations);
-    ServicePoints.initialize(testOkapiClient);
-    LoanTypes.initialize(testOkapiClient);
-    holdingsNoteTypes = new ReferenceData(testOkapiClient, "/holdings-note-types", "name");
-    callNumberTypes = new ReferenceData(testOkapiClient, "/call-number-types", "name");
-    materialTypes = new ReferenceData(testOkapiClient, "/material-types", "name");
-    itemNoteTypes = new ReferenceData(testOkapiClient, "/item-note-types", "name");
+    testFolioClient = new StaticFolioClient();
+    locations = new Locations(testFolioClient);
+    Items.initialize(testFolioClient, locations);
+    ServicePoints.initialize(testFolioClient);
+    LoanTypes.initialize(testFolioClient);
+    holdingsNoteTypes = new ReferenceData(testFolioClient, "/holdings-note-types", "name");
+    callNumberTypes = new ReferenceData(testFolioClient, "/call-number-types", "name");
+    materialTypes = new ReferenceData(testFolioClient, "/material-types", "name");
+    itemNoteTypes = new ReferenceData(testFolioClient, "/item-note-types", "name");
   }
 
   @AfterClass
@@ -139,7 +139,7 @@ public class HoldingsTest extends DbBaseTest {
   public void summarizeAvailability() throws SQLException, IOException, AuthenticationException {
     HoldingSet hs = Holdings.retrieveHoldingsByInstanceHrid(testConnection, locations, holdingsNoteTypes, callNumberTypes, "10055679");
     Holding h = hs.get("f26ba953-b4b6-486b-8113-1cffc3f3c3f8");
-    ItemList il = Items.retrieveItemsForHoldings(testOkapiClient, testConnection, "10055679", hs);
+    ItemList il = Items.retrieveItemsForHoldings(testFolioClient, testConnection, "10055679", hs);
     Map<String, TreeSet<Item>> itemSet = il.getItems();
     TreeSet<Item> itemTreeSet = itemSet.get("f26ba953-b4b6-486b-8113-1cffc3f3c3f8");
     Instant availabilityInstant = h.summarizeItemAvailability(itemTreeSet);
@@ -148,7 +148,7 @@ public class HoldingsTest extends DbBaseTest {
 
     hs = Holdings.retrieveHoldingsByInstanceHrid(testConnection, locations, holdingsNoteTypes, callNumberTypes, "2805041");
     h = hs.get("fdac516c-91eb-438d-b784-0b99b19769d4");
-    il = Items.retrieveItemsForHoldings(testOkapiClient, testConnection, "2805041", hs);
+    il = Items.retrieveItemsForHoldings(testFolioClient, testConnection, "2805041", hs);
     itemSet = il.getItems();
     for (String id : itemSet.keySet()) {
       itemTreeSet = itemSet.get(id);
@@ -157,14 +157,14 @@ public class HoldingsTest extends DbBaseTest {
     assertEquals(examples.get("expectedJson-1cbded88-05d9-460d-b930-0427e4718e1b").toJson(),hs.toJson());
 
     hs = Holdings.retrieveHoldingsByInstanceHrid(testConnection, locations, holdingsNoteTypes, callNumberTypes, "4442869");
-    il = Items.retrieveItemsForHoldings(testOkapiClient, testConnection, "4442869", hs);
+    il = Items.retrieveItemsForHoldings(testFolioClient, testConnection, "4442869", hs);
     for (String hId : hs.getUuids()) {
       hs.get(hId).summarizeItemAvailability(il.getItems().get(hId));
     }
     assertEquals(examples.get("expectedJson-7d7cca49-d86c-425c-820e-d46b9f2ec998").toJson(),hs.toJson());
 
     hs = Holdings.retrieveHoldingsByInstanceHrid(testConnection, locations, holdingsNoteTypes, callNumberTypes, "15607108");
-    il = Items.retrieveItemsForHoldings(testOkapiClient, testConnection, "15607108", hs);
+    il = Items.retrieveItemsForHoldings(testFolioClient, testConnection, "15607108", hs);
     for (String hId : hs.getUuids()) {
       hs.get(hId).summarizeItemAvailability(il.getItems().get(hId));
     }

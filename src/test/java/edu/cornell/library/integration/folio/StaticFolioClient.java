@@ -6,7 +6,7 @@ import java.net.HttpURLConnection;
 
 import edu.cornell.library.integration.db_test.TestUtil;
 
-public class StaticOkapiClient extends OkapiClient {
+public class StaticFolioClient extends FolioClient {
   @Override
   public HttpURLConnection post(final String endPoint, final String json) throws IOException {
     return null;
@@ -36,7 +36,7 @@ public class StaticOkapiClient extends OkapiClient {
   public String query(final String endPoint, final String query, final Integer limit) throws IOException {
     // should we use query?
     // should we enforce limit?
-    String data = "static_okapi_data" + endPoint.replace("/", File.separator) + ".json";
+    String data = "static_folio_data" + endPoint.replace("/", File.separator) + ".json";
     try {
       return TestUtil.loadResourceFile(data);
     } catch (Exception e) {
@@ -46,7 +46,7 @@ public class StaticOkapiClient extends OkapiClient {
 
   @Override
   public String query(final String endPointQuery) throws IOException {
-    String data = "static_okapi_data" + endPointQuery.replace("/", File.separator) + ".json";
+    String data = "static_folio_data" + endPointQuery.replace("/", File.separator) + ".json";
     try {
       return TestUtil.loadResourceFile(data);
     } catch (Exception e) {

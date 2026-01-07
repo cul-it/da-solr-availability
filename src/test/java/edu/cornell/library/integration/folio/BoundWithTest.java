@@ -24,7 +24,7 @@ public class BoundWithTest {
 
   static Connection inventory = null;
   static Locations locations = null;
-  static OkapiClient testOkapiClient = null;
+  static FolioClient testFolioClient = null;
 
   @BeforeClass
   public static void connect() throws SQLException, IOException, AuthenticationException {
@@ -42,8 +42,8 @@ public class BoundWithTest {
     inventory = DriverManager.getConnection(     prop.getProperty("databaseURLCurrent"),
         prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent"));
 
-    testOkapiClient = new StaticOkapiClient();
-    locations = new Locations(testOkapiClient);
+    testFolioClient = new StaticFolioClient();
+    locations = new Locations(testFolioClient);
   }
 
   @Test

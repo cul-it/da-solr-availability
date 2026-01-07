@@ -12,7 +12,7 @@ import java.util.Random;
 
 import javax.naming.AuthenticationException;
 
-public class OkapiClientAuthTest {
+public class FolioClientAuthTest {
 
   public static void main(String[] args) throws IOException, AuthenticationException, InterruptedException {
 
@@ -33,7 +33,7 @@ public class OkapiClientAuthTest {
     if (folioConfig == null)
       throw new IllegalArgumentException("target_folio must be set in environment to name of target Folio instance.");
 
-    OkapiClient folio = new OkapiClient(prop, folioConfig);
+    FolioClient folio = new FolioClient(prop, folioConfig);
     folio.printLoginStatus(folio);
 
     Instant testCompletedAt = Instant.now().plus(17, ChronoUnit.MINUTES);
@@ -54,7 +54,7 @@ public class OkapiClientAuthTest {
     }
   }
 
-  private static void retrieveStatCodes(OkapiClient folio, Random generator) throws IOException, AuthenticationException {
+  private static void retrieveStatCodes(FolioClient folio, Random generator) throws IOException, AuthenticationException {
     ReferenceData statCodes = new ReferenceData(folio,"/statistical-codes","code");
     Object[] values = statCodes.dataByName.entrySet().toArray();
     System.out.format("codes: %d; random code: %s\n", values.length,

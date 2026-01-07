@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.cornell.library.integration.folio.Locations;
-import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.Locations.Location;
 import edu.cornell.library.integration.folio.Locations.Sort;
 
@@ -52,14 +52,14 @@ public class LocationMonitor {
             "DELETE FROM locationFolio WHERE code = ?");
         ){
 
-      OkapiClient okapi = new OkapiClient(prop,"Folio");
+      FolioClient folio = new FolioClient(prop,"Folio");
 
       Map<String,String> cachedLocations = new HashMap<>();
       try (ResultSet rs = selectAllStmt.executeQuery()) {
         while (rs.next()) cachedLocations.put(rs.getString("code"), rs.getString("json"));
       }
 
-      new Locations(okapi);
+      new Locations(folio);
       for (Location l : Locations.allLocations(Sort.CODE)) {
         String json = mapper.writeValueAsString(l);
         if ( cachedLocations.containsKey(l.code) ) {

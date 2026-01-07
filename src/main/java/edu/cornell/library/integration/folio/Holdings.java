@@ -63,10 +63,10 @@ public class Holdings {
   }
 /*
   public static HoldingSet retrieveHoldingsByInstanceId(
-      OkapiClient okapi, Locations locations, ReferenceData holdingsNoteTypes, String instanceId )
+      FolioClient folio, Locations locations, ReferenceData holdingsNoteTypes, String instanceId )
       throws IOException {
     List<Map<String, Object>> rawHoldings =
-        okapi.queryAsList("/holdings-storage/holdings", "instanceId=="+instanceId, null);
+        folio.queryAsList("/holdings-storage/holdings", "instanceId=="+instanceId, null);
     HoldingSet holdings = new HoldingSet();
     for ( Map<String,Object> rawHolding : rawHoldings)
       holdings.put((String)rawHolding.get("id"),new Holding(rawHolding,locations,holdingsNoteTypes));
@@ -94,17 +94,17 @@ public class Holdings {
   }
 /*
   public static HoldingSet retrieveHoldingsByInstanceHrid(
-      OkapiClient okapi, Locations locations, ReferenceData holdingsNoteTypes, String instanceHrid )
+      FolioClient folio, Locations locations, ReferenceData holdingsNoteTypes, String instanceHrid )
       throws IOException {
 
-    List<Map<String,Object>> instances = okapi.queryAsList("/instance-storage/instances", "hrid=="+instanceHrid, null);
+    List<Map<String,Object>> instances = folio.queryAsList("/instance-storage/instances", "hrid=="+instanceHrid, null);
     if (instances.size() != 1) {
       System.out.printf("%d instances found for hrid %s\n",instances.size(),instanceHrid);
       System.exit(0);
     }
     Map<String,Object> instance = instances.get(0);
     String instanceId = (String)instance.get("id");
-    return retrieveHoldingsByInstanceId(okapi,locations,holdingsNoteTypes,instanceId);
+    return retrieveHoldingsByInstanceId(folio,locations,holdingsNoteTypes,instanceId);
   }
 */
 
