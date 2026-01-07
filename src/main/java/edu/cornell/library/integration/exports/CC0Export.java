@@ -80,7 +80,7 @@ public class CC0Export {
           }
 
         ExportUtils.cleanUnwantedDataFields(bibRec, null, Arrays.asList(new ExportUtils.FieldRange("857","999")),false);
-        writer.write(bibRec.toString("xml").replace("<?xml version='1.0' encoding='UTF-8'?>", "")
+        writer.write(bibRec.toString("xml").replaceAll("^<\\?xml version=[\"']1.0[\"'] encoding=[\"']UTF-8[\"']\\?>", "")
             .replace(" xmlns=\"http://www.loc.gov/MARC21/slim\"","")+"\n");
         if ( ++recordsThisFile == recordsPerFile ) {
 //        if ( Files.size(outputFile) > 209715200L /*200MB*/ ) {
