@@ -37,21 +37,21 @@ public class Items {
   static ReferenceData materialTypes = null;
   static ReferenceData itemNoteTypes = null;
 
-  public static void initialize(OkapiClient okapi, Locations locs) throws IOException, AuthenticationException {
+  public static void initialize(FolioClient folio, Locations locs) throws IOException, AuthenticationException {
     if (locations == null) {
       locations = locs;
-      materialTypes = new ReferenceData( okapi, "/material-types", "name");
-      itemNoteTypes = new ReferenceData( okapi, "/item-note-types", "name");
+      materialTypes = new ReferenceData( folio, "/material-types", "name");
+      itemNoteTypes = new ReferenceData( folio, "/item-note-types", "name");
     }
   }
 
   public static ItemList retrieveItemsForHoldings(
-      OkapiClient okapi, Connection inventory, String bibId, HoldingSet holdings)
+      FolioClient folio, Connection inventory, String bibId, HoldingSet holdings)
           throws SQLException, IOException, AuthenticationException {
     if (locations == null) {
-      locations = new Locations( okapi );
-      materialTypes = new ReferenceData( okapi, "/material-types", "name");
-      itemNoteTypes = new ReferenceData( okapi, "/item-note-types", "name");
+      locations = new Locations( folio );
+      materialTypes = new ReferenceData( folio, "/material-types", "name");
+      itemNoteTypes = new ReferenceData( folio, "/item-note-types", "name");
     }
     ItemList il = new ItemList();
     Map<Integer,String> dueDates = new TreeMap<>();

@@ -27,7 +27,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class OkapiClient {
+public class FolioClient {
 
   private final String name;
   private final String url;
@@ -40,7 +40,7 @@ public class OkapiClient {
   private Instant refreshExpires = null;
 
   
-  protected OkapiClient() {
+  protected FolioClient() {
     this.name = "BOGUS_FOLIO";
     this.url = "BOGUS_URL";
     this.username = "BOGUS_USER";
@@ -48,12 +48,12 @@ public class OkapiClient {
     this.tenant = "BOGUS_TENANT";
   }
 
-  public OkapiClient(Properties prop, String identifier) throws IOException, AuthenticationException {
+  public FolioClient(Properties prop, String identifier) throws IOException, AuthenticationException {
     this.name = identifier;
-    this.url = prop.getProperty("okapiUrl"+identifier);
-    this.tenant = prop.getProperty("okapiTenant"+identifier);
-    this.username = prop.getProperty("okapiUser"+identifier);
-    this.password = prop.getProperty("okapiPass"+identifier);
+    this.url = prop.getProperty("folioUrl"+identifier);
+    this.tenant = prop.getProperty("folioTenant"+identifier);
+    this.username = prop.getProperty("folioUser"+identifier);
+    this.password = prop.getProperty("folioPass"+identifier);
     HttpURLConnection c = this.post("/authn/login-with-expiry",String.format(
         "{\"username\":\"%s\",\"password\":\"%s\"}",this.username,this.password));
     if (201 != c.getResponseCode())
@@ -349,13 +349,18 @@ public class OkapiClient {
   protected static ObjectMapper mapper = new ObjectMapper();
 
 
-  public void printLoginStatus(OkapiClient folio) {
+  public void printLoginStatus() {
     Instant now = Instant.now();
     System.out.format("%s:%s; ACCESS: %s; REFRESH: %s\n",
         this.name,this.username,
         humanReadableTimespan(now.until(accessExpires,ChronoUnit.SECONDS)),
         humanReadableTimespan(now.until(refreshExpires,ChronoUnit.SECONDS)));
   }
+
+  public long getRemainingAuthSeconds() {
+    Instant now = Instant.now();
+    return now.until(accessExpires,ChronoUnit.SECONDS);
+}
 
   private String humanReadableTimespan(long seconds) {
     int minuteLen = 60, hourLen = 3600, dayLen = 86_400;

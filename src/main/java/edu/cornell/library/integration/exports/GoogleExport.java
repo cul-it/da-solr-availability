@@ -36,7 +36,7 @@ import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.Items.ItemList;
 import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
-import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
 import edu.cornell.library.integration.marc.ControlField;
@@ -55,14 +55,14 @@ public class GoogleExport {
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("databaseURLCurrent"),
                    prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent")); ){
 
-      OkapiClient okapi = new OkapiClient(prop,"Folio");
+      FolioClient folio = new FolioClient(prop,"Folio");
 
-      Locations locations = new Locations(okapi);
-      ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
-      ReferenceData callNumberTypes = new ReferenceData(okapi, "/call-number-types","name");
-      LoanTypes.initialize(okapi);
-      ServicePoints.initialize(okapi);
-      Items.initialize(okapi, locations);
+      Locations locations = new Locations(folio);
+      ReferenceData holdingsNoteTypes = new ReferenceData(folio, "/holdings-note-types","name");
+      ReferenceData callNumberTypes = new ReferenceData(folio, "/call-number-types","name");
+      LoanTypes.initialize(folio);
+      ServicePoints.initialize(folio);
+      Items.initialize(folio, locations);
 
       Set<String> bibs = ExportUtils.getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
@@ -98,7 +98,7 @@ public class GoogleExport {
         ExportUtils.cleanUnwantedDataFields(bibRec, Arrays.asList("995"), null, false);
 
         Map<String,Integer> itemStats = collateHoldingsAndItemsData(
-            okapi, inventory, bibRec, locations, holdingsNoteTypes, callNumberTypes);
+            folio, inventory, bibRec, locations, holdingsNoteTypes, callNumberTypes);
         int items = itemStats.get("items");
         int masterBWs = itemStats.get("master BW items");
         if ( items == 0 ) {
@@ -250,7 +250,7 @@ public class GoogleExport {
 
 
   private static Map<String,Integer> collateHoldingsAndItemsData(
-      OkapiClient okapi, Connection inventory, MarcRecord bibRec, Locations locations,
+      FolioClient folio, Connection inventory, MarcRecord bibRec, Locations locations,
       ReferenceData holdingsNoteTypes, ReferenceData callNumberTypes)
       throws SQLException, IOException, AuthenticationException {
     int maxBibFieldId = bibRec.dataFields.last().id;
@@ -259,7 +259,7 @@ public class GoogleExport {
     HoldingsAndItems values = new HoldingsAndItems();
     values.holdings = Holdings.retrieveHoldingsByInstanceHrid(
         inventory, locations, holdingsNoteTypes, callNumberTypes, bibRec.id);
-    values.items = Items.retrieveItemsForHoldings(okapi, inventory, bibRec.id, values.holdings);
+    values.items = Items.retrieveItemsForHoldings(folio, inventory, bibRec.id, values.holdings);
 
     TreeSet<DataField> itemFields = new TreeSet<>();
 

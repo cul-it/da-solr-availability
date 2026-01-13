@@ -20,13 +20,13 @@ public class LocationsTest {
 
   static VoyagerDBConnection testDB = null;
   static Locations locations = null;
-  static OkapiClient testOkapiClient = null;
+  static FolioClient testFolioClient = null;
 
   @BeforeClass
   public static void connect() throws SQLException, IOException, AuthenticationException {
 
-    testOkapiClient = new StaticOkapiClient();
-    locations = new Locations(testOkapiClient);
+    testFolioClient = new StaticFolioClient();
+    locations = new Locations(testFolioClient);
 
     testDB = new VoyagerDBConnection("src/test/resources/voyagerTest.sql");
 

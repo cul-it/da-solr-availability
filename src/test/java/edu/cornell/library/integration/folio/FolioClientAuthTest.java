@@ -12,7 +12,7 @@ import java.util.Random;
 
 import javax.naming.AuthenticationException;
 
-public class OkapiClientAuthTest {
+public class FolioClientAuthTest {
 
   public static void main(String[] args) throws IOException, AuthenticationException, InterruptedException {
 
@@ -33,8 +33,8 @@ public class OkapiClientAuthTest {
     if (folioConfig == null)
       throw new IllegalArgumentException("target_folio must be set in environment to name of target Folio instance.");
 
-    OkapiClient folio = new OkapiClient(prop, folioConfig);
-    folio.printLoginStatus(folio);
+    FolioClient folio = new FolioClient(prop, folioConfig);
+    folio.printLoginStatus();
 
     Instant testCompletedAt = Instant.now().plus(17, ChronoUnit.MINUTES);
     System.out.println("\nWe're logged in. The access tokens are meant to last 10 minutes, so we will make"
@@ -42,19 +42,24 @@ public class OkapiClientAuthTest {
         + " require two refreshes of the access token.");
     System.out.println("We'll just be retrieving statistical codes each time. The values won't be verified,"
         + " just that they are retrievable.");
-    
+
     Random generator = new Random();
     retrieveStatCodes(folio, generator);
+    boolean doneLongWait = false;
     while (Instant.now().isBefore(testCompletedAt)) {
       int seconds = 30 + generator.nextInt(30);
+      if ( ! doneLongWait && 175 > folio.getRemainingAuthSeconds()) {
+        seconds = 180;
+        doneLongWait = true;
+      }
       System.out.format("\nWaiting %d seconds\n", seconds);
       Thread.sleep(seconds*1000);
-      folio.printLoginStatus(folio);
+      folio.printLoginStatus();
       retrieveStatCodes(folio, generator);
     }
   }
 
-  private static void retrieveStatCodes(OkapiClient folio, Random generator) throws IOException, AuthenticationException {
+  private static void retrieveStatCodes(FolioClient folio, Random generator) throws IOException, AuthenticationException {
     ReferenceData statCodes = new ReferenceData(folio,"/statistical-codes","code");
     Object[] values = statCodes.dataByName.entrySet().toArray();
     System.out.format("codes: %d; random code: %s\n", values.length,

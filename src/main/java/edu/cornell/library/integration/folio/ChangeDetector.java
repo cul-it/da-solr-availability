@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class ChangeDetector {
 
   public static Map<String,Set<Change>> detectChangedInstances(
-      Connection inventory, OkapiClient okapi, Timestamp since )
+      Connection inventory, FolioClient folio, Timestamp since )
           throws SQLException, IOException, InterruptedException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
@@ -33,7 +33,7 @@ public class ChangeDetector {
     List<Map<String, Object>> changedInstances;
 
     do {
-      changedInstances = okapi.queryAsList("/instance-storage/instances",
+      changedInstances = folio.queryAsList("/instance-storage/instances",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
       INSTANCE: for (Map<String,Object> instance : changedInstances) {
@@ -96,13 +96,13 @@ public class ChangeDetector {
         String marc = null;
         String srsQuery = "/source-storage/records/"+id+"/formatted?idType=INSTANCE";
         try {
-          marc = okapi.query(srsQuery).replaceAll("\\s*\\n\\s*", " ");
+          marc = folio.query(srsQuery).replaceAll("\\s*\\n\\s*", " ");
         } catch (IOException e) {
           // If MARC not found, wait 3 seconds and try one more time.
           System.out.printf("Error retrieving MARC from SRS (%s): %s %s\n",e.getMessage(),hrid,id);
           Thread.sleep(3_000);
           try {
-            marc = okapi.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
+            marc = folio.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
                 .replaceAll("\\s*\\n\\s*", " ");
           } catch (IOException e2) {
             System.out.printf("Error retrieving MARC from SRS (%s): %s %s\n",e2.getMessage(),hrid,id);
@@ -134,7 +134,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedHoldings(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
+      Connection inventory, FolioClient folio, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -143,7 +143,7 @@ public class ChangeDetector {
     List<Map<String, Object>> changedHoldings;
 
     do {
-      changedHoldings = okapi.queryAsList("/holdings-storage/holdings",
+      changedHoldings = folio.queryAsList("/holdings-storage/holdings",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
       HOLDING: for (Map<String,Object> holding : changedHoldings) {
@@ -213,7 +213,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedItems(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
+      Connection inventory, FolioClient folio, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -222,7 +222,7 @@ public class ChangeDetector {
     List<Map<String, Object>> changedItems;
 
     do {
-      changedItems = okapi.queryAsList("/item-storage/items",
+      changedItems = folio.queryAsList("/item-storage/items",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
       for (Map<String,Object> item : changedItems) {
@@ -296,7 +296,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedLoans(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
+      Connection inventory, FolioClient folio, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -305,7 +305,7 @@ public class ChangeDetector {
     List<Map<String, Object>> changedLoans;
 
     do {
-      changedLoans = okapi.queryAsList("/loan-storage/loans",
+      changedLoans = folio.queryAsList("/loan-storage/loans",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
       LOAN: for (Map<String,Object> loan : changedLoans) {
@@ -369,7 +369,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedRequests(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
+      Connection inventory, FolioClient folio, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -378,7 +378,7 @@ public class ChangeDetector {
     List<Map<String, Object>> changedRequests;
 
     do {
-      changedRequests = okapi.queryAsList("/request-storage/requests",
+      changedRequests = folio.queryAsList("/request-storage/requests",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
       REQUEST: for (Map<String,Object> request : changedRequests) {
@@ -460,7 +460,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedOrderLines(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
+      Connection inventory, FolioClient folio, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -469,7 +469,7 @@ public class ChangeDetector {
     List<Map<String, Object>> changedPols;
 
     do {
-      changedPols = okapi.queryAsList("/orders-storage/po-lines",
+      changedPols = folio.queryAsList("/orders-storage/po-lines",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
       POL: for (Map<String,Object> pol : changedPols) {
@@ -533,7 +533,7 @@ public class ChangeDetector {
   }
 
   public static Map<String,Set<Change>> detectChangedOrders(
-      Connection inventory, OkapiClient okapi, Timestamp since ) throws SQLException, IOException, AuthenticationException {
+      Connection inventory, FolioClient folio, Timestamp since ) throws SQLException, IOException, AuthenticationException {
 
     Map<String,Set<Change>> changes = new HashMap<>();
 
@@ -542,7 +542,7 @@ public class ChangeDetector {
     List<Map<String, Object>> changedOrders;
 
     do {
-      changedOrders = okapi.queryAsList("/orders-storage/purchase-orders",
+      changedOrders = folio.queryAsList("/orders-storage/purchase-orders",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
       ORDER: for (Map<String,Object> order : changedOrders) {

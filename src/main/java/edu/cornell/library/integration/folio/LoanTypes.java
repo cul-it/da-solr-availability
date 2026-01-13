@@ -13,8 +13,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class LoanTypes {
 
-  public static void initialize( OkapiClient okapi ) throws IOException, AuthenticationException {
-    if (_byUuid.isEmpty()) populateLoanTypes(okapi);
+  public static void initialize( FolioClient folio ) throws IOException, AuthenticationException {
+    if (_byUuid.isEmpty()) populateLoanTypes(folio);
   }
 
   public final static LoanType getByUuid( String uuid ) {
@@ -103,12 +103,12 @@ public class LoanTypes {
     }
   }
 
-  private static void populateLoanTypes( OkapiClient okapi ) throws IOException, AuthenticationException {
-    List<Map<String,Object>> okapiTypes = okapi.queryAsList("/loan-types",null,500 );
+  private static void populateLoanTypes( FolioClient folio ) throws IOException, AuthenticationException {
+    List<Map<String,Object>> folioTypes = folio.queryAsList("/loan-types",null,500 );
     EnumSet<ExpectedLoanType> expected = EnumSet.allOf(ExpectedLoanType.class);
-    for ( Map<String,Object> okapiType : okapiTypes ) {
-      String id = (String)okapiType.get("id");
-      String name = (String)okapiType.get("name");
+    for ( Map<String,Object> folioType : folioTypes ) {
+      String id = (String)folioType.get("id");
+      String name = (String)folioType.get("name");
       ExpectedLoanType exp = ExpectedLoanType.byName(name);
       if ( exp == null ) {
         System.out.printf("Unexpected loan type (%s): %s\n",id,name);
