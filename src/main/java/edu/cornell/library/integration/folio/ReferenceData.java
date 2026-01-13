@@ -17,15 +17,15 @@ public class ReferenceData {
   // PUBLIC METHODS
 
   /*
-   * Retrieve the complete data set (up to 4000) items from OKAPI, and build a
+   * Retrieve the complete data set (up to 4000) items from Folio API, and build a
    * reference map to identify UUIDs based on key values. The UUIDs are assumed to
    * be the "id" field in the data set, and the provided key field is the field
    * that will be used to find the UUID values. This currently only works with top
    * level key fields, and those where the key field values are strings. If other
    * use cases arise, this can be expanded.
    */
-  public ReferenceData(OkapiClient okapi, String endPoint, String nameField) throws IOException, AuthenticationException {
-    String json = okapi.query(endPoint , null, 4000);
+  public ReferenceData(FolioClient folio, String endPoint, String nameField) throws IOException, AuthenticationException {
+    String json = folio.query(endPoint , null, 4000);
     Map<String, Object> rawData = mapper.readValue(json, Map.class);
     Map<String, String> processedByName = new HashMap<>();
     Map<String, String> processedByUuid = new HashMap<>();

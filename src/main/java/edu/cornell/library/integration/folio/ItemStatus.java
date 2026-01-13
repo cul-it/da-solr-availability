@@ -38,7 +38,7 @@ public class ItemStatus {
 
     if (this.status.equals("Checked out")) {
       List<Map<String, Object>> loans = new ArrayList<>();
-//          okapi.queryAsList("/loan-storage/loans", "itemId=="+item.id, null);
+//          folio.queryAsList("/loan-storage/loans", "itemId=="+item.id, null);
       try (PreparedStatement loansByItem = inventory.prepareStatement("SELECT * FROM loanFolio WHERE itemHrid = ?")){
         loansByItem.setString(1, item.hrid);
         try ( ResultSet rs = loansByItem.executeQuery() ) {

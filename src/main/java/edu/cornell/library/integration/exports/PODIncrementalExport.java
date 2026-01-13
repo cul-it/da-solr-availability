@@ -28,7 +28,7 @@ import java.util.zip.GZIPOutputStream;
 import javax.naming.AuthenticationException;
 
 import edu.cornell.library.integration.exports.PODExporter.UpdateType;
-import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.FolioClient;
 
 public class PODIncrementalExport {
 
@@ -47,9 +47,9 @@ public class PODIncrementalExport {
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("databaseURLCurrent"),
         prop.getProperty("databaseUserCurrent"),prop.getProperty("databasePassCurrent")) ){
 
-      OkapiClient okapi = new OkapiClient(prop,"Folio");
+      FolioClient folio = new FolioClient(prop,"Folio");
 
-      PODExporter exporter = new PODExporter( inventory, okapi, prop );
+      PODExporter exporter = new PODExporter( inventory, folio, prop );
       exporter.verbose = true;
 
 

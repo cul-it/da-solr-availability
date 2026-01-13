@@ -32,15 +32,15 @@ import edu.cornell.library.integration.folio.Items;
 import edu.cornell.library.integration.folio.Items.ItemList;
 import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
-import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
-import edu.cornell.library.integration.folio.StaticOkapiClient;
+import edu.cornell.library.integration.folio.StaticFolioClient;
 
 public class CallNumberBrowseTest extends DbBaseTest {
 
   static Map<String,HoldingSet> examples;
-  static OkapiClient okapi = null;
+  static FolioClient folio = null;
   static Connection testDB = null;
 //  static Connection voyagerLive = null;
   static Locations locations = null;
@@ -54,12 +54,12 @@ public class CallNumberBrowseTest extends DbBaseTest {
     ObjectMapper mapper = new ObjectMapper();
     examples = mapper.readValue(loadResourceFile("folio_holdings_examples.json").replaceAll("(?m)^#.*$" , ""),
         new TypeReference<HashMap<String,HoldingSet>>() {});
-    okapi = new StaticOkapiClient();
-    locations = new Locations(okapi);
-    holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types", "name");
-    callNumberTypes = new ReferenceData(okapi, "/call-number-types", "name");
-    LoanTypes.initialize(okapi);
-    ServicePoints.initialize(okapi);
+    folio = new StaticFolioClient();
+    locations = new Locations(folio);
+    holdingsNoteTypes = new ReferenceData(folio, "/holdings-note-types", "name");
+    callNumberTypes = new ReferenceData(folio, "/call-number-types", "name");
+    LoanTypes.initialize(folio);
+    ServicePoints.initialize(folio);
   }
 
   @AfterClass
@@ -72,7 +72,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
   @Test
   public void multipleCopies() throws SQLException, IOException, XMLStreamException, AuthenticationException {
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "4442869");
-    ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "4442869", holdings);
+    ItemList items = Items.retrieveItemsForHoldings(folio, testDB, "4442869", holdings);
     for (String holdingUuid : holdings.getUuids())
       holdings.get(holdingUuid).summarizeItemAvailability(items.getItems().get(holdingUuid));
 
@@ -146,7 +146,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
   @Test
   public void serial() throws SQLException, IOException, XMLStreamException, AuthenticationException {
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "329763");
-    ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "329763", holdings);
+    ItemList items = Items.retrieveItemsForHoldings(folio, testDB, "329763", holdings);
     assertEquals(8,holdings.size());
     Collection<Object> linkJsons = new HashSet<>();
     linkJsons.add("{\"description\":\"HathiTrust (multiple volumes)\",\"url\":\"http://catalog.hathitrust.org/Record/000637680\"}");
@@ -325,7 +325,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
       throws SQLException, IOException, XMLStreamException, AuthenticationException {
 
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "1449673");
-    ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "1449673", holdings);
+    ItemList items = Items.retrieveItemsForHoldings(folio, testDB, "1449673", holdings);
     for (String holdingUuid : holdings.getUuids())
       holdings.get(holdingUuid).summarizeItemAvailability(items.getItems().get(holdingUuid));
 
@@ -351,7 +351,7 @@ public class CallNumberBrowseTest extends DbBaseTest {
       throws SQLException, IOException, XMLStreamException, AuthenticationException {
 
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(testDB, locations, holdingsNoteTypes, callNumberTypes, "3088531");
-    ItemList items = Items.retrieveItemsForHoldings(okapi, testDB, "3088531", holdings);
+    ItemList items = Items.retrieveItemsForHoldings(folio, testDB, "3088531", holdings);
     for (String holdingUuid : holdings.getUuids())
       holdings.get(holdingUuid).summarizeItemAvailability(items.getItems().get(holdingUuid));
     SolrInputDocument mainDoc = new SolrInputDocument();

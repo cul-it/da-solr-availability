@@ -35,10 +35,10 @@ public final class Locations {
    * @throws IOException 
    * @throws AuthenticationException 
    */
-  public Locations(final OkapiClient okapi) throws IOException, AuthenticationException {
+  public Locations(final FolioClient folio) throws IOException, AuthenticationException {
 
     if (_byCode.isEmpty())
-      populateLocationMaps(okapi);
+      populateLocationMaps(folio);
   }
 
   /**
@@ -200,24 +200,24 @@ public final class Locations {
   private static final Map<String, Location> _byUuid = new TreeMap<>();
   private static final Map<Location, List<FacetMapRule>> _facetsByLocation = new TreeMap<>();
 
-  private static void populateLocationMaps(final OkapiClient okapi) throws IOException, AuthenticationException {
+  private static void populateLocationMaps(final FolioClient folio) throws IOException, AuthenticationException {
     Map<String,Map<String,String>> libraryPatterns = loadPatternMap("library_names.txt");
     List<FacetMapRule> facetPatterns = loadFacetPatternMap("LocationFacetMapping.txt");
 
-    ReferenceData libraries = new ReferenceData( okapi, "/location-units/libraries", "name");
-    List<Map<String,Object>> okapiLocs = okapi.queryAsList("/locations", null, 500);
-    for (Map<String,Object> okapiLoc : okapiLocs) {
-      String name = (String)okapiLoc.get("discoveryDisplayName");
+    ReferenceData libraries = new ReferenceData( folio, "/location-units/libraries", "name");
+    List<Map<String,Object>> folioLocs = folio.queryAsList("/locations", null, 500);
+    for (Map<String,Object> folioLoc : folioLocs) {
+      String name = (String)folioLoc.get("discoveryDisplayName");
       if (name == null)
-        name = (String)okapiLoc.get("name");
+        name = (String)folioLoc.get("name");
       Map<String,String> libraryDetails = getLibrary(name, libraryPatterns);
-      String libraryName = libraries.getName((String)okapiLoc.get("libraryId"));
-      String id = (String)okapiLoc.get("id");
-      String primaryServicePoint = (String)okapiLoc.get("primaryServicePoint");
+      String libraryName = libraries.getName((String)folioLoc.get("libraryId"));
+      String id = (String)folioLoc.get("id");
+      String primaryServicePoint = (String)folioLoc.get("primaryServicePoint");
       String hoursCode   = (libraryDetails==null)?null:libraryDetails.values().iterator().next();
-      Location l = new Location((String)okapiLoc.get("code"), name, libraryName, hoursCode,id,primaryServicePoint);
+      Location l = new Location((String)folioLoc.get("code"), name, libraryName, hoursCode,id,primaryServicePoint);
       _byCode.put(l.code, l);
-      _byUuid.put((String)okapiLoc.get("id"), l);
+      _byUuid.put((String)folioLoc.get("id"), l);
       List<FacetMapRule> locationFacetRules = new ArrayList<>();
       for (FacetMapRule rule : facetPatterns)
         if (rule.displayName.equals(l.name))

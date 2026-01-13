@@ -40,7 +40,7 @@ import edu.cornell.library.integration.folio.Holdings;
 import edu.cornell.library.integration.folio.Items;
 import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
-import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
@@ -73,15 +73,15 @@ public class PODExporter {
   private final String podUrl;
   private final String podToken;
 
-  public PODExporter ( Connection inventory, OkapiClient okapi, Properties prop )
+  public PODExporter ( Connection inventory, FolioClient folio, Properties prop )
       throws IOException, SQLException, AuthenticationException {
     
-    this.locations = new Locations(okapi);
-    this.holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
-    this.callNumberTypes = new ReferenceData(okapi, "/call-number-types","name");
-    Items.initialize(okapi,this.locations);
-    ServicePoints.initialize(okapi);
-    LoanTypes.initialize(okapi);
+    this.locations = new Locations(folio);
+    this.holdingsNoteTypes = new ReferenceData(folio, "/holdings-note-types","name");
+    this.callNumberTypes = new ReferenceData(folio, "/call-number-types","name");
+    Items.initialize(folio,this.locations);
+    ServicePoints.initialize(folio);
+    LoanTypes.initialize(folio);
 
     this.inventory = inventory;
     this.insertInstancePodStmt = inventory.prepareStatement(

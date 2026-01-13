@@ -9,8 +9,8 @@ import javax.naming.AuthenticationException;
 
 public class ServicePoints {
 
-  public static void initialize( OkapiClient okapi ) throws IOException, AuthenticationException {
-    if (_byUuid.isEmpty()) populateServicePoints(okapi);
+  public static void initialize( FolioClient folio ) throws IOException, AuthenticationException {
+    if (_byUuid.isEmpty()) populateServicePoints(folio);
   }
 
   public final static ServicePoint getByUuid( String uuid ) {
@@ -29,8 +29,8 @@ public class ServicePoints {
     }
   }
 
-  private static void populateServicePoints( OkapiClient okapi ) throws IOException, AuthenticationException {
-    List<Map<String,Object>> servicePoints = okapi.queryAsList("/service-points",null,500 );
+  private static void populateServicePoints( FolioClient folio ) throws IOException, AuthenticationException {
+    List<Map<String,Object>> servicePoints = folio.queryAsList("/service-points",null,500 );
     for ( Map<String,Object> sp : servicePoints ) {
       String id = (String)sp.get("id");
       String displayName = (String)sp.get("discoveryDisplayName");

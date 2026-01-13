@@ -58,7 +58,7 @@ import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.Items.ItemList;
 import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
-import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.OpenOrder;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
@@ -113,14 +113,14 @@ public class ProcessAvailabilityQueue {
             .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
         ) {
 
-      OkapiClient okapi = new OkapiClient(prop,"Folio");
-      Locations locations = new Locations(okapi);
-      ReferenceData holdingsNoteTypes = new ReferenceData(okapi, "/holdings-note-types","name");
-      ReferenceData callNumberTypes = new ReferenceData(okapi, "/call-number-types","name");
-      ReferenceData statCodes = new ReferenceData(okapi,"/statistical-codes","code");
-      LoanTypes.initialize(okapi);
-      ServicePoints.initialize(okapi);
-      Items.initialize(okapi, locations);
+      FolioClient folio = new FolioClient(prop,"Folio");
+      Locations locations = new Locations(folio);
+      ReferenceData holdingsNoteTypes = new ReferenceData(folio, "/holdings-note-types","name");
+      ReferenceData callNumberTypes = new ReferenceData(folio, "/call-number-types","name");
+      ReferenceData statCodes = new ReferenceData(folio,"/statistical-codes","code");
+      LoanTypes.initialize(folio);
+      ServicePoints.initialize(folio);
+      Items.initialize(folio, locations);
 
       for (int i = 0; i < 500_000; i++){
         BibToUpdate bib = null;
@@ -170,7 +170,7 @@ public class ProcessAvailabilityQueue {
           queueRecordsNotRecentlyUpdated(inventoryDB,solr);
         } else {
           UpdateResults updateSuccess = updateBibInSolr(
-              okapi,inventoryDB,classificationDB,solr,callNumberSolr,locations,
+              folio,inventoryDB,classificationDB,solr,callNumberSolr,locations,
               holdingsNoteTypes, callNumberTypes, statCodes, bib, priority);
 //          if (priority != null && priority <= 5)
 //            solr.blockUntilFinished();
@@ -287,7 +287,7 @@ public class ProcessAvailabilityQueue {
       "  FROM processedMarcData"+
       " WHERE hrid = ?";
   static UpdateResults updateBibInSolr(
-      OkapiClient okapi, Connection inventory, Connection classificationDB,
+      FolioClient folio, Connection inventory, Connection classificationDB,
       SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
       ReferenceData callNumberTypes, ReferenceData statCodes, BibToUpdate changedBib, Integer priority)
       throws SQLException, IOException, InterruptedException, AuthenticationException {
@@ -330,7 +330,7 @@ public class ProcessAvailabilityQueue {
     doc.addField("instance_id", instanceId);
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
         inventory,locations,holdingsNoteTypes,callNumberTypes, String.valueOf(bibId));
-    ItemList items = Items.retrieveItemsForHoldings(okapi, inventory, bibId, holdings);
+    ItemList items = Items.retrieveItemsForHoldings(folio, inventory, bibId, holdings);
     doc.addField("statcode_facet", holdings.getStatCodes(statCodes));
     doc.addField("statcode_facet", items.getStatCodes(statCodes));
     doc.addField("item_count_i", items.itemCount());

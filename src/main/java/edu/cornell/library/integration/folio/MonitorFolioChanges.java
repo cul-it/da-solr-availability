@@ -52,7 +52,7 @@ public class MonitorFolioChanges {
         PreparedStatement getUserChangeTotals = inventory.prepareStatement
             ("SELECT id, COUNT(*) FROM userChanges GROUP BY 1")) {
 
-      OkapiClient okapi = new OkapiClient( prop, "Folio" );
+      FolioClient folio = new FolioClient( prop, "Folio" );
 
       Timestamp time = Change.getCurrentToDate( inventory, CURRENT_TO_KEY );
       if (time == null) {
@@ -66,21 +66,21 @@ public class MonitorFolioChanges {
         final Timestamp since = time;
 
         trimUserChangeLog.executeUpdate();
-        queueForIndex( ChangeDetector.detectChangedInstances( inventory, okapi, since ),
+        queueForIndex( ChangeDetector.detectChangedInstances( inventory, folio, since ),
             queueGen, getTitle, getUserChangeTotals );
         Map<String, Set<Change>> changedBibs =
-            ChangeDetector.detectChangedHoldings( inventory, okapi, since );
+            ChangeDetector.detectChangedHoldings( inventory, folio, since );
         queueForIndex(changedBibs,queueGen,getTitle, getUserChangeTotals);
         queueForIndex(changedBibs,queueAvail,getTitle, getUserChangeTotals);
-        queueForIndex(ChangeDetector.detectChangedItems( inventory, okapi, since ),
+        queueForIndex(ChangeDetector.detectChangedItems( inventory, folio, since ),
             queueAvail, getTitle, getUserChangeTotals );
-        queueForIndex( ChangeDetector.detectChangedLoans( inventory, okapi, since ),
+        queueForIndex( ChangeDetector.detectChangedLoans( inventory, folio, since ),
             queueAvail, getTitle, getUserChangeTotals );
-        queueForIndex( ChangeDetector.detectChangedRequests( inventory, okapi, since ),
+        queueForIndex( ChangeDetector.detectChangedRequests( inventory, folio, since ),
             queueAvail, getTitle, getUserChangeTotals );
-        queueForIndex( ChangeDetector.detectChangedOrderLines( inventory, okapi, since ),
+        queueForIndex( ChangeDetector.detectChangedOrderLines( inventory, folio, since ),
             queueAvail, getTitle, getUserChangeTotals );
-        queueForIndex( ChangeDetector.detectChangedOrders( inventory, okapi, since ),
+        queueForIndex( ChangeDetector.detectChangedOrders( inventory, folio, since ),
             queueAvail, getTitle, getUserChangeTotals );
 
         Thread.sleep(12_000); //12 seconds

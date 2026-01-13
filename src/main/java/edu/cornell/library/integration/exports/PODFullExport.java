@@ -22,7 +22,7 @@ import java.util.Set;
 import javax.naming.AuthenticationException;
 
 import edu.cornell.library.integration.exports.PODExporter.UpdateType;
-import edu.cornell.library.integration.folio.OkapiClient;
+import edu.cornell.library.integration.folio.FolioClient;
 
 public class PODFullExport {
 
@@ -41,9 +41,9 @@ public class PODFullExport {
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("databaseURLCurrent"),
                    prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent")); ){
 
-      OkapiClient okapi = new OkapiClient(prop,"Folio");
+      FolioClient folio = new FolioClient(prop,"Folio");
 
-      PODExporter exporter = new PODExporter( inventory, okapi , prop);
+      PODExporter exporter = new PODExporter( inventory, folio , prop);
 
       Set<String> bibs = getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
