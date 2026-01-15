@@ -38,14 +38,15 @@ public class WorksAndInventory {
       " VALUES (?, ?, NOW(), ?, ?, ?, ?, ?, ?, ?, ?, ?)" ;
   private final static String updateBRS = "UPDATE bibRecsSolr SET record_date = ? WHERE bib_id = ?";
   private final static String selectB2W = "SELECT * FROM bib2work WHERE hrid = ? AND active = 1";
-  private final static String selectB2W2 =
+  final static String selectB2W2 =
       "SELECT bib2work.hrid "+
       "  FROM bib2work, processedMarcData, bibRecsSolr"+
       " WHERE work_id = ?"+
       "   AND bib2work.hrid = processedMarcData.hrid"+
       "   AND recordtype_solr_fields LIKE '%type: Catalog%'"+
       "   AND bib2work.hrid = bibRecsSolr.bib_id"+
-      "   AND bibRecsSolr.active = 1";
+      "   AND bibRecsSolr.active = 1"+
+      "   AND bib2work.active = 1";
   private final static String insertB2W =
       "REPLACE INTO bib2work ( hrid, oclc_id, work_id, active) VALUES (?,?,?,1)";
   private final static String selectW2O = "SELECT oclc_id, work_id from workids.work2oclc WHERE oclc_id = ?";
