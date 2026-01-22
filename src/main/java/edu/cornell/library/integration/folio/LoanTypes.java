@@ -59,7 +59,8 @@ public class LoanTypes {
     KEY_X ("Keys extended loan"),
     KEY_L ("Keys long term"),
     KEY_S ("Keys short term"),
-    SENSE ("Sensory Lending");
+    SENSE ("Sensory Lending"),
+  SENSE500("Sensory Lending - 500");
 
     final private String label;
     private ExpectedLoanType(String label) { this.label = label; }
