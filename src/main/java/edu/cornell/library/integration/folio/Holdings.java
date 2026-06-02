@@ -228,6 +228,16 @@ public class Holdings {
       }
       return statcodes;
     }
+
+    // record has at least one holding, and all holdings are flagged as having a remote campus location
+    public boolean fullyRemoteCampus() {
+      if (this.holdings == null || this.holdings.isEmpty())
+        return false;
+      for ( Holding h : this.holdings.values() )
+        if (h.remoteCampus == null || ! h.remoteCampus)
+          return false;
+      return true;
+    }
   }
 
   public static void mergeAccessLinksIntoHoldings(HoldingSet holdings, Collection<Object> linkJsons)

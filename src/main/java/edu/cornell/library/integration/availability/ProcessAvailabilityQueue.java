@@ -337,6 +337,11 @@ public class ProcessAvailabilityQueue {
     if ( Items.applyDummyRMCItems(holdings,items) )
       doc.addField("availability_facet","RMC Dummy Item");
     boolean active = doc.getFieldValue("type").equals("Catalog");
+    if (active && holdings.fullyRemoteCampus()) {
+      active = false;
+      doc.removeField("type");
+      doc.addField("type", "Hidden not suppressed");
+    }
     doc.addField("notes_t", holdings.getNotes());
 
     boolean masterBoundWith =
