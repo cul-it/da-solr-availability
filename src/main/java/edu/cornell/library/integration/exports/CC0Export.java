@@ -23,6 +23,8 @@ import javax.naming.AuthenticationException;
 import edu.cornell.library.integration.folio.DownloadMARC;
 import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.Holdings;
+import edu.cornell.library.integration.folio.Items;
+import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
@@ -54,7 +56,10 @@ public class CC0Export {
       Locations locations = new Locations(folio);
       ReferenceData holdingsNoteTypes = new ReferenceData(folio, "/holdings-note-types","name");
       ReferenceData callNumberTypes = new ReferenceData(folio, "/call-number-types","name");
+      ReferenceData statCodes = new ReferenceData(folio,"/statistical-codes","code");
       ServicePoints.initialize(folio);
+      LoanTypes.initialize(folio);
+      Items.initialize(folio, locations);
 
       Set<String> bibs = ExportUtils.getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
