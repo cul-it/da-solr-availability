@@ -107,7 +107,13 @@ public class CC0Export {
           continue BIB;
         }
 
-        ExportUtils.cleanUnwantedDataFields(bibRec, null, Arrays.asList(new ExportUtils.FieldRange("857","999")),false);
+        ExportUtils.cleanUnwantedDataFields(
+            bibRec,
+            null, // no specific fields to remove
+            // but a couple of id ranges to get rid of
+            Arrays.asList(new ExportUtils.FieldRange("857","879"), new ExportUtils.FieldRange("881","999")),
+            false); // don't remove non-Numeric field tags
+
         writer.write(bibRec.toString("xml").replaceAll("^<\\?xml version=[\"']1.0[\"'] encoding=[\"']UTF-8[\"']\\?>", "")
             .replace(" xmlns=\"http://www.loc.gov/MARC21/slim\"","")+"\n");
         if ( ++recordsThisFile == recordsPerFile ) {
