@@ -25,6 +25,7 @@ import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.Holdings;
 import edu.cornell.library.integration.folio.Locations;
 import edu.cornell.library.integration.folio.ReferenceData;
+import edu.cornell.library.integration.folio.ServicePoints;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.MarcRecord;
@@ -53,6 +54,7 @@ public class CC0Export {
       Locations locations = new Locations(folio);
       ReferenceData holdingsNoteTypes = new ReferenceData(folio, "/holdings-note-types","name");
       ReferenceData callNumberTypes = new ReferenceData(folio, "/call-number-types","name");
+      ServicePoints.initialize(folio);
 
       Set<String> bibs = ExportUtils.getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
