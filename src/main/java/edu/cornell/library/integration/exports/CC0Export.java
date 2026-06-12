@@ -97,6 +97,7 @@ public class CC0Export {
             inventory,locations,holdingsNoteTypes,callNumberTypes, bibid);
         if (holdings.fullyRemoteCampus()) {
           System.out.printf("Skipping %s: Weill\n", bibid);
+          continue BIB;
         }
 
         ExportUtils.cleanUnwantedDataFields(bibRec, null, Arrays.asList(new ExportUtils.FieldRange("857","999")),false);
