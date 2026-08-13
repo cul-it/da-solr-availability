@@ -25,10 +25,16 @@ public class ReferenceData {
    * use cases arise, this can be expanded.
    */
   public ReferenceData(FolioClient folio, String endPoint, String nameField) throws IOException, AuthenticationException {
+    this(folio, endPoint, nameField, null);
+  }
+
+  public ReferenceData(FolioClient folio, String endPoint, String nameField, String additionalField)
+      throws IOException, AuthenticationException {
     String json = folio.query(endPoint , null, 4000);
     Map<String, Object> rawData = mapper.readValue(json, Map.class);
     Map<String, String> processedByName = new HashMap<>();
     Map<String, String> processedByUuid = new HashMap<>();
+    Map<String,Map<String,String>> entriesByUuid = new HashMap<>();
     for (String mainKey : rawData.keySet()) {
 
       if (mainKey.equals("totalRecords"))
@@ -44,18 +50,18 @@ public class ReferenceData {
         String id = (String) entry.get("id");
         processedByName.put( (name).toLowerCase(), id);
         processedByUuid.put(id, name);
+        Map<String,String> entryHash = new HashMap<>();
+        entryHash.put("id", id);
+        entryHash.put(nameField, name);
+        if (additionalField != null)
+          entryHash.put(additionalField, (String) entry.get(additionalField));
+        entriesByUuid.put(id, entryHash);
       }
     }
 
     this.dataByName = processedByName;
     this.dataByUuid = processedByUuid;
-    this.entriesByUuid = new HashMap<>();
-    for ( Entry<String,String> e : this.dataByUuid.entrySet() ) {
-      Map<String,String> entry = new HashMap<>();
-      entry.put("id", e.getKey());
-      entry.put(nameField, e.getValue());
-      this.entriesByUuid.put(e.getKey(), entry);
-    }
+    this.entriesByUuid = entriesByUuid;
   }
 
   /*

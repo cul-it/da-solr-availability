@@ -171,9 +171,20 @@ public class HoldingsTest extends DbBaseTest {
     assertEquals(examples.get("expected-15607108").toJson(),hs.toJson());
 
 
-
   }
-//
+
+  @Test
+  public void suppressRemoteCampusHolding() throws SQLException, IOException, AuthenticationException {
+    // holding record is unsuppressed, but should be loaded as suppressed because Wood is at Weill, not Ithaca
+    HoldingSet hs = Holdings.retrieveHoldingsByInstanceHrid(
+        testConnection, locations, holdingsNoteTypes, callNumberTypes, "17448924");
+    Holding h = hs.get("6b06b4fc-2358-559b-b246-973ffe7c20b0");
+    assertEquals( "Samuel J. Wood Library", h.location.library );
+    assertFalse( h.active );
+    assertTrue( h.remoteCampus );
+    System.out.println( h.toJson() );
+  }
+  //
 //    h = Holdings.retrieveHoldingsByHoldingId(voyagerTest, 1055);
 //    for (int mfhdId : h.getMfhdIds()) {
 //      i = Items.retrieveItemsByHoldingId(voyagerTest, mfhdId, h.get(mfhdId).active);

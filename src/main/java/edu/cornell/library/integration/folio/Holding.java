@@ -53,6 +53,7 @@ public class Holding {
   @JsonProperty("date")        public Integer date;
   @JsonProperty("links")       public List<Link> links = null;
   @JsonProperty("active")      public boolean active = true;
+  @JsonProperty("remoteCampus")public Boolean remoteCampus = null;
 
 
   @JsonIgnore public Map<String,Object> rawFolioHolding = null;
@@ -78,12 +79,6 @@ public class Holding {
       this.date = (int) Instant.parse(metadata.get("CreatedDate")).getEpochSecond();
     this.hrid = (String)raw.get("hrid");
 
-    if (  ( raw.containsKey("discoverySuppress") && (boolean) raw.get("discoverySuppress") )
-        || ( raw.containsKey("staffSuppress") && (boolean) raw.get("staffSuppress") ) )
-      this.active = false;
-    else
-      this.active = true;
-
     String locationId = null;
     if ( raw.containsKey("temporaryLocationId") ) {
       locationId = (String)raw.get("temporaryLocationId");
@@ -97,6 +92,16 @@ public class Holding {
         this.online = true;
       else
         this.location = l;
+    }
+
+    if (isRemoteCampus()) {
+      this.active = false;
+      this.remoteCampus = true;
+    } else if (  ( (boolean) raw.getOrDefault("discoverySuppress", false) )
+              || ( (boolean) raw.getOrDefault("staffSuppress", false) ) ) {
+      this.active = false;
+    } else {
+      this.active = true;
     }
 
     boolean mainCallNumberPresent = false;
@@ -232,6 +237,14 @@ public class Holding {
           }
         }
     }
+  }
+
+  private boolean isRemoteCampus() {
+    if (this.online != null && this.online)
+      return false;
+    if (this.location != null)
+      return this.location.remoteCampus;
+    return false;
   }
 
   Holding(
