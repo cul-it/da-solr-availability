@@ -56,32 +56,50 @@ public class SolrQueries {
     return mostRecentSolrTimestamp;
   }
 
-  public static void updateInSolrBC(SolrClient solr, SolrClient callnumSolr, String cacheDir,
+  public static void updateInSolrBlacklightCallnum(SolrClient solr, SolrClient callnumSolr, String cacheDir,
       SolrInputDocument doc, Set<SolrInputDocument> callnumDocs) throws SolrServerException, IOException {
 
     String bibid = (String) doc.getFieldValue("id");
     String instance_id = (String) doc.getFieldValue("instance_id");
+    Path cacheFile = null;
 
-    // TODO CONDITIONAL MAIN RECORD LOGIC
-    solr.add(doc);
+    // MAIN RECORD LOGIC
 
+    boolean saveToSolrB = true;
+    String docXml = ClientUtils.toXML(doc);
+    if (cacheDir != null) {
+      cacheFile = Paths.get(cacheDir,instance_id.substring(0, 3), bibid+"-blacklight.xml");
+      if (Files.exists(cacheFile)) {
+        String oldXml = Files.readString(cacheFile);
+        if (docXml.equals(oldXml))
+          saveToSolrB = false;
+      }
+    }
+    if (saveToSolrB) {
+      Files.createDirectories(Paths.get(cacheDir,instance_id.substring(0, 3)));
+      Files.writeString(cacheFile, docXml);
+      solr.add(doc);
+    }
 
     // CALLNUMBER LOGIC
+
     StringBuilder callNumXml = new StringBuilder();
     for (SolrInputDocument d : callnumDocs)
       callNumXml.append(ClientUtils.toXML(d)).append("\n");
-
-    Path cacheFile = Paths.get(cacheDir,instance_id.substring(0, 3), instance_id+"-callnumbers.xml");
-    if (cacheDir != null && Files.exists(cacheFile)) {
-      String oldXml = Files.readString(cacheFile);
-      if (callNumXml.toString().equals(oldXml))
-        return;
+    if (cacheDir != null) {
+      cacheFile = Paths.get(cacheDir,instance_id.substring(0, 3), bibid+"-callnumbers.xml");
+      if (Files.exists(cacheFile)) {
+        String oldXml = Files.readString(cacheFile);
+        if (callNumXml.toString().equals(oldXml))
+          return;
+      }
     }
 
     callnumSolr.deleteByQuery("bibid:"+bibid);
     if ( ! callnumDocs.isEmpty() )
       callnumSolr.add(callnumDocs);
-    Files.createDirectories(Paths.get(cacheDir,instance_id.substring(0, 3)));
+    if ( ! saveToSolrB )
+      Files.createDirectories(Paths.get(cacheDir,instance_id.substring(0, 3)));
     Files.writeString(cacheFile, callNumXml.toString());
 
   }

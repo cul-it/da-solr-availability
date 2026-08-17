@@ -432,11 +432,7 @@ public class ProcessAvailabilityQueue {
         changes)+" priority:"+priority);
 
     try {
-      SolrQueries.updateInSolrBC(solr, callNumberSolr, solrDocumentCacheDirectory, doc, callnumSolrDocs);
-//      solr.add(doc);
-//      callNumberSolr.deleteByQuery("bibid:"+bibId);
-//      if ( ! callnumSolrDocs.isEmpty() && active )
-//        callNumberSolr.add(callnumSolrDocs);
+      SolrQueries.updateInSolrBlacklightCallnum(solr, callNumberSolr, solrDocumentCacheDirectory, doc, callnumSolrDocs);
     } catch (SolrServerException | RemoteSolrException e) {
       System.out.printf("Error communicating with Solr server after processing.");
       e.printStackTrace();
