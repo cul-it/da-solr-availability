@@ -1,6 +1,9 @@
 package edu.cornell.library.integration.solr;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -85,15 +90,15 @@ public class SolrQueries {
     boolean saveToSolrB = true;
     String docXml = ClientUtils.toXML(doc);
     if (cacheDir != null) {
-      cacheFile = Paths.get(fullCacheDir.toString(), bibid+"-blacklight.xml");
+      cacheFile = Paths.get(fullCacheDir.toString(), bibid+"-blacklight.xml.gz");
       if (Files.exists(cacheFile)) {
-        String oldXml = Files.readString(cacheFile);
+        String oldXml = readFromGzipFile(cacheFile);
         if (docXml.equals(oldXml))
           saveToSolrB = false;
       }
     }
     if (saveToSolrB) {
-      Files.writeString(cacheFile, docXml);
+      writeToGzipFile(cacheFile, docXml);
       solr.add(doc);
     }
 
@@ -103,9 +108,9 @@ public class SolrQueries {
     for (SolrInputDocument d : callnumDocs)
       callNumXml.append(ClientUtils.toXML(d)).append("\n");
     if (cacheDir != null) {
-      cacheFile = Paths.get(fullCacheDir.toString(), bibid+"-callnumbers.xml");
+      cacheFile = Paths.get(fullCacheDir.toString(), bibid+"-callnumbers.xml.gz");
       if (Files.exists(cacheFile)) {
-        String oldXml = Files.readString(cacheFile);
+        String oldXml = readFromGzipFile(cacheFile);
         if (callNumXml.toString().equals(oldXml))
           return Arrays.asList(saveToSolrB, false);
       }
@@ -114,9 +119,28 @@ public class SolrQueries {
     callnumSolr.deleteByQuery("bibid:"+bibid);
     if ( ! callnumDocs.isEmpty() )
       callnumSolr.add(callnumDocs);
-    Files.writeString(cacheFile, callNumXml.toString());
+    writeToGzipFile(cacheFile, callNumXml.toString());
     return Arrays.asList(saveToSolrB, true);
 
   }
 
+
+  private static void writeToGzipFile(Path path, String content) throws IOException {
+    try (
+        FileOutputStream fos = new FileOutputStream(path.toString());
+        GZIPOutputStream gzos = new GZIPOutputStream(fos);) {
+      gzos.write(content.getBytes(StandardCharsets.UTF_8));
+      gzos.finish();
+    }
+  }
+
+  private static String readFromGzipFile(Path path) throws IOException {
+    try (
+        FileInputStream fis = new FileInputStream(path.toString());
+        GZIPInputStream gzis = new GZIPInputStream(fis);
+        ) {
+      return new String(gzis.readAllBytes(), StandardCharsets.UTF_8);
+    }
+    
+  }
 }
