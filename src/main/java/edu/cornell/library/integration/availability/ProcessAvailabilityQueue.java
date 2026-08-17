@@ -432,7 +432,9 @@ public class ProcessAvailabilityQueue {
         changes)+" priority:"+priority);
 
     try {
-      SolrQueries.updateInSolrBlacklightCallnum(solr, callNumberSolr, solrDocumentCacheDirectory, doc, callnumSolrDocs);
+      List<Boolean> updated = SolrQueries.updateInSolrBlacklightCallnum(
+          solr, callNumberSolr, solrDocumentCacheDirectory, doc, callnumSolrDocs);
+      updateAvailQueueDates(inventory, bibId, updated);
     } catch (SolrServerException | RemoteSolrException e) {
       System.out.printf("Error communicating with Solr server after processing.");
       e.printStackTrace();
@@ -441,6 +443,7 @@ public class ProcessAvailabilityQueue {
     }
     return UpdateResults.SUCCESS;
   }
+
 
   private static SolrInputDocument constructSolrInputDocument(ResultSet rs, String hrid)
       throws SQLException {
@@ -496,6 +499,33 @@ public class ProcessAvailabilityQueue {
     return items;
   }
   private static Pattern number = Pattern.compile("[0-9]+");
+
+
+  private static void updateAvailQueueDates(Connection inventory, String bibId, List<Boolean> updated)
+      throws SQLException {
+    String query ;
+    Boolean bib = updated.get(0);
+    Boolean call = updated.get(1);
+    if (bib) {
+      if (call) query ="UPDATE availQueueDates SET visit_date = NOW(), bib_update_date = NOW(), call_update_date = NOW()"
+                      +" WHERE hrid = ?";
+      else      query ="UPDATE availQueueDates SET visit_date = NOW(), bib_update_date = NOW() WHERE hrid = ?";
+    } else {
+      if (call) query ="UPDATE availQueueDates SET visit_date = NOW(), call_update_date = NOW() WHERE hrid = ?";
+      else      query ="UPDATE availQueueDates SET visit_date = NOW() WHERE hrid = ?";
+    }
+    try (PreparedStatement stmt = inventory.prepareStatement(query)) {
+      stmt.setString(1, bibId);
+      int upd = stmt.executeUpdate();
+      if (upd == 0) 
+        try (PreparedStatement insert = inventory.prepareStatement(
+            "INSERT INTO availQueueDates (hrid, visit_date, bib_update_date, call_update_date) "+
+            "VALUES (?, NOW(), NOW(), NOW())")) {
+          insert.setString(1, bibId);
+          insert.executeUpdate();
+        }
+    }
+  }
 
   public static class BibToUpdate implements Comparable<BibToUpdate>{
     final String bibId;

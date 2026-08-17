@@ -7,8 +7,10 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,11 +58,26 @@ public class SolrQueries {
     return mostRecentSolrTimestamp;
   }
 
-  public static void updateInSolrBlacklightCallnum(SolrClient solr, SolrClient callnumSolr, String cacheDir,
+  /**
+   * Determine, based on cached Solr documents, whether the blacklight solr document or call number solr document(s)
+   * are changed from those last pushed to Solr. If they are changed, then update Solr and the record cache. Return
+   * an indication of whether a Solr update was necessary.
+   * @param solr - Solr client for the Blacklight Solr index
+   * @param callnumSolr - Solr client for the call number Solr index
+   * @param cacheDir - Local filepath for cached Solr documents
+   * @param doc - SolrInputDocument prepared for the Blacklight Solr index
+   * @param callnumDocs - SolrInputDocument(s) prepared for the call number Solr index
+   * @return List<Boolean> of size 2, indicating whether the Blacklight and call number indexes were updated, respectively
+   * @throws SolrServerException
+   * @throws IOException
+   */
+  public static List<Boolean> updateInSolrBlacklightCallnum(SolrClient solr, SolrClient callnumSolr, String cacheDir,
       SolrInputDocument doc, Set<SolrInputDocument> callnumDocs) throws SolrServerException, IOException {
 
     String bibid = (String) doc.getFieldValue("id");
     String instance_id = (String) doc.getFieldValue("instance_id");
+    Path fullCacheDir = Paths.get(cacheDir,instance_id.substring(0, 2),instance_id.substring(2, 4));
+    Files.createDirectories(fullCacheDir);
     Path cacheFile = null;
 
     // MAIN RECORD LOGIC
@@ -68,7 +85,7 @@ public class SolrQueries {
     boolean saveToSolrB = true;
     String docXml = ClientUtils.toXML(doc);
     if (cacheDir != null) {
-      cacheFile = Paths.get(cacheDir,instance_id.substring(0, 3), bibid+"-blacklight.xml");
+      cacheFile = Paths.get(fullCacheDir.toString(), bibid+"-blacklight.xml");
       if (Files.exists(cacheFile)) {
         String oldXml = Files.readString(cacheFile);
         if (docXml.equals(oldXml))
@@ -76,7 +93,6 @@ public class SolrQueries {
       }
     }
     if (saveToSolrB) {
-      Files.createDirectories(Paths.get(cacheDir,instance_id.substring(0, 3)));
       Files.writeString(cacheFile, docXml);
       solr.add(doc);
     }
@@ -87,20 +103,19 @@ public class SolrQueries {
     for (SolrInputDocument d : callnumDocs)
       callNumXml.append(ClientUtils.toXML(d)).append("\n");
     if (cacheDir != null) {
-      cacheFile = Paths.get(cacheDir,instance_id.substring(0, 3), bibid+"-callnumbers.xml");
+      cacheFile = Paths.get(fullCacheDir.toString(), bibid+"-callnumbers.xml");
       if (Files.exists(cacheFile)) {
         String oldXml = Files.readString(cacheFile);
         if (callNumXml.toString().equals(oldXml))
-          return;
+          return Arrays.asList(saveToSolrB, false);
       }
     }
 
     callnumSolr.deleteByQuery("bibid:"+bibid);
     if ( ! callnumDocs.isEmpty() )
       callnumSolr.add(callnumDocs);
-    if ( ! saveToSolrB )
-      Files.createDirectories(Paths.get(cacheDir,instance_id.substring(0, 3)));
     Files.writeString(cacheFile, callNumXml.toString());
+    return Arrays.asList(saveToSolrB, true);
 
   }
 
