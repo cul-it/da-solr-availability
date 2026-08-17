@@ -20,9 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -36,12 +34,9 @@ import java.util.regex.Pattern;
 import javax.naming.AuthenticationException;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.BaseHttpSolrClient.RemoteSolrException;
 import org.apache.solr.client.solrj.impl.Http2SolrClient;
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -49,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.cornell.library.integration.availability.MultivolumeAnalysis.MultiVolFlag;
 import edu.cornell.library.integration.changes.Change;
 import edu.cornell.library.integration.folio.BoundWith;
+import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.Holding;
 import edu.cornell.library.integration.folio.Holdings;
 import edu.cornell.library.integration.folio.Holdings.HoldingSet;
@@ -58,10 +54,12 @@ import edu.cornell.library.integration.folio.Items.Item;
 import edu.cornell.library.integration.folio.Items.ItemList;
 import edu.cornell.library.integration.folio.LoanTypes;
 import edu.cornell.library.integration.folio.Locations;
-import edu.cornell.library.integration.folio.FolioClient;
 import edu.cornell.library.integration.folio.OpenOrder;
 import edu.cornell.library.integration.folio.ReferenceData;
 import edu.cornell.library.integration.folio.ServicePoints;
+import edu.cornell.library.integration.solr.SolrQueries;
+import edu.cornell.library.integration.solr.SolrUtils;
+
 
 public class ProcessAvailabilityQueue {
 
@@ -105,12 +103,8 @@ public class ProcessAvailabilityQueue {
         PreparedStatement queueGen = inventoryDB.prepareStatement
             ("INSERT INTO generationQueue ( hrid, priority, cause, record_date )"
                 + " VALUES (?,?,?,NOW())");
-        Http2SolrClient solr = new Http2SolrClient
-            .Builder(prop.getProperty("solrUrl")+"/"+prop.getProperty("blacklightSolrCore"))
-            .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
-        Http2SolrClient callNumberSolr = new Http2SolrClient
-            .Builder(prop.getProperty("solrUrl")+"/"+prop.getProperty("callnumSolrCore"))
-            .withBasicAuthCredentials(prop.getProperty("solrUser"),prop.getProperty("solrPassword")).build();
+        Http2SolrClient solr = SolrUtils.getSolrClient(prop, "blacklightSolrCore");
+        Http2SolrClient callNumberSolr = SolrUtils.getSolrClient(prop, "callnumSolrCore");
         ) {
 
       FolioClient folio = new FolioClient(prop,"Folio");
@@ -121,6 +115,8 @@ public class ProcessAvailabilityQueue {
       LoanTypes.initialize(folio);
       ServicePoints.initialize(folio);
       Items.initialize(folio, locations);
+
+      String solrDocumentCacheDirectory = prop.getProperty("solrDocumentCacheDirectory");
 
       for (int i = 0; i < 500_000; i++){
         BibToUpdate bib = null;
@@ -170,10 +166,8 @@ public class ProcessAvailabilityQueue {
           queueRecordsNotRecentlyUpdated(inventoryDB,solr);
         } else {
           UpdateResults updateSuccess = updateBibInSolr(
-              folio,inventoryDB,classificationDB,solr,callNumberSolr,locations,
+              folio,inventoryDB,classificationDB,solr,callNumberSolr,solrDocumentCacheDirectory,locations,
               holdingsNoteTypes, callNumberTypes, statCodes, bib, priority);
-//          if (priority != null && priority <= 5)
-//            solr.blockUntilFinished();
           if ( ! updateSuccess.equals(UpdateResults.FAILURE) ) {
             for (int id : ids) {
               clearFromQueueStmt.setInt(1, id);
@@ -197,7 +191,6 @@ public class ProcessAvailabilityQueue {
           }
         }
       }
-//      solr.blockUntilFinished();
     }
   }
 
@@ -221,20 +214,8 @@ public class ProcessAvailabilityQueue {
         cursor = rs.getObject(1, LocalDateTime.class).toInstant(ZoneOffset.UTC);
     }
 
-    // Query Solr for records
-    SolrQuery q = new SolrQuery();
-    q.setFields("id","timestamp");
-    q.setQuery("timestamp:[* TO \""+cursor+"\"]");
-    q.setRows(1_000);
-    q.setRequestHandler("standard");
-    q.setSort("random",ORDER.asc);
-    Map<String,Timestamp> recordIds = new HashMap<>();
-    for (SolrDocument doc : solr.query(q)
-        .getResults()) {
-      Timestamp lastIndexDate = Timestamp.valueOf(((Date)doc
-          .getFieldValue("timestamp")).toInstant().atZone(ZoneId.of("Z")).toLocalDateTime());
-      recordIds.put((String)doc.getFieldValue("id"),lastIndexDate);
-    }
+
+    Map<String,Timestamp> recordIds = SolrQueries.getOldestSolrRecords(solr, cursor);
 
     // Queue results
     if (! recordIds.isEmpty()) {
@@ -252,17 +233,7 @@ public class ProcessAvailabilityQueue {
     }
 
     // If no results found, identify new cursor
-    q = new SolrQuery();
-    q.setFields("timestamp");
-    q.setQuery("id:*");
-    q.setRows(1);
-    q.setSort("timestamp", ORDER.desc);
-    q.setRequestHandler("standard");
-    Timestamp mostRecentSolrTimestamp = null;
-    for (SolrDocument doc : solr.query(q).getResults())
-      mostRecentSolrTimestamp =
-          Timestamp.valueOf(((Date)doc.getFieldValue("timestamp"))
-              .toInstant().atZone(ZoneId.of("Z")).toLocalDateTime());
+    Timestamp mostRecentSolrTimestamp = SolrQueries.getMostRecentSolrTimestamp(solr);
     if (mostRecentSolrTimestamp != null) {
       System.out.println("Most Recent Solr Timestamp: "+mostRecentSolrTimestamp);
       try (PreparedStatement updateCursor = inventory.prepareStatement(
@@ -273,64 +244,50 @@ public class ProcessAvailabilityQueue {
     }
   }
 
-  final static String solrFieldsDataQuery =
-      "SELECT record_dates," +
-      // field list maintained here, and in constructSolrInputDocument() below
-      "       authortitle_solr_fields, title130_solr_fields,    subject_solr_fields,"+
-      "       pubinfo_solr_fields,     format_solr_fields,      factfiction_solr_fields,"+
-      "       language_solr_fields,    isbn_solr_fields,        series_solr_fields,"+
-      "       titlechange_solr_fields, toc_solr_fields,         instruments_solr_fields," + 
-      "       marc_solr_fields,        simpleproc_solr_fields,  findingaids_solr_fields,"+
-      "       citationref_solr_fields, url_solr_fields,         hathilinks_solr_fields,"+
-      "       newbooks_solr_fields,    recordtype_solr_fields,  recordboost_solr_fields,"+
-      "       callnumber_solr_fields,  otherids_solr_fields" + 
-      "  FROM processedMarcData"+
-      " WHERE hrid = ?";
+  final static String solrFieldsDataQuery = "SELECT * FROM processedMarcData WHERE hrid = ?";
   static UpdateResults updateBibInSolr(
       FolioClient folio, Connection inventory, Connection classificationDB,
-      SolrClient solr, SolrClient callNumberSolr,Locations locations,ReferenceData holdingsNoteTypes,
-      ReferenceData callNumberTypes, ReferenceData statCodes, BibToUpdate changedBib, Integer priority)
+      SolrClient solr, SolrClient callNumberSolr, String solrDocumentCacheDirectory, Locations locations,
+      ReferenceData holdingsNoteTypes, ReferenceData callNumberTypes, ReferenceData statCodes,
+      BibToUpdate changedBib, Integer priority)
       throws SQLException, IOException, InterruptedException, AuthenticationException {
 
     Set<SolrInputDocument> callnumSolrDocs = new HashSet<>();
     String bibId = changedBib.bibId;
+
+    // Retrieve Bibliographic Solr fields and build Solr document to add availability info into
     SolrInputDocument doc = null;
-    Map<String,Object> instance = null;
-    String instanceId = null;
-
     try (PreparedStatement pstmt = inventory.prepareStatement(solrFieldsDataQuery)){
-
-
       pstmt.setString(1, bibId);
-      try (ResultSet rs = pstmt.executeQuery();
-          PreparedStatement instanceByHrid = inventory.prepareStatement(
-              "SELECT * FROM instanceFolio WHERE hrid = ?");) {
-
+      try (ResultSet rs = pstmt.executeQuery()) {
         if ( ! rs.next() ) {
-          System.out.println( "Bibliographic fields for record "+bibId+" not found.");
+          System.out.println( "Bibliographic Solr fields for record "+bibId+" not found.");
           return UpdateResults.NOBIBDATA;
         }
-
         doc = constructSolrInputDocument( rs, bibId );
-
-        instanceByHrid.setString(1, bibId);
-        try ( ResultSet rs1 = instanceByHrid.executeQuery() ) {
-          while (rs1.next()) {
-            instanceId = rs1.getString("id");
-            instance = mapper.readValue( rs1.getString("content"), Map.class);
-          }
-        }
       }
     }
 
-    if (instance == null) {
-      System.out.printf("Instances not found for hrid %s\n",bibId);
-      return UpdateResults.FAILURE;
+    // Retrieve instance id for bib
+    String instanceId = null;
+    try (PreparedStatement instanceByHrid = inventory.prepareStatement(
+        "SELECT * FROM instanceFolio WHERE hrid = ?");) {
+        instanceByHrid.setString(1, bibId);
+        try ( ResultSet rs = instanceByHrid.executeQuery() ) {
+          if ( ! rs.next() ) {
+            System.out.printf("Instance not found for hrid %s\n",bibId);
+            return UpdateResults.FAILURE;
+          }
+          doc.addField("instance_id", rs.getString("id"));
+        }
     }
-    doc.addField("instance_id", instanceId);
+
+    // Retrieve all the holdings and items for the bib
     HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
         inventory,locations,holdingsNoteTypes,callNumberTypes, String.valueOf(bibId));
     ItemList items = Items.retrieveItemsForHoldings(folio, inventory, bibId, holdings);
+
+    // Modify Solr document with holding, item, and availability data
     doc.addField("statcode_facet", holdings.getStatCodes(statCodes));
     doc.addField("statcode_facet", items.getStatCodes(statCodes));
     doc.addField("item_count_i", items.itemCount());
@@ -475,11 +432,11 @@ public class ProcessAvailabilityQueue {
         changes)+" priority:"+priority);
 
     try {
-
-      solr.add(doc);
-      callNumberSolr.deleteByQuery("bibid:"+bibId);
-      if ( ! callnumSolrDocs.isEmpty() && active )
-        callNumberSolr.add(callnumSolrDocs);
+      SolrQueries.updateInSolrBC(solr, callNumberSolr, solrDocumentCacheDirectory, doc, callnumSolrDocs);
+//      solr.add(doc);
+//      callNumberSolr.deleteByQuery("bibid:"+bibId);
+//      if ( ! callnumSolrDocs.isEmpty() && active )
+//        callNumberSolr.add(callnumSolrDocs);
     } catch (SolrServerException | RemoteSolrException e) {
       System.out.printf("Error communicating with Solr server after processing.");
       e.printStackTrace();
