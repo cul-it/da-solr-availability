@@ -29,6 +29,8 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.marc.MarcRecord.RecordType;
+
 /*
  *  MarcRecord Handler Class
  */
@@ -326,6 +328,19 @@ public class MarcRecord implements Comparable<MarcRecord> {
   private static String cleanInvalidXmlChars(String text) {
     return text.replaceAll("[^\u0009\r\n\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF]", " ");
   }
+
+  public static List<MarcRecord> readMarc21File( RecordType type, byte[] marcdata) {
+    List<MarcRecord> recs = new ArrayList<>();
+    while (marcdata.length != 0) {
+        if (Character.isWhitespace(0)) {
+            marcdata = Arrays.copyOfRange(marcdata, 1, marcdata.length); continue; }
+        int recordLength = Integer.valueOf(new String( Arrays.copyOfRange(marcdata,0,5) ));
+        byte[] record = Arrays.copyOfRange(marcdata,0,recordLength);
+        recs.add(new MarcRecord(type, record));
+        marcdata = Arrays.copyOfRange(marcdata, recordLength, marcdata.length);
+    }
+    return recs;
+}
 
   private void processRecord(XMLStreamReader r, boolean trimSubfields) throws XMLStreamException {
 

@@ -109,11 +109,16 @@ public class FolioClient {
   private static final DateTimeFormatter isoDT = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("Z"));
 
   public HttpURLConnection post(final String endPoint, final String json) throws IOException {
-    return post(endPoint,json,null);
+    return post(endPoint,json,null,null);
   }
 
-  public HttpURLConnection post(final String endPoint, final String json, Map<String,String> headers) throws IOException {
+  public HttpURLConnection post(
+      final String endPoint, final String json, Map<String,String> headers) throws IOException {
+    return post(endPoint,json,headers,null);
+  }
 
+  public HttpURLConnection post(
+      final String endPoint, final String json, Map<String,String> headers, String contentType) throws IOException {
     System.out.println("About to post " + endPoint);
 
     final URL fullPath = new URL(this.url + endPoint);
@@ -135,6 +140,13 @@ public class FolioClient {
 
     return c;
   }
+
+  public String postToString(final String endPoint, final String json, Map<String,String> headers, final String contentType) throws IOException {
+    HttpURLConnection c = post(endPoint, json, headers, contentType);
+    return convertStreamToString(c.getInputStream());
+}
+
+
 
   public String put(final String endPoint, final Map<String, Object> object) throws IOException, AuthenticationException {
     return put(endPoint, (String) object.get("id"), mapper.writeValueAsString(object));
