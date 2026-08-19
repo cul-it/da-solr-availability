@@ -66,8 +66,8 @@ public class MonitorFolioChanges {
         final Timestamp since = time;
 
         trimUserChangeLog.executeUpdate();
-//        queueForIndex( ChangeDetector.detectChangedInstances( inventory, folio, since ),
-//            queueGen, getTitle, getUserChangeTotals );
+        queueForIndex( ChangeDetector.detectChangedInstances( inventory, folio, since ),
+            queueGen, getTitle, getUserChangeTotals );
         Map<String, Set<Change>> changedBibs =
             ChangeDetector.detectChangedHoldings( inventory, folio, since );
         queueForIndex(changedBibs,queueGen,getTitle, getUserChangeTotals);
