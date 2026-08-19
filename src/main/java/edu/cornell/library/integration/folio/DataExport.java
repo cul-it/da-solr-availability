@@ -50,7 +50,8 @@ public class DataExport {
 		tPayload.put("fileDefinitionId", fileDefinitionId);
 		tPayload.put("jobProfileId", profileId);
 		tPayload.put("recordType", "INSTANCE");
-		folio.post("/data-export/export", mapper.writeValueAsString(tPayload));
+		String response = folio.postToString("/data-export/export", mapper.writeValueAsString(tPayload),null,null);
+		System.out.println(response);
 
 		// WAIT FOR DONE
 		List<Map<String,String>> exportedFiles = null;
