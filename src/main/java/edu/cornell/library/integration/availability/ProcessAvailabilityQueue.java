@@ -10,11 +10,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -24,7 +21,6 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
@@ -205,43 +201,21 @@ public class ProcessAvailabilityQueue {
       while (rs.next()) if ( rs.getInt(1) > 10 ) return;
     }
 
-    // Get target modification date cursor
-    Instant cursor = null;
-    try ( Statement stmt = inventory.createStatement();
+    // Get least recently visited records
+    try (Statement stmt = inventory.createStatement();
         ResultSet rs = stmt.executeQuery(
-            "SELECT current_to_date FROM updateCursor WHERE cursor_name = 'solr_times'")) {
-      while (rs.next())
-        cursor = rs.getObject(1, LocalDateTime.class).toInstant(ZoneOffset.UTC);
-    }
-
-
-    Map<String,Timestamp> recordIds = SolrQueries.getOldestSolrRecords(solr, cursor);
-
-    // Queue results
-    if (! recordIds.isEmpty()) {
-      try ( PreparedStatement insert = inventory.prepareStatement(
-          "INSERT INTO availQueue(hrid, priority, cause, record_date)"
-          + " VALUES (?,9,'Age of Record',?)")) {
-        for ( Entry<String,Timestamp> e : recordIds.entrySet() ) {
-          insert.setString(1, e.getKey());
-          insert.setTimestamp(2, e.getValue());
-          insert.addBatch();
-        }
-        insert.executeBatch();
+            "SELECT hrid,visit_date FROM availQueueDates ORDER BY visit_date ASC limit 1000");
+        PreparedStatement insert = inventory.prepareStatement(
+            "INSERT INTO availQueue(hrid, priority, cause, record_date) VALUES (?,9,'Age of Record',?)");
+        ) {
+      while (rs.next()) {
+        insert.setString(1, rs.getString("hrid"));
+        insert.setTimestamp(2, rs.getTimestamp("visit_date"));
+        insert.addBatch();
       }
-      return;
+      insert.executeBatch();
     }
-
-    // If no results found, identify new cursor
-    Timestamp mostRecentSolrTimestamp = SolrQueries.getMostRecentSolrTimestamp(solr);
-    if (mostRecentSolrTimestamp != null) {
-      System.out.println("Most Recent Solr Timestamp: "+mostRecentSolrTimestamp);
-      try (PreparedStatement updateCursor = inventory.prepareStatement(
-          "UPDATE updateCursor SET current_to_date = ? WHERE cursor_name = 'solr_times'")) {
-        updateCursor.setTimestamp(1, mostRecentSolrTimestamp);
-        updateCursor.executeUpdate();
-      }
-    }
+    return;
   }
 
   final static String solrFieldsDataQuery = "SELECT * FROM processedMarcData WHERE hrid = ?";
