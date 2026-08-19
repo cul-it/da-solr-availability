@@ -18,7 +18,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import javax.naming.AuthenticationException;
+
 import edu.cornell.library.integration.folio.DownloadMARC;
+import edu.cornell.library.integration.folio.FolioClient;
+import edu.cornell.library.integration.folio.Holdings;
+import edu.cornell.library.integration.folio.Items;
+import edu.cornell.library.integration.folio.LoanTypes;
+import edu.cornell.library.integration.folio.Locations;
+import edu.cornell.library.integration.folio.ReferenceData;
+import edu.cornell.library.integration.folio.ServicePoints;
+import edu.cornell.library.integration.folio.Holdings.HoldingSet;
 import edu.cornell.library.integration.marc.DataField;
 import edu.cornell.library.integration.marc.MarcRecord;
 import edu.cornell.library.integration.marc.Subfield;
@@ -26,7 +36,7 @@ import edu.cornell.library.integration.marc.Subfield;
 public class CC0Export {
 
 
-  public static void main(String[] args) throws IOException, SQLException {
+  public static void main(String[] args) throws IOException, SQLException, AuthenticationException {
 
     Map<String, String> env = System.getenv();
     String configFile = env.get("configFile");
@@ -40,6 +50,16 @@ public class CC0Export {
 
     try (Connection inventory = DriverManager.getConnection(prop.getProperty("databaseURLCurrent"),
                    prop.getProperty("databaseUserCurrent"), prop.getProperty("databasePassCurrent")); ){
+
+      // load reference data
+      FolioClient folio = new FolioClient(prop,"Folio");
+      Locations locations = new Locations(folio);
+      ReferenceData holdingsNoteTypes = new ReferenceData(folio, "/holdings-note-types","name");
+      ReferenceData callNumberTypes = new ReferenceData(folio, "/call-number-types","name");
+      ReferenceData statCodes = new ReferenceData(folio,"/statistical-codes","code");
+      ServicePoints.initialize(folio);
+      LoanTypes.initialize(folio);
+      Items.initialize(folio, locations);
 
       Set<String> bibs = ExportUtils.getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());
@@ -79,7 +99,21 @@ public class CC0Export {
             continue BIB;
           }
 
-        ExportUtils.cleanUnwantedDataFields(bibRec, null, Arrays.asList(new ExportUtils.FieldRange("857","999")),false);
+        // confirm the record isn't Weill
+        HoldingSet holdings = Holdings.retrieveHoldingsByInstanceHrid(
+            inventory,locations,holdingsNoteTypes,callNumberTypes, bibid);
+        if (holdings.fullyRemoteCampus()) {
+          System.out.printf("Skipping %s: Weill\n", bibid);
+          continue BIB;
+        }
+
+        ExportUtils.cleanUnwantedDataFields(
+            bibRec,
+            null, // no specific fields to remove
+            // but a couple of id ranges to get rid of
+            Arrays.asList(new ExportUtils.FieldRange("857","879"), new ExportUtils.FieldRange("881","999")),
+            false); // don't remove non-Numeric field tags
+
         writer.write(bibRec.toString("xml").replaceAll("^<\\?xml version=[\"']1.0[\"'] encoding=[\"']UTF-8[\"']\\?>", "")
             .replace(" xmlns=\"http://www.loc.gov/MARC21/slim\"","")+"\n");
         if ( ++recordsThisFile == recordsPerFile ) {

@@ -18,8 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 /**
  * Give access to location data by code or number. Will load loaded into memory
@@ -117,13 +120,16 @@ public final class Locations {
    *  <dt>compareTo( Location other )</dt><dd>returns this.number.compareTo(other.number)</dd>
    * </dl>
    */
+  @JsonAutoDetect(fieldVisibility = Visibility.ANY)
   public static class Location implements Comparable<Location> {
-    public final String code;
-    public final String name;
-    public final String library;
-    public final String hoursCode;
-    public final String id;
-    public final String primaryServicePoint;
+    @JsonProperty("code")      public final String code;
+    @JsonProperty("name")      public final String name;
+    @JsonProperty("library")   public final String library;
+    @JsonProperty("hoursCode") public final String hoursCode;
+    @JsonProperty("id")        public final String id;
+    @JsonProperty("primaryServicePoint")
+                               public final String primaryServicePoint;
+    @JsonIgnore                public Boolean remoteCampus = false;
 
     /**
      * @return
@@ -138,6 +144,7 @@ public final class Locations {
       sb.append("; library: ").append(this.library);
       if (this.hoursCode != null)
         sb.append("; hoursCode: ").append(this.hoursCode);
+      sb.append("; remoteCampus: ").append(this.remoteCampus);
       return sb.toString();
     }
 
@@ -182,6 +189,24 @@ public final class Locations {
       this.id = id;
       this.primaryServicePoint = primaryServicePoint;
     }
+
+    Location(
+        String code,
+        String name,
+        String library,
+        String hoursCode,
+        String id,
+        String primaryServicePoint,
+        Boolean remoteCampus
+        ) {
+      this.code = code;
+      this.name = name.trim();
+      this.library = library;
+      this.hoursCode = hoursCode;
+      this.id = id;
+      this.primaryServicePoint = primaryServicePoint;
+      this.remoteCampus = remoteCampus;
+    }
   }
 
   public static enum Sort { CODE, UUID }
@@ -204,18 +229,21 @@ public final class Locations {
     Map<String,Map<String,String>> libraryPatterns = loadPatternMap("library_names.txt");
     List<FacetMapRule> facetPatterns = loadFacetPatternMap("LocationFacetMapping.txt");
 
-    ReferenceData libraries = new ReferenceData( folio, "/location-units/libraries", "name");
+    ReferenceData libraries = new ReferenceData( folio, "/location-units/libraries", "name", "campusId");
     List<Map<String,Object>> folioLocs = folio.queryAsList("/locations", null, 500);
     for (Map<String,Object> folioLoc : folioLocs) {
       String name = (String)folioLoc.get("discoveryDisplayName");
       if (name == null)
         name = (String)folioLoc.get("name");
       Map<String,String> libraryDetails = getLibrary(name, libraryPatterns);
-      String libraryName = libraries.getName((String)folioLoc.get("libraryId"));
+      Map<String, String> library = libraries.getEntryHashByUuid((String)folioLoc.get("libraryId"));
+      String libraryName = library.get("name");
+      String campusId = library.get("campusId");
       String id = (String)folioLoc.get("id");
       String primaryServicePoint = (String)folioLoc.get("primaryServicePoint");
       String hoursCode   = (libraryDetails==null)?null:libraryDetails.values().iterator().next();
-      Location l = new Location((String)folioLoc.get("code"), name, libraryName, hoursCode,id,primaryServicePoint);
+      Location l = new Location((String)folioLoc.get("code"), name, libraryName,
+          hoursCode,id,primaryServicePoint,! campusId.equals("ee275fa1-0124-4c35-866e-fc0872f8d092"));
       _byCode.put(l.code, l);
       _byUuid.put((String)folioLoc.get("id"), l);
       List<FacetMapRule> locationFacetRules = new ArrayList<>();
