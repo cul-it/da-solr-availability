@@ -22,6 +22,7 @@
             <include>**/exports/*.java</include>
             <include>**/folio/*.java</include>
             <include>**/marc/*.java</include>
+            <include>**/solr/*.java</include>
             <include>**/voyager/*.java</include>
           </includes>
         </configuration>
