@@ -578,7 +578,7 @@ public class ChangeDetector {
         PreparedStatement bfQuery = inventory.prepareStatement(
          "SELECT moddate FROM bibFolio WHERE instanceHrid = ?")) {
       while (lastId > minId) {
-        System.out.format("%d %d %d\n", minId, lastId, maxId);
+        System.out.format("Blacklight bib check: %d %d %d\n", minId, lastId, maxId);
         metadbQuery.setLong(1, lastId);
         try(ResultSet mdbRs = metadbQuery.executeQuery()) {
           while (mdbRs.next()) {
@@ -595,12 +595,8 @@ public class ChangeDetector {
                 boolean newerInMetadb = iModdate == null || 1 ==  mModdate.compareTo(iModdate);
                 if ( ! newerInMetadb )  continue;
                 changeType = "Bib modified";
-                System.out.format( "%8s %s %s %d\n", hrid, mModdate, iModdate, mModdate.compareTo(iModdate));
               } else {
-                // not in inventory
-                changeType = "Bib added";
-                System.out.format( "%8s %s\n", hrid, mModdate);
-                
+                changeType = "Bib added"; // not in inventory
               }
 
               String instanceId = null;
