@@ -592,7 +592,7 @@ public class ChangeDetector {
               String changeType;
               if (bfRs.next()) {
                 Timestamp iModdate = bfRs.getTimestamp("moddate");
-                boolean newerInMetadb = 1 ==  mModdate.compareTo(iModdate);
+                boolean newerInMetadb = iModdate == null || 1 ==  mModdate.compareTo(iModdate);
                 if ( ! newerInMetadb )  continue;
                 changeType = "Bib modified";
                 System.out.format( "%8s %s %s %d\n", hrid, mModdate, iModdate, mModdate.compareTo(iModdate));

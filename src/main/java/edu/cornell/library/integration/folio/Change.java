@@ -65,6 +65,16 @@ public class Change implements Comparable<Change>{
     }
   }
 
+  public static void setCurrentToId(Long id, Connection inventory, String key ) throws SQLException {
+    
+    try (PreparedStatement pstmt = inventory.prepareStatement(
+        "REPLACE INTO updateCursorId ( cursor_name, current_to_id ) VALUES (?,?)")) {
+      pstmt.setString(1, key);
+      pstmt.setLong(2, id);
+      pstmt.executeUpdate();
+    }
+  }
+
   public static Long getMostRecentIdInMetadb(Connection metadb, String tableName) throws SQLException {
     try (Statement stmt = metadb.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT MAX(__id) FROM "+tableName)) {

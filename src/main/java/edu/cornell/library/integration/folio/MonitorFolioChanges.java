@@ -96,12 +96,12 @@ public class MonitorFolioChanges {
         queueForIndex( ChangeDetector.detectChangedOrders( inventory, folio, since ),
             queueAvail, getTitle, getUserChangeTotals );
 
-        if (i % 10 == 0) {
+        if ((i % 10) == 0) {
           Long newCursor = Change.getMostRecentIdInMetadb(metadb, "folio_source_record.records_lb");
-          System.out.println(newCursor);
           queueForIndex( ChangeDetector.detectChangedBibs(inventory, metadb, folio, metadbCursor, newCursor),
               queueGen, getTitle, getUserChangeTotals);
           metadbCursor = newCursor;
+          Change.setCurrentToId( metadbCursor, inventory, METADB_CURSOR_KEY );
         }
 
         Thread.sleep(12_000); //12 seconds
