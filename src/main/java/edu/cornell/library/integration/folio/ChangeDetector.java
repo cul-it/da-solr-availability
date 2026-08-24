@@ -93,40 +93,7 @@ public class ChangeDetector {
 
         if ( ! source.equals("MARC") ) continue INSTANCE;
 
-        String marc = null;
-        String srsQuery = "/source-storage/records/"+id+"/formatted?idType=INSTANCE";
-        try {
-          marc = folio.query(srsQuery).replaceAll("\\s*\\n\\s*", " ");
-        } catch (IOException e) {
-          // If MARC not found, wait 3 seconds and try one more time.
-          System.out.printf("Error retrieving MARC from SRS (%s): %s %s\n",e.getMessage(),hrid,id);
-          Thread.sleep(3_000);
-          try {
-            marc = folio.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
-                .replaceAll("\\s*\\n\\s*", " ");
-          } catch (IOException e2) {
-            System.out.printf("Error retrieving MARC from SRS (%s): %s %s\n",e2.getMessage(),hrid,id);
-            continue INSTANCE;
-          }
-        }
-        if ( getPreviousBib == null )
-          getPreviousBib = inventory.prepareStatement(
-              "SELECT content FROM bibFolio WHERE instanceHrid = ?");
-        getPreviousBib.setString(1, hrid);
-        try ( ResultSet rs = getPreviousBib.executeQuery() ) {
-          while (rs.next()) if (rs.getString("content").equals(marc)) continue INSTANCE;
-        }
-
-        Matcher m = modDateP.matcher(marc);
-        Timestamp marcTimestamp = (m.matches())
-            ? Timestamp.from(Instant.parse(m.group(1).replace("+00:00","Z"))): null;
-        if ( replaceBib == null )
-          replaceBib = inventory.prepareStatement(
-              "REPLACE INTO bibFolio (instanceHrid,moddate,content) VALUES (?,?,?)");
-        replaceBib.setString(1, hrid);
-        replaceBib.setTimestamp(2, marcTimestamp);
-        replaceBib.setString(3, marc);
-        replaceBib.executeUpdate();
+        updateBibInCache(inventory, folio, hrid, id);
       }
     } while (changedInstances.size() == limit);
 
@@ -595,6 +562,73 @@ public class ChangeDetector {
     return changes;
   }
 
+
+  public static Map<String,Set<Change>> detectChangedBibs(
+      Connection inventory, Connection metadb, FolioClient folio, Long minId, Long maxId)
+          throws SQLException, AuthenticationException, InterruptedException {
+
+    Map<String,Set<Change>> changes = new HashMap<>();
+    Long lastId = maxId + 1;
+    try (PreparedStatement metadbQuery = metadb.prepareStatement(
+         "SELECT __id, external_hrid AS hrid, updated_date"+
+         "  FROM folio_source_record.records_lb__"+
+         " WHERE __id < ?"+
+         " ORDER BY __id desc"+
+         " LIMIT 100");
+        PreparedStatement bfQuery = inventory.prepareStatement(
+         "SELECT moddate FROM bibFolio WHERE instanceHrid = ?")) {
+      while (lastId > minId) {
+        System.out.format("Blacklight bib check: %d %d %d\n", minId, lastId, maxId);
+        metadbQuery.setLong(1, lastId);
+        try(ResultSet mdbRs = metadbQuery.executeQuery()) {
+          while (mdbRs.next()) {
+            lastId = mdbRs.getLong("__id");
+            if (lastId < minId) break;
+            Timestamp mModdate = mdbRs.getTimestamp("updated_date");
+            mModdate.setNanos(0);
+            String hrid = mdbRs.getString("hrid");
+            bfQuery.setString(1, hrid);
+            try (ResultSet bfRs = bfQuery.executeQuery()) {
+              String changeType;
+              if (bfRs.next()) {
+                Timestamp iModdate = bfRs.getTimestamp("moddate");
+                boolean newerInMetadb = iModdate == null || 1 ==  mModdate.compareTo(iModdate);
+                if ( ! newerInMetadb )  continue;
+                changeType = "Bib modified";
+              } else {
+                changeType = "Bib added"; // not in inventory
+              }
+
+              String instanceId = null;
+              if (getInstanceIdByInstanceHrid == null)
+                getInstanceIdByInstanceHrid = inventory.prepareStatement(
+                    "SELECT id FROM instanceFolio WHERE hrid = ?");
+              getInstanceIdByInstanceHrid.setString(1,hrid);
+              try (ResultSet rs = getInstanceIdByInstanceHrid.executeQuery() ) {
+                while (rs.next()) instanceId = rs.getString(1);
+              }
+              if (instanceId == null) { System.out.println("Instance not in cache for hrid "+hrid); continue; }
+
+              String marc = updateBibInCache(inventory, folio, hrid, instanceId);
+              Change c = new Change(Change.Type.BIB,instanceId,changeType,
+                  mModdate,null,trackUserChange( inventory, marc ));
+              if ( ! changes.containsKey(hrid)) {
+                Set<Change> t = new HashSet<>();
+                t.add(c);
+                changes.put(hrid,t);
+              }
+              changes.get(hrid).add(c);
+            }
+          }
+        }
+        
+      }
+    }
+    return changes;
+    
+  }
+
+
   public static String trackUserChange( Connection inventory, String json ) throws SQLException {
     Matcher userM = modUserP.matcher(json);
     if ( userM.matches() ) {
@@ -608,6 +642,47 @@ public class ChangeDetector {
     }
     return null;
   }
+
+
+  private static String updateBibInCache(Connection inventory, FolioClient folio, String hrid, String id)
+      throws AuthenticationException, SQLException, InterruptedException {
+    String marc = null;
+    String srsQuery = "/source-storage/records/"+id+"/formatted?idType=INSTANCE";
+    try {
+      marc = folio.query(srsQuery).replaceAll("\\s*\\n\\s*", " ");
+    } catch (IOException e) {
+      // If MARC not found, wait 3 seconds and try one more time.
+      System.out.printf("Error retrieving MARC from SRS (%s): %s %s\n",e.getMessage(),hrid,id);
+      Thread.sleep(3_000);
+      try {
+        marc = folio.query("/source-storage/records/"+id+"/formatted?idType=INSTANCE")
+            .replaceAll("\\s*\\n\\s*", " ");
+      } catch (IOException e2) {
+        System.out.printf("Error retrieving MARC from SRS (%s): %s %s\n",e2.getMessage(),hrid,id);
+       return null;
+      }
+    }
+    if ( getPreviousBib == null )
+      getPreviousBib = inventory.prepareStatement(
+          "SELECT content FROM bibFolio WHERE instanceHrid = ?");
+    getPreviousBib.setString(1, hrid);
+    try ( ResultSet rs = getPreviousBib.executeQuery() ) {
+      while (rs.next()) if (rs.getString("content").equals(marc)) return null;
+    }
+
+    Matcher m = modDateP.matcher(marc);
+    Timestamp marcTimestamp = (m.matches())
+        ? Timestamp.from(Instant.parse(m.group(1).replace("+00:00","Z"))): null;
+    if ( replaceBib == null )
+      replaceBib = inventory.prepareStatement(
+          "REPLACE INTO bibFolio (instanceHrid,moddate,content) VALUES (?,?,?)");
+    replaceBib.setString(1, hrid);
+    replaceBib.setTimestamp(2, marcTimestamp);
+    replaceBib.setString(3, marc);
+    replaceBib.executeUpdate();
+    return marc;
+  }
+
 
   static Pattern modDateP = Pattern.compile("^.*\"updatedDate\" *: *\"([^\"]+)\".*$");
   static Pattern modUserP = Pattern.compile("^.*\"updatedByUserId\" *: *\"([^\"]+)\".*$");
@@ -629,6 +704,7 @@ public class ChangeDetector {
   static PreparedStatement replaceOrder = null;
   static PreparedStatement replaceOrderLine = null;
   static PreparedStatement getInstanceHridByInstanceId = null;
+  static PreparedStatement getInstanceIdByInstanceHrid = null;
   static PreparedStatement getItemParentage = null;
   static PreparedStatement getLoanParentage = null;
   static PreparedStatement getRequestParentage = null;

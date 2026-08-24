@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -24,6 +25,7 @@ import javax.naming.AuthenticationException;
 public class MonitorFolioChanges {
 
   private static final String CURRENT_TO_KEY = "avail";
+  private static final String METADB_CURSOR_KEY = "metadb_bib";
 
   public static void main(String[] args) throws IOException, SQLException, InterruptedException, AuthenticationException {
 
@@ -39,8 +41,10 @@ public class MonitorFolioChanges {
 
 
     try (
-        Connection inventory = DriverManager.getConnection(
-            prop.getProperty("databaseURLCurrent"),prop.getProperty("databaseUserCurrent"),prop.getProperty("databasePassCurrent"));
+        Connection inventory = DriverManager.getConnection( prop.getProperty("databaseURLCurrent"),
+        		prop.getProperty("databaseUserCurrent"),prop.getProperty("databasePassCurrent"));
+        Connection metadb = DriverManager.getConnection( prop.getProperty("databaseURLMetaDB"),
+        		prop.getProperty("databaseUserMetaDB"),prop.getProperty("databasePassMetaDB"));
         PreparedStatement queueAvail = inventory.prepareStatement
             ("INSERT INTO availQueue ( hrid, priority, cause, record_date ) VALUES (?,?,?,?)");
         PreparedStatement queueGen = inventory.prepareStatement
@@ -60,8 +64,17 @@ public class MonitorFolioChanges {
         System.out.println("No starting timestamp in DB, defaulting to 10 hours ago.");
       }
       System.out.println(time);
+      Long metadbCursor = Change.getCurrentToId(inventory, METADB_CURSOR_KEY);
+      if (metadbCursor == null) {
+        System.out.println("MetaDB bib cursor missing.");
+        System.exit(1);
+      }
+      System.out.println(metadbCursor);
+      try (Statement stmt = inventory.createStatement()) {
+        stmt.executeUpdate("SET time_zone = '+00:00'");
+      }
 
-      while ( true ) {
+      for (int i = 0; i < 500_000; i++){
         Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-10_000);//now minus 10 seconds
         final Timestamp since = time;
 
@@ -82,6 +95,14 @@ public class MonitorFolioChanges {
             queueAvail, getTitle, getUserChangeTotals );
         queueForIndex( ChangeDetector.detectChangedOrders( inventory, folio, since ),
             queueAvail, getTitle, getUserChangeTotals );
+
+        if ((i % 10) == 0) {
+          Long newCursor = Change.getMostRecentIdInMetadb(metadb, "folio_source_record.records_lb");
+          queueForIndex( ChangeDetector.detectChangedBibs(inventory, metadb, folio, metadbCursor, newCursor),
+              queueGen, getTitle, getUserChangeTotals);
+          metadbCursor = newCursor;
+          Change.setCurrentToId( metadbCursor, inventory, METADB_CURSOR_KEY );
+        }
 
         Thread.sleep(12_000); //12 seconds
         time = newTime;
