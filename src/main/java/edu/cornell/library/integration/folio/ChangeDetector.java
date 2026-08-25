@@ -651,7 +651,7 @@ public class ChangeDetector {
 
   static Pattern modDateP = Pattern.compile("^.*\"updatedDate\" *: *\"([^\"]+)\".*$");
   static Pattern modUserP = Pattern.compile("^.*\"updatedByUserId\" *: *\"([^\"]+)\".*$");
-  static Pattern marcFieldModDateP = Pattern.compile("^(\\d\\d\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)(\\d\\d)24.6$");
+  static Pattern marcFieldModDateP = Pattern.compile("(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2}).*");
 
   static PreparedStatement getPreviousInstance = null;
   static PreparedStatement getPreviousBib = null;
