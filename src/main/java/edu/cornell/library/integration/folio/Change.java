@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.List;
@@ -36,12 +37,20 @@ public class Change implements Comparable<Change>{
     try (PreparedStatement pstmt = inventory.prepareStatement(
         "SELECT current_to_date FROM updateCursor WHERE cursor_name = ?")) {
       pstmt.setString(1, key);
-
       try (ResultSet rs = pstmt.executeQuery()) {
-        while (rs.next())
-          return rs.getTimestamp(1);
+        while (rs.next()) return rs.getTimestamp(1);
       }
-      
+    }
+    return null;
+  }
+
+  public static Long getCurrentToId( Connection inventory, String key ) throws SQLException {
+    try (PreparedStatement pstmt = inventory.prepareStatement(
+        "SELECT current_to_id FROM updateCursorId WHERE cursor_name = ?")) {
+      pstmt.setString(1, key);
+      try (ResultSet rs = pstmt.executeQuery()) {
+        while (rs.next())  return rs.getLong(1);
+      }
     }
     return null;
   }
@@ -54,6 +63,25 @@ public class Change implements Comparable<Change>{
       pstmt.setTimestamp(2, currentTo);
       pstmt.executeUpdate();
     }
+  }
+
+  public static void setCurrentToId(Long id, Connection inventory, String key ) throws SQLException {
+    
+    try (PreparedStatement pstmt = inventory.prepareStatement(
+        "REPLACE INTO updateCursorId ( cursor_name, current_to_id ) VALUES (?,?)")) {
+      pstmt.setString(1, key);
+      pstmt.setLong(2, id);
+      pstmt.executeUpdate();
+    }
+  }
+
+  public static Long getMostRecentIdInMetadb(Connection metadb, String tableName) throws SQLException {
+    try (Statement stmt = metadb.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT MAX(__id) FROM "+tableName)) {
+      while (rs.next())
+        return rs.getLong(1);
+    }
+    return null;
   }
 
   @Override

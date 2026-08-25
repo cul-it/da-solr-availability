@@ -22,6 +22,7 @@
             <include>**/exports/*.java</include>
             <include>**/folio/*.java</include>
             <include>**/marc/*.java</include>
+            <include>**/solr/*.java</include>
             <include>**/voyager/*.java</include>
           </includes>
         </configuration>
@@ -60,6 +61,11 @@
       <artifactId>mysql-connector-java</artifactId>
       <version>8.0.28</version>
       <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <version>42.4.4</version>
     </dependency>
     <dependency>
       <groupId>org.xerial</groupId>
