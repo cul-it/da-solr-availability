@@ -33,7 +33,7 @@ public class DataExport {
 
 		// CREATE FILE DEFINITION
 		Map<String,String> fdPayload = new HashMap<>();
-		fdPayload.put("fileName", "test.csv");
+		fdPayload.put("fileName", "blacklight-export.csv");
 		fdPayload.put("uploadFormat", "csv");
 		String fileDefinitionId = (String)mapper.readValue(
 				folio.postToString("/data-export/file-definitions",

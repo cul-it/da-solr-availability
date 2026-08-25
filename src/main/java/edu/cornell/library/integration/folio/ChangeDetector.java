@@ -609,7 +609,7 @@ public class ChangeDetector {
         PreparedStatement bfQuery = inventory.prepareStatement(
          "SELECT moddate FROM bibFolio WHERE instanceHrid = ?")) {
       while (lastId > minId) {
-        System.out.format("Blacklight bib check: %d %d %d\n", minId, lastId, maxId);
+        System.out.format("Metadb bib check: %d %d %d\n", minId, lastId, maxId);
         metadbQuery.setLong(1, lastId);
         try(ResultSet mdbRs = metadbQuery.executeQuery()) {
           while (mdbRs.next()) {
