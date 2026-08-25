@@ -33,6 +33,7 @@ public class ChangeDetector {
     Map<String,Set<Change>> changes = new HashMap<>();
 
     int limit = 500;
+    int countToTriggerDE = 50;
     Timestamp modDateCursor = since;
     List<Map<String, Object>> changedInstances;
     Boolean doDE = null; // Folio Data Export
@@ -43,7 +44,7 @@ public class ChangeDetector {
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
 
-      if (doDE == null) doDE = changedInstances.size() > 200;
+      if (doDE == null) doDE = changedInstances.size() > countToTriggerDE;
 
       INSTANCE: for (Map<String,Object> instance : changedInstances) {
 
