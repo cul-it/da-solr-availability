@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,9 @@ import javax.naming.AuthenticationException;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import edu.cornell.library.integration.marc.ControlField;
+import edu.cornell.library.integration.marc.MarcRecord;
+
 public class ChangeDetector {
 
   public static Map<String,Set<Change>> detectChangedInstances(
@@ -29,13 +33,19 @@ public class ChangeDetector {
     Map<String,Set<Change>> changes = new HashMap<>();
 
     int limit = 500;
+    int countToTriggerDE = 50;
     Timestamp modDateCursor = since;
     List<Map<String, Object>> changedInstances;
+    Boolean doDE = null; // Folio Data Export
+    List<String> instancesForDE = new ArrayList<>();
 
     do {
       changedInstances = folio.queryAsList("/instance-storage/instances",
           "metadata.updatedDate>"+modDateCursor.toInstant().toString()+
           " sortBy metadata.updatedDate",limit);
+
+      if (doDE == null) doDE = changedInstances.size() > countToTriggerDE;
+
       INSTANCE: for (Map<String,Object> instance : changedInstances) {
 
         String hrid = (String)instance.get("hrid");
@@ -93,9 +103,30 @@ public class ChangeDetector {
 
         if ( ! source.equals("MARC") ) continue INSTANCE;
 
+        if ( doDE ) {
+          instancesForDE.add(id);
+          continue INSTANCE;
+        }
+
         updateBibInCache(inventory, folio, hrid, id);
+
       }
     } while (changedInstances.size() == limit);
+
+    if (doDE && ! instancesForDE.isEmpty()) {
+      List<MarcRecord> records = DataExport.retrieveMarcByUuid(folio, instancesForDE);
+      if ( replaceBib == null )
+        replaceBib = inventory.prepareStatement(
+            "REPLACE INTO bibFolio (instanceHrid,moddate,content) VALUES (?,?,?)");
+      for (MarcRecord r : records) {
+        String marcJson = r.toJson();
+        replaceBib.setString(1, r.id);
+        replaceBib.setTimestamp(2, extractTimestamp(r));
+        replaceBib.setString(3, marcJson);
+        replaceBib.addBatch();
+      }
+      replaceBib.executeBatch();
+    }
 
     return changes;
   }
@@ -578,7 +609,7 @@ public class ChangeDetector {
         PreparedStatement bfQuery = inventory.prepareStatement(
          "SELECT moddate FROM bibFolio WHERE instanceHrid = ?")) {
       while (lastId > minId) {
-        System.out.format("Blacklight bib check: %d %d %d\n", minId, lastId, maxId);
+        System.out.format("Metadb bib check: %d %d %d\n", minId, lastId, maxId);
         metadbQuery.setLong(1, lastId);
         try(ResultSet mdbRs = metadbQuery.executeQuery()) {
           while (mdbRs.next()) {
@@ -643,6 +674,16 @@ public class ChangeDetector {
     return null;
   }
 
+  private static Timestamp extractTimestamp(MarcRecord r) {
+    for (ControlField f: r.controlFields) if (f.tag.equals("005")) {
+        Matcher m = marcFieldModDateP.matcher(f.value);
+        if (m.matches())
+            return Timestamp.valueOf(String.format("%s-%s-%s %s:%s:%s.00000000",
+                    m.group(1),m.group(2),m.group(3),m.group(4),m.group(5),m.group(6)));
+    }
+    System.out.format("005 date may be missing or malformed in bib record %s\n", r.id);
+    return null;
+  }
 
   private static String updateBibInCache(Connection inventory, FolioClient folio, String hrid, String id)
       throws AuthenticationException, SQLException, InterruptedException {
@@ -683,9 +724,9 @@ public class ChangeDetector {
     return marc;
   }
 
-
   static Pattern modDateP = Pattern.compile("^.*\"updatedDate\" *: *\"([^\"]+)\".*$");
   static Pattern modUserP = Pattern.compile("^.*\"updatedByUserId\" *: *\"([^\"]+)\".*$");
+  static Pattern marcFieldModDateP = Pattern.compile("(\\d{4})(\\d{2})(\\d{2})(\\d{2})(\\d{2})(\\d{2}).*");
 
   static PreparedStatement getPreviousInstance = null;
   static PreparedStatement getPreviousBib = null;
