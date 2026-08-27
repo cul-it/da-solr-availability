@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.xml.stream.XMLInputFactory;
@@ -27,7 +28,10 @@ import javax.xml.stream.XMLStreamWriter;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.cornell.library.integration.marc.MarcRecord.RecordType;
 
 /*
  *  MarcRecord Handler Class
@@ -129,6 +133,49 @@ public class MarcRecord implements Comparable<MarcRecord> {
         this.id = f.value;
         break;
       }
+  }
+
+  public static MarcRecord fromJson(String json) throws JsonMappingException, JsonProcessingException {
+    Map<String,Object> jsonMap = mapper.readValue(json, Map.class);
+    MarcRecord rec = new MarcRecord(MarcRecord.RecordType.BIBLIOGRAPHIC);
+    rec.leader = (String) jsonMap.get("leader");
+    List<Map<String,Object>> fields = (List<Map<String, Object>>) jsonMap.get("fields");
+    int fieldId = 1;
+    for ( Map<String,Object> f : fields )
+        for ( Entry<String,Object> field : f.entrySet() ) {
+            Object fieldValue = field.getValue();
+            if ( fieldValue.getClass().equals(String.class) ) {
+                rec.controlFields.add(new ControlField(fieldId++,field.getKey(),
+                        Normalizer.normalize((String) fieldValue,Normalizer.Form.NFC)));
+                if (field.getKey().equals("001")) {
+                    rec.bib_id = (String) fieldValue; rec.id = rec.bib_id;
+                }
+            } else {
+                Map<String,Object> fValue = (Map<String, Object>) fieldValue;
+                int subfieldId = 1;
+                List<Map<String,Object>> subfields = (List<Map<String,Object>>) fValue.get("subfields");
+                TreeSet<Subfield> processedSubfields = new TreeSet<>();
+                for (Map<String,Object> subfield : subfields) {
+                    if ( subfield.isEmpty() ) continue;
+                    String code = subfield.keySet().iterator().next();
+                    processedSubfields.add(new Subfield( subfieldId++, code.charAt(0),
+                            Normalizer.normalize((String) subfield.get(code),Normalizer.Form.NFC) ));
+                }
+                Character ind1 = ((String)fValue.get("ind1")+" ").charAt(0); //if ind is empty, default to space
+                Character ind2 = ((String)fValue.get("ind2")+" ").charAt(0);
+                rec.dataFields.add(new DataField(fieldId++,field.getKey(),ind1,ind2,processedSubfields));
+            }
+        }
+    F: for ( DataField f : rec.dataFields )
+        for ( Subfield sf : f.subfields )
+            if ( sf.code.equals('6') )
+                if (subfield6Pattern.matcher(sf.value).matches()) {
+                    if (f.tag.equals("880"))
+                        f.mainTag = sf.value.substring(0,3);
+                    f.linkNumber = Integer.valueOf(sf.value.substring(4,6));
+                    continue F;
+                }
+        return rec;
   }
 
   @Override
@@ -323,9 +370,56 @@ public class MarcRecord implements Comparable<MarcRecord> {
     return null;
   }
 
+  public String toJson() throws JsonProcessingException {
+    Map<String,Object> record = new HashMap<>();
+    Map<String,Object> parsedRecord = new HashMap<>();
+    record.put("parsedRecord",parsedRecord);
+    Map<String,Object> content = new HashMap<>();
+    parsedRecord.put("content", content);
+    content.put("leader", this.leader);
+    Map<String,List<Map<String,Object>>> fields = new HashMap<>();
+    List<Map<String,Object>> fieldsList = new ArrayList<>();
+    content.put("fields", fieldsList);
+    for (ControlField f : this.controlFields) {
+      Map<String,Object> field = new HashMap<>();
+      field.put(f.tag, f.value);
+      fieldsList.add(field);
+    }
+    for (DataField f : this.dataFields) {
+      Map<String,Object> field = new HashMap<>();
+      Map<String,Object> fieldContent = new HashMap<>();
+      fieldContent.put("ind1", f.ind1);
+      fieldContent.put("ind2", f.ind2);
+      List<Map<Character,String>> subfields = new ArrayList<>();
+      fieldContent.put("subfields", subfields);
+      for (Subfield sf : f.subfields) {
+        Map<Character,String> subfield = new HashMap<>();
+        subfield.put(sf.code, sf.value);
+        subfields.add(subfield);
+      }
+      field.put(f.tag, fieldContent);
+      fieldsList.add(field);
+    }
+
+    return mapper.writeValueAsString(record);
+  }
+
   private static String cleanInvalidXmlChars(String text) {
     return text.replaceAll("[^\u0009\r\n\u0020-\uD7FF\uE000-\uFFFD\uD800\uDC00-\uDBFF\uDFFF]", " ");
   }
+
+  public static List<MarcRecord> readMarc21File( RecordType type, byte[] marcdata) {
+    List<MarcRecord> recs = new ArrayList<>();
+    while (marcdata.length != 0) {
+        if (Character.isWhitespace(0)) {
+            marcdata = Arrays.copyOfRange(marcdata, 1, marcdata.length); continue; }
+        int recordLength = Integer.valueOf(new String( Arrays.copyOfRange(marcdata,0,5) ));
+        byte[] record = Arrays.copyOfRange(marcdata,0,recordLength);
+        recs.add(new MarcRecord(type, record));
+        marcdata = Arrays.copyOfRange(marcdata, recordLength, marcdata.length);
+    }
+    return recs;
+}
 
   private void processRecord(XMLStreamReader r, boolean trimSubfields) throws XMLStreamException {
 
