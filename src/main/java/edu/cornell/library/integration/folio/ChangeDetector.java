@@ -661,17 +661,18 @@ public class ChangeDetector {
 
 
   public static String trackUserChange( Connection inventory, String json ) throws SQLException {
+    if (json == null) return null;
     Matcher userM = modUserP.matcher(json);
-    if ( userM.matches() ) {
-      String userId = userM.group(1);
-      if ( trackUpdatesByUser == null )
-        trackUpdatesByUser = inventory.prepareStatement(
-            "INSERT INTO userChanges (id) VALUES (?)");
-      trackUpdatesByUser.setString(1, userId);
-      trackUpdatesByUser.executeUpdate();
-      return userId;
-    }
-    return null;
+    if ( ! userM.matches() ) return null;
+
+    String userId = userM.group(1);
+    if ( trackUpdatesByUser == null )
+      trackUpdatesByUser = inventory.prepareStatement(
+          "INSERT INTO userChanges (id) VALUES (?)");
+    trackUpdatesByUser.setString(1, userId);
+    trackUpdatesByUser.executeUpdate();
+    return userId;
+
   }
 
   private static Timestamp extractTimestamp(MarcRecord r) {
