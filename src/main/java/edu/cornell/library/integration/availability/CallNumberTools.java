@@ -182,8 +182,11 @@ public class CallNumberTools {
       if (number.contains(".")) {
         int dotPos = number.indexOf('.');
         i = Integer.valueOf(number.substring(0, dotPos));
-      } else
+      } else if (number.matches("\\d+(\\.\\d+)?")) {
         i = Integer.valueOf(number);
+      } else {
+        continue ENG;
+      }
       if ( ( letters.equals("QA") && ( i == 75 || i == 76 || i == 267 || i == 268 ) ) 
           || ( letters.equals("QC") &&  i >= 320 && i <= 999 ) ) {
         flags.add("Engineering Library");
