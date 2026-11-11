@@ -632,15 +632,18 @@ public class PODExporter {
   public void executeDelayedCommits() throws SQLException {
     this.delayCommits = false;
     for (DelayedCommit commit : this.delayedCommits) {
-      System.out.println(commit);
+
       switch (commit.type()) {
       case DELETE:
+        System.out.format("DELETE %s\n", commit.instanceHrid());
         deletePodInventoryForDeletedInstance(commit.instanceHrid());
         break;
       case UPD_SUPPRESSED:
+        System.out.format("UPD_SUPPRESSED %s\n", (String)commit.instance().get("hrid"));
         updatePodInventoryForInactiveInstance(commit.instance(), commit.bibModdate(), commit.instanceModdate());
         break;
       case UPD_ACTIVE:
+        System.out.format("UPD_ACTIVE %s\n", (String)commit.instance().get("hrid"));
         updatePodInventoryForActiveInstance(commit.instance(), commit.bibModdate(),
             commit.instanceModdate(),commit.holdingsAndItems());
         break;

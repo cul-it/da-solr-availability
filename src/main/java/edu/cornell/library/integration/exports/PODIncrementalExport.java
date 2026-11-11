@@ -121,8 +121,16 @@ public class PODIncrementalExport {
 
   private static Set<String> identifyChangedRecords(Connection inventory) throws SQLException {
 
+    Timestamp since = null;
+    try (Statement stmt = inventory.createStatement();
+        ResultSet rs = stmt.executeQuery("SELECT current_to_date FROM updateCursor WHERE cursor_name = 'pod_upd'")) {
+        while (rs.next()) since= rs.getTimestamp(1);
+    }
+    Timestamp newTime = new Timestamp(Calendar.getInstance().getTime().getTime()-172_800_000);//now minus 2 days
+    System.out.println(since);
+
+
     Set<String> changedInstances = new HashSet<>();
-    Timestamp since = Timestamp.valueOf(LocalDateTime.now().minusMonths(1));
 
     System.out.println("Looking for changed instances");
     changedInstances.addAll(getNewer(inventory,since,
@@ -143,6 +151,12 @@ public class PODIncrementalExport {
     System.out.println("Looking for deleted records");
     changedInstances.addAll(getDeleted(inventory));
     System.out.println("All changes: "+changedInstances.size());
+
+    try (PreparedStatement stmt = inventory.prepareStatement(
+        "UPDATE updateCurser SET current_to_date = ? WHERE cursor_name = 'pod_upd'")){
+      stmt.setTimestamp(1, newTime);
+      stmt.executeUpdate();
+    }
 
     return changedInstances;
   }
