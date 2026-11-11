@@ -16,7 +16,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -64,6 +63,7 @@ public class PODIncrementalExport {
 
       String updatesFile = String.format("cornell-incr-%s.xml", today);
       BufferedWriter writer = Files.newBufferedWriter(Paths.get(updatesFile));
+      { File uf = new File(updatesFile); uf.deleteOnExit(); }
       writer.write("<?xml version='1.0' encoding='UTF-8'?>"
           + "<collection xmlns=\"http://www.loc.gov/MARC21/slim\">\n");
       int updateRecords = 0;
