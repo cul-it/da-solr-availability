@@ -72,13 +72,17 @@ public class PODExporter {
 
   private final String podUrl;
   private final String podToken;
+  private final List<DelayedCommit> delayedCommits;
+  private boolean delayCommits;
 
-  public PODExporter ( Connection inventory, FolioClient folio, Properties prop )
+  public PODExporter ( Connection inventory, FolioClient folio, Properties prop, boolean delayCommits )
       throws IOException, SQLException, AuthenticationException {
     
     this.locations = new Locations(folio);
     this.holdingsNoteTypes = new ReferenceData(folio, "/holdings-note-types","name");
     this.callNumberTypes = new ReferenceData(folio, "/call-number-types","name");
+    this.delayCommits = delayCommits;
+    this.delayedCommits = new ArrayList<>();
     Items.initialize(folio,this.locations);
     ServicePoints.initialize(folio);
     LoanTypes.initialize(folio);
@@ -116,7 +120,6 @@ public class PODExporter {
     else
       throw new IllegalArgumentException("podToken required in config.");
   }
-
 
   public static String hexdigits = "0123456789abcdef";
   public void pushFileToPod( String filename, String contentType ) throws IOException {
@@ -482,6 +485,10 @@ public class PODExporter {
   }
 
   private void deletePodInventoryForDeletedInstance(String instanceHrid) throws SQLException {
+    if (this.delayCommits) {
+      this.delayedCommits.add(new DelayedCommit(CommitType.DELETE, instanceHrid,null,null,null, null));
+      return;
+    }
     removeOldHoldingAndItemPodExportData(instanceHrid);
     this.deleteInstancePodStmt.setString(1, instanceHrid);
     this.deleteInstancePodStmt.executeUpdate();
@@ -491,7 +498,11 @@ public class PODExporter {
   private void updatePodInventoryForInactiveInstance(
       Map<String,Object> instance, Timestamp bibModdate, Timestamp instanceModdate)
           throws SQLException {
-
+    if (this.delayCommits) {
+      this.delayedCommits.add(new DelayedCommit(
+          CommitType.UPD_SUPPRESSED, null, instance,bibModdate,instanceModdate, null));
+      return;
+    }
     String instanceHrid = (String)instance.get("hrid");
     removeOldHoldingAndItemPodExportData(instanceHrid);
 
@@ -531,6 +542,12 @@ public class PODExporter {
 
   private void updatePodInventoryForActiveInstance(Map<String, Object> instance, Timestamp bibModdate,
       Timestamp instanceModdate, HoldingsAndItems holdingsAndItems) throws SQLException {
+    if (this.delayCommits) {
+      this.delayedCommits.add(new DelayedCommit(
+          CommitType.UPD_ACTIVE, null, instance,bibModdate,instanceModdate, holdingsAndItems));
+      return;
+    }
+
     String instanceHrid = (String)instance.get("hrid");
 
     this.insertInstancePodStmt.setString(1,instanceHrid);
@@ -611,6 +628,33 @@ public class PODExporter {
       }
     }
   }
+
+  public void executeDelayedCommits() throws SQLException {
+    this.delayCommits = false;
+    for (DelayedCommit commit : this.delayedCommits) {
+      System.out.println(commit);
+      switch (commit.type()) {
+      case DELETE:
+        deletePodInventoryForDeletedInstance(commit.instanceHrid());
+        break;
+      case UPD_SUPPRESSED:
+        updatePodInventoryForInactiveInstance(commit.instance(), commit.bibModdate(), commit.instanceModdate());
+        break;
+      case UPD_ACTIVE:
+        updatePodInventoryForActiveInstance(commit.instance(), commit.bibModdate(),
+            commit.instanceModdate(),commit.holdingsAndItems());
+        break;
+      }
+    }
+  }
+  record DelayedCommit(
+      CommitType type,
+      String instanceHrid,
+      Map<String,Object> instance, 
+      Timestamp bibModdate,
+      Timestamp instanceModdate,
+      HoldingsAndItems holdingsAndItems) {}
+  enum CommitType{DELETE, UPD_SUPPRESSED, UPD_ACTIVE;}
 
   private static Map<String, Object> getInstance(Connection inventory, String bibId)
       throws SQLException, IOException {

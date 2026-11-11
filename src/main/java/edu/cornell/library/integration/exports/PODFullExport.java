@@ -43,7 +43,7 @@ public class PODFullExport {
 
       FolioClient folio = new FolioClient(prop,"Folio");
 
-      PODExporter exporter = new PODExporter( inventory, folio , prop);
+      PODExporter exporter = new PODExporter( inventory, folio , prop, false);
 
       Set<String> bibs = getBibsToExport(inventory);
       System.out.println("Bib count: "+bibs.size());

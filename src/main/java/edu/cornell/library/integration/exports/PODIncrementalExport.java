@@ -17,9 +17,11 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -29,6 +31,7 @@ import javax.naming.AuthenticationException;
 
 import edu.cornell.library.integration.exports.PODExporter.UpdateType;
 import edu.cornell.library.integration.folio.FolioClient;
+
 
 public class PODIncrementalExport {
 
@@ -49,11 +52,12 @@ public class PODIncrementalExport {
 
       FolioClient folio = new FolioClient(prop,"Folio");
 
-      PODExporter exporter = new PODExporter( inventory, folio, prop );
+      PODExporter exporter = new PODExporter( inventory, folio, prop, true );
       exporter.verbose = true;
 
 
       Set<String> bibs = identifyChangedRecords(inventory);
+
       Calendar cal = Calendar.getInstance();
       SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
       String today = sdf.format(cal.getTime());
@@ -82,14 +86,19 @@ public class PODIncrementalExport {
         writer.flush();
         writer.close();
         String gzipFile = gzip( updatesFile );
-        exporter.pushFileToPod( gzipFile, "application/gzip");
+        System.out.println("pushing update file");
+        exporter.pushFileToPod( gzipFile, "application/gzip")
       }
       deletes.flush();
       deletes.close();
       System.out.printf("Updates and new MARC: %d\n", updateRecords);
       System.out.printf("Deletes: %d\n", deleteRecords);
-      if ( deleteRecords > 0 )
+      if ( deleteRecords > 0 ) {
+        System.out.println("pushing delete file");
         exporter.pushFileToPod( deletesFile, "text/plain");
+      }
+
+      exporter.executeDelayedCommits();
     }
 
   }
@@ -113,133 +122,205 @@ public class PODIncrementalExport {
   private static Set<String> identifyChangedRecords(Connection inventory) throws SQLException {
 
     Set<String> changedInstances = new HashSet<>();
-    Timestamp oneMonthAgo = Timestamp.valueOf(LocalDateTime.now().minusMonths(1));
+//    Timestamp since = Timestamp.valueOf(LocalDateTime.now().minusMonths(1));
+    Timestamp since = Timestamp.valueOf(LocalDateTime.now().minusHours(1 ));
 
-    // NEWER IN FOLIO CACHE
+    System.out.println("Looking for changed instances");
+    changedInstances.addAll(getNewer(inventory,since,
+        "SELECT hrid, moddate FROM instanceFolio WHERE moddate > ?",
+        "SELECT instanceModdate FROM instancePod WHERE instanceHrid = ?"));
 
-    String newerInstanceQuery =
-    "SELECT p.instanceHrid"+
-    "  FROM instancePod p,"+
-    "       (SELECT f.hrid, f.moddate"+
-    "          FROM instanceFolio f"+
-    "         WHERE f.moddate > ?) AS f1"+
-    " WHERE p.instanceHrid = f1.hrid"+
-    "   AND f1.moddate > p.instanceModdate";
-    changedInstances.addAll(getChanged(inventory,newerInstanceQuery,oneMonthAgo));
+    System.out.println("Looking for changed bibs");
+    changedInstances.addAll(getNewer(inventory,since,
+        "SELECT instanceHrid, moddate FROM bibFolio WHERE moddate > ?",
+        "SELECT bibModdate FROM instancePod WHERE instanceHrid = ?"));
 
-    String newerBibQuery =
-    "SELECT p.instanceHrid"+
-    "  FROM instancePod p,"+
-    "       (SELECT f.instanceHrid, f.moddate"+
-    "          FROM bibFolio f"+
-    "         WHERE f.moddate > ?) AS f1"+
-    " WHERE p.instanceHrid = f1.instanceHrid"+
-    "   AND f1.moddate > p.bibModdate";
-    changedInstances.addAll(getChanged(inventory,newerBibQuery,oneMonthAgo));
+    System.out.println("Looking for changed holdings");
+    changedInstances.addAll(getNewerHoldings(inventory,since));
 
-    String newerHoldingQuery =
-    "SELECT p.instanceHrid, f1.instanceHrid"+
-    "  FROM holdingPod p,"+
-    "       (SELECT f.hrid, f.moddate, f.instanceHrid"+
-    "          FROM holdingFolio f"+
-    "         WHERE f.moddate > ?) AS f1"+
-    " WHERE p.hrid = f1.hrid"+
-    "   AND f1.moddate > p.moddate";
-    changedInstances.addAll(getChanged(inventory,newerHoldingQuery,oneMonthAgo));
+    System.out.println("Looking for changed items");
+    changedInstances.addAll(getNewerItems(inventory,since));
 
-    String newerItemQuery =
-    "SELECT p2.instanceHrid, f2.instanceHrid"+
-    "  FROM itemPod p,"+
-    "       (SELECT f.hrid, f.moddate, f.holdingHrid"+
-    "          FROM itemFolio f"+
-    "         WHERE f.moddate > ?) AS f1,"+
-    "       holdingPod p2,"+
-    "       holdingFolio f2"+
-    " WHERE p.hrid = f1.hrid"+
-    "   AND f1.moddate > p.moddate"+
-    "   AND p.holdingHrid = p2.hrid"+
-    "   AND f1.holdingHrid = f2.hrid";
-    changedInstances.addAll(getChanged(inventory,newerItemQuery,oneMonthAgo));
-    System.out.println("All updates: "+changedInstances.size());
-
-    changedInstances.addAll(getNewAndDeleted(inventory));
+    System.out.println("Looking for deleted records");
+    changedInstances.addAll(getDeleted(inventory));
     System.out.println("All changes: "+changedInstances.size());
 
     return changedInstances;
   }
 
-  private static Set<String> getNewAndDeleted(Connection inventory) throws SQLException {
+  private static Set<String> getNewer(Connection inventory, Timestamp since, String folioQuery, String podQuery) throws SQLException {
+    Set<String> changed = new HashSet<>();
+    Map<String,Timestamp> folioRecs = getAllMaps(inventory, folioQuery, since);
+    System.out.format("%d recently changed\n", folioRecs.size());
+    try( PreparedStatement podQ = inventory.prepareStatement(podQuery)) {
+      int count=0;
+      for (String hrid : folioRecs.keySet()) {
+        podQ.setString(1, hrid);
+        try (ResultSet podRs = podQ.executeQuery()) {
+          if (podRs.next()) {
+            // rec is in pod; queue if newer
+            if (podRs.getTimestamp(1).before(folioRecs.get(hrid))) {
+              System.out.format("Record %s is newer %s; %s\n", hrid, folioRecs.get(hrid), podRs.getTimestamp(1));
+              changed.add(hrid);
+            }
+          } else {
+            // rec is not in pod
+            System.out.format("Record %s is not in pod\n", hrid);
+            changed.add(hrid);
+          }
+        }
+        if (++count % 1000 == 0) System.out.format("%d evaluated\n", count);
+      }
+    }
+    return changed;
+  }
+
+  private static Set<String> getNewerHoldings(Connection inventory, Timestamp since) throws SQLException {
+    Set<String> changed = new HashSet<>();
+    List<HoldingFolio> folioRecs = new ArrayList<>();
+    try (PreparedStatement folioQ = inventory.prepareStatement(
+        "SELECT instanceHrid, hrid, moddate FROM holdingFolio WHERE moddate > ?")){
+      folioQ.setTimestamp(1, since);
+      try (ResultSet folioRs = folioQ.executeQuery()) {
+        while (folioRs.next()) folioRecs.add(new HoldingFolio(folioRs.getString(1),folioRs.getString(2),folioRs.getTimestamp(3)));
+      }
+    }
+    System.out.format("%d recently changed\n", folioRecs.size());
+    try( PreparedStatement podQ = inventory.prepareStatement(
+        "SELECT instanceHrid, hrid, moddate FROM holdingPod WHERE hrid = ?")) {
+      int count=0;
+      for (HoldingFolio holdingFolio : folioRecs) {
+        podQ.setString(1, holdingFolio.holdingHrid());
+        try (ResultSet podRs = podQ.executeQuery()) {
+          if (podRs.next()) {
+            // rec is in pod; queue if newer
+            Timestamp podModdate = podRs.getTimestamp("moddate");
+            if (podModdate == null || podModdate.before(holdingFolio.moddate())) {
+              System.out.format("Holding %s is newer %s; %s\n", holdingFolio.holdingHrid, holdingFolio.moddate(), podRs.getTimestamp("moddate"));
+              changed.add(holdingFolio.instanceHrid());
+              changed.add(podRs.getString("instanceHrid"));
+            }
+          } else {
+            // rec is not in pod
+            System.out.format("Holding %s is not in pod\n", holdingFolio.holdingHrid());
+            changed.add(holdingFolio.instanceHrid());
+          }
+        }
+        if (++count % 1000 == 0) System.out.format("%d evaluated\n", count);
+      }
+    }
+    return changed;
+  }
+  record HoldingFolio(String instanceHrid, String holdingHrid, Timestamp moddate) { }
+
+  private static Set<String> getNewerItems(Connection inventory, Timestamp since) throws SQLException {
+    Set<String> changed = new HashSet<>();
+    List<ItemFolio> folioRecs = new ArrayList<>();
+    try (PreparedStatement folioQ = inventory.prepareStatement(
+        "SELECT holdingHrid, hrid, moddate FROM itemFolio WHERE moddate > ?")){
+      folioQ.setTimestamp(1, since);
+      try (ResultSet folioRs = folioQ.executeQuery()) {
+        while (folioRs.next()) folioRecs.add(new ItemFolio(folioRs.getString(1),folioRs.getString(2),folioRs.getTimestamp(3)));
+      }
+    }
+    System.out.format("%d recently changed\n", folioRecs.size());
+    try( PreparedStatement podQ = inventory.prepareStatement(
+        "SELECT holdingHrid, hrid, moddate FROM itemPod WHERE hrid = ?")) {
+      int count=0;
+      for (ItemFolio itemFolio : folioRecs) {
+        podQ.setString(1, itemFolio.itemHrid());
+        try (ResultSet podRs = podQ.executeQuery()) {
+          if (podRs.next()) {
+            // rec is in pod; queue if newer
+            Timestamp podModdate = podRs.getTimestamp("moddate");
+            if (podModdate == null || podModdate.before(itemFolio.moddate())) {
+              System.out.format("Item %s is newer %s; %s\n", itemFolio.itemHrid(), itemFolio.moddate(), podRs.getTimestamp("moddate"));
+              changed.add(getInstanceHrid(inventory,itemFolio.holdingHrid()));
+              changed.add(getInstanceHrid(inventory,podRs.getString("holdingHrid")));
+            }
+          } else {
+            // rec is not in pod
+            System.out.format("Item %s is not in pod\n", itemFolio.itemHrid());
+            changed.add(getInstanceHrid(inventory,itemFolio.holdingHrid()));
+          }
+        }
+        if (++count % 1000 == 0) System.out.format("%d evaluated\n", count);
+      }
+    }
+    return changed;
+  }
+  private static String getInstanceHrid(Connection inventory, String holdingHrid) throws SQLException {
+    try (PreparedStatement q = inventory.prepareStatement("SELECT instanceHrid FROM holdingFolio WHERE hrid = ?")){
+      q.setString(1, holdingHrid);
+      try (ResultSet rs = q.executeQuery()){
+        while (rs.next()) return rs.getString(1);
+      }
+    }
+    return null;
+  }
+  record ItemFolio(String holdingHrid, String itemHrid, Timestamp moddate) { }
+
+  private static Set<String> getDeleted(Connection inventory) throws SQLException {
 
     Set<String> affectedInstances = new HashSet<>();
 
     try ( Statement stmt = inventory.createStatement() ) {
-      BIBS: {
+      INSTANCES: {
         Set<String> allFolioBibs = getAll( stmt, "SELECT hrid FROM instanceFolio");
         Set<String> allPodBibs = getAll( stmt, "SELECT instanceHrid FROM instancePod");
-        Set<String> newBibs = new HashSet<>(allFolioBibs);
-        newBibs.removeAll(allPodBibs);
-        System.out.println("total new bibs: "+newBibs.size());
-        affectedInstances.addAll(newBibs);
         allPodBibs.removeAll(allFolioBibs);
         System.out.println("total deleted bibs: "+allPodBibs.size());
+        if ( ! allPodBibs.isEmpty()) System.out.println(allPodBibs);
         affectedInstances.addAll(allPodBibs);
-        allFolioBibs.clear();allPodBibs.clear();newBibs.clear();
       }
 
-    HOLDINGS: {
-        Map<String,String> allFolioHoldings =
-            getAllMaps( stmt, "SELECT hrid, instanceHrid FROM holdingFolio");
+      HOLDINGS: {
+        Set<String> allFolioHoldings = getAll( stmt, "SELECT hrid FROM holdingFolio");
         Map<String,String> allPodHoldings =
             getAllMaps( stmt, "SELECT hrid, instanceHrid FROM holdingPod");
-        Map<String,String> newHoldings = new HashMap<>(allFolioHoldings);
-        newHoldings.keySet().removeAll(allPodHoldings.keySet());
-        System.out.println("total new holdings: "+newHoldings.size());
-        affectedInstances.addAll(newHoldings.values());
-        allPodHoldings.keySet().removeAll(allFolioHoldings.keySet());
+        allPodHoldings.keySet().removeAll(allFolioHoldings);
         System.out.println("total deleted holdings: "+allPodHoldings.size());
+        System.out.println(allPodHoldings);
         affectedInstances.addAll(allPodHoldings.values());
-        allFolioHoldings.clear();allPodHoldings.clear();newHoldings.clear();
       }
 
 
       ITEMS: {
-          Map<String,String> allFolioItems =
-              getAllMaps( stmt,
-               "SELECT i.hrid, instanceHrid"+
-               "  FROM itemFolio i, holdingFolio h"+
-               " WHERE i.holdingHrid = h.hrid");
-          Map<String,String> allPodItems =
-              getAllMaps( stmt,
-               "SELECT i.hrid, instanceHrid"+
-               "  FROM itemPod i, holdingPod h"+
-               " WHERE i.holdingHrid = h.hrid");
-          Map<String,String> newItems = new HashMap<>(allFolioItems);
-          newItems.keySet().removeAll(allPodItems.keySet());
-          System.out.println("total new items: "+newItems.size());
-          affectedInstances.addAll(newItems.values());
-          allPodItems.keySet().removeAll(allFolioItems.keySet());
+          Set<String> allFolioItems = getAll( stmt, "SELECT hrid FROM itemFolio");
+          Map<String,String> allPodItems = getAllMaps( stmt, "SELECT hrid, holdingHrid FROM itemPod i");
+          allPodItems.keySet().removeAll(allFolioItems);
           System.out.println("total deleted items: "+allPodItems.size());
-          affectedInstances.addAll(allPodItems.values());
-          allFolioItems.clear();allPodItems.clear();newItems.clear();
+          for (String itemHrid : allPodItems.keySet()) {
+            String holdingHrid = allPodItems.get(itemHrid);
+            String instanceHrid = getInstanceHrid(inventory,holdingHrid);
+            if (instanceHrid == null) {
+              System.out.format("item: %s; holding %s - not traced back to instance\n",itemHrid, holdingHrid);
+              continue;
+            }
+            System.out.format("item: %s; holding %s; instance: %s\n",itemHrid, holdingHrid, instanceHrid);
+            affectedInstances.add(instanceHrid);
+          }
         }
     }
     return affectedInstances;
   }
 
-  private static Set<String> getChanged(
-      Connection inventory, String query, Timestamp since) throws SQLException {
-    Set<String> changes = new HashSet<>();
-    try (PreparedStatement stmt = inventory.prepareStatement(query)) {
-      stmt.setTimestamp(1, since);
-      try (ResultSet rs = stmt.executeQuery()) {
-        int columns = rs.getMetaData().getColumnCount();
-        while (rs.next()) for (int i = 1; i <= columns; i++) changes.add(rs.getString(i));
+  /**
+   * Execute query with a timestamp parameter, and return HashMap of String and Timestamp built from columns
+   * one and two of the results. */
+  private static Map<String,Timestamp> getAllMaps(Connection db, String query, Timestamp param) throws SQLException {
+    Map<String,Timestamp> folioRecs = new HashMap<>();
+    try (PreparedStatement folioQ = db.prepareStatement(query)){
+      folioQ.setTimestamp(1, param);
+      try (ResultSet folioRs = folioQ.executeQuery()) {
+        while (folioRs.next()) folioRecs.put(folioRs.getString(1), folioRs.getTimestamp(2));
       }
     }
-    return changes;
+    return folioRecs;
   }
 
-
+  /** Use existing Statement to execute query, and return HashMap of String and String build from first
+   *  two colums of the results. */
   private static Map<String,String> getAllMaps(Statement stmt, String query) throws SQLException {
     Map<String,String> recs = new HashMap<>();
     try ( ResultSet rs = stmt.executeQuery(query) ) {
