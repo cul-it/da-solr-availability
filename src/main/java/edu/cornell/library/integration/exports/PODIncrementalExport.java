@@ -87,7 +87,7 @@ public class PODIncrementalExport {
         writer.close();
         String gzipFile = gzip( updatesFile );
         System.out.println("pushing update file");
-        exporter.pushFileToPod( gzipFile, "application/gzip")
+        exporter.pushFileToPod( gzipFile, "application/gzip");
       }
       deletes.flush();
       deletes.close();
@@ -122,8 +122,7 @@ public class PODIncrementalExport {
   private static Set<String> identifyChangedRecords(Connection inventory) throws SQLException {
 
     Set<String> changedInstances = new HashSet<>();
-//    Timestamp since = Timestamp.valueOf(LocalDateTime.now().minusMonths(1));
-    Timestamp since = Timestamp.valueOf(LocalDateTime.now().minusHours(1 ));
+    Timestamp since = Timestamp.valueOf(LocalDateTime.now().minusMonths(1));
 
     System.out.println("Looking for changed instances");
     changedInstances.addAll(getNewer(inventory,since,
