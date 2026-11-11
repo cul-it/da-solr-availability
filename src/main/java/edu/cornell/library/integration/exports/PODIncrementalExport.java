@@ -153,7 +153,7 @@ public class PODIncrementalExport {
     System.out.println("All changes: "+changedInstances.size());
 
     try (PreparedStatement stmt = inventory.prepareStatement(
-        "UPDATE updateCurser SET current_to_date = ? WHERE cursor_name = 'pod_upd'")){
+        "UPDATE updateCursor SET current_to_date = ? WHERE cursor_name = 'pod_upd'")){
       stmt.setTimestamp(1, newTime);
       stmt.executeUpdate();
     }
